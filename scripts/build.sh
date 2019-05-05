@@ -30,5 +30,6 @@ build_extfunc_depends()
 
 export CFG_PROJECT_NAME="Elastos.SDK.Contact";
 export CFG_PROJECT_DIR="$PROJECT_DIR";
+export CFG_CMAKELIST_DIR="$PROJECT_DIR/lib";
 source "$DEPENDS_DIR/scripts/build.sh" $@;
 
