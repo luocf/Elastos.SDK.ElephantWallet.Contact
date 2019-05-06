@@ -1,0 +1,49 @@
+/**
+ * @file	
+ * @brief	
+ * @details	
+ *
+ * @author	xxx
+ * @author	<xxx@xxx.com>
+ * @copyright	(c) 2012 xxx All rights reserved.
+ **/
+
+#include <xxx.h>
+
+/*****************************************************************************
+ * TYPE DECLARATION
+ *****************************************************************************/
+
+/*****************************************************************************
+ * GLOBAL VARIABLES DEFINITION
+ *****************************************************************************/
+#define S_COLOR_NONE			"\033[00m"		/**< @brief log no color **/
+
+/** @brief log mutex variable **/
+static osal_mutex_t s_mutex_entity = OSAL_MUTEX_INITIALIZER;
+
+/*****************************************************************************
+ * STATIC FUNCTION DECLARATION
+ *****************************************************************************/
+static void logprintf(const char* prefix, const char* format, va_list args);
+
+/*****************************************************************************
+ * FUNCTION IMPLEMENTATIONS
+ *****************************************************************************/
+
+/*!
+ * @brief	
+ * @details	
+ *
+ * @param[in]  xx	xxx
+ * @param[out] xx	xxx
+ *
+ * @retval	0	success
+ * @retval	<0	error code, see vupnp_errno
+ *
+ **/
+void log_enable_color(bool enable)
+{
+	s_logcolor = enable;
+}
+
