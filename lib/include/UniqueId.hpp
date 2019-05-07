@@ -1,21 +1,21 @@
-#ifndef _ELASTOS_CONTACT_UNIQUE_ID_HPP_
-#define _ELASTOS_CONTACT_UNIQUE_ID_HPP_
+#ifndef _ELASTOS_UNIQUE_ID_HPP_
+#define _ELASTOS_UNIQUE_ID_HPP_
 
 namespace elastos {
 
-class ContactUniqueId {
+class UniqueId {
 public:
   /*** type define ***/
 
   /*** static function and variable ***/
 
   /*** class function and variable ***/
-  explicit ContactUniqueId(const std::string& did,
+  explicit UniqueId(const std::string& did,
                            const std::string& phoneNumber,
                            const std::string& emailAddress,
                            const std::string& wechatId);
-  explicit ContactUniqueId();
-  virtual ~ContactUniqueId();
+  explicit UniqueId();
+  virtual ~UniqueId();
 
   std::string getDid();
   std::string getPhoneNumber();
@@ -32,8 +32,8 @@ private:
   std::string mPhoneNumber;
   std::string mEmailAddress;
   std::string mWechatId;
-}; // class ContactUniqueId
+}; // class UniqueId
 
 } // namespace elastos
 
-#endif /* _ELASTOS_CONTACT_UNIQUE_ID_HPP_ */
+#endif /* _ELASTOS_UNIQUE_ID_HPP_ */

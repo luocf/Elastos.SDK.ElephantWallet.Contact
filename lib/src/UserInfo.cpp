@@ -1,11 +1,11 @@
 //
-//  ContactUser.cpp
+//  UserInfo.cpp
 //
 //  Created by mengxk on 19/03/16.
 //  Copyright © 2016 mengxk. All rights reserved.
 //
 
-#include <ContactUser.hpp>
+#include <UserInfo.hpp>
 
 namespace elastos {
 
@@ -21,16 +21,16 @@ namespace elastos {
 /***********************************************/
 /***** class public function implement  ********/
 /***********************************************/
-ContactUser::ContactUser(const char* userPubKey)
+UserInfo::UserInfo(const char* userPubKey)
 {
 }
 
-ContactUser::ContactUser()
-    : ContactUser(nullptr)
+UserInfo::UserInfo()
+    : UserInfo(nullptr)
 {
 }
 
-ContactUser::~ContactUser()
+UserInfo::~UserInfo()
 {
 }
 
