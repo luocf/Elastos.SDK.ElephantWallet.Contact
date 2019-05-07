@@ -20,16 +20,18 @@ build_extfunc_depends()
         #"$DEPENDS_DIR/scripts/build-sqlite.sh" $@;
     #fi
 
-	"$DEPENDS_DIR/scripts/build-openssl.sh" $@;
+    local params=${@//--force-build/}
+
+	"$DEPENDS_DIR/scripts/build-openssl.sh" $params;
 
 	#CFG_BUILD_ROOT
-	"$DEPENDS_DIR/scripts/build-Elastos.SDK.Keypair.C.sh" $@;
+	"$DEPENDS_DIR/scripts/build-Elastos.SDK.Keypair.C.sh" $params;
 	
-	"$DEPENDS_DIR/scripts/build-Elastos.NET.Carrier.Native.SDK.sh" $@;
+	"$DEPENDS_DIR/scripts/build-Elastos.NET.Carrier.Native.SDK.sh" $params;
 }
 
 export CFG_PROJECT_NAME="Elastos.SDK.Contact";
 export CFG_PROJECT_DIR="$PROJECT_DIR";
 export CFG_CMAKELIST_DIR="$PROJECT_DIR/lib";
-source "$DEPENDS_DIR/scripts/build.sh" $@;
+source "$DEPENDS_DIR/scripts/build.sh" $@ --force-build;
 
