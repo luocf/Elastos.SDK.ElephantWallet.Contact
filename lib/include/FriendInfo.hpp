@@ -7,22 +7,25 @@ namespace elastos {
 
 class FriendInfo : public BaseInfo {
 public:
-  /*** type define ***/
+    /*** type define ***/
 
-  /*** static function and variable ***/
+    /*** static function and variable ***/
 
-  /*** class function and variable ***/
-  explicit FriendInfo(const char* userPubKey);
-  explicit FriendInfo();
-  virtual ~FriendInfo();
+    /*** class function and variable ***/
+    explicit FriendInfo(const char* userPubKey);
+    explicit FriendInfo();
+    virtual ~FriendInfo();
+
+    int setAlias(const std::string& value);
+    const std::string& getAlias();
 
 private:
-  /*** type define ***/
+    /*** type define ***/
 
-  /*** static function and variable ***/
+    /*** static function and variable ***/
 
-  /*** class function and variable ***/
-  std::string mAlias;
+    /*** class function and variable ***/
+    std::string mAlias;
 
 }; // class FriendInfo
 

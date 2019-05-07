@@ -13,60 +13,31 @@
 
 #include "BaseInfo.hpp"
 #include "FriendInfo.hpp"
-#include "UniqueId.hpp"
+#include "IdentifyCode.hpp"
 
 namespace elastos {
 
 class UserInfo : public BaseInfo {
 public:
-  /*** type define ***/
-  class FriendListener {
-  public:
-      enum Status {
-          Online,
-          Offline,
-      };
+    /*** type define ***/
 
-      explicit FriendListener() = default;
-      virtual ~FriendListener() = default;
+    /*** static function and variable ***/
 
-      virtual void onStatus(FriendInfo friendInfo, Status status) = 0;
-      virtual int onRequest(FriendInfo friendInfo, std::string message) = 0;
-      virtual void onReceiveMessage(FriendInfo friendInfo, int msgType, std::vector<int8_t> msgContent) = 0;
-  };
+    /*** class function and variable ***/
+    explicit UserInfo(const char* userPubKey);
+    explicit UserInfo();
+    virtual ~UserInfo();
 
-  /*** static function and variable ***/
-
-  /*** class function and variable ***/
-  explicit UserInfo(const char* userPubKey);
-  explicit UserInfo();
-  virtual ~UserInfo();
-
-  virtual void setFriendListner(FriendListener* listener);
-
-  virtual int addFriendByDid(std::string did);
-  virtual int addFriendByCarrier(std::string carrierAddress);
-  virtual int addFriendByEla(std::string elaAddress);
-
-  virtual std::string findFriend(int type, std::string content);
-
-  virtual void sendMessage(BaseInfo friendInfo, int msgType, std::string msgContent);
-  virtual void sendMessage(BaseInfo friendInfo, int msgType, std::vector<int8_t> msgContent);
-
-  virtual void sendChainMessage(BaseInfo friendInfo, int msgType, std::vector<int8_t> msgContent,
-                                const std::string& seed) = 0;
+    int setIdentifyCode(IdentifyCode::Type idType, const std::string& value);
+    const IdentifyCode& getIdentifyCode();
 
 private:
-  /*** type define ***/
+    /*** type define ***/
 
-  /*** static function and variable ***/
+    /*** static function and variable ***/
 
-  /*** class function and variable ***/
-  UniqueId mUniqueId;
-  std::vector<FriendInfo> mFriendList;
-
-  std::unique_ptr<FriendListener> mFriendListener;
-
+    /*** class function and variable ***/
+    IdentifyCode mIdentifyCode;
 }; // class UserInfo
 
 } // namespace elastos

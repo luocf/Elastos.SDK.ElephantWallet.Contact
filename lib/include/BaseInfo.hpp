@@ -5,32 +5,42 @@
 #include <string>
 #include <vector>
 
+#include "ErrCode.hpp"
+
 namespace elastos {
 
 class BaseInfo {
 protected:
-  /*** type define ***/
+    /*** type define ***/
+    enum Item {
+        Nickname = 1,
+        Avatar,
+        Gender,
+        Description,
+    };
 
-  /*** static function and variable ***/
+    /*** static function and variable ***/
 
-  /*** class function and variable ***/
-  explicit BaseInfo(const char* userPubKey);
-  explicit BaseInfo();
-  virtual ~BaseInfo();
+    /*** class function and variable ***/
+    explicit BaseInfo(const char* userPubKey);
+    explicit BaseInfo();
+    virtual ~BaseInfo();
+
+    int updateInfo(Item item, const std::string& value);
 
 private:
-  /*** type define ***/
+    /*** type define ***/
 
-  /*** static function and variable ***/
+    /*** static function and variable ***/
 
-  /*** class function and variable ***/
-  std::string mElaAddress;
-  std::map<std::string, std::string> mCarrierIdMap; // DevUUID: CarrierId
+    /*** class function and variable ***/
+    std::string mElaAddress;
+    std::map<std::string, std::string> mCarrierAddrMap; // DevUUID: CarrierId
 
-  std::string mNickname;
-  std::string mAvatar;
-  std::string mGender;
-  std::string mDescription;
+    std::string mNickname;
+    std::string mAvatar;
+    std::string mGender;
+    std::string mDescription;
 }; // class BaseInfo
 
 } // namespace elastos
