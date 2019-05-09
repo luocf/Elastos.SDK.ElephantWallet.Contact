@@ -24,6 +24,8 @@ build_extfunc_depends()
 
 	"$DEPENDS_DIR/scripts/build-openssl.sh" $params;
 
+	"$DEPENDS_DIR/scripts/build-curl.sh" $params
+
 	#CFG_BUILD_ROOT
 	"$DEPENDS_DIR/scripts/build-Elastos.SDK.Keypair.C.sh" $params;
 	

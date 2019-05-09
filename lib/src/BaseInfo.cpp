@@ -1,11 +1,11 @@
 //
-//  UserInfo.cpp
+//  BaseInfo.cpp
 //
 //  Created by mengxk on 19/03/16.
 //  Copyright © 2016 mengxk. All rights reserved.
 //
 
-#include <UserInfo.hpp>
+#include <BaseInfo.hpp>
 
 namespace elastos {
 
@@ -21,28 +21,22 @@ namespace elastos {
 /***********************************************/
 /***** class public function implement  ********/
 /***********************************************/
-UserInfo::UserInfo(const std::string& did)
-    : BaseInfo(did)
-    , mIdentifyCode()
+BaseInfo::BaseInfo(const std::string& did)
+    : mDid(did)
+    , mElaAddr()
+    , mCarrierAddrMap()
+    , mNickname()
+    , mAvatar()
+    , mGender()
+    , mDescription()
 {
 }
 
-UserInfo::UserInfo()
-    : UserInfo(nullptr)
-{
-    throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
-}
-
-UserInfo::~UserInfo()
+BaseInfo::~BaseInfo()
 {
 }
 
-int UserInfo::setIdentifyCode(IdentifyCode::Type idType, const std::string& value)
-{
-    throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
-}
-
-const IdentifyCode& UserInfo::getIdentifyCode() const
+int BaseInfo::updateInfo(Item item, const std::string& value)
 {
     throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
 }

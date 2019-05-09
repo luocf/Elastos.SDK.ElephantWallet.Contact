@@ -22,8 +22,7 @@ protected:
     /*** static function and variable ***/
 
     /*** class function and variable ***/
-    explicit BaseInfo(const char* userPubKey);
-    explicit BaseInfo();
+    explicit BaseInfo(const std::string& did);
     virtual ~BaseInfo();
 
     int updateInfo(Item item, const std::string& value);
@@ -34,7 +33,8 @@ private:
     /*** static function and variable ***/
 
     /*** class function and variable ***/
-    std::string mElaAddress;
+    std::string mDid;
+    std::string mElaAddr;
     std::map<std::string, std::string> mCarrierAddrMap; // DevUUID: CarrierId
 
     std::string mNickname;

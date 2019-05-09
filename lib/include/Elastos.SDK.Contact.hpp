@@ -11,8 +11,10 @@
 #ifndef _ELASTOS_SDK_CONTACT_HPP_
 #define _ELASTOS_SDK_CONTACT_HPP_
 
+#include "Config.hpp"
 #include "FriendManager.hpp"
 #include "MessageManager.hpp"
+#include "SecurityManager.hpp"
 #include "UserManager.hpp"
 
 namespace elastos {
@@ -20,17 +22,30 @@ namespace elastos {
 class Contact {
 public:
     /*** type define ***/
+    class Factory {
+    public:
+        static int SetLocalDataDir(const std::string& dir);
+        static std::shared_ptr<Contact> Create();
+
+    private:
+        static std::string sLocalDataDir;
+        friend class Contact;
+    };
 
     /*** static function and variable ***/
 
     /*** class function and variable ***/
-    explicit Contact(const char* userPubKey);
-    explicit Contact();
-    virtual ~Contact();
+    void setListener(std::shared_ptr<SecurityManager::SecurityListener> sectyListener,
+                     std::shared_ptr<UserManager::UserListener> userListener = nullptr,
+                     std::shared_ptr<FriendManager::FriendListener> friendListener = nullptr,
+                     std::shared_ptr<MessageManager::MessageListener> msgListener = nullptr);
 
-    const UserManager& getUserManager();
-    const FriendManager& getFriendManager();
-    const MessageManager& getMessageManager();
+    std::weak_ptr<SecurityManager> getSecurityManager();
+    std::weak_ptr<UserManager> getUserManager();
+    std::weak_ptr<FriendManager> getFriendManager();
+    std::weak_ptr<MessageManager> getMessageManager();
+
+    int start();
 
 private:
     /*** type define ***/
@@ -38,10 +53,16 @@ private:
     /*** static function and variable ***/
 
     /*** class function and variable ***/
-    UserManager mUserManager;
-    FriendManager mFriendManager;
-    MessageManager mMessageManager;
+    explicit Contact();
+    virtual ~Contact();
+    int getUserDataDir(std::string& dir);
 
+    std::shared_ptr<SecurityManager> mSecurityManager;
+    std::shared_ptr<UserManager> mUserManager;
+    std::shared_ptr<FriendManager> mFriendManager;
+    std::shared_ptr<MessageManager> mMessageManager;
+
+    std::shared_ptr<Config> mConfig;
 }; // class Contact
 
 } // namespace elastos

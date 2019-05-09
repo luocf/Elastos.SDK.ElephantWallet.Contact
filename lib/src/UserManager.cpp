@@ -1,11 +1,11 @@
 //
-//  UserInfo.cpp
+//  UserManager.cpp
 //
 //  Created by mengxk on 19/03/16.
 //  Copyright © 2016 mengxk. All rights reserved.
 //
 
-#include <UserInfo.hpp>
+#include <UserManager.hpp>
 
 namespace elastos {
 
@@ -21,30 +21,50 @@ namespace elastos {
 /***********************************************/
 /***** class public function implement  ********/
 /***********************************************/
-UserInfo::UserInfo(const std::string& did)
-    : BaseInfo(did)
-    , mIdentifyCode()
+UserManager::UserManager(std::weak_ptr<SecurityManager> sectyMgr)
+    : mSecurityManager(sectyMgr)
+    , mUserListener()
+    , mUserInfo()
+    , mStatus(Status::Pending)
 {
 }
 
-UserInfo::UserInfo()
-    : UserInfo(nullptr)
+UserManager::~UserManager()
+{
+}
+
+void UserManager::setUserListener(std::shared_ptr<UserListener> listener)
+{
+    mUserListener = listener;
+}
+
+int UserManager::makeUser()
+{
+    std::string did;
+    int ret = mSecurityManager.lock()->getDid(did);
+    if(ret < 0) {
+        return ret;
+    }
+
+    mUserInfo = std::make_shared<UserInfo>(did);
+    setStatus(Status::Ready);
+
+    return 0;
+}
+
+UserManager::Status UserManager::getStatus()
 {
     throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
 }
 
-UserInfo::~UserInfo()
-{
-}
-
-int UserInfo::setIdentifyCode(IdentifyCode::Type idType, const std::string& value)
+int UserManager::updateUserInfo(IdentifyCode::Type idType, const std::string& value)
 {
     throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
 }
 
-const IdentifyCode& UserInfo::getIdentifyCode() const
+std::weak_ptr<UserInfo> UserManager::getUserInfo() const
 {
-    throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
+    return mUserInfo;
 }
 
 /***********************************************/
@@ -55,5 +75,14 @@ const IdentifyCode& UserInfo::getIdentifyCode() const
 /***********************************************/
 /***** class private function implement  *******/
 /***********************************************/
+void UserManager::setStatus(Status status)
+{
+    bool changed = (mStatus != status);
+    mStatus = status;
+    if(changed == true
+    && mUserListener != nullptr) {
+        mUserListener->onStatusChanged(mUserInfo, mStatus);
+    }
+}
 
 } // namespace elastos

@@ -13,38 +13,42 @@
 
 #include "FriendInfo.hpp"
 #include "IdentifyCode.hpp"
+#include "SecurityManager.hpp"
 
 namespace elastos {
 
 class FriendManager {
 public:
     /*** type define ***/
+    enum Status {
+        Online,
+        Offline,
+    };
+
     class FriendListener {
     public:
-        enum Status {
-            Online,
-            Offline,
-        };
-
         explicit FriendListener() = default;
         virtual ~FriendListener() = default;
 
         virtual int onRequest(FriendInfo friendInfo, std::string message) = 0;
         virtual void onStatusChanged(FriendInfo friendInfo, Status status) = 0;
-        virtual void onReceiveMessage(FriendInfo friendInfo, int msgType, std::vector<int8_t> msgContent) = 0;
     };
 
     /*** static function and variable ***/
 
     /*** class function and variable ***/
-    explicit FriendManager();
+    explicit FriendManager(std::weak_ptr<SecurityManager> sectyMgr);
     virtual ~FriendManager();
 
-    virtual void setFriendListner(FriendListener* listener);
+    virtual void setFriendListener(std::shared_ptr<FriendListener> listener);
 
     virtual int addFriendByDid(std::string did);
     virtual int addFriendByCarrier(std::string carrierAddress);
     virtual int addFriendByEla(std::string elaAddress);
+
+    virtual int removeFriendByDid(std::string did);
+    virtual int removeFriendByCarrier(std::string carrierAddress);
+    virtual int removeFriendByEla(std::string elaAddress);
 
     virtual std::string findFriend(int type, std::string content);
     virtual std::vector<FriendInfo> filterFriends(std::string regex);
@@ -55,9 +59,9 @@ private:
     /*** static function and variable ***/
 
     /*** class function and variable ***/
+    std::weak_ptr<SecurityManager> mSecurityManager;
+    std::shared_ptr<FriendListener> mFriendListener;
     std::vector<FriendInfo> mFriendList;
-
-    std::unique_ptr<FriendListener> mFriendListener;
 
 }; // class FriendManager
 

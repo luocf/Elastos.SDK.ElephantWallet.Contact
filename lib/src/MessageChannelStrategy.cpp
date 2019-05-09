@@ -1,11 +1,11 @@
 //
-//  UserInfo.cpp
+//  MessageChannelStrategy.cpp
 //
 //  Created by mengxk on 19/03/16.
 //  Copyright © 2016 mengxk. All rights reserved.
 //
 
-#include <UserInfo.hpp>
+#include <MessageChannelStrategy.hpp>
 
 namespace elastos {
 
@@ -21,30 +21,18 @@ namespace elastos {
 /***********************************************/
 /***** class public function implement  ********/
 /***********************************************/
-UserInfo::UserInfo(const std::string& did)
-    : BaseInfo(did)
-    , mIdentifyCode()
+MessageChannelStrategy::MessageChannelStrategy()
+    : mChannelListener()
 {
 }
 
-UserInfo::UserInfo()
-    : UserInfo(nullptr)
-{
-    throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
-}
-
-UserInfo::~UserInfo()
+MessageChannelStrategy::~MessageChannelStrategy()
 {
 }
 
-int UserInfo::setIdentifyCode(IdentifyCode::Type idType, const std::string& value)
+void MessageChannelStrategy::setChannelListener(std::shared_ptr<ChannelListener> listener)
 {
-    throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
-}
-
-const IdentifyCode& UserInfo::getIdentifyCode() const
-{
-    throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
+    mChannelListener = listener;
 }
 
 /***********************************************/

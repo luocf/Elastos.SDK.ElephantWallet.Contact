@@ -9,7 +9,7 @@ Name: Elastos.SDK.Contact
 Description: Elastos.SDK.Contact
 Version: @PACKAGE_VERSION@
 
-Requires:
+Requires: Elastos.SDK.Keypair.C
 Libs: -L${libdir} -lElastos.SDK.Contact
 Libs.private: ${libdir}
 Cflags: -I${includedir}/Elastos.SDK.Contact

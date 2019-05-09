@@ -1,6 +1,10 @@
 #ifndef _ELASTOS_IDENTIFY_CODE_HPP_
 #define _ELASTOS_IDENTIFY_CODE_HPP_
 
+#include <string>
+
+#include "ErrCode.hpp"
+
 namespace elastos {
 
 class IdentifyCode {
@@ -16,14 +20,14 @@ public:
     /*** static function and variable ***/
 
     /*** class function and variable ***/
-    explicit IdentifyCode(const std::string& did,
-            const std::string& phoneNumber,
-            const std::string& emailAddress,
-            const std::string& wechatId);
+    explicit IdentifyCode(const std::string& phoneNumber,
+                          const std::string& emailAddress,
+                          const std::string& wechatId);
     explicit IdentifyCode();
     virtual ~IdentifyCode();
 
-    std::string get(Type type);
+    int set(Type type, const std::string& value);
+    std::string get(Type type) const;
 
 private:
     /*** type define ***/
@@ -31,7 +35,6 @@ private:
     /*** static function and variable ***/
 
     /*** class function and variable ***/
-    std::string mDid;
     std::string mPhoneNumber;
     std::string mEmailAddress;
     std::string mWechatId;

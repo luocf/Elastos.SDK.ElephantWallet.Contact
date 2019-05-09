@@ -13,42 +13,45 @@
 
 #include "FriendInfo.hpp"
 #include "IdentifyCode.hpp"
+#include "SecurityManager.hpp"
+#include "UserInfo.hpp"
 
 namespace elastos {
 
 class UserManager {
 public:
     /*** type define ***/
+    enum Status {
+        Pending = 1,
+        Ready,
+        Online,
+        Offline,
+    };
+
     class UserListener {
     public:
-        enum Status {
-            Ready,
-            Online,
-            Offline,
-        };
 
         explicit UserListener() = default;
         virtual ~UserListener() = default;
 
-        virtual void onStatusChanged(const UserInfo& userInfo, Status status) = 0;
-        virtual int onSigninDevicesOverflow(const UserInfo& userInfo, int capacity) = 0;
+        virtual void onStatusChanged(const std::weak_ptr<UserInfo> userInfo, Status status) = 0;
+        virtual int onSigninDevicesOverflow(const std::weak_ptr<UserInfo> userInfo, int capacity) = 0;
     };
 
     /*** static function and variable ***/
 
     /*** class function and variable ***/
-    explicit UserManager();
+    explicit UserManager(std::weak_ptr<SecurityManager> sectyMgr);
     virtual ~UserManager();
 
-    void reset();
+    virtual void setUserListener(std::shared_ptr<UserListener> listener);
 
-    std::string newUser();
-    int recoverUser(const std::string& userPubKey);
+    int makeUser();
 
     Status getStatus();
 
     int updateUserInfo(IdentifyCode::Type idType, const std::string& value);
-    const UserInfo* getUserInfo() const;
+    std::weak_ptr<UserInfo> getUserInfo() const;
 
 private:
     /*** type define ***/
@@ -57,8 +60,12 @@ private:
 
     /*** class function and variable ***/
     int syncHistoryInfo();
+    void setStatus(Status status);
 
-    std::unique_ptr<UserInfo> mUserInfo;
+    std::weak_ptr<SecurityManager> mSecurityManager;
+    std::shared_ptr<UserListener> mUserListener;
+    std::shared_ptr<UserInfo> mUserInfo;
+
     Status mStatus;
 }; // class UserManager
 

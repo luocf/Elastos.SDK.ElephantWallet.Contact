@@ -12,12 +12,12 @@ public:
     /*** static function and variable ***/
 
     /*** class function and variable ***/
-    explicit FriendInfo(const char* userPubKey);
+    explicit FriendInfo(const std::string& did);
     explicit FriendInfo();
     virtual ~FriendInfo();
 
     int setAlias(const std::string& value);
-    const std::string& getAlias();
+    std::string getAlias() const;
 
 private:
     /*** type define ***/

@@ -24,12 +24,12 @@ public:
     /*** static function and variable ***/
 
     /*** class function and variable ***/
-    explicit UserInfo(const char* userPubKey);
+    explicit UserInfo(const std::string& did);
     explicit UserInfo();
     virtual ~UserInfo();
 
     int setIdentifyCode(IdentifyCode::Type idType, const std::string& value);
-    const IdentifyCode& getIdentifyCode();
+    const IdentifyCode& getIdentifyCode() const;
 
 private:
     /*** type define ***/
@@ -38,6 +38,7 @@ private:
 
     /*** class function and variable ***/
     IdentifyCode mIdentifyCode;
+
 }; // class UserInfo
 
 } // namespace elastos

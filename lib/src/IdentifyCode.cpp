@@ -1,11 +1,11 @@
 //
-//  UserInfo.cpp
+//  IdentifyCode.cpp
 //
 //  Created by mengxk on 19/03/16.
 //  Copyright © 2016 mengxk. All rights reserved.
 //
 
-#include <UserInfo.hpp>
+#include <IdentifyCode.hpp>
 
 namespace elastos {
 
@@ -21,28 +21,31 @@ namespace elastos {
 /***********************************************/
 /***** class public function implement  ********/
 /***********************************************/
-UserInfo::UserInfo(const std::string& did)
-    : BaseInfo(did)
-    , mIdentifyCode()
+IdentifyCode::IdentifyCode(const std::string& phoneNumber,
+                           const std::string& emailAddress,
+                           const std::string& wechatId)
+    : mPhoneNumber(phoneNumber)
+    , mEmailAddress(emailAddress)
+    , mWechatId(wechatId)
+
 {
 }
 
-UserInfo::UserInfo()
-    : UserInfo(nullptr)
+IdentifyCode::IdentifyCode()
+    : IdentifyCode("", "", "")
+{
+}
+
+IdentifyCode::~IdentifyCode()
+{
+}
+
+int IdentifyCode::set(Type type, const std::string& value)
 {
     throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
 }
 
-UserInfo::~UserInfo()
-{
-}
-
-int UserInfo::setIdentifyCode(IdentifyCode::Type idType, const std::string& value)
-{
-    throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
-}
-
-const IdentifyCode& UserInfo::getIdentifyCode() const
+std::string IdentifyCode::get(Type type) const
 {
     throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
 }

@@ -1,11 +1,14 @@
 //
-//  UserInfo.cpp
+//  MessageManager.cpp
 //
 //  Created by mengxk on 19/03/16.
 //  Copyright © 2016 mengxk. All rights reserved.
 //
 
-#include <UserInfo.hpp>
+#include <MessageManager.hpp>
+
+#include <ChannelImplCarrier.hpp>
+#include <ChannelImplElaChain.hpp>
 
 namespace elastos {
 
@@ -21,28 +24,41 @@ namespace elastos {
 /***********************************************/
 /***** class public function implement  ********/
 /***********************************************/
-UserInfo::UserInfo(const std::string& did)
-    : BaseInfo(did)
-    , mIdentifyCode()
+MessageManager::MessageManager(std::weak_ptr<SecurityManager> sectyMgr)
+    : mSecurityManager(sectyMgr)
+    , mMessageListener()
+    , mUserInfo()
+    , mMessageChannelMap()
 {
 }
 
-UserInfo::UserInfo()
-    : UserInfo(nullptr)
+MessageManager::~MessageManager()
+{
+}
+
+void MessageManager::setMessageListener(std::shared_ptr<MessageListener> listener)
+{
+    mMessageListener = listener;
+}
+
+int MessageManager::openChannels(std::weak_ptr<Config> config)
+{
+    mMessageChannelMap[ChannelType::Carrier] = std::make_shared<ChannelImplCarrier>(config);
+    mMessageChannelMap[ChannelType::ElaChain] = std::make_shared<ChannelImplElaChain>(config, mSecurityManager);
+
+    for(const auto& channel: mMessageChannelMap) {
+        channel.second->open();
+    }
+
+    return 0;
+}
+
+int MessageManager::sendMessage(FriendInfo friendInfo, int msgType, std::string msgContent)
 {
     throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
 }
 
-UserInfo::~UserInfo()
-{
-}
-
-int UserInfo::setIdentifyCode(IdentifyCode::Type idType, const std::string& value)
-{
-    throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
-}
-
-const IdentifyCode& UserInfo::getIdentifyCode() const
+int MessageManager::sendMessage(FriendInfo friendInfo, int msgType, std::vector<int8_t> msgContent)
 {
     throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
 }
