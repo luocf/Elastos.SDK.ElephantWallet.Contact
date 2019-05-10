@@ -37,7 +37,7 @@ public:
     virtual void setChannelListener(std::shared_ptr<ChannelListener> listener);
 
     virtual int open() = 0;
-    virtual int clone() = 0;
+    virtual int close() = 0;
 
     virtual int sendMessage(FriendInfo friendInfo,
                             int msgType, std::string msgContent) = 0;

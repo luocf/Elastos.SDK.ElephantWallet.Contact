@@ -7,7 +7,7 @@
 
 #include <Config.hpp>
 
-#include "misc/CompatibleFileSystem.hpp"
+#include <CompatibleFileSystem.hpp>
 
 namespace elastos {
 

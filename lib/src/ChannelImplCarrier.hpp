@@ -12,10 +12,10 @@
 #define _ELASTOS_CHANNEL_IMPL_CARRIER_HPP_
 
 #include <Config.hpp>
-#include <MessageChannelStrategy.hpp>
-
 #include <ela_carrier.h>
 #include <ela_session.h>
+#include <MessageChannelStrategy.hpp>
+#include <ThreadPool.hpp>
 
 namespace elastos {
 
@@ -30,7 +30,7 @@ public:
     virtual ~ChannelImplCarrier();
 
     virtual int open() override;
-    virtual int clone() override;
+    virtual int close() override;
 
     virtual int sendMessage(FriendInfo friendInfo,
                             int msgType, std::string msgContent) override;
@@ -43,8 +43,11 @@ protected:
     /*** static function and variable ***/
 
     /*** class function and variable ***/
+    void runCarrier();
+
     std::weak_ptr<Config> mConfig;
     std::unique_ptr<ElaCarrier, std::function<void(ElaCarrier*)>> mCarrier;
+    std::unique_ptr<ThreadPool<std::function<void(ChannelImplCarrier*)>>> mTaskThread;
 
 }; // class ChannelImplCarrier
 

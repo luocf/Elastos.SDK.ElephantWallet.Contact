@@ -14,8 +14,7 @@
 #include <Config.hpp>
 #include <MessageChannelStrategy.hpp>
 #include <SecurityManager.hpp>
-
-#include "misc/ThreadPool.hpp"
+#include <ThreadPool.hpp>
 
 namespace elastos {
 
@@ -31,7 +30,7 @@ public:
     virtual ~ChannelImplElaChain();
 
     virtual int open() override;
-    virtual int clone() override;
+    virtual int close() override;
 
     virtual int sendMessage(FriendInfo friendInfo,
                             int msgType, std::string msgContent) override;
@@ -46,7 +45,7 @@ private:
     /*** class function and variable ***/
     std::weak_ptr<Config> mConfig;
     std::weak_ptr<SecurityManager> mSecurityManager;
-    ThreadPool<std::function<void()>> mThreadPool;
+    std::unique_ptr<ThreadPool<std::function<void()>>> mTaskThread;
 
 }; // class ChannelImplElaChain
 

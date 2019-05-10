@@ -7,8 +7,8 @@
 
 #include <Elastos.SDK.Contact.hpp>
 
-#include "misc/CompatibleFileSystem.hpp"
-#include "misc/Log.hpp"
+#include <CompatibleFileSystem.hpp>
+#include <Log.hpp>
 
 namespace elastos {
 

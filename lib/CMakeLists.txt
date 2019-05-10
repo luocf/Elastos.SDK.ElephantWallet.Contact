@@ -3,7 +3,9 @@ cmake_minimum_required(VERSION 3.12)
 include(../config/cmake/CMakeLists.txt)
 
 project(Elastos.SDK.Contact)
+add_subdirectory(common)
 add_subdirectory(src)
+add_subdirectory(wrapper/httpclient)
 
 if(DEFINED CFG_WITH_TEST)
 	add_subdirectory(test)

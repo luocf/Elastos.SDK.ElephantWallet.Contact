@@ -26,7 +26,7 @@ ChannelImplElaChain::ChannelImplElaChain(std::weak_ptr<Config> config,
     : MessageChannelStrategy()
     , mConfig(config)
     , mSecurityManager(sectyMgr)
-    , mThreadPool()
+    , mTaskThread()
 {
 }
 
@@ -39,7 +39,7 @@ int ChannelImplElaChain::open()
     throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
 }
 
-int ChannelImplElaChain::clone()
+int ChannelImplElaChain::close()
 {
     throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
 }

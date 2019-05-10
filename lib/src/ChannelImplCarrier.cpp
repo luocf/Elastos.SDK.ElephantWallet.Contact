@@ -7,7 +7,7 @@
 
 #include <ChannelImplCarrier.hpp>
 
-#include "misc/Log.hpp"
+#include <Log.hpp>
 
 namespace elastos {
 
@@ -27,6 +27,7 @@ ChannelImplCarrier::ChannelImplCarrier(std::weak_ptr<Config> config)
     : MessageChannelStrategy()
     , mConfig(config)
     , mCarrier()
+    , mTaskThread()
 {
 }
 
@@ -36,6 +37,10 @@ ChannelImplCarrier::~ChannelImplCarrier()
 
 int ChannelImplCarrier::open()
 {
+    if(mCarrier != nullptr) {
+        return ErrCode::ChannelFailedMultiOpen;
+    }
+
     auto config = mConfig.lock();
 
     ElaOptions carrierOpts;
@@ -78,18 +83,23 @@ int ChannelImplCarrier::open()
         return ErrCode::ChannelFailedNewCarrier;
     }
 
-    int ret = ela_run(mCarrier.get(), 500);
-    if(ret < 0) {
-        Log::E(Log::TAG, "Failed to run carrier!");
-        return ErrCode::ChannelFailedRunCarrier;
+    if(mTaskThread == nullptr) {
+        mTaskThread = std::make_unique<ThreadPool<std::function<void(ChannelImplCarrier*)>>>();
     }
+    mTaskThread->post(std::bind(&ChannelImplCarrier::runCarrier, this));
 
     return 0;
 }
 
-int ChannelImplCarrier::clone()
+int ChannelImplCarrier::close()
 {
-    throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
+    if (mCarrier == nullptr) {
+        ela_session_cleanup(mCarrier.get());
+        ela_kill(mCarrier.get());
+    }
+    mCarrier = nullptr;
+
+    return 0;
 }
 
 int ChannelImplCarrier::sendMessage(FriendInfo friendInfo,
@@ -106,6 +116,15 @@ int ChannelImplCarrier::sendMessage(FriendInfo friendInfo,
 /***********************************************/
 /***** class protected function implement  *****/
 /***********************************************/
+void ChannelImplCarrier::runCarrier()
+{
+    int ret = ela_run(mCarrier.get(), 500);
+    if(ret < 0) {
+        ela_kill(mCarrier.get());
+        Log::E(Log::TAG, "Failed to run carrier!");
+        return;
+    }
+}
 
 
 /***********************************************/

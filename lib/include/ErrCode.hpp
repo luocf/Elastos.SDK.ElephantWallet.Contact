@@ -24,8 +24,9 @@ public:
     constexpr static const int FailedKeypairGetPubKey = -102;
     constexpr static const int FailedKeypairGetDid = -103;
 
-    constexpr static const int ChannelFailedNewCarrier = -200;
-    constexpr static const int ChannelFailedRunCarrier = -201;
+    constexpr static const int ChannelFailedMultiOpen = -200;
+    constexpr static const int ChannelFailedNewCarrier = -201;
+    constexpr static const int ChannelFailedRunCarrier = -202;
 
     constexpr static const int StdSystemErrorIndex = -1000;
 
