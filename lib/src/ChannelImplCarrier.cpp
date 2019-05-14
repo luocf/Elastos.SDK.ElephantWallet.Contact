@@ -49,21 +49,33 @@ int ChannelImplCarrier::open()
     memset(&carrierOpts, 0, sizeof(carrierOpts));
     memset(&carrierCallbacks, 0, sizeof(carrierCallbacks));
 
+    carrierOpts.udp_enabled = config->mCarrierConfig->mEnableUdp;
+    carrierOpts.persistent_location = config->mUserDataDir.c_str();
+
+    // set BootstrapNode
     size_t carrierNodeSize = config->mCarrierConfig->mBootstrapNodes.size();
     BootstrapNode carrierNodeArray[carrierNodeSize];
     memset (carrierNodeArray, 0, sizeof(carrierNodeArray));
-
     for(int idx = 0; idx < carrierNodeSize; idx++) {
         const auto& node = config->mCarrierConfig->mBootstrapNodes[idx];
         carrierNodeArray[idx].ipv4 = node.mIpv4.c_str();
         carrierNodeArray[idx].port = node.mPort.c_str();
         carrierNodeArray[idx].public_key = node.mPublicKey.c_str();
     }
-
-    carrierOpts.udp_enabled = config->mCarrierConfig->mEnableUdp;
-    carrierOpts.persistent_location = config->mUserDataDir.c_str();
     carrierOpts.bootstraps_size = carrierNodeSize;
     carrierOpts.bootstraps = carrierNodeArray;
+
+    // set HiveBootstrapNode
+    size_t hiveNodeSize = config->mCarrierConfig->mHiveNodes.size();
+    HiveBootstrapNode hiveNodeArray[hiveNodeSize];
+    memset (hiveNodeArray, 0, sizeof(hiveNodeArray));
+    for(int idx = 0; idx < hiveNodeSize; idx++) {
+        const auto& node = config->mCarrierConfig->mHiveNodes[idx];
+        hiveNodeArray[idx].ipv4 = node.mIpv4.c_str();
+        hiveNodeArray[idx].port = node.mPort.c_str();
+    }
+    carrierOpts.hive_bootstraps_size = hiveNodeSize;
+    carrierOpts.hive_bootstraps = hiveNodeArray;
 
     ela_log_init(static_cast<ElaLogLevel>(config->mCarrierConfig->mLogLevel), nullptr, nullptr);
 
@@ -84,7 +96,7 @@ int ChannelImplCarrier::open()
     }
 
     if(mTaskThread == nullptr) {
-        mTaskThread = std::make_unique<ThreadPool<std::function<void(ChannelImplCarrier*)>>>();
+        mTaskThread = std::make_unique<ThreadPool>();
     }
     mTaskThread->post(std::bind(&ChannelImplCarrier::runCarrier, this));
 
@@ -100,6 +112,11 @@ int ChannelImplCarrier::close()
     mCarrier = nullptr;
 
     return 0;
+}
+
+int ChannelImplCarrier::isReady()
+{
+    throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
 }
 
 int ChannelImplCarrier::sendMessage(FriendInfo friendInfo,

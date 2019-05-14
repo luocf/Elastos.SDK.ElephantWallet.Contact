@@ -39,6 +39,8 @@ public:
     virtual int open() = 0;
     virtual int close() = 0;
 
+    virtual int isReady() = 0;
+
     virtual int sendMessage(FriendInfo friendInfo,
                             int msgType, std::string msgContent) = 0;
     virtual int sendMessage(FriendInfo friendInfo,

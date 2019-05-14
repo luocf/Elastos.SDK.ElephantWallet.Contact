@@ -29,14 +29,36 @@ public:
         ElaChain = 0x00000100,
     };
 
+    enum class MessageType: uint32_t {
+        Nonspecific = 0x00000001,
+        Text = 0x00000002,
+        Audio = 0x00000040,
+        Transfer = 0x00000080,
+    };
+
+    struct MessageInfo {
+    public:
+        const uint32_t mId;
+        const MessageType mType;
+        const std::vector<uint8_t> mPlainContent;
+        const std::string mCryptoAlgorithm;
+    private:
+        explicit MessageInfo(MessageType type,
+                             const std::vector<uint8_t>& plainContent,
+                             const std::string& cryptoAlgorithm);
+        virtual ~MessageInfo();
+
+        friend MessageManager;
+    };
+
     class MessageListener {
     public:
         explicit MessageListener() = default;
         virtual ~MessageListener() = default;
 
-        virtual void onReceivedMessage(UserInfo userInfo, FriendInfo friendInfo,
-                                       int channelType,
-                                       int msgType, std::vector<int8_t> msgContent) = 0;
+        virtual void onReceivedMessage(const FriendInfo& friendInfo,
+                                       ChannelType chType,
+                                       const MessageInfo& msgInfo) = 0;
         virtual void onSentMessage(int msgIndex, int errCode) = 0;
     };
 
@@ -50,8 +72,13 @@ public:
 
     virtual int openChannels(std::weak_ptr<Config> config);
 
-    virtual int sendMessage(FriendInfo friendInfo, int msgType, std::string msgContent);
-    virtual int sendMessage(FriendInfo friendInfo, int msgType, std::vector<int8_t> msgContent);
+    virtual std::shared_ptr<MessageInfo> makeMessage(MessageType type,
+                                                     const std::vector<uint8_t>& plainContent,
+                                                     const std::string& cryptoAlgorithm = "") const;
+    virtual std::shared_ptr<MessageInfo> makeMessage(const std::string& plainContent,
+                                                     const std::string& cryptoAlgorithm = "") const;
+
+    virtual int sendMessage(const FriendInfo& friendInfo, ChannelType chType, const MessageInfo& msgInfo);
 
 private:
     /*** type define ***/

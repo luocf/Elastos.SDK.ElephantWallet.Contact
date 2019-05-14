@@ -22,7 +22,7 @@ namespace elastos {
 /***** class public function implement  ********/
 /***********************************************/
 UserInfo::UserInfo(const std::string& did)
-    : BaseInfo(did)
+    : HumanInfo(did)
     , mIdentifyCode()
 {
 }

@@ -68,6 +68,9 @@ private:
 	static constexpr const char* SCHEME_HTTP  = "http://";
 	static constexpr const char* SCHEME_HTTPS = "https://";
 
+    static std::mutex gMutex;
+    static bool gIsGlobalInitialized;
+
   /*** static function and variable ***/
 	static size_t CurlHeaderCallback(char* buffer, size_t size, size_t nitems, void* userdata);
 	static size_t CurlWriteCallback(char* buffer, size_t size, size_t nitems, void* userdata);

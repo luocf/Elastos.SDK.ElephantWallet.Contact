@@ -22,7 +22,7 @@ namespace elastos {
 /***** class public function implement  ********/
 /***********************************************/
 FriendInfo::FriendInfo(const std::string& did)
-    : BaseInfo(did)
+    : HumanInfo(did)
 {
     throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
 }

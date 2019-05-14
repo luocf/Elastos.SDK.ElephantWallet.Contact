@@ -9,6 +9,7 @@
 
 #include <ChannelImplCarrier.hpp>
 #include <ChannelImplElaChain.hpp>
+#include <Random.hpp>
 
 namespace elastos {
 
@@ -53,13 +54,43 @@ int MessageManager::openChannels(std::weak_ptr<Config> config)
     return 0;
 }
 
-int MessageManager::sendMessage(FriendInfo friendInfo, int msgType, std::string msgContent)
+std::shared_ptr<MessageManager::MessageInfo> MessageManager::makeMessage(MessageType type,
+                                                                         const std::vector<uint8_t>& plainContent,
+                                                                         const std::string& cryptoAlgorithm) const
 {
-    throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
+    struct Impl: MessageManager::MessageInfo {
+        Impl(MessageType type,
+             const std::vector<uint8_t>& plainContent,
+             const std::string& cryptoAlgorithm)
+            : MessageManager::MessageInfo(type, plainContent, cryptoAlgorithm) {
+        }
+    };
+
+    auto msgInfo = std::make_shared<Impl>(type, plainContent, cryptoAlgorithm);
+
+    return msgInfo;
 }
 
-int MessageManager::sendMessage(FriendInfo friendInfo, int msgType, std::vector<int8_t> msgContent)
+std::shared_ptr<MessageManager::MessageInfo> MessageManager::makeMessage(const std::string& plainContent,
+                                                                         const std::string& cryptoAlgorithm) const
 {
+    std::vector<uint8_t> plainContentBytes(plainContent.begin(), plainContent.end());
+
+    return makeMessage(MessageType::Text, plainContentBytes, cryptoAlgorithm);
+}
+
+int MessageManager::sendMessage(const FriendInfo& friendInfo, ChannelType chType, const MessageInfo& msgInfo)
+{
+    auto it = mMessageChannelMap.find(chType);
+    if(it == mMessageChannelMap.end()) {
+        return ErrCode::ChannelNotFound;
+    }
+    auto channel = it->second;
+
+    if(channel->isReady() == false) {
+        return ErrCode::ChannelNotReady;
+    }
+
     throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
 }
 
@@ -71,5 +102,18 @@ int MessageManager::sendMessage(FriendInfo friendInfo, int msgType, std::vector<
 /***********************************************/
 /***** class private function implement  *******/
 /***********************************************/
+MessageManager::MessageInfo::MessageInfo(MessageType type,
+                                         const std::vector<uint8_t>& plainContent,
+                                         const std::string& cryptoAlgorithm)
+    : mId(Random::Gen<uint32_t>())
+    , mType(type)
+    , mPlainContent(plainContent)
+    , mCryptoAlgorithm(cryptoAlgorithm)
+{
+}
+
+MessageManager::MessageInfo::~MessageInfo()
+{
+}
 
 } // namespace elastos

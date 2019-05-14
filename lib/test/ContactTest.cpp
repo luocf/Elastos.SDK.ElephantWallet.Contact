@@ -1,16 +1,23 @@
 #include <Elastos.SDK.Contact.hpp>
+#include <Elastos.SDK.Keypair.C/Elastos.Wallet.Utility.h>
 #include <iostream>
+#include <execinfo.h>
+#include <signal.h>
 
 std::string gSavedMnemonic;
 std::string gCachedMnemonic;
 
+void signalHandler(int sig);
 std::shared_ptr<elastos::SecurityManager::SecurityListener> getSecurityListener(std::weak_ptr<elastos::Contact> contact);
 std::shared_ptr<elastos::UserManager::UserListener> getUserListener();
 std::shared_ptr<elastos::FriendManager::FriendListener> getFriendListener();
 std::shared_ptr<elastos::MessageManager::MessageListener> getMessageListener();
+std::string getPublicKey();
 
 int main(int argc, char **argv)
 {
+    signal(SIGSEGV, signalHandler);
+
     int ret = elastos::Contact::Factory::SetLocalDataDir("/tmp/elastos.sdk.contact/test");
     if(ret < 0) {
         throw std::runtime_error(std::string("Failed to set contact local dir! ret=") + std::to_string(ret));
@@ -32,33 +39,46 @@ int main(int argc, char **argv)
     return 0;
 }
 
+void signalHandler(int sig) {
+    std::cerr << "Error: signal " << sig << std::endl;
+
+    void* addrlist[10];
+    int addrlen = backtrace( addrlist, sizeof( addrlist ) / sizeof( void* ));
+    if(addrlen == 0) {
+        std::cerr << std::endl;
+        return;
+    }
+
+    char** symbollist = backtrace_symbols( addrlist, addrlen );
+    for ( int i = 4; i < addrlen; i++ ) {
+        std::cerr << symbollist[i] << std::endl;
+    }
+    free(symbollist);
+
+    exit(1);
+}
+
 std::shared_ptr<elastos::SecurityManager::SecurityListener> getSecurityListener(std::weak_ptr<elastos::Contact> contact)
 {
-    class SecurityListener : public elastos::SecurityManager::SecurityListener {
+    class SecurityListener final : public elastos::SecurityManager::SecurityListener {
     public:
         explicit SecurityListener(std::weak_ptr<elastos::Contact> contact)
             : mContact(contact) {
         };
         virtual ~SecurityListener() = default;
 
-        virtual std::string onRequestMnemonic() override {
-            std::cout << __PRETTY_FUNCTION__ << std::endl;
-            if(gSavedMnemonic.empty() == true) {
-                auto sectyMgr = mContact.lock()->getSecurityManager();
-                sectyMgr.lock()->generateMnemonic(gSavedMnemonic);
-                std::cout << "generate mnemonic: " << gSavedMnemonic << std::endl;
-            }
-
-            if(gCachedMnemonic.empty() == true) {
-                std::string password;
-                std::cout << "input password: ";
-                std::getline(std::cin, password);
-
-                gCachedMnemonic = gSavedMnemonic;
-            }
-
-            return gCachedMnemonic;
+        std::string onRequestPublicKey() override {
+            auto pubKey = getPublicKey();
+            std::cout << __PRETTY_FUNCTION__ << " pubKey:" << pubKey << std::endl;
+            return pubKey;
         };
+
+        std::vector<int8_t> onEncryptData(const std::string& pubKey, const std::vector<int8_t>& src) override {
+            return src;
+        }
+        std::vector<int8_t> onDecryptData(const std::vector<int8_t>& src) override {
+            return src;
+        }
 
     private:
         std::weak_ptr<elastos::Contact> mContact;
@@ -118,9 +138,9 @@ std::shared_ptr<elastos::MessageManager::MessageListener> getMessageListener()
         explicit MessageListener() = default;
         virtual ~MessageListener() = default;
 
-        virtual void onReceivedMessage(elastos::UserInfo userInfo, elastos::FriendInfo friendInfo,
-                                       int channelType,
-                                       int msgType, std::vector<int8_t> msgContent) override {
+        virtual void onReceivedMessage(const elastos::FriendInfo& friendInfo,
+                                       elastos::MessageManager::ChannelType chType,
+                                       const elastos::MessageManager::MessageInfo& msgInfo) override {
             std::cout << __PRETTY_FUNCTION__ << std::endl;
         };
 
@@ -130,4 +150,34 @@ std::shared_ptr<elastos::MessageManager::MessageListener> getMessageListener()
     };
 
     return std::make_shared<MessageListener>();
+}
+
+std::string getPublicKey()
+{
+    const char* language = "english";
+    const char* words = "";
+
+    if(gCachedMnemonic.empty() == true) {
+        std::string password;
+        std::cout << "input password: ";
+        std::getline(std::cin, password);
+
+        if(gSavedMnemonic.empty() == true) {
+            gSavedMnemonic = ::generateMnemonic(language, words);
+            std::cout << "generate mnemonic: " << gSavedMnemonic << std::endl;
+        }
+        gCachedMnemonic = gSavedMnemonic;
+    }
+
+    void* seedData = nullptr;
+    int seedSize = ::getSeedFromMnemonic(&seedData, gCachedMnemonic.c_str(), language, words, "");
+
+    auto pubKey = ::getSinglePublicKey(seedData, seedSize);
+    freeBuf(seedData);
+
+    std::string retval = pubKey;
+    freeBuf(pubKey);
+
+    return pubKey;
+
 }

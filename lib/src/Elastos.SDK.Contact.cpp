@@ -9,6 +9,7 @@
 
 #include <CompatibleFileSystem.hpp>
 #include <Log.hpp>
+#include <BlkChnClient.hpp>
 
 namespace elastos {
 
@@ -44,10 +45,10 @@ int Contact::Factory::SetLocalDataDir(const std::string& dir)
 
 std::shared_ptr<Contact> Contact::Factory::Create()
 {
-    struct impl: Contact {
+    struct Impl: Contact {
     };
 
-    return std::make_shared<impl>();
+    return std::make_shared<Impl>();
 }
 
 /***********************************************/
@@ -66,16 +67,7 @@ void Contact::setListener(std::shared_ptr<SecurityManager::SecurityListener> sec
 
 int Contact::start()
 {
-    std::string userDataDir;
-    int ret = getUserDataDir(userDataDir);
-    if(ret < 0) {
-        return ret;
-    }
-    Log::D(Log::TAG, "%s userdatadir:%s", __PRETTY_FUNCTION__, userDataDir.c_str());
-
-    auto cfgFilePath = std::filesystem::path(userDataDir.c_str()) / "config.dat";
-    mConfig = std::make_shared<Config>(cfgFilePath);
-    ret = mConfig->load();
+    int ret = initGlobal();
     if(ret < 0) {
         return ret;
     }
@@ -169,6 +161,32 @@ int Contact::getUserDataDir(std::string& dir)
     }
 
     dir = userDataDir.string();
+
+    return 0;
+}
+
+int Contact::initGlobal()
+{
+    int ret;
+
+    std::string userDataDir;
+    ret = getUserDataDir(userDataDir);
+    if(ret < 0) {
+        return ret;
+    }
+    Log::D(Log::TAG, "%s userdatadir:%s", __PRETTY_FUNCTION__, userDataDir.c_str());
+
+    auto cfgFilePath = std::filesystem::path(userDataDir.c_str()) / "config.dat";
+    mConfig = std::make_shared<Config>(cfgFilePath);
+    ret = mConfig->load();
+    if(ret < 0) {
+        return ret;
+    }
+
+    ret = BlkChnClient::InitInstance(mConfig, mSecurityManager);
+    if(ret < 0) {
+        return ret;
+    }
 
     return 0;
 }

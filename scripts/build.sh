@@ -22,6 +22,8 @@ build_extfunc_depends()
 
     local params=${@//--force-build/}
 
+	"$DEPENDS_DIR/scripts/build-json.sh" $params;
+
 	"$DEPENDS_DIR/scripts/build-openssl.sh" $params;
 
 	"$DEPENDS_DIR/scripts/build-curl.sh" $params

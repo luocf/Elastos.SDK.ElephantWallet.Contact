@@ -24,9 +24,6 @@ namespace elastos {
 ChannelImplElaChain::ChannelImplElaChain(std::weak_ptr<Config> config,
                                          std::weak_ptr<SecurityManager> sectyMgr)
     : MessageChannelStrategy()
-    , mConfig(config)
-    , mSecurityManager(sectyMgr)
-    , mTaskThread()
 {
 }
 
@@ -40,6 +37,11 @@ int ChannelImplElaChain::open()
 }
 
 int ChannelImplElaChain::close()
+{
+    throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
+}
+
+int ChannelImplElaChain::isReady()
 {
     throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
 }

@@ -1,5 +1,5 @@
-#ifndef _ELASTOS_BASE_INFO_HPP_
-#define _ELASTOS_BASE_INFO_HPP_
+#ifndef _ELASTOS_HUMAN_INFO_HPP_
+#define _ELASTOS_HUMAN_INFO_HPP_
 
 #include <map>
 #include <string>
@@ -9,7 +9,7 @@
 
 namespace elastos {
 
-class BaseInfo {
+class HumanInfo {
 protected:
     /*** type define ***/
     enum Item {
@@ -22,8 +22,8 @@ protected:
     /*** static function and variable ***/
 
     /*** class function and variable ***/
-    explicit BaseInfo(const std::string& did);
-    virtual ~BaseInfo();
+    explicit HumanInfo(const std::string& did);
+    virtual ~HumanInfo();
 
     int updateInfo(Item item, const std::string& value);
 
@@ -33,16 +33,18 @@ private:
     /*** static function and variable ***/
 
     /*** class function and variable ***/
-    std::string mDid;
-    std::string mElaAddr;
+    std::string mChainPubKey;
     std::map<std::string, std::string> mCarrierAddrMap; // DevUUID: CarrierId
 
+    std::string mDid;
+    std::string mElaAddr;
     std::string mNickname;
     std::string mAvatar;
     std::string mGender;
     std::string mDescription;
-}; // class BaseInfo
+
+}; // class HumanInfo
 
 } // namespace elastos
 
-#endif /* _ELASTOS_BASE_INFO_HPP_ */
+#endif /* _ELASTOS_HUMAN_INFO_HPP_ */

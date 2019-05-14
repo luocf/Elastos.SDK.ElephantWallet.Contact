@@ -1,11 +1,11 @@
 //
-//  BaseInfo.cpp
+//  HumanInfo.cpp
 //
 //  Created by mengxk on 19/03/16.
 //  Copyright © 2016 mengxk. All rights reserved.
 //
 
-#include <BaseInfo.hpp>
+#include <HumanInfo.hpp>
 
 namespace elastos {
 
@@ -21,8 +21,9 @@ namespace elastos {
 /***********************************************/
 /***** class public function implement  ********/
 /***********************************************/
-BaseInfo::BaseInfo(const std::string& did)
-    : mDid(did)
+HumanInfo::HumanInfo(const std::string& dump)
+    : mChainPubKey()
+    , mDid()
     , mElaAddr()
     , mCarrierAddrMap()
     , mNickname()
@@ -32,11 +33,11 @@ BaseInfo::BaseInfo(const std::string& did)
 {
 }
 
-BaseInfo::~BaseInfo()
+HumanInfo::~HumanInfo()
 {
 }
 
-int BaseInfo::updateInfo(Item item, const std::string& value)
+int HumanInfo::updateInfo(Item item, const std::string& value)
 {
     throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
 }

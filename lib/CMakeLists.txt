@@ -6,6 +6,7 @@ project(Elastos.SDK.Contact)
 add_subdirectory(common)
 add_subdirectory(src)
 add_subdirectory(wrapper/httpclient)
+add_subdirectory(wrapper/json)
 
 if(DEFINED CFG_WITH_TEST)
 	add_subdirectory(test)

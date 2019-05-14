@@ -23,8 +23,7 @@ namespace elastos {
 /***********************************************/
 /***** class public function implement  ********/
 /***********************************************/
-template<class F, class... Args>
-ThreadPool<F, Args...>::ThreadPool(const std::string& threadName, size_t threadCnt)
+ThreadPool::ThreadPool(const std::string& threadName, size_t threadCnt)
     : mThreadName(threadName)
     , mThreadPool(threadCnt)
     , mMutex()
@@ -35,12 +34,11 @@ ThreadPool<F, Args...>::ThreadPool(const std::string& threadName, size_t threadC
     Log::D(Log::TAG, "%s name:%s count:%d", __PRETTY_FUNCTION__, threadName.c_str(), threadCnt);
 
 	for(size_t idx = 0; idx < mThreadPool.size(); idx++) {
-		mThreadPool[idx] = std::thread(&ThreadPool<F, Args...>::processTaskQueue, this);
+		mThreadPool[idx] = std::thread(&ThreadPool::processTaskQueue, this);
 	}
 }
 
-template<class F, class... Args>
-ThreadPool<F, Args...>::~ThreadPool()
+ThreadPool::~ThreadPool()
 {
     Log::D(Log::TAG, "%s", __PRETTY_FUNCTION__);
 
@@ -61,8 +59,7 @@ ThreadPool<F, Args...>::~ThreadPool()
     mThreadPool.clear();
 }
 
-template<class F, class... Args>
-void ThreadPool<F, Args...>::post(const Task& task)
+void ThreadPool::post(const Task& task)
 {
 	std::unique_lock<std::mutex> lock(mMutex);
 	mTaskQueue.push(task);
@@ -73,8 +70,7 @@ void ThreadPool<F, Args...>::post(const Task& task)
 	mCondition.notify_all();
 }
 
-template<class F, class... Args>
-void ThreadPool<F, Args...>::post(Task&& task)
+void ThreadPool::post(Task&& task)
 {
 	std::unique_lock<std::mutex> lock(mMutex);
 	mTaskQueue.push(std::move(task));
@@ -93,8 +89,7 @@ void ThreadPool<F, Args...>::post(Task&& task)
 /***********************************************/
 /***** class private function implement  *******/
 /***********************************************/
-template<class F, class... Args>
-void ThreadPool<F, Args...>::processTaskQueue(void)
+void ThreadPool::processTaskQueue(void)
 {
 	std::unique_lock<std::mutex> lock(mMutex);
 

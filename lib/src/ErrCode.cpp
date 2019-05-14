@@ -42,20 +42,8 @@ std::string ErrCode::ToString(int errCode)
     case NoSecurityListener:
         errMsg = "NoSecurityListener";
         break;
-    case BadMnemonic:
-        errMsg = "BadMnemonic";
-        break;
-    case FailedKeypairGenMnemonic:
-        errMsg = "FailedKeypairGenMnemonic";
-        break;
-    case FailedKeypairMakeSeed:
-        errMsg = "FailedKeypairMakeSeed";
-        break;
-    case FailedKeypairGetPubKey:
-        errMsg = "FailedKeypairGetPubKey";
-        break;
-    case FailedKeypairGetDid:
-        errMsg = "FailedKeypairGetDid";
+    case BadSecurityValue:
+        errMsg = "BadSecurityValue";
         break;
     case StdSystemErrorIndex:
         errMsg = "StdSystemErrorIndex";

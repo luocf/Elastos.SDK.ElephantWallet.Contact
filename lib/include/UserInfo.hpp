@@ -11,13 +11,13 @@
 #ifndef _ELASTOS_USER_INFO_HPP_
 #define _ELASTOS_USER_INFO_HPP_
 
-#include "BaseInfo.hpp"
+#include "HumanInfo.hpp"
 #include "FriendInfo.hpp"
 #include "IdentifyCode.hpp"
 
 namespace elastos {
 
-class UserInfo : public BaseInfo {
+class UserInfo : public HumanInfo {
 public:
     /*** type define ***/
 

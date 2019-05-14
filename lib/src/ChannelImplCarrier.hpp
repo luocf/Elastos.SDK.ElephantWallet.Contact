@@ -32,6 +32,8 @@ public:
     virtual int open() override;
     virtual int close() override;
 
+    virtual int isReady() override;
+
     virtual int sendMessage(FriendInfo friendInfo,
                             int msgType, std::string msgContent) override;
     virtual int sendMessage(FriendInfo friendInfo,
@@ -47,7 +49,7 @@ protected:
 
     std::weak_ptr<Config> mConfig;
     std::unique_ptr<ElaCarrier, std::function<void(ElaCarrier*)>> mCarrier;
-    std::unique_ptr<ThreadPool<std::function<void(ChannelImplCarrier*)>>> mTaskThread;
+    std::unique_ptr<ThreadPool> mTaskThread;
 
 }; // class ChannelImplCarrier
 

@@ -32,6 +32,8 @@ public:
     virtual int open() override;
     virtual int close() override;
 
+    virtual int isReady() override;
+
     virtual int sendMessage(FriendInfo friendInfo,
                             int msgType, std::string msgContent) override;
     virtual int sendMessage(FriendInfo friendInfo,
@@ -43,9 +45,6 @@ private:
     /*** static function and variable ***/
 
     /*** class function and variable ***/
-    std::weak_ptr<Config> mConfig;
-    std::weak_ptr<SecurityManager> mSecurityManager;
-    std::unique_ptr<ThreadPool<std::function<void()>>> mTaskThread;
 
 }; // class ChannelImplElaChain
 

@@ -1,10 +1,10 @@
-pkg_search_module(pkg-curl REQUIRED libcurl)
-message(STATUS "curl include path: ${pkg-curl_INCLUDE_DIRS}")
-message(STATUS "curl library path: ${pkg-curl_STATIC_LDFLAGS}")
-
 pkg_search_module(pkg-Elastos.SDK.Keypair.C REQUIRED Elastos.SDK.Keypair.C)
 message(STATUS "Elastos.SDK.Keypair.C include path: ${pkg-Elastos.SDK.Keypair.C_INCLUDE_DIRS}")
 message(STATUS "Elastos.SDK.Keypair.C library path: ${pkg-Elastos.SDK.Keypair.C_STATIC_LDFLAGS}")
+
+pkg_search_module(pkg-curl REQUIRED libcurl)
+message(STATUS "curl include path: ${pkg-curl_INCLUDE_DIRS}")
+message(STATUS "curl library path: ${pkg-curl_STATIC_LDFLAGS}")
 
 set(pkg-Elastos.NET.Carrier_STATIC_LDFLAGS
     crystal
@@ -24,20 +24,22 @@ file( GLOB Elastos.SDK.Contact-HEADERS "../include/*.hpp" )
 
 add_library(Elastos.SDK.Contact)
 target_sources(Elastos.SDK.Contact PRIVATE
-    ${Elastos.SDK.Contact-SOURCES})
-target_sources(Elastos.SDK.Contact PRIVATE
+    ${Elastos.SDK.Contact-SOURCES}
     $<TARGET_OBJECTS:httpclient>)
 target_include_directories(Elastos.SDK.Contact PRIVATE
-    "${pkg-curl_INCLUDE_DIRS}"
     "${pkg-Elastos.SDK.Keypair.C_INCLUDE_DIRS}"
+    "${pkg-curl_INCLUDE_DIRS}"
     "${CMAKE_CURRENT_SOURCE_DIR}/../include")
 target_link_libraries(Elastos.SDK.Contact PUBLIC
-    ${pkg-curl_STATIC_LDFLAGS}
     ${pkg-Elastos.SDK.Keypair.C_STATIC_LDFLAGS}
+    ${pkg-curl_STATIC_LDFLAGS}
     ${pkg-Elastos.NET.Carrier_STATIC_LDFLAGS}
     crypto
     ssl)
-target_link_libraries(Elastos.SDK.Contact PUBLIC common)
+target_link_libraries(Elastos.SDK.Contact PRIVATE
+    common
+    httpclient
+    json)
 #target_link_libraries(Elastos.SDK.Contact PRIVATE
     #thirdparty)
 if("${CFG_TARGET_PLATFORM}" STREQUAL "Android")

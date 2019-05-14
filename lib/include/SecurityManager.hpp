@@ -23,7 +23,10 @@ public:
     /*** type define ***/
     class SecurityListener {
     public:
-        virtual std::string onRequestMnemonic() = 0;
+        virtual std::string onRequestPublicKey() = 0;
+
+        virtual std::vector<int8_t> onEncryptData(const std::string& pubKey, const std::vector<int8_t>& src) = 0;
+        virtual std::vector<int8_t> onDecryptData(const std::vector<int8_t>& src) = 0;
     protected:
         explicit SecurityListener() = default;
         virtual ~SecurityListener() = default;
@@ -37,14 +40,11 @@ public:
 
     void setSecurityListener(std::shared_ptr<SecurityListener> listener);
 
-    int generateMnemonic(std::string& value) const;
-
-    int getPublicKey(std::string& value);
-    int getElaAddress(std::string& value);
-    int getDid(std::string& value);
+    int getPublicKey(std::string& pubKey);
+    int getElaAddress(std::string& elaAddr);
+    int getDid(std::string& did);
 
     int encryptData(const std::string& key, const std::vector<int8_t>& src, std::vector<int8_t>& dest);
-    int encryptData(const std::vector<int8_t>& src, std::vector<int8_t>& dest);
     int decryptData(const std::vector<int8_t>& src, std::vector<int8_t>& dest);
 
     void clear();
@@ -53,12 +53,8 @@ private:
     /*** type define ***/
 
     /*** static function and variable ***/
-    constexpr static const char* Language = "english";
-    constexpr static const char* Words = "";
 
     /*** class function and variable ***/
-    int getSeed(std::vector<uint8_t>& value);
-
     std::shared_ptr<SecurityListener> mSecurityListener;
 
 }; // class SecurityManager

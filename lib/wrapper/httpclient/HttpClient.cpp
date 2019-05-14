@@ -19,19 +19,25 @@ namespace elastos {
 /* =========================================== */
 /* === static variables initialize =========== */
 /* =========================================== */
-
+std::mutex HttpClient::gMutex {};
+bool HttpClient::gIsGlobalInitialized = false;
 
 /* =========================================== */
 /* === static function implement ============= */
 /* =========================================== */
 int HttpClient::InitGlobal()
 {
+	std::unique_lock<std::mutex> lock(gMutex);
+    if(gIsGlobalInitialized == true) {
+        return 0;
+    }
+
 	CURLcode curle;
 	curle = curl_global_init(CURL_GLOBAL_ALL);
 	CHECK_ERROR(curle);
 
 	//curl_global_cleanup(); // never called
-
+    gIsGlobalInitialized = true;
 	return 0;
 }
 

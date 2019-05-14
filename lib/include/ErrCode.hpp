@@ -17,16 +17,15 @@ public:
 
     constexpr static const int InvalidLocalDataDir = -50;
     constexpr static const int NoSecurityListener = -51;
-    constexpr static const int BadMnemonic = -52;
-
-    constexpr static const int FailedKeypairGenMnemonic = -100;
-    constexpr static const int FailedKeypairMakeSeed = -101;
-    constexpr static const int FailedKeypairGetPubKey = -102;
-    constexpr static const int FailedKeypairGetDid = -103;
+    constexpr static const int BadSecurityValue = -52;
+    constexpr static const int KeypairError = -53;
 
     constexpr static const int ChannelFailedMultiOpen = -200;
     constexpr static const int ChannelFailedNewCarrier = -201;
     constexpr static const int ChannelFailedRunCarrier = -202;
+    constexpr static const int ChannelNotFound = -203;
+    constexpr static const int ChannelNotReady = -204;
+
 
     constexpr static const int StdSystemErrorIndex = -1000;
 

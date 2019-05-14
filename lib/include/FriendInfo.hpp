@@ -1,11 +1,11 @@
 #ifndef _ELASTOS_FRIEND_INFO_HPP_
 #define _ELASTOS_FRIEND_INFO_HPP_
 
-#include "BaseInfo.hpp"
+#include "HumanInfo.hpp"
 
 namespace elastos {
 
-class FriendInfo : public BaseInfo {
+class FriendInfo : public HumanInfo {
 public:
     /*** type define ***/
 

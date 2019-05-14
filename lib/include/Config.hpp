@@ -13,15 +13,44 @@ class Config {
 public:
     /*** type define ***/
     struct CarrierConfig {
-        struct BootstrapNode {
+        struct Node {
             const std::string mIpv4;
             const std::string mPort;
+        };
+        struct BootstrapNode : Node {
             const std::string mPublicKey;
+        };
+        struct HiveNode : Node {
         };
 
         int mLogLevel;
         bool mEnableUdp;
         std::vector<BootstrapNode> mBootstrapNodes;
+        std::vector<HiveNode> mHiveNodes;
+    };
+
+    struct ElaChainConfig {
+        struct Api {
+            std::string mGetBalance;
+            std::string mCreateTx;
+            std::string mCreateCrossTx;
+            std::string mSendRawTx;
+            std::string mGetTx;
+            std::string mGetAllTxs;
+            std::string mGetHistory;
+        };
+
+        std::string mUrl;
+        Api mApi;
+    };
+
+    struct DidChainConfig : ElaChainConfig {
+        struct AgentApi {
+            std::string mGetDidProps;
+            std::string mUploadDidProps;
+        };
+        std::string mDidUrl;
+        AgentApi mAgentApi;
     };
 
     /*** static function and variable ***/
@@ -34,14 +63,19 @@ public:
     int save();
 
     std::string mUserDataDir;
-    std::unique_ptr<CarrierConfig> mCarrierConfig;
 
+    std::unique_ptr<CarrierConfig> mCarrierConfig;
+    std::unique_ptr<ElaChainConfig> mElaChainConfig;
+
+    std::unique_ptr<DidChainConfig> mDidChainConfig;
 private:
     /*** type define ***/
 
     /*** static function and variable ***/
 
     /*** class function and variable ***/
+    int loadDefaultValues();
+
     std::string mConfigFilePath;
 
 }; // class Config

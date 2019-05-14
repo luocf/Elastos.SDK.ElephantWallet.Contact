@@ -56,6 +56,7 @@ private:
     explicit Contact();
     virtual ~Contact();
     int getUserDataDir(std::string& dir);
+    int initGlobal();
 
     std::shared_ptr<SecurityManager> mSecurityManager;
     std::shared_ptr<UserManager> mUserManager;

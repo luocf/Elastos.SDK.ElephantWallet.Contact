@@ -5,6 +5,7 @@ message(STATUS "curl library path: ${pkg-curl_STATIC_LDFLAGS}")
 file(GLOB HTTPCLIENT_SOURCES "*.cpp")
 add_library(httpclient OBJECT ${HTTPCLIENT_SOURCES})
 target_include_directories(httpclient PRIVATE "${pkg-curl_INCLUDE_DIRS}")
+target_include_directories(httpclient PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
 target_link_libraries(httpclient ${pkg-curl_STATIC_LDFLAGS})
 target_link_libraries(httpclient common)
 

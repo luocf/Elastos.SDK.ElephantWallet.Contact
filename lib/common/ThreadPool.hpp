@@ -21,7 +21,6 @@
 
 namespace elastos {
 
-template<class F, class... Args>
 class ThreadPool {
 public:
     /*** type define ***/
@@ -34,10 +33,10 @@ public:
     explicit ThreadPool(const std::string& threadName = "", size_t threadCnt = 1);
     virtual ~ThreadPool();
 
-	// post and copy
-	void post(const Task& task);
-	// post and move
-	void post(Task&& task);
+    // post and copy
+    void post(const Task& task);
+    // post and move
+    void post(Task&& task);
 
 protected:
     /*** type define ***/
@@ -45,19 +44,17 @@ protected:
     /*** static function and variable ***/
 
     /*** class function and variable ***/
-	std::string mThreadName;
-	std::vector<std::thread> mThreadPool;
-	std::mutex mMutex;
-	std::condition_variable mCondition;
-	std::queue<Task> mTaskQueue;
-	bool mQuit;
+    std::string mThreadName;
+    std::vector<std::thread> mThreadPool;
+    std::mutex mMutex;
+    std::condition_variable mCondition;
+    std::queue<Task> mTaskQueue;
+    bool mQuit;
 
-	void processTaskQueue(void);
+    void processTaskQueue(void);
 
 }; // class ThreadPool
 
 } // namespace elastos
-
-#include "ThreadPool.tcc"
 
 #endif /* _ELASTOS_THREAD_POOL_HPP_ */
