@@ -21,14 +21,21 @@ namespace elastos {
 /***********************************************/
 /***** class public function implement  ********/
 /***********************************************/
-ChannelImplElaChain::ChannelImplElaChain(std::weak_ptr<Config> config,
+ChannelImplElaChain::ChannelImplElaChain(uint32_t chType,
+                                         std::shared_ptr<ChannelListener> listener,
+                                         std::weak_ptr<Config> config,
                                          std::weak_ptr<SecurityManager> sectyMgr)
-    : MessageChannelStrategy()
+    : MessageChannelStrategy(chType, listener)
 {
 }
 
 ChannelImplElaChain::~ChannelImplElaChain()
 {
+}
+
+int ChannelImplElaChain::preset()
+{
+    throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
 }
 
 int ChannelImplElaChain::open()
@@ -41,18 +48,30 @@ int ChannelImplElaChain::close()
     throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
 }
 
-int ChannelImplElaChain::isReady()
+int ChannelImplElaChain::getAddress(std::string& address)
+{
+    throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
+}
+
+bool ChannelImplElaChain::isReady()
+{
+    throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
+}
+
+int ChannelImplElaChain::requestFriend(const std::string& friendAddr,
+                                       const std::string& summary,
+                                       bool remoteRequest)
 {
     throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
 }
 
 int ChannelImplElaChain::sendMessage(FriendInfo friendInfo,
-                                     int msgType, std::string msgContent)
+                                     uint32_t msgType, std::string msgContent)
 {
     throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
 }
 int ChannelImplElaChain::sendMessage(FriendInfo friendInfo,
-                                     int msgType, std::vector<int8_t> msgContent)
+                                     uint32_t msgType, std::vector<int8_t> msgContent)
 {
     throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
 }

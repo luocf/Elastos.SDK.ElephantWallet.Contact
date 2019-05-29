@@ -11,31 +11,21 @@
 #ifndef _ELASTOS_USER_MANAGER_HPP_
 #define _ELASTOS_USER_MANAGER_HPP_
 
-#include "FriendInfo.hpp"
-#include "IdentifyCode.hpp"
+#include "Config.hpp"
 #include "SecurityManager.hpp"
 #include "UserInfo.hpp"
 
 namespace elastos {
 
-class UserManager {
+class UserManager : public std::enable_shared_from_this<UserManager> {
 public:
     /*** type define ***/
-    enum Status {
-        Pending = 1,
-        Ready,
-        Online,
-        Offline,
-    };
-
     class UserListener {
     public:
-
         explicit UserListener() = default;
         virtual ~UserListener() = default;
 
-        virtual void onStatusChanged(const std::weak_ptr<UserInfo> userInfo, Status status) = 0;
-        virtual int onSigninDevicesOverflow(const std::weak_ptr<UserInfo> userInfo, int capacity) = 0;
+        virtual int onSigninDevicesOverflow(const std::weak_ptr<HumanInfo> userInfo, int capacity) = 0;
     };
 
     /*** static function and variable ***/
@@ -46,27 +36,28 @@ public:
 
     virtual void setUserListener(std::shared_ptr<UserListener> listener);
 
+    void setConfig(std::weak_ptr<Config> config);
+    int loadLocalData();
+    int saveLocalData();
+    int serialize(std::string& value) const;
+
     int makeUser();
-
-    Status getStatus();
-
-    int updateUserInfo(IdentifyCode::Type idType, const std::string& value);
-    std::weak_ptr<UserInfo> getUserInfo() const;
+    int getUserInfo(std::weak_ptr<UserInfo>& userInfo);
 
 private:
     /*** type define ***/
 
     /*** static function and variable ***/
+    static constexpr const char* DataFileName = "userdata.dat";
 
     /*** class function and variable ***/
     int syncHistoryInfo();
-    void setStatus(Status status);
 
     std::weak_ptr<SecurityManager> mSecurityManager;
+    std::weak_ptr<Config> mConfig;
     std::shared_ptr<UserListener> mUserListener;
     std::shared_ptr<UserInfo> mUserInfo;
 
-    Status mStatus;
 }; // class UserManager
 
 } // namespace elastos

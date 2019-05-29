@@ -6,12 +6,19 @@
 //
 
 #include <FriendInfo.hpp>
+#include <FriendManager.hpp>
+#include <Json.hpp>
+#include <SafePtr.hpp>
 
 namespace elastos {
 
 /***********************************************/
 /***** static variables initialize *************/
 /***********************************************/
+struct JsonKey {
+    static constexpr const char* HumanInfo = "HumanInfo";
+    static constexpr const char* Alias = "Alias";
+};
 
 
 /***********************************************/
@@ -21,16 +28,11 @@ namespace elastos {
 /***********************************************/
 /***** class public function implement  ********/
 /***********************************************/
-FriendInfo::FriendInfo(const std::string& did)
-    : HumanInfo(did)
+FriendInfo::FriendInfo(std::weak_ptr<FriendManager> friendMgr)
+    : HumanInfo()
+    , mFriendManager(friendMgr)
+    , mAlias()
 {
-    throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
-}
-
-FriendInfo::FriendInfo()
-    : FriendInfo(nullptr)
-{
-    throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
 }
 
 FriendInfo::~FriendInfo()
@@ -39,12 +41,91 @@ FriendInfo::~FriendInfo()
 
 int FriendInfo::setAlias(const std::string& value)
 {
-    throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
+    mAlias = value;
+
+    auto friendMgr = SAFE_GET_PTR(mFriendManager);
+    int ret = friendMgr->saveLocalData();
+    if(ret < 0) {
+        return ret;
+    }
+
+    return 0;
 }
 
 std::string FriendInfo::getAlias() const
 {
-    throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
+    return mAlias;
+}
+
+int FriendInfo::serialize(std::string& value, bool summaryOnly) const
+{
+    Json jsonInfo = Json::object();
+
+    std::string humanInfo, identCode;
+    int ret = HumanInfo::serialize(humanInfo, summaryOnly);
+    if(ret < 0) {
+        return ret;
+    }
+    jsonInfo[JsonKey::HumanInfo] = humanInfo;
+
+    if(summaryOnly == false) {
+        jsonInfo[JsonKey::Alias] = mAlias;
+    }
+
+    value = jsonInfo.dump();
+
+    return 0;
+}
+
+int FriendInfo::deserialize(const std::string& value, bool summaryOnly)
+{
+    Json jsonInfo= Json::parse(value);
+
+    std::string humanInfo = jsonInfo[JsonKey::HumanInfo];
+    int ret = HumanInfo::deserialize(humanInfo, summaryOnly);
+    if(ret < 0) {
+        return ret;
+    }
+
+    if(summaryOnly == false) {
+        mAlias = jsonInfo[JsonKey::Alias];
+    }
+
+    return 0;
+
+}
+
+int FriendInfo::addCarrierInfo(const CarrierInfo& info, const Status status)
+{
+    int ret = HumanInfo::addCarrierInfo(info, status);
+    if(ret <= 0) { // error or not changed
+        return ret;
+    }
+
+    auto friendMgr = SAFE_GET_PTR(mFriendManager);
+    ret = friendMgr->saveLocalData();
+    if(ret < 0) {
+        return ret;
+    }
+
+    return 0;
+}
+
+int FriendInfo::setHumanInfo(Item item, const std::string& value)
+{
+    int ret = HumanInfo::setHumanInfo(item, value);
+    Log::D(Log::TAG, "%s ret=%d", __PRETTY_FUNCTION__, ret);
+    if(ret <= 0) { // error or not changed
+        return ret;
+    }
+
+    auto friendMgr = SAFE_GET_PTR(mFriendManager);
+    ret = friendMgr->saveLocalData();
+    if(ret < 0) {
+        return ret;
+    }
+
+    return 0;
 }
 
 /***********************************************/

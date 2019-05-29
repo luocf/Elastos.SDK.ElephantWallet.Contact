@@ -13,15 +13,16 @@
 
 #include "Config.hpp"
 #include "ErrCode.hpp"
-#include "FriendInfo.hpp"
+#include "HumanInfo.hpp"
 #include "SecurityManager.hpp"
-#include "UserInfo.hpp"
+#include "UserManager.hpp"
+#include "FriendManager.hpp"
 
 #include "MessageChannelStrategy.hpp"
 
 namespace elastos {
 
-class MessageManager {
+class MessageManager : public std::enable_shared_from_this<MessageManager> {
 public:
     /*** type define ***/
     enum class ChannelType: uint32_t {
@@ -30,10 +31,13 @@ public:
     };
 
     enum class MessageType: uint32_t {
-        Nonspecific = 0x00000001,
-        Text = 0x00000002,
-        Audio = 0x00000040,
-        Transfer = 0x00000080,
+        Message = 0x000000FF,
+        MsgText = 0x00000001,
+        MsgAudio = 0x00000002,
+        MsgTransfer = 0x00000004,
+
+        CtrlRequestFriend = 0x00000100,
+        Control = 0x0000FF00,
     };
 
     struct MessageInfo {
@@ -51,26 +55,69 @@ public:
         friend MessageManager;
     };
 
-    class MessageListener {
+    class MessageListener : public MessageChannelStrategy::ChannelListener {
     public:
         explicit MessageListener() = default;
         virtual ~MessageListener() = default;
 
-        virtual void onReceivedMessage(const FriendInfo& friendInfo,
-                                       ChannelType chType,
-                                       const MessageInfo& msgInfo) = 0;
-        virtual void onSentMessage(int msgIndex, int errCode) = 0;
+        virtual void onStatusChanged(std::shared_ptr<UserInfo> userInfo,
+                                     ChannelType channelType,
+                                     UserInfo::Status status) = 0;
+
+        virtual void onReceivedMessage(std::shared_ptr<FriendInfo> friendInfo,
+                                       ChannelType channelType,
+                                       const std::shared_ptr<MessageInfo> msgInfo) = 0;
+
+        virtual void onSentMessage(int msgIndex, int errCode) override = 0;
+
+        virtual void onFriendRequest(std::shared_ptr<FriendInfo> friendInfo,
+                                     ChannelType channelType,
+                                     const std::string& summary) = 0;
+
+        virtual void onFriendStatusChanged(std::shared_ptr<FriendInfo> friendInfo,
+                                           ChannelType channelType,
+                                           FriendInfo::Status status) = 0;
+    private:
+        virtual void onStatusChanged(const std::string& userCode,
+                                     uint32_t channelType,
+                                     ChannelStatus status) override;
+
+        virtual void onReceivedMessage(const std::string& friendCode,
+                                       uint32_t channelType,
+                                       uint32_t msgType, std::vector<int8_t> msgContent) override;
+
+        //virtual void onSentMessage(int msgIndex, int errCode) override;
+
+        virtual void onFriendRequest(const std::string& friendCode,
+                                     uint32_t channelType,
+                                     const std::string& summary) override;
+
+        virtual void onFriendStatusChanged(const std::string& friendCode,
+                                           uint32_t channelType,
+                                           ChannelStatus status) override;
+
+        std::weak_ptr<MessageManager> mMessageManager;
+        friend class MessageManager;
     };
 
     /*** static function and variable ***/
 
     /*** class function and variable ***/
-    explicit MessageManager(std::weak_ptr<SecurityManager> sectyMgr);
+    explicit MessageManager(std::weak_ptr<SecurityManager> sectyMgr,
+                            std::weak_ptr<UserManager> userMgr,
+                            std::weak_ptr<FriendManager> friendMgr);
     virtual ~MessageManager();
 
     virtual void setMessageListener(std::shared_ptr<MessageListener> listener);
 
-    virtual int openChannels(std::weak_ptr<Config> config);
+    virtual int presetChannels(std::weak_ptr<Config> config);
+    virtual int openChannels();
+    virtual int closehannels();
+
+    virtual int requestFriend(const std::string& friendAddr,
+                              ChannelType chType,
+                              const std::string& summary,
+                              bool remoteRequest = true);
 
     virtual std::shared_ptr<MessageInfo> makeMessage(MessageType type,
                                                      const std::vector<uint8_t>& plainContent,
@@ -78,7 +125,7 @@ public:
     virtual std::shared_ptr<MessageInfo> makeMessage(const std::string& plainContent,
                                                      const std::string& cryptoAlgorithm = "") const;
 
-    virtual int sendMessage(const FriendInfo& friendInfo, ChannelType chType, const MessageInfo& msgInfo);
+    virtual int sendMessage(std::shared_ptr<FriendInfo> friendInfo, ChannelType chType, const std::shared_ptr<MessageInfo> msgInfo);
 
 private:
     /*** type define ***/
@@ -86,13 +133,39 @@ private:
     /*** static function and variable ***/
 
     /*** class function and variable ***/
+    template <class T>
+    int getChannel(ChannelType chType, std::weak_ptr<T>& channel);
+
     std::weak_ptr<SecurityManager> mSecurityManager;
+    std::weak_ptr<UserManager> mUserManager;
+    std::weak_ptr<FriendManager> mFriendManager;
     std::shared_ptr<MessageListener> mMessageListener;
-    std::weak_ptr<UserInfo> mUserInfo;
 
     std::map<ChannelType, std::shared_ptr<MessageChannelStrategy>> mMessageChannelMap;
 
+    friend class Contact;
 }; // class MessageManager
+
+/***********************************************/
+/***** class template function implement *******/
+/***********************************************/
+template <class T>
+int MessageManager::getChannel(ChannelType chType, std::weak_ptr<T>& channel)
+{
+    const auto& it = mMessageChannelMap.find(chType);
+    if(it == mMessageChannelMap.end()) {
+        return ErrCode::NotFoundError;
+    }
+
+    auto ptr = std::dynamic_pointer_cast<T>(it->second);
+    if(ptr.get() == nullptr) {
+        return ErrCode::InvalidArgument;
+    }
+
+    channel = ptr;
+
+    return 0;
+}
 
 } // namespace elastos
 

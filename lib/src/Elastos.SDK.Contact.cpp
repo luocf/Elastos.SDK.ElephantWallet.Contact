@@ -7,9 +7,11 @@
 
 #include <Elastos.SDK.Contact.hpp>
 
+#include <BlkChnClient.hpp>
+#include "ChannelImplCarrier.hpp"
 #include <CompatibleFileSystem.hpp>
 #include <Log.hpp>
-#include <BlkChnClient.hpp>
+#include <SafePtr.hpp>
 
 namespace elastos {
 
@@ -18,10 +20,15 @@ namespace elastos {
 /***********************************************/
 std::string Contact::Factory::sLocalDataDir;
 
-
 /***********************************************/
 /***** static function implement ***************/
 /***********************************************/
+
+void Contact::Factory::SetLogLevel(int level)
+{
+    Log::SetLevel(static_cast<Log::Level>(level));
+}
+
 int Contact::Factory::SetLocalDataDir(const std::string& dir)
 {
     if(dir.empty()) {
@@ -72,12 +79,27 @@ int Contact::start()
         return ret;
     }
 
-    ret = mMessageManager->openChannels(mConfig);
+    ret = mMessageManager->presetChannels(mConfig);
     if(ret < 0) {
         return ret;
     }
 
     ret = mUserManager->makeUser();
+    if(ret < 0) {
+        return ret;
+    }
+
+    ret = setUserInfo();
+    if(ret < 0) {
+        return ret;
+    }
+
+    ret = mFriendManager->restoreFriends();
+    if(ret < 0) {
+        return ret;
+    }
+
+    ret = mMessageManager->openChannels();
     if(ret < 0) {
         return ret;
     }
@@ -118,7 +140,7 @@ Contact::Contact()
     : mSecurityManager(std::make_shared<SecurityManager>())
     , mUserManager(std::make_shared<UserManager>(mSecurityManager))
     , mFriendManager(std::make_shared<FriendManager>(mSecurityManager))
-    , mMessageManager(std::make_shared<MessageManager>(mSecurityManager))
+    , mMessageManager(std::make_shared<MessageManager>(mSecurityManager, mUserManager, mFriendManager))
     , mConfig()
 {
 }
@@ -176,14 +198,52 @@ int Contact::initGlobal()
     }
     Log::D(Log::TAG, "%s userdatadir:%s", __PRETTY_FUNCTION__, userDataDir.c_str());
 
-    auto cfgFilePath = std::filesystem::path(userDataDir.c_str()) / "config.dat";
-    mConfig = std::make_shared<Config>(cfgFilePath);
+    mConfig = std::make_shared<Config>(userDataDir);
     ret = mConfig->load();
     if(ret < 0) {
         return ret;
     }
 
+    mUserManager->setConfig(mConfig);
+    mFriendManager->setConfig(mConfig, mMessageManager);
+
     ret = BlkChnClient::InitInstance(mConfig, mSecurityManager);
+    if(ret < 0) {
+        return ret;
+    }
+
+    return 0;
+}
+
+int Contact::setUserInfo()
+{
+    std::weak_ptr<UserInfo> weakUserInfo;
+    int ret = mUserManager->getUserInfo(weakUserInfo);
+    if(ret < 0) {
+        return ret;
+    }
+    auto userInfo = SAFE_GET_PTR(weakUserInfo);
+
+    std::string currDevId;
+    ret = SecurityManager::GetCurrentDevId(currDevId);
+    if(ret < 0) {
+        return ret;
+    }
+
+    std::weak_ptr<MessageChannelStrategy> weakChCarrier;
+    ret = mMessageManager->getChannel(MessageManager::ChannelType::Carrier, weakChCarrier);
+    if(ret < 0) {
+        return ret;
+    }
+    auto chCarrier = SAFE_GET_PTR(weakChCarrier);
+
+    std::string carrierAddr;
+    ret = chCarrier->getAddress(carrierAddr);
+    if(ret < 0) {
+        return ret;
+    }
+
+    ret = userInfo->addCarrierInfo({currDevId, carrierAddr, ""}, UserInfo::Status::Offline);
     if(ret < 0) {
         return ret;
     }

@@ -24,6 +24,7 @@ public:
     /*** type define ***/
     class Factory {
     public:
+        static void SetLogLevel(int level);
         static int SetLocalDataDir(const std::string& dir);
         static std::shared_ptr<Contact> Create();
 
@@ -57,6 +58,7 @@ private:
     virtual ~Contact();
     int getUserDataDir(std::string& dir);
     int initGlobal();
+    int setUserInfo();
 
     std::shared_ptr<SecurityManager> mSecurityManager;
     std::shared_ptr<UserManager> mUserManager;

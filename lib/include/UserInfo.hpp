@@ -12,24 +12,29 @@
 #define _ELASTOS_USER_INFO_HPP_
 
 #include "HumanInfo.hpp"
-#include "FriendInfo.hpp"
 #include "IdentifyCode.hpp"
 
 namespace elastos {
 
-class UserInfo : public HumanInfo {
+class UserManager;
+
+class UserInfo : public HumanInfo, IdentifyCode {
 public:
     /*** type define ***/
 
     /*** static function and variable ***/
 
     /*** class function and variable ***/
-    explicit UserInfo(const std::string& did);
-    explicit UserInfo();
+    explicit UserInfo(std::weak_ptr<UserManager> userMgr);
     virtual ~UserInfo();
 
-    int setIdentifyCode(IdentifyCode::Type idType, const std::string& value);
-    const IdentifyCode& getIdentifyCode() const;
+    virtual int serialize(std::string& value, bool summaryOnly = false) const override;
+    virtual int deserialize(const std::string& value, bool summaryOnly = false) override;
+
+    virtual int addCarrierInfo(const CarrierInfo& info, const Status status) override;
+    virtual int setHumanInfo(Item item, const std::string& value) override;
+
+    virtual int setIdentifyCode(Type type, const std::string& value) override;
 
 private:
     /*** type define ***/
@@ -37,7 +42,7 @@ private:
     /*** static function and variable ***/
 
     /*** class function and variable ***/
-    IdentifyCode mIdentifyCode;
+    std::weak_ptr<UserManager> mUserManager;
 
 }; // class UserInfo
 

@@ -11,6 +11,8 @@ set(pkg-Elastos.NET.Carrier_STATIC_LDFLAGS
     elacarrier
     elasession
     flatccrt
+    hive-api
+    hive-api++
     pj
     pjlib-util
     pjmedia
@@ -35,9 +37,9 @@ target_link_libraries(Elastos.SDK.Contact PUBLIC
     ${pkg-curl_STATIC_LDFLAGS}
     ${pkg-Elastos.NET.Carrier_STATIC_LDFLAGS}
     crypto
-    ssl)
+    ssl
+    common)
 target_link_libraries(Elastos.SDK.Contact PRIVATE
-    common
     httpclient
     json)
 #target_link_libraries(Elastos.SDK.Contact PRIVATE

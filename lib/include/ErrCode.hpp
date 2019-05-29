@@ -11,20 +11,29 @@ public:
 
     /*** static function and variable ***/
     constexpr static const int UnknownError = -1;
-    constexpr static const int InvalidArgument = -2;
-    constexpr static const int IOSystemException = -4;
-    constexpr static const int NetworkException = -5;
+    constexpr static const int NotFoundError = -2;
+    constexpr static const int NotReadyError = -3;
+    constexpr static const int InvalidArgument = -4;
+    constexpr static const int IOSystemException = -5;
+    constexpr static const int NetworkException = -6;
+    constexpr static const int PointerReleasedError = -7;
+    constexpr static const int DevUUIDError = -8;
+    constexpr static const int FileNotExistsError = -9;
+    constexpr static const int JsonParseException = -10;
+    constexpr static const int ConflictWithExpectedError = -11;
+    constexpr static const int MergeInfoFailed = -12;
 
     constexpr static const int InvalidLocalDataDir = -50;
     constexpr static const int NoSecurityListener = -51;
     constexpr static const int BadSecurityValue = -52;
     constexpr static const int KeypairError = -53;
 
-    constexpr static const int ChannelFailedMultiOpen = -200;
-    constexpr static const int ChannelFailedNewCarrier = -201;
-    constexpr static const int ChannelFailedRunCarrier = -202;
-    constexpr static const int ChannelNotFound = -203;
-    constexpr static const int ChannelNotReady = -204;
+    constexpr static const int ChannelFailedPresetAll = -200;
+    constexpr static const int ChannelFailedOpenAll = -201;
+    constexpr static const int ChannelFailedMultiOpen = -202;
+    constexpr static const int ChannelFailedCarrier = -203;
+    constexpr static const int ChannelNotFound = -207;
+    constexpr static const int ChannelNotReady = -208;
 
 
     constexpr static const int StdSystemErrorIndex = -1000;

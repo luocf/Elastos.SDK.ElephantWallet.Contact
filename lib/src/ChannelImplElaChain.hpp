@@ -25,19 +25,28 @@ public:
     /*** static function and variable ***/
 
     /*** class function and variable ***/
-    explicit ChannelImplElaChain(std::weak_ptr<Config> config,
+    explicit ChannelImplElaChain(uint32_t chType,
+                                 std::shared_ptr<ChannelListener> listener,
+                                 std::weak_ptr<Config> config,
                                  std::weak_ptr<SecurityManager> sectyMgr);
     virtual ~ChannelImplElaChain();
 
+    virtual int preset() override;
     virtual int open() override;
     virtual int close() override;
 
-    virtual int isReady() override;
+    virtual int getAddress(std::string& address) override;
+
+    virtual bool isReady() override;
+
+    virtual int requestFriend(const std::string& friendAddr,
+                              const std::string& summary,
+                              bool remoteRequest = true) override;
 
     virtual int sendMessage(FriendInfo friendInfo,
-                            int msgType, std::string msgContent) override;
+                            uint32_t msgType, std::string msgContent) override;
     virtual int sendMessage(FriendInfo friendInfo,
-                            int msgType, std::vector<int8_t> msgContent) override;
+                            uint32_t msgType, std::vector<int8_t> msgContent) override;
 
 private:
     /*** type define ***/

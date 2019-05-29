@@ -23,13 +23,12 @@ namespace elastos {
 /***********************************************/
 /***** class public function implement  ********/
 /***********************************************/
-Config::Config(const std::string& cfgFilePath)
-    : mUserDataDir()
+Config::Config(const std::string& userDataDir)
+    : mUserDataDir(userDataDir)
     , mCarrierConfig()
     , mElaChainConfig()
-    , mConfigFilePath(cfgFilePath)
+    , mDidChainConfig()
 {
-    mUserDataDir = std::filesystem::path(mConfigFilePath).parent_path().string();
 }
 
 Config::~Config()
@@ -38,6 +37,8 @@ Config::~Config()
 
 int Config::load()
 {
+    auto cfgFilePath = std::filesystem::path(mUserDataDir.c_str()) / ConfigFileName;
+
     int ret = loadDefaultValues();
     return ret;
 }

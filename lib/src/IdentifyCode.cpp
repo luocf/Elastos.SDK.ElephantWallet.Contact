@@ -7,11 +7,17 @@
 
 #include <IdentifyCode.hpp>
 
+#include <Json.hpp>
+
 namespace elastos {
 
 /***********************************************/
 /***** static variables initialize *************/
 /***********************************************/
+struct JsonKey {
+    static constexpr const char* CarrierSecretKeyMap = "CarrierSecretKeyMap";
+    static constexpr const char* IdCodeMap = "IdCodeMap";
+};
 
 
 /***********************************************/
@@ -21,18 +27,8 @@ namespace elastos {
 /***********************************************/
 /***** class public function implement  ********/
 /***********************************************/
-IdentifyCode::IdentifyCode(const std::string& phoneNumber,
-                           const std::string& emailAddress,
-                           const std::string& wechatId)
-    : mPhoneNumber(phoneNumber)
-    , mEmailAddress(emailAddress)
-    , mWechatId(wechatId)
-
-{
-}
-
 IdentifyCode::IdentifyCode()
-    : IdentifyCode("", "", "")
+    : mIdCodeMap()
 {
 }
 
@@ -40,14 +36,41 @@ IdentifyCode::~IdentifyCode()
 {
 }
 
-int IdentifyCode::set(Type type, const std::string& value)
+int IdentifyCode::setIdentifyCode(Type type, const std::string& value)
 {
     throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
 }
 
-std::string IdentifyCode::get(Type type) const
+int IdentifyCode::getIdentifyCode(Type type, std::string& value) const
 {
     throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
+}
+
+int IdentifyCode::serialize(std::string& value) const
+{
+    Json jsonInfo = Json::object();
+
+    jsonInfo[JsonKey::CarrierSecretKeyMap] = mCarrierSecretKeyMap;
+    jsonInfo[JsonKey::IdCodeMap] = mIdCodeMap;
+
+    value = jsonInfo.dump();
+
+    return 0;
+}
+
+int IdentifyCode::deserialize(const std::string& value)
+{
+    Json jsonInfo;
+    try {
+        jsonInfo= Json::parse(value);
+    } catch(Json::parse_error) {
+        return ErrCode::JsonParseException;
+    }
+
+    mCarrierSecretKeyMap = jsonInfo[JsonKey::CarrierSecretKeyMap].get<std::map<std::string, std::string>>();
+    mIdCodeMap = jsonInfo[JsonKey::IdCodeMap].get<std::map<Type, std::string>>();
+
+    return 0;
 }
 
 /***********************************************/

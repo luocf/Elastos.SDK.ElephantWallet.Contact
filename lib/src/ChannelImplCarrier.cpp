@@ -8,6 +8,7 @@
 #include <ChannelImplCarrier.hpp>
 
 #include <Log.hpp>
+#include <SafePtr.hpp>
 
 namespace elastos {
 
@@ -19,15 +20,46 @@ namespace elastos {
 /***********************************************/
 /***** static function implement ***************/
 /***********************************************/
+bool ChannelImplCarrier::IsValidCarrierAddress(const std::string& address)
+{
+    bool valid = ela_address_is_valid(address.c_str());
+    return valid;
+}
+
+bool ChannelImplCarrier::IsValidCarrierUsrId(const std::string& usrId)
+{
+    bool valid = ela_id_is_valid(usrId.c_str());
+    return valid;
+}
+
+int ChannelImplCarrier::GetCarrierUsrIdByAddress(const std::string& address, std::string& usrId)
+{
+    char buf[ELA_MAX_ID_LEN + 1] = {0};
+    auto ret = ela_get_id_by_address(address.c_str(), buf, sizeof(buf));
+    if(ret == nullptr) {
+        int err = ela_get_error();
+        char strerr_buf[512] = {0};
+        ela_get_strerror(err, strerr_buf, sizeof(strerr_buf));
+        Log::E(Log::TAG, "Failed to add friend! ret=%s(0x%x)", strerr_buf, ret);
+        return ErrCode::ChannelFailedCarrier;
+    }
+
+    usrId = ret;
+    return 0;
+}
+
 
 /***********************************************/
 /***** class public function implement  ********/
 /***********************************************/
-ChannelImplCarrier::ChannelImplCarrier(std::weak_ptr<Config> config)
-    : MessageChannelStrategy()
+ChannelImplCarrier::ChannelImplCarrier(uint32_t chType,
+                                       std::shared_ptr<ChannelListener> listener,
+                                       std::weak_ptr<Config> config)
+    : MessageChannelStrategy(chType, listener)
     , mConfig(config)
     , mCarrier()
     , mTaskThread()
+    , mChannelStatus(ChannelListener::ChannelStatus::Pending)
 {
 }
 
@@ -35,19 +67,22 @@ ChannelImplCarrier::~ChannelImplCarrier()
 {
 }
 
-int ChannelImplCarrier::open()
+int ChannelImplCarrier::preset()
 {
     if(mCarrier != nullptr) {
         return ErrCode::ChannelFailedMultiOpen;
     }
 
-    auto config = mConfig.lock();
+    auto config = SAFE_GET_PTR(mConfig);
 
     ElaOptions carrierOpts;
     ElaCallbacks carrierCallbacks;
 
     memset(&carrierOpts, 0, sizeof(carrierOpts));
     memset(&carrierCallbacks, 0, sizeof(carrierCallbacks));
+    carrierCallbacks.connection_status = OnCarrierConnection;
+    carrierCallbacks.friend_request = OnCarrierFriendRequest;
+    carrierCallbacks.friend_connection = OnCarrierFriendConnection;
 
     carrierOpts.udp_enabled = config->mCarrierConfig->mEnableUdp;
     carrierOpts.persistent_location = config->mUserDataDir.c_str();
@@ -92,9 +127,14 @@ int ChannelImplCarrier::open()
     mCarrier = std::unique_ptr<ElaCarrier, std::function<void(ElaCarrier*)>>(creater(), deleter);
     if (mCarrier == nullptr) {
         Log::E(Log::TAG, "Failed to new carrier!");
-        return ErrCode::ChannelFailedNewCarrier;
+        return ErrCode::ChannelFailedCarrier;
     }
 
+    return 0;
+}
+
+int ChannelImplCarrier::open()
+{
     if(mTaskThread == nullptr) {
         mTaskThread = std::make_unique<ThreadPool>();
     }
@@ -114,18 +154,62 @@ int ChannelImplCarrier::close()
     return 0;
 }
 
-int ChannelImplCarrier::isReady()
+int ChannelImplCarrier::getAddress(std::string& address)
 {
-    throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
+    char addr[ELA_MAX_ADDRESS_LEN + 1] = {0};
+    auto ret = ela_get_address(mCarrier.get(), addr, sizeof(addr));
+    if(ret == nullptr) {
+        int err = ela_get_error();
+        char strerr_buf[512] = {0};
+        ela_get_strerror(err, strerr_buf, sizeof(strerr_buf));
+        Log::E(Log::TAG, "Failed to add friend! ret=%s(0x%x)", strerr_buf, ret);
+        return ErrCode::ChannelFailedCarrier;
+    }
+
+    address = addr;
+    return 0;
+}
+
+bool ChannelImplCarrier::isReady()
+{
+    return (mChannelStatus == ChannelListener::ChannelStatus::Online);
+}
+
+int ChannelImplCarrier::requestFriend(const std::string& friendCode,
+                                      const std::string& summary,
+                                      bool remoteRequest)
+{
+    std::function<bool(const char*)> validCheckFun = (remoteRequest ? ela_address_is_valid : ela_id_is_valid);
+    bool valid = validCheckFun(friendCode.c_str());
+    if(valid != true) {
+        return ErrCode::InvalidArgument;
+    }
+
+    int ret = ErrCode::UnknownError;
+    if(remoteRequest == true) {
+        const char* hello = (summary.empty() ? " " : summary.c_str());
+        ret = ela_add_friend(mCarrier.get(), friendCode.c_str(), hello);
+    } else {
+        ret = ela_accept_friend(mCarrier.get(), friendCode.c_str());
+    }
+    if(ret != 0) {
+        int err = ela_get_error();
+        char strerr_buf[512] = {0};
+        ela_get_strerror(err, strerr_buf, sizeof(strerr_buf));
+        Log::E(Log::TAG, "Failed to add friend! ret=%s(0x%x)", strerr_buf, ret);
+        return ErrCode::ChannelFailedCarrier;
+    }
+
+    return 0;
 }
 
 int ChannelImplCarrier::sendMessage(FriendInfo friendInfo,
-                                    int msgType, std::string msgContent)
+                                    uint32_t msgType, std::string msgContent)
 {
     throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
 }
 int ChannelImplCarrier::sendMessage(FriendInfo friendInfo,
-                                    int msgType, std::vector<int8_t> msgContent)
+                                    uint32_t msgType, std::vector<int8_t> msgContent)
 {
     throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
 }
@@ -143,6 +227,49 @@ void ChannelImplCarrier::runCarrier()
     }
 }
 
+void ChannelImplCarrier::OnCarrierConnection(ElaCarrier *carrier,
+                                             ElaConnectionStatus status, void *context)
+{
+    Log::D(Log::TAG, "CarrierConnectionStatus: %d", status);
+    auto channel = reinterpret_cast<ChannelImplCarrier*>(context);
+
+    std::string carrierAddr, carrierUsrId;
+    channel->getAddress(carrierAddr);
+    GetCarrierUsrIdByAddress(carrierAddr, carrierUsrId);
+
+    channel->mChannelStatus = ( status == ElaConnectionStatus_Connected
+                              ? ChannelListener::ChannelStatus::Online
+                              : ChannelListener::ChannelStatus::Offline);
+    if(channel->mChannelListener.get() != nullptr) {
+        channel->mChannelListener->onStatusChanged(carrierUsrId, channel->mChannelType, channel->mChannelStatus);
+    }
+}
+
+void ChannelImplCarrier::OnCarrierFriendRequest(ElaCarrier *carrier, const char *friendid,
+                                                const ElaUserInfo *info,
+                                                const char *hello, void *context)
+{
+    Log::D(Log::TAG, "CarrierFriendRequest from: %s", friendid);
+    auto channel = reinterpret_cast<ChannelImplCarrier*>(context);
+
+    if(channel->mChannelListener.get() != nullptr) {
+        channel->mChannelListener->onFriendRequest(friendid, channel->mChannelType, hello);
+    }
+}
+
+void ChannelImplCarrier::OnCarrierFriendConnection(ElaCarrier *carrier,const char *friendid,
+                                                   ElaConnectionStatus status, void *context)
+{
+    Log::D(Log::TAG, "CarrierFriendConnection from: %s %d", friendid, status);
+    auto channel = reinterpret_cast<ChannelImplCarrier*>(context);
+
+    if(channel->mChannelListener.get() != nullptr) {
+        auto chStatus = ( status == ElaConnectionStatus_Connected
+                        ? ChannelListener::ChannelStatus::Online
+                        : ChannelListener::ChannelStatus::Offline);
+        channel->mChannelListener->onFriendStatusChanged(friendid, channel->mChannelType, chStatus);
+    }
+}
 
 /***********************************************/
 /***** class private function implement  *******/

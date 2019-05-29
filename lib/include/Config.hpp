@@ -56,13 +56,13 @@ public:
     /*** static function and variable ***/
 
     /*** class function and variable ***/
-    explicit Config(const std::string& cfgFilePath);
+    explicit Config(const std::string& userDataDir);
     virtual ~Config();
 
     int load();
     int save();
 
-    std::string mUserDataDir;
+    const std::string mUserDataDir;
 
     std::unique_ptr<CarrierConfig> mCarrierConfig;
     std::unique_ptr<ElaChainConfig> mElaChainConfig;
@@ -72,11 +72,12 @@ private:
     /*** type define ***/
 
     /*** static function and variable ***/
+    static constexpr const char* ConfigFileName = "config.dat";
 
     /*** class function and variable ***/
     int loadDefaultValues();
 
-    std::string mConfigFilePath;
+
 
 }; // class Config
 

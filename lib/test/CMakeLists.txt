@@ -1,10 +1,14 @@
+file( GLOB ContactTest-SOURCES "ContactTest*.cpp")
+
 add_executable(ContactTest)
-target_sources(ContactTest PRIVATE ContactTest.cpp)
+target_sources(ContactTest PRIVATE
+    ${ContactTest-SOURCES})
 target_include_directories(ContactTest PRIVATE
     "${CMAKE_CURRENT_SOURCE_DIR}/../include"
     "${CMAKE_INSTALL_PREFIX}/include")
 target_link_libraries(ContactTest PUBLIC
     Elastos.SDK.Contact)
+configure_file("ContactTestUI.sh" "${CMAKE_CURRENT_BINARY_DIR}/ContactTestUI.sh" COPYONLY)
 
 add_executable(BlkChnClientTest)
 target_sources(BlkChnClientTest PRIVATE BlkChnClientTest.cpp)

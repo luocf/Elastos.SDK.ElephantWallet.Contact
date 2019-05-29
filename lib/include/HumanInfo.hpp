@@ -5,43 +5,77 @@
 #include <string>
 #include <vector>
 
-#include "ErrCode.hpp"
+#include <ErrCode.hpp>
 
 namespace elastos {
 
 class HumanInfo {
-protected:
+public:
     /*** type define ***/
-    enum Item {
-        Nickname = 1,
+    enum class Item: int {
+        ChainPubKey = 1,
+        Did,
+        ElaAddress,
+        Nickname,
         Avatar,
         Gender,
         Description,
     };
 
+    enum class HumanKind: int {
+        Did = 1,
+        Ela,
+        Carrier,
+    };
+
+    enum class Status: uint8_t {
+        Invalid = 0x0,
+        WaitForAccept = 0x1,
+        Offline = 0x2,
+        Online = 0x4,
+    };
+
+
+    struct CarrierInfo {
+        std::string mDevId;
+        std::string mUsrAddr;
+        std::string mUsrId;
+    };
+
     /*** static function and variable ***/
+    static HumanKind AnalyzeHumanKind(const std::string& code);
 
     /*** class function and variable ***/
-    explicit HumanInfo(const std::string& did);
+    explicit HumanInfo();
     virtual ~HumanInfo();
 
-    int updateInfo(Item item, const std::string& value);
+    virtual int addCarrierInfo(const CarrierInfo& info, const Status status = Status::Invalid);
+    virtual int getCarrierInfoByUsrId(const std::string& usrId, CarrierInfo& info) const;
+    virtual int getAllCarrierInfo(std::vector<CarrierInfo>& infoArray) const;
+    virtual int setCarrierStatus(const std::string& usrId, const Status status);
+    virtual int getCarrierStatus(const std::string& usrId, Status& status) const;
 
-private:
+    virtual int setHumanInfo(Item item, const std::string& value);
+    virtual int getHumanInfo(Item item, std::string& value) const;
+    virtual int mergeHumanInfo(const HumanInfo& value, const Status status);
+
+    virtual int setHumanStatus(HumanKind kind, const Status status);
+    virtual int getHumanStatus(HumanKind kind, Status& status);
+    virtual Status getHumanStatus();
+
+    virtual int serialize(std::string& value, bool summaryOnly = false) const;
+    virtual int deserialize(const std::string& value, bool summaryOnly = false);
+
+protected:
     /*** type define ***/
 
     /*** static function and variable ***/
 
     /*** class function and variable ***/
-    std::string mChainPubKey;
-    std::map<std::string, std::string> mCarrierAddrMap; // DevUUID: CarrierId
-
-    std::string mDid;
-    std::string mElaAddr;
-    std::string mNickname;
-    std::string mAvatar;
-    std::string mGender;
-    std::string mDescription;
+    std::vector<CarrierInfo> mBoundCarrierArray;
+    std::vector<Status> mBoundCarrierStatus;
+    std::map<Item, std::string> mCommonInfoMap;
+    std::map<HumanKind, Status> mStatusMap;
 
 }; // class HumanInfo
 

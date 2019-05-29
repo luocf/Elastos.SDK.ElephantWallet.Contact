@@ -25,14 +25,19 @@ public:
     public:
         virtual std::string onRequestPublicKey() = 0;
 
-        virtual std::vector<int8_t> onEncryptData(const std::string& pubKey, const std::vector<int8_t>& src) = 0;
-        virtual std::vector<int8_t> onDecryptData(const std::vector<int8_t>& src) = 0;
+        virtual std::vector<uint8_t> onEncryptData(const std::string& pubKey, const std::vector<uint8_t>& src) = 0;
+        virtual std::vector<uint8_t> onDecryptData(const std::vector<uint8_t>& src) = 0;
     protected:
         explicit SecurityListener() = default;
         virtual ~SecurityListener() = default;
     };
 
     /*** static function and variable ***/
+    static int GetCurrentDevId(std::string& devId);
+    static int GetElaAddress(const std::string& pubKey, std::string& elaAddr);
+    static int GetDid(const std::string& pubKey, std::string& did);
+    static bool IsValidElaAddress(const std::string& code);
+    static bool IsValidDid(const std::string& code);
 
     /*** class function and variable ***/
     explicit SecurityManager();
@@ -44,8 +49,11 @@ public:
     int getElaAddress(std::string& elaAddr);
     int getDid(std::string& did);
 
-    int encryptData(const std::string& key, const std::vector<int8_t>& src, std::vector<int8_t>& dest);
-    int decryptData(const std::vector<int8_t>& src, std::vector<int8_t>& dest);
+    int encryptData(const std::string& key, const std::vector<uint8_t>& src, std::vector<uint8_t>& dest);
+    int decryptData(const std::vector<uint8_t>& src, std::vector<uint8_t>& dest);
+
+    int saveCryptoFile(const std::string& filePath, const std::vector<uint8_t>& originData);
+    int loadCryptoFile(const std::string& filePath, std::vector<uint8_t>& originData);
 
     void clear();
 

@@ -8,6 +8,11 @@
 #include <SecurityManager.hpp>
 
 #include <Elastos.Wallet.Utility.h>
+#include <fstream>
+#include <Log.hpp>
+#include <sys/utsname.h>
+#include <unistd.h>
+#include <uuid/uuid.h>
 
 namespace elastos {
 
@@ -19,6 +24,81 @@ namespace elastos {
 /***********************************************/
 /***** static function implement ***************/
 /***********************************************/
+int SecurityManager::GetCurrentDevId(std::string& devId)
+{
+    int ret = ErrCode::UnknownError;
+
+    devId = "";
+
+    std::string sysName;
+    std::string uuidName;
+#if defined(__APPLE__)
+    struct utsname utsName;
+    ret = uname(&utsName);
+    if(ret < 0) {
+        return ErrCode::DevUUIDError;
+    }
+    sysName = utsName.sysname;
+
+    uuid_t uuid = {};
+    struct timespec ts = { .tv_sec = 5, .tv_nsec = 0 };
+    ret = gethostuuid(uuid, &ts);
+    if(ret < 0) {
+        return ErrCode::DevUUIDError;
+    }
+
+    uuid_string_t uuidStr;
+    uuid_unparse_upper(uuid, uuidStr);
+    uuidName = uuidStr;
+#else
+#error "Unsupport Platform"
+#endif
+
+    devId = sysName + "(" + uuidStr + ")";
+
+    return 0;
+}
+
+int SecurityManager::GetElaAddress(const std::string& pubKey, std::string& elaAddr)
+{
+    auto keypairAddr = ::getAddress(pubKey.c_str());
+    if(keypairAddr == nullptr) {
+        return ErrCode::KeypairError;
+    }
+
+    elaAddr = keypairAddr;
+    ::freeBuf(keypairAddr);
+
+    return 0;
+}
+
+int SecurityManager::GetDid(const std::string& pubKey, std::string& did)
+{
+    auto keypairDid = ::getDid(pubKey.c_str());
+    if(keypairDid == nullptr) {
+        return ErrCode::KeypairError;
+    }
+
+    did = keypairDid;
+    ::freeBuf(keypairDid);
+
+    return 0;
+}
+
+bool SecurityManager::IsValidElaAddress(const std::string& code)
+{
+    bool valid = ::isAddressValid(code.c_str());
+    return valid;
+}
+
+bool SecurityManager::IsValidDid(const std::string& code)
+{
+    // TODO
+    //bool valid = ::isAddressValid(code.c_str());
+    //return valid;
+
+    return (code.length() == 34 && code[0] == 'i');
+}
 
 /***********************************************/
 /***** class public function implement  ********/
@@ -59,13 +139,10 @@ int SecurityManager::getElaAddress(std::string& value)
         return ret;
     }
 
-    auto addr = ::getAddress(pubKey.c_str());
-    if(addr == nullptr) {
-        return ErrCode::KeypairError;
+    ret = GetElaAddress(pubKey, value);
+    if(ret < 0) {
+        return ret;
     }
-
-    value = addr;
-    freeBuf(addr);
 
     return 0;
 }
@@ -78,19 +155,16 @@ int SecurityManager::getDid(std::string& value)
         return ret;
     }
 
-    auto did = ::getDid(pubKey.c_str());
-    if(did == nullptr) {
-        return ErrCode::KeypairError;
+    ret = GetDid(pubKey, value);
+    if(ret < 0) {
+        return ret;
     }
-
-    value = did;
-    freeBuf(did);
 
     return 0;
 }
 
 
-int SecurityManager::encryptData(const std::string& key, const std::vector<int8_t>& src, std::vector<int8_t>& dest)
+int SecurityManager::encryptData(const std::string& key, const std::vector<uint8_t>& src, std::vector<uint8_t>& dest)
 {
     if(mSecurityListener == nullptr) {
         return ErrCode::NoSecurityListener;
@@ -104,10 +178,15 @@ int SecurityManager::encryptData(const std::string& key, const std::vector<int8_
     return 0;
 }
 
-int SecurityManager::decryptData(const std::vector<int8_t>& src, std::vector<int8_t>& dest)
+int SecurityManager::decryptData(const std::vector<uint8_t>& src, std::vector<uint8_t>& dest)
 {
     if(mSecurityListener == nullptr) {
         return ErrCode::NoSecurityListener;
+    }
+
+    if(src.empty()) {
+        dest.clear();
+        return 0;
     }
 
     dest = mSecurityListener->onDecryptData(src);
@@ -117,6 +196,62 @@ int SecurityManager::decryptData(const std::vector<int8_t>& src, std::vector<int
 
     return 0;
 }
+
+int SecurityManager::saveCryptoFile(const std::string& filePath, const std::vector<uint8_t>& originData)
+{
+    std::string pubKey;
+    int ret = getPublicKey(pubKey);
+    if(ret < 0) {
+        return ret;
+    }
+
+    std::vector<uint8_t> encryptedData;
+    ret = encryptData(pubKey, originData, encryptedData);
+    if(ret < 0) {
+        return ret;
+    }
+
+    std::ofstream cryptoFile;
+
+    cryptoFile.open(filePath, std::ios::out | std::ios::binary);
+
+    cryptoFile.write(reinterpret_cast<char*>(encryptedData.data()), encryptedData.size ());
+
+    cryptoFile.close();
+
+    return 0;
+}
+
+int SecurityManager::loadCryptoFile(const std::string& filePath, std::vector<uint8_t>& originData)
+{
+    std::vector<uint8_t> encryptedData;
+
+    std::ifstream cryptoFile;
+
+    cryptoFile.open(filePath, std::ios::in | std::ios::binary);
+
+    cryptoFile.seekg (0, cryptoFile.end);
+    int dataLen = cryptoFile.tellg();
+    cryptoFile.seekg (0, cryptoFile.beg);
+    if(dataLen < 0) {
+        cryptoFile.close();
+        return ErrCode::FileNotExistsError;
+    }
+
+    encryptedData.resize(dataLen);
+
+    cryptoFile.read(reinterpret_cast<char*>(encryptedData.data()), encryptedData.size ());
+
+    cryptoFile.close();
+
+    int ret = decryptData(encryptedData, originData);
+    if(ret < 0) {
+        return ret;
+    }
+
+    return 0;
+}
+
 
 /***********************************************/
 /***** class protected function implement  *****/

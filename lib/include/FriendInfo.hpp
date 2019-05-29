@@ -5,6 +5,8 @@
 
 namespace elastos {
 
+class FriendManager;
+
 class FriendInfo : public HumanInfo {
 public:
     /*** type define ***/
@@ -12,12 +14,17 @@ public:
     /*** static function and variable ***/
 
     /*** class function and variable ***/
-    explicit FriendInfo(const std::string& did);
-    explicit FriendInfo();
+    explicit FriendInfo(std::weak_ptr<FriendManager> friendMgr);
     virtual ~FriendInfo();
 
     int setAlias(const std::string& value);
     std::string getAlias() const;
+
+    virtual int serialize(std::string& value, bool summaryOnly = false) const override;
+    virtual int deserialize(const std::string& value, bool summaryOnly = false) override;
+
+    virtual int addCarrierInfo(const CarrierInfo& info, const Status status) override;
+    virtual int setHumanInfo(Item item, const std::string& value) override;
 
 private:
     /*** type define ***/
@@ -25,6 +32,8 @@ private:
     /*** static function and variable ***/
 
     /*** class function and variable ***/
+    std::weak_ptr<FriendManager> mFriendManager;
+
     std::string mAlias;
 
 }; // class FriendInfo

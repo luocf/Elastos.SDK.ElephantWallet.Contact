@@ -1,6 +1,7 @@
 #ifndef _ELASTOS_IDENTIFY_CODE_HPP_
 #define _ELASTOS_IDENTIFY_CODE_HPP_
 
+#include <map>
 #include <string>
 
 #include "ErrCode.hpp"
@@ -11,7 +12,6 @@ class IdentifyCode {
 public:
     /*** type define ***/
     enum Type {
-        Did = 1,
         PhoneNumber,
         EmailAddress,
         WechatId,
@@ -20,14 +20,14 @@ public:
     /*** static function and variable ***/
 
     /*** class function and variable ***/
-    explicit IdentifyCode(const std::string& phoneNumber,
-                          const std::string& emailAddress,
-                          const std::string& wechatId);
     explicit IdentifyCode();
     virtual ~IdentifyCode();
 
-    int set(Type type, const std::string& value);
-    std::string get(Type type) const;
+    virtual int setIdentifyCode(Type type, const std::string& value);
+    virtual int getIdentifyCode(Type type, std::string& value) const;
+
+    virtual int serialize(std::string& value) const;
+    virtual int deserialize(const std::string& value);
 
 private:
     /*** type define ***/
@@ -35,9 +35,8 @@ private:
     /*** static function and variable ***/
 
     /*** class function and variable ***/
-    std::string mPhoneNumber;
-    std::string mEmailAddress;
-    std::string mWechatId;
+    std::map<std::string, std::string> mCarrierSecretKeyMap; // DevUUID: CarrierId
+    std::map<Type, std::string> mIdCodeMap; // DevUUID: CarrierId
 }; // class IdentifyCode
 
 } // namespace elastos
