@@ -141,9 +141,8 @@ int MessageManager::requestFriend(const std::string& friendAddr,
     }
 
     auto userMgr = SAFE_GET_PTR(mUserManager);
-    std::weak_ptr<UserInfo> weakUserInfo;
-    userMgr->getUserInfo(weakUserInfo);
-    auto userInfo = SAFE_GET_PTR(weakUserInfo);
+    std::shared_ptr<UserInfo> userInfo;
+    userMgr->getUserInfo(userInfo);
 
     std::string userDid;
     int ret = userInfo->getHumanInfo(HumanInfo::Item::Did, userDid);
@@ -217,10 +216,10 @@ int MessageManager::sendMessage(const std::shared_ptr<HumanInfo> humanInfo,
         return ErrCode::ChannelNotReady;
     }
 
-    auto expectedMsgInfo = makeMessage(msgInfo);
+    auto cryptoMsgInfo = makeMessage(msgInfo);
     if(msgInfo->mCryptoAlgorithm.empty() == true
-    || msgInfo->mCryptoAlgorithm != "plain") {
-        expectedMsgInfo->mPlainContent = msgInfo->mPlainContent;
+    || msgInfo->mCryptoAlgorithm == "plain") {
+        cryptoMsgInfo->mPlainContent = msgInfo->mPlainContent;
     } else {
         std::string pubKey;
         int ret = humanInfo->getHumanInfo(HumanInfo::Item::ChainPubKey, pubKey);
@@ -229,14 +228,14 @@ int MessageManager::sendMessage(const std::shared_ptr<HumanInfo> humanInfo,
         }
 
         auto sectyMgr = SAFE_GET_PTR(mSecurityManager);
-        ret = sectyMgr->encryptData(pubKey, msgInfo->mPlainContent, expectedMsgInfo->mPlainContent);
+        ret = sectyMgr->encryptData(pubKey, msgInfo->mPlainContent, cryptoMsgInfo->mPlainContent);
         if(ret < 0) {
             return ret;
         }
     }
 
     Json jsonData = Json::object();
-    jsonData[JsonKey::MessageData] = expectedMsgInfo;
+    jsonData[JsonKey::MessageData] = cryptoMsgInfo;
     std::vector<uint8_t> data = Json::to_cbor(jsonData);
 
     if(chType == ChannelType::Carrier) {
@@ -317,10 +316,9 @@ void MessageManager::MessageListener::onStatusChanged(const std::string& userCod
 
     auto msgMgr = SAFE_GET_PTR_NO_RETVAL(mMessageManager);
     auto userMgr = SAFE_GET_PTR_NO_RETVAL(msgMgr->mUserManager);
-    std::weak_ptr<UserInfo> weakUserInfo;
-    userMgr->getUserInfo(weakUserInfo);
+    std::shared_ptr<UserInfo> userInfo;
+    userMgr->getUserInfo(userInfo);
 
-    auto userInfo = SAFE_GET_PTR_NO_RETVAL(weakUserInfo);
     ChannelType userChType = static_cast<ChannelType>(channelType);
     UserInfo::Status userStatus = (status == ChannelStatus::Online ? UserInfo::Status::Online : UserInfo::Status::Offline);
 
@@ -343,9 +341,54 @@ void MessageManager::MessageListener::onStatusChanged(const std::string& userCod
 
 void MessageManager::MessageListener::onReceivedMessage(const std::string& friendCode,
                                                         uint32_t channelType,
-                                                        uint32_t msgType, std::vector<int8_t> msgContent)
+                                                        const std::vector<uint8_t>& msgContent)
 {
-    Log::W(Log::TAG, "%s", __PRETTY_FUNCTION__);
+    int ret = ErrCode::UnknownError;
+    ChannelType chType = static_cast<ChannelType>(channelType);
+
+    Log::W(Log::TAG, "============= 0");
+    auto msgMgr = SAFE_GET_PTR_NO_RETVAL(mMessageManager);
+    auto userMgr = SAFE_GET_PTR_NO_RETVAL(msgMgr->mUserManager);
+    auto friendMgr = SAFE_GET_PTR_NO_RETVAL(msgMgr->mFriendManager);
+
+    auto jsonData = Json::from_cbor(msgContent);
+    std::shared_ptr<MessageInfo> cryptoMsgInfo = jsonData[JsonKey::MessageData];
+
+    Log::W(Log::TAG, "============= 1");
+    auto msgInfo = msgMgr->makeMessage(cryptoMsgInfo);
+    if(cryptoMsgInfo->mCryptoAlgorithm.empty() == true
+    || cryptoMsgInfo->mCryptoAlgorithm == "plain") {
+        cryptoMsgInfo->mPlainContent = msgInfo->mPlainContent;
+    } else {
+        auto sectyMgr = SAFE_GET_PTR_NO_RETVAL(msgMgr->mSecurityManager);
+        ret = sectyMgr->decryptData(cryptoMsgInfo->mPlainContent, msgInfo->mPlainContent);
+        if(ret < 0) {
+            return;
+        }
+    }
+
+    Log::W(Log::TAG, "============= 2");
+    std::shared_ptr<HumanInfo> humanInfo;
+    if(userMgr->contains(friendCode)) {
+        std::shared_ptr<UserInfo> userInfo;
+        ret = userMgr->getUserInfo(userInfo);
+        if(ret < 0) {
+            Log::E(Log::TAG, "Failed to get user info.");
+            return;
+        }
+        humanInfo = userInfo;
+    } else {
+        std::shared_ptr<FriendInfo> friendInfo;
+        ret = friendMgr->tryGetFriendInfo(friendCode, friendInfo);
+        if(ret < 0) {
+            Log::E(Log::TAG, "Failed to get friend info.");
+            return;
+        }
+        humanInfo = friendInfo;
+    }
+
+    Log::W(Log::TAG, "============= 3");
+    onReceivedMessage(humanInfo, chType, msgInfo);
 }
 
 void MessageManager::MessageListener::onSentMessage(int msgIndex, int errCode)
@@ -396,15 +439,14 @@ void MessageManager::MessageListener::onFriendRequest(const std::string& friendC
         return;
     }
 
-    std::weak_ptr<UserInfo> weakUserInfo;
-    ret = userMgr->getUserInfo(weakUserInfo);
+    std::shared_ptr<UserInfo> userInfo;
+    ret = userMgr->getUserInfo(userInfo);
     if(ret < 0) {
         Log::E(Log::TAG, "Failed to process friend request, user info is not exists.");
         return;
     }
 
     std::string userDid;
-    auto userInfo = SAFE_GET_PTR_NO_RETVAL(weakUserInfo);
     ret = userInfo->getHumanInfo(HumanInfo::Item::Did, userDid);
     if(ret < 0) {
         Log::E(Log::TAG, "Failed to process friend request, user did is not exists.");
@@ -455,21 +497,17 @@ void MessageManager::MessageListener::onFriendStatusChanged(const std::string& f
     auto userMgr = SAFE_GET_PTR_NO_RETVAL(msgMgr->mUserManager);
     auto friendMgr = SAFE_GET_PTR_NO_RETVAL(msgMgr->mFriendManager);
 
-    std::weak_ptr<UserInfo> weakUserInfo;
-    ret = userMgr->getUserInfo(weakUserInfo);
+    std::shared_ptr<UserInfo> userInfo;
+    ret = userMgr->getUserInfo(userInfo);
     if(ret < 0) {
         Log::E(Log::TAG, "Failed to process friend request, user info is not exists.");
         return;
     }
 
-    std::shared_ptr<HumanInfo> peerHumanInfo;
-
     std::string userDid;
-    auto userInfo = SAFE_GET_PTR_NO_RETVAL(weakUserInfo);
     UserInfo::CarrierInfo info;
     ret = userInfo->getCarrierInfoByUsrId(friendCode, info);
     if(ret >= 0) { // found
-        peerHumanInfo = userInfo;
         UserInfo::Status oldStatus = userInfo->getHumanStatus();
         if(humanChType == ChannelType::Carrier) {
             userInfo->setCarrierStatus(friendCode, humanStatus);
@@ -485,7 +523,6 @@ void MessageManager::MessageListener::onFriendStatusChanged(const std::string& f
     std::shared_ptr<FriendInfo> friendInfo;
     ret = friendMgr->tryGetFriendInfo(friendCode, friendInfo);
     if(ret >= 0) { // found
-        peerHumanInfo = friendInfo;
         FriendInfo::Status oldStatus = friendInfo->getHumanStatus();
         if(humanChType == ChannelType::Carrier) {
             friendInfo->setCarrierStatus(friendCode, humanStatus);
@@ -496,20 +533,22 @@ void MessageManager::MessageListener::onFriendStatusChanged(const std::string& f
         if(newStatus != oldStatus) {
             onFriendStatusChanged(friendInfo, humanChType, newStatus);
         }
+
+        // send latest user desc.
+        std::string humanDesc;
+        ret = userInfo->HumanInfo::serialize(humanDesc, true);
+        if(ret < 0) {
+            Log::E(Log::TAG, "Failed to serialize user human info.");
+            return;
+        }
+        auto msgInfo = msgMgr->makeMessage(MessageManager::MessageType::CtrlSyncDesc, humanDesc);
+        ret = msgMgr->sendMessage(friendInfo, humanChType, msgInfo);
+        if(ret < 0) {
+            Log::E(Log::TAG, "Failed to send sync desc message.");
+            return;
+        }
     }
 
-    std::string humanDesc;
-    ret = userInfo->HumanInfo::serialize(humanDesc, true);
-    if(ret < 0) {
-        Log::E(Log::TAG, "Failed to serialize user human info.");
-        return;
-    }
-    auto msgInfo = msgMgr->makeMessage(MessageManager::MessageType::CtrlSyncDesc, humanDesc);
-    ret = msgMgr->sendMessage(peerHumanInfo, humanChType, msgInfo);
-    if(ret < 0) {
-        Log::E(Log::TAG, "Failed to send sync desc message.");
-        return;
-    }
 
     Log::D(Log::TAG, "onFriendStatusChanged() friendCode=%s, ret=%d", friendCode.c_str(), ret);
     return;

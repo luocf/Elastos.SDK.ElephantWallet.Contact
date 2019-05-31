@@ -18,7 +18,6 @@ void signalHandler(int sig);
 std::shared_ptr<elastos::SecurityManager::SecurityListener> getSecurityListener(std::weak_ptr<elastos::Contact> contact);
 std::shared_ptr<elastos::UserManager::UserListener> getUserListener();
 std::shared_ptr<elastos::FriendManager::FriendListener> getFriendListener();
-std::shared_ptr<elastos::MessageManager::MessageListener> getMessageListener();
 std::string getPublicKey();
 
 int main(int argc, char **argv)
@@ -57,29 +56,29 @@ int main(int argc, char **argv)
 
     gCachedMnemonic.clear();
 
-    std::weak_ptr<elastos::UserInfo> userInfo;
+    std::shared_ptr<elastos::UserInfo> userInfo;
     ret = contact->getUserManager().lock()->getUserInfo(userInfo);
     if(ret < 0) {
         throw std::runtime_error(std::string("Failed to get user info! ret=") + std::to_string(ret));
     }
 
-    ret = userInfo.lock()->setHumanInfo(elastos::UserInfo::Item::Nickname, nickname);
+    ret = userInfo->setHumanInfo(elastos::UserInfo::Item::Nickname, nickname);
     if(ret < 0) {
         throw std::runtime_error(std::string("Failed to get user info! ret=") + std::to_string(ret));
     }
 
     std::string value;
-    userInfo.lock()->getHumanInfo(elastos::UserInfo::Item::Nickname, value);
+    userInfo->getHumanInfo(elastos::UserInfo::Item::Nickname, value);
     Log::I(Log::TAG, "NickName  : %s", value.c_str());
-    userInfo.lock()->getHumanInfo(elastos::UserInfo::Item::ChainPubKey, value);
+    userInfo->getHumanInfo(elastos::UserInfo::Item::ChainPubKey, value);
     Log::I(Log::TAG, "PubKey    : %s", value.c_str());
-    userInfo.lock()->getHumanInfo(elastos::UserInfo::Item::Did, value);
+    userInfo->getHumanInfo(elastos::UserInfo::Item::Did, value);
     Log::I(Log::TAG, "DID       : %s", value.c_str());
-    userInfo.lock()->getHumanInfo(elastos::UserInfo::Item::ElaAddress, value);
+    userInfo->getHumanInfo(elastos::UserInfo::Item::ElaAddress, value);
     Log::I(Log::TAG, "ElaAddress: %s", value.c_str());
 
     std::vector<elastos::UserInfo::CarrierInfo> carrierInfoArray;
-    userInfo.lock()->getAllCarrierInfo(carrierInfoArray);
+    userInfo->getAllCarrierInfo(carrierInfoArray);
     for(auto& it: carrierInfoArray) {
         Log::I(Log::TAG, "BoundDevId  : %s", it.mDevId.c_str());
         Log::I(Log::TAG, "CarrierAddr : %s", it.mUsrAddr.c_str());
@@ -204,46 +203,6 @@ std::shared_ptr<elastos::FriendManager::FriendListener> getFriendListener()
     };
 
     return std::make_shared<FriendListener>();
-}
-
-std::shared_ptr<elastos::MessageManager::MessageListener> getMessageListener()
-{
-    class MessageListener : public elastos::MessageManager::MessageListener {
-    public:
-        explicit MessageListener() = default;
-        virtual ~MessageListener() = default;
-
-        virtual void onStatusChanged(std::shared_ptr<elastos::UserInfo> userInfo,
-                                     elastos::MessageManager::ChannelType channelType,
-                                     elastos::UserInfo::Status status) override {
-            std::cout << __PRETTY_FUNCTION__ << std::endl;
-        };
-
-        virtual void onReceivedMessage(std::shared_ptr<elastos::FriendInfo> friendInfo,
-                                       elastos::MessageManager::ChannelType channelType,
-                                       const std::shared_ptr<elastos::MessageManager::MessageInfo> msgInfo) override {
-            std::cout << __PRETTY_FUNCTION__ << std::endl;
-        };
-
-        virtual void onSentMessage(int msgIndex, int errCode) override {
-            std::cout << __PRETTY_FUNCTION__ << std::endl;
-        };
-
-        virtual void onFriendRequest(std::shared_ptr<elastos::FriendInfo> friendId,
-                                     elastos::MessageManager::ChannelType channelType,
-                                     const std::string& summary) override {
-            std::cout << __PRETTY_FUNCTION__ << " summary:" << summary << std::endl;
-        };
-
-        virtual void onFriendStatusChanged(std::shared_ptr<elastos::FriendInfo> friendId,
-                                           elastos::MessageManager::ChannelType channelType,
-                                           elastos::FriendInfo::Status status) override {
-            std::cout << __PRETTY_FUNCTION__ << std::endl;
-        };
-
-    };
-
-    return std::make_shared<MessageListener>();
 }
 
 std::string getPublicKey()

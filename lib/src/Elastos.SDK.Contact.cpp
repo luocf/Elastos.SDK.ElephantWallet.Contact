@@ -217,12 +217,11 @@ int Contact::initGlobal()
 
 int Contact::setUserInfo()
 {
-    std::weak_ptr<UserInfo> weakUserInfo;
-    int ret = mUserManager->getUserInfo(weakUserInfo);
+    std::shared_ptr<UserInfo> userInfo;
+    int ret = mUserManager->getUserInfo(userInfo);
     if(ret < 0) {
         return ret;
     }
-    auto userInfo = SAFE_GET_PTR(weakUserInfo);
 
     std::string currDevId;
     ret = SecurityManager::GetCurrentDevId(currDevId);

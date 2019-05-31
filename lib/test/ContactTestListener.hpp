@@ -17,7 +17,7 @@ public:
                                  elastos::MessageManager::ChannelType channelType,
                                  elastos::UserInfo::Status status) override;
 
-    virtual void onReceivedMessage(std::shared_ptr<elastos::FriendInfo> friendInfo,
+    virtual void onReceivedMessage(std::shared_ptr<elastos::HumanInfo> humanInfo,
                                    elastos::MessageManager::ChannelType channelType,
                                    const std::shared_ptr<elastos::MessageManager::MessageInfo> msgInfo) override;
 

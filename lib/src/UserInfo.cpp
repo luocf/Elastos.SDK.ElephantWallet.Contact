@@ -68,7 +68,9 @@ int UserInfo::serialize(std::string& value, bool summaryOnly) const
 
 int UserInfo::deserialize(const std::string& value, bool summaryOnly)
 {
+    Log::W(Log::TAG, "============= userData:-%s-", value.c_str());
     Json jsonInfo= Json::parse(value);
+    Log::W(Log::TAG, "============= userData: ");
 
     std::string humanInfo = jsonInfo[JsonKey::HumanInfo];
     int ret = HumanInfo::deserialize(humanInfo, summaryOnly);

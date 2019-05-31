@@ -37,12 +37,14 @@ public:
     virtual void setUserListener(std::shared_ptr<UserListener> listener);
 
     void setConfig(std::weak_ptr<Config> config);
+
     int loadLocalData();
     int saveLocalData();
     int serialize(std::string& value) const;
 
     int makeUser();
-    int getUserInfo(std::weak_ptr<UserInfo>& userInfo);
+    int getUserInfo(std::shared_ptr<UserInfo>& userInfo);
+    bool contains(const std::string& userCode);
 
 private:
     /*** type define ***/

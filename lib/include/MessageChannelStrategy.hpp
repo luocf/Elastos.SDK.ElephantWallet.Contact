@@ -37,7 +37,7 @@ public:
 
         virtual void onReceivedMessage(const std::string& friendCode,
                                        uint32_t channelType,
-                                       uint32_t msgType, std::vector<int8_t> msgContent) = 0;
+                                       const std::vector<uint8_t>& msgContent) = 0;
         virtual void onSentMessage(int msgIndex, int errCode) = 0;
 
         virtual void onFriendRequest(const std::string& friendCode,

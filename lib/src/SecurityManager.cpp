@@ -224,8 +224,6 @@ int SecurityManager::saveCryptoFile(const std::string& filePath, const std::vect
 
 int SecurityManager::loadCryptoFile(const std::string& filePath, std::vector<uint8_t>& originData)
 {
-    std::vector<uint8_t> encryptedData;
-
     std::ifstream cryptoFile;
 
     cryptoFile.open(filePath, std::ios::in | std::ios::binary);
@@ -238,6 +236,7 @@ int SecurityManager::loadCryptoFile(const std::string& filePath, std::vector<uin
         return ErrCode::FileNotExistsError;
     }
 
+    std::vector<uint8_t> encryptedData;
     encryptedData.resize(dataLen);
 
     cryptoFile.read(reinterpret_cast<char*>(encryptedData.data()), encryptedData.size ());

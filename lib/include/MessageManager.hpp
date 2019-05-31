@@ -69,7 +69,7 @@ public:
                                      ChannelType channelType,
                                      UserInfo::Status status) = 0;
 
-        virtual void onReceivedMessage(std::shared_ptr<FriendInfo> friendInfo,
+        virtual void onReceivedMessage(std::shared_ptr<HumanInfo> humanInfo,
                                        ChannelType channelType,
                                        const std::shared_ptr<MessageInfo> msgInfo) = 0;
 
@@ -89,7 +89,7 @@ public:
 
         virtual void onReceivedMessage(const std::string& friendCode,
                                        uint32_t channelType,
-                                       uint32_t msgType, std::vector<int8_t> msgContent) override;
+                                       const std::vector<uint8_t>& msgContent) override;
 
         //virtual void onSentMessage(int msgIndex, int errCode) override;
 

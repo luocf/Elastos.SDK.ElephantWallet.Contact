@@ -110,8 +110,8 @@ int ChannelImplCarrier::preset()
         hiveNodeArray[idx].ipv4 = node.mIpv4.c_str();
         hiveNodeArray[idx].port = node.mPort.c_str();
     }
-    carrierOpts.hive_bootstraps_size = hiveNodeSize;
-    carrierOpts.hive_bootstraps = hiveNodeArray;
+    //carrierOpts.hive_bootstraps_size = hiveNodeSize;
+    //carrierOpts.hive_bootstraps = hiveNodeArray;
 
     ela_log_init(static_cast<ElaLogLevel>(config->mCarrierConfig->mLogLevel), nullptr, nullptr);
 
@@ -126,6 +126,7 @@ int ChannelImplCarrier::preset()
         }
     };
     mCarrier = std::unique_ptr<ElaCarrier, std::function<void(ElaCarrier*)>>(creater(), deleter);
+
     if (mCarrier == nullptr) {
         Log::E(Log::TAG, "Failed to new carrier!");
         return ErrCode::ChannelFailedCarrier;
@@ -280,7 +281,13 @@ void ChannelImplCarrier::OnCarrierFriendMessage(ElaCarrier *carrier, const char 
                                                 const void *msg, size_t len, void *context)
 {
     Log::D(Log::TAG, "OnCarrierFriendMessage from: %s len=%d", from, len);
+    auto channel = reinterpret_cast<ChannelImplCarrier*>(context);
 
+    if(channel->mChannelListener.get() != nullptr) {
+        auto data = reinterpret_cast<const uint8_t*>(msg);
+        auto msgContent = std::vector<uint8_t>(data, data + len);
+        channel->mChannelListener->onReceivedMessage(from, channel->mChannelType, msgContent);
+    }
 }
 
 /***********************************************/

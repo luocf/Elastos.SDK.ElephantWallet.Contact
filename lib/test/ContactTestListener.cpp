@@ -23,7 +23,7 @@ void ContactTestListener::onStatusChanged(std::shared_ptr<elastos::UserInfo> use
               << " Status:" << static_cast<int>(status) << std::endl;
 }
 
-void ContactTestListener::onReceivedMessage(std::shared_ptr<elastos::FriendInfo> friendInfo,
+void ContactTestListener::onReceivedMessage(std::shared_ptr<elastos::HumanInfo> humanInfo,
                                             elastos::MessageManager::ChannelType channelType,
                                             const std::shared_ptr<elastos::MessageManager::MessageInfo> msgInfo)
 {
