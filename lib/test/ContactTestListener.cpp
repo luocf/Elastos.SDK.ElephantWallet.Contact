@@ -58,7 +58,8 @@ void ContactTestListener::onFriendStatusChanged(std::shared_ptr<elastos::FriendI
                                                 elastos::MessageManager::ChannelType channelType,
                                                 elastos::FriendInfo::Status status)
 {
-    std::cout << __PRETTY_FUNCTION__ << std::endl;
+    std::cout << "ContactTestListener ChannelType:" << static_cast<int>(channelType)
+              << " FriendStatus:" << static_cast<int>(status) << std::endl;
 }
 
 /* =========================================== */

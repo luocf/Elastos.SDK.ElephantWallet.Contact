@@ -83,6 +83,7 @@ int ChannelImplCarrier::preset()
     carrierCallbacks.connection_status = OnCarrierConnection;
     carrierCallbacks.friend_request = OnCarrierFriendRequest;
     carrierCallbacks.friend_connection = OnCarrierFriendConnection;
+    carrierCallbacks.friend_message = OnCarrierFriendMessage;
 
     carrierOpts.udp_enabled = config->mCarrierConfig->mEnableUdp;
     carrierOpts.persistent_location = config->mUserDataDir.c_str();
@@ -203,15 +204,19 @@ int ChannelImplCarrier::requestFriend(const std::string& friendCode,
     return 0;
 }
 
-int ChannelImplCarrier::sendMessage(FriendInfo friendInfo,
-                                    uint32_t msgType, std::string msgContent)
+int ChannelImplCarrier::sendMessage(const std::string& friendCode,
+                                    std::vector<uint8_t> msgContent)
 {
-    throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
-}
-int ChannelImplCarrier::sendMessage(FriendInfo friendInfo,
-                                    uint32_t msgType, std::vector<int8_t> msgContent)
-{
-    throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
+    int ret = ela_send_friend_message(mCarrier.get(), friendCode.c_str(), msgContent.data(), msgContent.size());
+    if(ret != 0) {
+        int err = ela_get_error();
+        char strerr_buf[512] = {0};
+        ela_get_strerror(err, strerr_buf, sizeof(strerr_buf));
+        Log::E(Log::TAG, "Failed to send message! ret=%s(0x%x)", strerr_buf, ret);
+        return ErrCode::ChannelNotSendMessage;
+    }
+
+    return 0;
 }
 
 /***********************************************/
@@ -230,7 +235,6 @@ void ChannelImplCarrier::runCarrier()
 void ChannelImplCarrier::OnCarrierConnection(ElaCarrier *carrier,
                                              ElaConnectionStatus status, void *context)
 {
-    Log::D(Log::TAG, "CarrierConnectionStatus: %d", status);
     auto channel = reinterpret_cast<ChannelImplCarrier*>(context);
 
     std::string carrierAddr, carrierUsrId;
@@ -240,6 +244,7 @@ void ChannelImplCarrier::OnCarrierConnection(ElaCarrier *carrier,
     channel->mChannelStatus = ( status == ElaConnectionStatus_Connected
                               ? ChannelListener::ChannelStatus::Online
                               : ChannelListener::ChannelStatus::Offline);
+    Log::D(Log::TAG, "OnCarrierConnection status: %d", channel->mChannelStatus);
     if(channel->mChannelListener.get() != nullptr) {
         channel->mChannelListener->onStatusChanged(carrierUsrId, channel->mChannelType, channel->mChannelStatus);
     }
@@ -249,7 +254,7 @@ void ChannelImplCarrier::OnCarrierFriendRequest(ElaCarrier *carrier, const char 
                                                 const ElaUserInfo *info,
                                                 const char *hello, void *context)
 {
-    Log::D(Log::TAG, "CarrierFriendRequest from: %s", friendid);
+    Log::D(Log::TAG, "OnCarrierFriendRequest from: %s", friendid);
     auto channel = reinterpret_cast<ChannelImplCarrier*>(context);
 
     if(channel->mChannelListener.get() != nullptr) {
@@ -260,7 +265,7 @@ void ChannelImplCarrier::OnCarrierFriendRequest(ElaCarrier *carrier, const char 
 void ChannelImplCarrier::OnCarrierFriendConnection(ElaCarrier *carrier,const char *friendid,
                                                    ElaConnectionStatus status, void *context)
 {
-    Log::D(Log::TAG, "CarrierFriendConnection from: %s %d", friendid, status);
+    Log::D(Log::TAG, "OnCarrierFriendConnection from: %s %d", friendid, status);
     auto channel = reinterpret_cast<ChannelImplCarrier*>(context);
 
     if(channel->mChannelListener.get() != nullptr) {
@@ -269,6 +274,13 @@ void ChannelImplCarrier::OnCarrierFriendConnection(ElaCarrier *carrier,const cha
                         : ChannelListener::ChannelStatus::Offline);
         channel->mChannelListener->onFriendStatusChanged(friendid, channel->mChannelType, chStatus);
     }
+}
+
+void ChannelImplCarrier::OnCarrierFriendMessage(ElaCarrier *carrier, const char *from,
+                                                const void *msg, size_t len, void *context)
+{
+    Log::D(Log::TAG, "OnCarrierFriendMessage from: %s len=%d", from, len);
+
 }
 
 /***********************************************/

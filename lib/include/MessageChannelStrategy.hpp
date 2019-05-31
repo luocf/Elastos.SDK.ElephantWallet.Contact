@@ -65,10 +65,8 @@ public:
                               const std::string& summary,
                               bool remoteRequest = true) = 0;
 
-    virtual int sendMessage(FriendInfo friendInfo,
-                            uint32_t msgType, std::string msgContent) = 0;
-    virtual int sendMessage(FriendInfo friendInfo,
-                            uint32_t msgType, std::vector<int8_t> msgContent) = 0;
+    virtual int sendMessage(const std::string& friendCode,
+                            std::vector<uint8_t> msgContent) = 0;
 
 protected:
     /*** type define ***/

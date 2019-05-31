@@ -139,7 +139,7 @@ int HumanInfo::setCarrierStatus(const std::string& usrId, const Status status)
         return ErrCode::NotFoundError;
     }
 
-    //mBoundCarrierStatus[idx] = status;
+    mBoundCarrierStatus[idx] = status;
     return 0;
 }
 
@@ -255,7 +255,12 @@ int HumanInfo::getHumanStatus(HumanInfo::HumanKind kind, HumanInfo::Status& stat
         return ErrCode::InvalidArgument;
     }
 
-    status = mStatusMap[kind];
+    auto it = mStatusMap.find(kind);
+    if(it == mStatusMap.end()) {
+        return ErrCode::NotFoundError;
+    }
+
+    status = it->second;
     return 0;
 }
 
@@ -263,13 +268,13 @@ HumanInfo::Status HumanInfo::getHumanStatus()
 {
     Status status = Status::Invalid;
 
-    for(const auto& it: mStatusMap) {
+    for(const auto it: mStatusMap) {
         if(static_cast<int>(status) < static_cast<int>(it.second)) {
             status = it.second;
         }
     }
 
-    for(const auto& it: mBoundCarrierStatus) {
+    for(const auto it: mBoundCarrierStatus) {
         if(static_cast<int>(status) < static_cast<int>(it)) {
             status = it;
         }

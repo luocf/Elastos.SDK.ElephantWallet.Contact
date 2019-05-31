@@ -99,6 +99,8 @@ int UserManager::saveLocalData()
 
 int UserManager::serialize(std::string& value) const
 {
+    value = "";
+
     std::string userData;
     int ret = mUserInfo->serialize(userData);
     if(ret < 0) {

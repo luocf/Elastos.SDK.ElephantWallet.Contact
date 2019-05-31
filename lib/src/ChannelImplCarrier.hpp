@@ -47,10 +47,8 @@ public:
                               const std::string& summary,
                               bool remoteRequest = true) override;
 
-    virtual int sendMessage(FriendInfo friendInfo,
-                            uint32_t msgType, std::string msgContent) override;
-    virtual int sendMessage(FriendInfo friendInfo,
-                            uint32_t msgType, std::vector<int8_t> msgContent) override;
+    virtual int sendMessage(const std::string& friendCode,
+                            std::vector<uint8_t> msgContent) override;
 
 protected:
     /*** type define ***/
@@ -63,6 +61,8 @@ protected:
                                        const char *hello, void *context);
     static void OnCarrierFriendConnection(ElaCarrier *carrier,const char *friendid,
                                           ElaConnectionStatus status, void *context);
+    static void OnCarrierFriendMessage(ElaCarrier *carrier, const char *from,
+                                       const void *msg, size_t len, void *context);
 
     /*** class function and variable ***/
     void runCarrier();

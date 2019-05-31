@@ -65,13 +65,8 @@ int ChannelImplElaChain::requestFriend(const std::string& friendAddr,
     throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
 }
 
-int ChannelImplElaChain::sendMessage(FriendInfo friendInfo,
-                                     uint32_t msgType, std::string msgContent)
-{
-    throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
-}
-int ChannelImplElaChain::sendMessage(FriendInfo friendInfo,
-                                     uint32_t msgType, std::vector<int8_t> msgContent)
+int ChannelImplElaChain::sendMessage(const std::string& friendCode,
+                                     std::vector<uint8_t> msgContent)
 {
     throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
 }

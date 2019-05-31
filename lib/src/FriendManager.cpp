@@ -262,7 +262,7 @@ int FriendManager::acceptFriend(std::shared_ptr<FriendInfo> friendInfo)
             continue;
         }
 
-        ret = addFriendByCarrier(info.mUsrAddr, "", true);
+        ret = addFriendByCarrier(info.mUsrId, "", false);
         if(ret < 0) {
             return ret;
         }
@@ -271,9 +271,6 @@ int FriendManager::acceptFriend(std::shared_ptr<FriendInfo> friendInfo)
         if(ret < 0) {
             return ret;
         }
-
-        //auto msgMgr = SAFE_GET_PTR(mMessageManager);
-        //ret = msgMgr->sendMessage(const FriendInfo& friendInfo, ChannelType chType, const std::shared_ptr<MessageInfo> msgInfo);
     }
 
     return 0;
@@ -302,7 +299,7 @@ int FriendManager::addFriendByDid(const std::string& did, const std::string& sum
 int FriendManager::addFriendByCarrier(const std::string& carrierAddress, const std::string& summary, bool remoteRequest)
 {
     auto msgMgr = SAFE_GET_PTR(mMessageManager);
-    int ret = msgMgr->requestFriend(carrierAddress, MessageManager::ChannelType::Carrier, summary);
+    int ret = msgMgr->requestFriend(carrierAddress, MessageManager::ChannelType::Carrier, summary, remoteRequest);
     if(ret < 0) {
         return ret;
     }
@@ -368,17 +365,20 @@ int FriendManager::getFriendInfoByDid(const std::string& did, std::shared_ptr<Fr
 
 int FriendManager::getFriendInfoByCarrier(const std::string& carrierUsrId, std::shared_ptr<FriendInfo>& friendInfo)
 {
+    friendInfo.reset();
+
     for(auto idx = 0; idx < mFriendList.size(); idx++) {
-        auto friendInfo = mFriendList[idx];
+        auto info = mFriendList[idx];
         std::vector<FriendInfo::CarrierInfo> carrierInfoArray;
-        int ret = friendInfo->getAllCarrierInfo(carrierInfoArray);
+        int ret = info->getAllCarrierInfo(carrierInfoArray);
         if(ret < 0) {
             return ret;
         }
 
-        for(const auto& info: carrierInfoArray) {
-            if(info.mUsrAddr == carrierUsrId
-            || info.mUsrId == carrierUsrId) {
+        for(const auto& carrierInfo: carrierInfoArray) {
+            if(carrierInfo.mUsrAddr == carrierUsrId
+            || carrierInfo.mUsrId == carrierUsrId) {
+                friendInfo = info;
                 return idx;
             }
         }

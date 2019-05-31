@@ -43,10 +43,8 @@ public:
                               const std::string& summary,
                               bool remoteRequest = true) override;
 
-    virtual int sendMessage(FriendInfo friendInfo,
-                            uint32_t msgType, std::string msgContent) override;
-    virtual int sendMessage(FriendInfo friendInfo,
-                            uint32_t msgType, std::vector<int8_t> msgContent) override;
+    virtual int sendMessage(const std::string& friendCode,
+                            std::vector<uint8_t> msgContent) override;
 
 private:
     /*** type define ***/

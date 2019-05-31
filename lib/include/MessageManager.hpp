@@ -31,25 +31,30 @@ public:
     };
 
     enum class MessageType: uint32_t {
+        Empty = 0x00000000,
+
         Message = 0x000000FF,
         MsgText = 0x00000001,
         MsgAudio = 0x00000002,
         MsgTransfer = 0x00000004,
 
-        CtrlRequestFriend = 0x00000100,
-        Control = 0x0000FF00,
+        Control = 0x00FF0000,
+        CtrlSyncDesc = 0x00010000,
     };
 
     struct MessageInfo {
     public:
-        const uint32_t mId;
-        const MessageType mType;
-        const std::vector<uint8_t> mPlainContent;
-        const std::string mCryptoAlgorithm;
+        MessageType mType;
+        std::vector<uint8_t> mPlainContent;
+        std::string mCryptoAlgorithm;
+        uint64_t mTimeStamp;
     private:
         explicit MessageInfo(MessageType type,
                              const std::vector<uint8_t>& plainContent,
                              const std::string& cryptoAlgorithm);
+        explicit MessageInfo(const MessageInfo& info,
+                             bool ignoreContent = true);
+        explicit MessageInfo();
         virtual ~MessageInfo();
 
         friend MessageManager;
@@ -122,10 +127,15 @@ public:
     virtual std::shared_ptr<MessageInfo> makeMessage(MessageType type,
                                                      const std::vector<uint8_t>& plainContent,
                                                      const std::string& cryptoAlgorithm = "") const;
-    virtual std::shared_ptr<MessageInfo> makeMessage(const std::string& plainContent,
+    virtual std::shared_ptr<MessageInfo> makeMessage(MessageType type,
+                                                     const std::string& plainContent,
                                                      const std::string& cryptoAlgorithm = "") const;
+    virtual std::shared_ptr<MessageInfo> makeTextMessage(const std::string& plainContent,
+                                                         const std::string& cryptoAlgorithm = "") const;
 
-    virtual int sendMessage(std::shared_ptr<FriendInfo> friendInfo, ChannelType chType, const std::shared_ptr<MessageInfo> msgInfo);
+    virtual int sendMessage(const std::shared_ptr<HumanInfo> humanInfo,
+                            ChannelType chType,
+                            const std::shared_ptr<MessageInfo> msgInfo);
 
 private:
     /*** type define ***/
@@ -135,6 +145,7 @@ private:
     /*** class function and variable ***/
     template <class T>
     int getChannel(ChannelType chType, std::weak_ptr<T>& channel);
+    std::shared_ptr<MessageInfo> makeMessage(std::shared_ptr<MessageInfo> from, bool ignoreContent = true);
 
     std::weak_ptr<SecurityManager> mSecurityManager;
     std::weak_ptr<UserManager> mUserManager;
