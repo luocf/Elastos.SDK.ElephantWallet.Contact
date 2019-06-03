@@ -26,8 +26,8 @@ class MessageManager : public std::enable_shared_from_this<MessageManager> {
 public:
     /*** type define ***/
     enum class ChannelType: uint32_t {
-        Carrier  = 0x000000FF,
-        ElaChain = 0x00000100,
+        Carrier  = 0x00000001,
+        ElaChain = 0x00000010,
     };
 
     enum class MessageType: uint32_t {

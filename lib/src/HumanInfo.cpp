@@ -210,7 +210,6 @@ int HumanInfo::getHumanInfo(Item item, std::string& value) const
 
 int HumanInfo::mergeHumanInfo(const HumanInfo& value, const Status status)
 {
-    Log::D(Log::TAG, " ============ 0   %s did:%s", __PRETTY_FUNCTION__, this->mCommonInfoMap[Item::Did].c_str());
     auto it = value.mCommonInfoMap.find(Item::Did);
     if(it != value.mCommonInfoMap.end() && it->second.empty() == false) {
         if(this->mCommonInfoMap[Item::Did].empty() == false
@@ -231,7 +230,7 @@ int HumanInfo::mergeHumanInfo(const HumanInfo& value, const Status status)
         this->mCommonInfoMap[Item::ElaAddress] = it->second;
     }
 
-    Log::D(Log::TAG, " ============ 1   %s did:%s", __PRETTY_FUNCTION__, this->mCommonInfoMap[Item::Did].c_str());
+    Log::D(Log::TAG, " ============ 0   %s mBoundCarrierArray:%d", __PRETTY_FUNCTION__, value.mBoundCarrierArray.size());
     for(const auto& it: value.mBoundCarrierArray) {
         int ret = addCarrierInfo(it, status);
         if(ret < 0) {
@@ -333,8 +332,8 @@ int HumanInfo::deserialize(const std::string& value, bool summaryOnly)
     }
 
     mCommonInfoMap = jsonInfo[JsonKey::CommonInfoMap].get<std::map<Item, std::string>>();
+    mBoundCarrierArray = jsonInfo[JsonKey::BoundCarrierArray].get<std::vector<CarrierInfo>>();
     if(summaryOnly == false) {
-        mBoundCarrierArray = jsonInfo[JsonKey::BoundCarrierArray].get<std::vector<CarrierInfo>>();
         mBoundCarrierStatus = jsonInfo[JsonKey::BoundCarrierStatus].get<std::vector<Status>>();
         mStatusMap = jsonInfo[JsonKey::StatusMap].get<std::map<HumanKind, Status>>();
     }

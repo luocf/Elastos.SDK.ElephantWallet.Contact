@@ -10,7 +10,7 @@ const std::vector<ContactTestCmd::CommandInfo> ContactTestCmd::gCommandInfoList 
     { 'h', "help",          ContactTestCmd::Help,        "      Print help usages." },
     { 'p', "print-info",    ContactTestCmd::PrintInfo,   "Print current contact infos." },
     { 'a', "add-friend",    ContactTestCmd::AddFriend,   "Add a friend by [did, ela address or carrier address]." },
-    { 's', "send-message",  ContactTestCmd::SendMessage, "Send message to a friend like: s [friendCode] [chType] [msg]" },
+    { 's', "send-message",  ContactTestCmd::SendMessage, "Send message to a friend like: s [friendCode] [chType(1 or 2)] [msg]" },
 };
 
 /* =========================================== */
@@ -123,22 +123,43 @@ int ContactTestCmd::SendMessage(std::shared_ptr<elastos::Contact> contact,
                                 const std::vector<std::string>& args,
                                 std::string& errMsg)
 {
-    auto friendId = args.size() > 1 ? args[1] : "";
+    auto friendCode = args.size() > 1 ? args[1] : "";
     auto channelType = args.size() > 2 ? args[2] : "";
     auto msg = args.size() > 3 ? args[3] : "";
+    if(channelType.empty() == true) {
+        errMsg = "Channel Type not exists";
+        return -1;
+    }
 
-    //auto weakFriendMgr = contact->getFriendManager();
-    //auto friendMgr = weakFriendMgr.lock();
-    //if(friendMgr.get() == nullptr) {
-        //errMsg = "FriendManager has been released.";
-        //return -1;
-    //}
+    auto weakFriendMgr = contact->getFriendManager();
+    auto friendMgr = weakFriendMgr.lock();
+    if(friendMgr.get() == nullptr) {
+        errMsg = "FriendManager has been released.";
+        return -1;
+    }
 
-    //int ret = friendMgr->tryAddFriend(friendId, summary);
-    //if(ret < 0) {
-        //errMsg = "Failed to add friend ret=" + std::to_string(ret);
-        //return ret;
-    //}
+    std::shared_ptr<elastos::FriendInfo> friendInfo;
+    int ret = friendMgr->tryGetFriendInfo(friendCode, friendInfo);
+    if(ret < 0) {
+        errMsg = "Failed to find friend ret=" + std::to_string(ret);
+        return ret;
+    }
+
+    auto weakMsgMgr = contact->getMessageManager();
+    auto msgMgr = weakMsgMgr.lock();
+    if(msgMgr.get() == nullptr) {
+        errMsg = "msgManager has been released.";
+        return -1;
+    }
+
+    int chType = std::stoi(channelType);
+    auto msgInfo = msgMgr->makeTextMessage(msg);
+
+    ret = msgMgr->sendMessage(friendInfo, static_cast<elastos::MessageManager::ChannelType>(chType), msgInfo);
+    if(ret < 0) {
+        errMsg = "Failed to send message ret=" + std::to_string(ret);
+        return ret;
+    }
 
     return 0;
 }
