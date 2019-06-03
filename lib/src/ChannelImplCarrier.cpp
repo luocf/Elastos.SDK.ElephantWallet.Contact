@@ -60,6 +60,7 @@ ChannelImplCarrier::ChannelImplCarrier(uint32_t chType,
     , mCarrier()
     , mTaskThread()
     , mChannelStatus(ChannelListener::ChannelStatus::Pending)
+    , mRecvDataCache()
 {
 }
 
@@ -208,13 +209,30 @@ int ChannelImplCarrier::requestFriend(const std::string& friendCode,
 int ChannelImplCarrier::sendMessage(const std::string& friendCode,
                                     std::vector<uint8_t> msgContent)
 {
-    int ret = ela_send_friend_message(mCarrier.get(), friendCode.c_str(), msgContent.data(), msgContent.size());
-    if(ret != 0) {
-        int err = ela_get_error();
-        char strerr_buf[512] = {0};
-        ela_get_strerror(err, strerr_buf, sizeof(strerr_buf));
-        Log::E(Log::TAG, "Failed to send message! ret=%s(0x%x)", strerr_buf, ret);
-        return ErrCode::ChannelNotSendMessage;
+    int pkgCount = msgContent.size() / MaxPkgSize + 1;
+    Log::D(Log::TAG, "ChannelImplCarrier::sendMessage() size=%d count=%d", msgContent.size(), pkgCount);
+    if(pkgCount > 255) {
+        return ErrCode::ChannelDataTooLarge;
+    }
+
+    for(auto pkgIdx = 0; pkgIdx < pkgCount; pkgIdx++) {
+        std::vector<uint8_t> data {std::begin(PkgMagic), std::end(PkgMagic)};
+        data[PkgMagicDataIdx] = static_cast<uint8_t>(pkgIdx);
+        data[PkgMagicDataCnt] = static_cast<uint8_t>(pkgCount);
+
+        auto dataBegin = msgContent.begin() + pkgIdx * MaxPkgSize;
+        auto dataRemains = msgContent.end() - dataBegin;
+        auto dataEnd = (MaxPkgSize < dataRemains ? dataBegin + MaxPkgSize : dataBegin + dataRemains);
+        data.insert(data.end(), dataBegin, dataEnd);
+
+        int ret = ela_send_friend_message(mCarrier.get(), friendCode.c_str(), data.data(), data.size());
+        if(ret != 0) {
+            int err = ela_get_error();
+            char strerr_buf[512] = {0};
+            ela_get_strerror(err, strerr_buf, sizeof(strerr_buf));
+            Log::E(Log::TAG, "Failed to send message! ret=%s(0x%x)", strerr_buf, ret);
+            return ErrCode::ChannelNotSendMessage;
+        }
     }
 
     return 0;
@@ -281,12 +299,36 @@ void ChannelImplCarrier::OnCarrierFriendMessage(ElaCarrier *carrier, const char 
                                                 const void *msg, size_t len, void *context)
 {
     Log::D(Log::TAG, "OnCarrierFriendMessage from: %s len=%d", from, len);
-    auto channel = reinterpret_cast<ChannelImplCarrier*>(context);
 
-    if(channel->mChannelListener.get() != nullptr) {
-        auto data = reinterpret_cast<const uint8_t*>(msg);
-        auto msgContent = std::vector<uint8_t>(data, data + len);
-        channel->mChannelListener->onReceivedMessage(from, channel->mChannelType, msgContent);
+    auto channel = reinterpret_cast<ChannelImplCarrier*>(context);
+    if(channel->mChannelListener.get() == nullptr) {
+        Log::W(Log::TAG, "ChannelListener is not set. ignore to process");
+        return;
+    }
+
+    auto data = reinterpret_cast<const uint8_t*>(msg);
+
+    int32_t dataOffset = 0;
+    bool dataComplete = true;
+    bool isPkgData = true;
+    for(auto idx = 0; idx < PkgMagicHeadSize; idx++) {
+        if(data[idx] != PkgMagic[idx]) {
+            isPkgData = false;
+            break;
+        }
+    }
+    if(isPkgData == true) {
+        dataOffset = PkgMagicSize;
+        dataComplete = (data[PkgMagicDataIdx] == data[PkgMagicDataCnt] - 1 ? true : false);
+        Log::D(Log::TAG, "OnCarrierFriendMessage PkgMagicData Idx/Cnt=%d/%d", data[PkgMagicDataIdx], data[PkgMagicDataCnt]);
+    }
+
+    auto& dataCache = channel->mRecvDataCache[from];
+    dataCache.insert(dataCache.end(), data + dataOffset, data + len);
+
+    if(dataComplete == true) {
+        channel->mChannelListener->onReceivedMessage(from, channel->mChannelType, dataCache);
+        dataCache.clear();
     }
 }
 

@@ -7,9 +7,10 @@
 /* === static variables initialize =========== */
 /* =========================================== */
 const std::vector<ContactTestCmd::CommandInfo> ContactTestCmd::gCommandInfoList {
-    { 'h', "help",       ContactTestCmd::Help,      "      Print help usages." },
-    { 'p', "print-info", ContactTestCmd::PrintInfo, "Print current contact infos." },
-    { 'a', "add-friend", ContactTestCmd::AddFriend, "Add a friend by [did, ela address or carrier address]." },
+    { 'h', "help",          ContactTestCmd::Help,        "      Print help usages." },
+    { 'p', "print-info",    ContactTestCmd::PrintInfo,   "Print current contact infos." },
+    { 'a', "add-friend",    ContactTestCmd::AddFriend,   "Add a friend by [did, ela address or carrier address]." },
+    { 's', "send-message",  ContactTestCmd::SendMessage, "Send message to a friend like: s [friendCode] [chType] [msg]" },
 };
 
 /* =========================================== */
@@ -117,3 +118,27 @@ int ContactTestCmd::AddFriend(std::shared_ptr<elastos::Contact> contact,
     return 0;
 }
 
+
+int ContactTestCmd::SendMessage(std::shared_ptr<elastos::Contact> contact,
+                                const std::vector<std::string>& args,
+                                std::string& errMsg)
+{
+    auto friendId = args.size() > 1 ? args[1] : "";
+    auto channelType = args.size() > 2 ? args[2] : "";
+    auto msg = args.size() > 3 ? args[3] : "";
+
+    //auto weakFriendMgr = contact->getFriendManager();
+    //auto friendMgr = weakFriendMgr.lock();
+    //if(friendMgr.get() == nullptr) {
+        //errMsg = "FriendManager has been released.";
+        //return -1;
+    //}
+
+    //int ret = friendMgr->tryAddFriend(friendId, summary);
+    //if(ret < 0) {
+        //errMsg = "Failed to add friend ret=" + std::to_string(ret);
+        //return ret;
+    //}
+
+    return 0;
+}

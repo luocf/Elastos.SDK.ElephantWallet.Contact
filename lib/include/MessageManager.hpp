@@ -106,6 +106,7 @@ public:
     };
 
     /*** static function and variable ***/
+    static std::shared_ptr<MessageInfo> MakeEmptyMessage();
 
     /*** class function and variable ***/
     explicit MessageManager(std::weak_ptr<SecurityManager> sectyMgr,

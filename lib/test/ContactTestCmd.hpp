@@ -44,6 +44,9 @@ private:
     static int AddFriend(std::shared_ptr<elastos::Contact> contact,
                          const std::vector<std::string>& args,
                          std::string& errMsg);
+    static int SendMessage(std::shared_ptr<elastos::Contact> contact,
+                           const std::vector<std::string>& args,
+                           std::string& errMsg);
 
     static const std::vector<CommandInfo> gCommandInfoList;
 

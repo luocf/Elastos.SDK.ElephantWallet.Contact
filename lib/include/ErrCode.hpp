@@ -37,6 +37,7 @@ public:
     constexpr static const int ChannelNotEstablished = -209;
     constexpr static const int ChannelNotOnline = -210;
     constexpr static const int ChannelNotSendMessage = -211;
+    constexpr static const int ChannelDataTooLarge = -212;
 
 
     constexpr static const int StdSystemErrorIndex = -1000;

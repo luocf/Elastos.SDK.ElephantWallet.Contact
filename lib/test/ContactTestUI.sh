@@ -11,6 +11,7 @@ CMD_LIST=(
     'h' 'help'
     'p' 'print-info'
     'a' 'add-friend'
+    's' 'send-message'
 )
 
 

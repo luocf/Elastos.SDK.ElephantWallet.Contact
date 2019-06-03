@@ -39,7 +39,7 @@ NLOHMANN_JSON_SERIALIZE_ENUM(MessageManager::MessageType, {
     { MessageManager::MessageType::CtrlSyncDesc, "CtrlSyncDesc" },
 });
 
-inline void to_json(Json& j, const std::shared_ptr<MessageManager::MessageInfo> info) {
+inline void to_json(Json& j, const std::shared_ptr<MessageManager::MessageInfo>& info) {
     j = Json {
         {"Type", info->mType},
         {"PlainContent", info->mPlainContent},
@@ -48,11 +48,22 @@ inline void to_json(Json& j, const std::shared_ptr<MessageManager::MessageInfo> 
     };
 }
 
-inline void from_json(const Json& j, const std::shared_ptr<MessageManager::MessageInfo> info) {
+inline void from_json(const Json& j, std::shared_ptr<MessageManager::MessageInfo>& info) {
+    info = MessageManager::MakeEmptyMessage();
     info->mType = j["Type"];
     info->mPlainContent = j["PlainContent"].get<std::vector<uint8_t>>();
     info->mCryptoAlgorithm = j["CryptoAlgorithm"];
     info->mTimeStamp = j["TimeStamp"];
+}
+
+std::shared_ptr<MessageManager::MessageInfo> MessageManager::MakeEmptyMessage()
+{
+    struct Impl: MessageManager::MessageInfo {
+    };
+
+    auto msgInfo = std::make_shared<Impl>();
+
+    return msgInfo;
 }
 
 /***********************************************/
@@ -236,7 +247,10 @@ int MessageManager::sendMessage(const std::shared_ptr<HumanInfo> humanInfo,
 
     Json jsonData = Json::object();
     jsonData[JsonKey::MessageData] = cryptoMsgInfo;
-    std::vector<uint8_t> data = Json::to_cbor(jsonData);
+    //std::vector<uint8_t> data = Json::to_cbor(jsonData);
+    std::string jsonStr = jsonData.dump();
+    Log::W(Log::TAG, ">>>>>>>>>>>>> %s", jsonStr.c_str());
+    std::vector<uint8_t> data(jsonStr.begin(), jsonStr.end());
 
     if(chType == ChannelType::Carrier) {
         std::vector<HumanInfo::CarrierInfo> infoArray;
@@ -346,19 +360,20 @@ void MessageManager::MessageListener::onReceivedMessage(const std::string& frien
     int ret = ErrCode::UnknownError;
     ChannelType chType = static_cast<ChannelType>(channelType);
 
-    Log::W(Log::TAG, "============= 0");
     auto msgMgr = SAFE_GET_PTR_NO_RETVAL(mMessageManager);
     auto userMgr = SAFE_GET_PTR_NO_RETVAL(msgMgr->mUserManager);
     auto friendMgr = SAFE_GET_PTR_NO_RETVAL(msgMgr->mFriendManager);
 
-    auto jsonData = Json::from_cbor(msgContent);
+    std::string jsonStr(msgContent.begin(), msgContent.end());
+    Log::W(Log::TAG, "<<<<<<<<<<<<< %s", jsonStr.c_str());
+    auto jsonData = Json::parse(jsonStr);
+    //auto jsonData = Json::from_cbor(msgContent);
     std::shared_ptr<MessageInfo> cryptoMsgInfo = jsonData[JsonKey::MessageData];
 
-    Log::W(Log::TAG, "============= 1");
     auto msgInfo = msgMgr->makeMessage(cryptoMsgInfo);
     if(cryptoMsgInfo->mCryptoAlgorithm.empty() == true
     || cryptoMsgInfo->mCryptoAlgorithm == "plain") {
-        cryptoMsgInfo->mPlainContent = msgInfo->mPlainContent;
+        msgInfo->mPlainContent = cryptoMsgInfo->mPlainContent;
     } else {
         auto sectyMgr = SAFE_GET_PTR_NO_RETVAL(msgMgr->mSecurityManager);
         ret = sectyMgr->decryptData(cryptoMsgInfo->mPlainContent, msgInfo->mPlainContent);
@@ -367,7 +382,6 @@ void MessageManager::MessageListener::onReceivedMessage(const std::string& frien
         }
     }
 
-    Log::W(Log::TAG, "============= 2");
     std::shared_ptr<HumanInfo> humanInfo;
     if(userMgr->contains(friendCode)) {
         std::shared_ptr<UserInfo> userInfo;
@@ -387,7 +401,18 @@ void MessageManager::MessageListener::onReceivedMessage(const std::string& frien
         humanInfo = friendInfo;
     }
 
-    Log::W(Log::TAG, "============= 3");
+    if(msgInfo->mType == MessageType::CtrlSyncDesc) {
+        std::string humanDesc {msgInfo->mPlainContent.begin(), msgInfo->mPlainContent.end()};
+        auto newInfo = HumanInfo();
+        newInfo.HumanInfo::deserialize(humanDesc, true);
+        if(ret < 0) {
+            Log::E(Log::TAG, "Failed to process friend desc.");
+            return;
+        }
+
+        humanInfo->mergeHumanInfo(newInfo, HumanInfo::Status::Online);
+    }
+
     onReceivedMessage(humanInfo, chType, msgInfo);
 }
 
@@ -541,7 +566,7 @@ void MessageManager::MessageListener::onFriendStatusChanged(const std::string& f
             Log::E(Log::TAG, "Failed to serialize user human info.");
             return;
         }
-        auto msgInfo = msgMgr->makeMessage(MessageManager::MessageType::CtrlSyncDesc, humanDesc);
+        auto msgInfo = msgMgr->makeMessage(MessageType::CtrlSyncDesc, humanDesc);
         ret = msgMgr->sendMessage(friendInfo, humanChType, msgInfo);
         if(ret < 0) {
             Log::E(Log::TAG, "Failed to send sync desc message.");
