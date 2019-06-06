@@ -1,11 +1,12 @@
 #include <Elastos.SDK.Contact.hpp>
 #include <Elastos.SDK.Keypair.C/Elastos.Wallet.Utility.h>
-#include <execinfo.h>
+
 #include <fstream>
 #include <iostream>
 #include <thread>
 #include <signal.h>
 
+#include <Platform.hpp>
 #include <Log.hpp>
 #include "ContactTestCmd.hpp"
 #include "ContactTestListener.hpp"
@@ -121,20 +122,10 @@ void loop(const char* fifoFilePath, std::shared_ptr<elastos::Contact> contact)
 void signalHandler(int sig) {
     std::cerr << "Error: signal " << sig << std::endl;
 
-    void* addrlist[512];
-    int addrlen = backtrace( addrlist, sizeof( addrlist ) / sizeof( void* ));
-    if(addrlen == 0) {
-        std::cerr << std::endl;
-        return;
-    }
+    std::string backtrace = elastos::Platform::GetBacktrace();
+    std::cerr << backtrace << std::endl;
 
-    char** symbollist = backtrace_symbols( addrlist, addrlen );
-    for ( int i = 4; i < addrlen; i++ ) {
-        std::cerr << symbollist[i] << std::endl;
-    }
-    free(symbollist);
-
-    exit(1);
+    exit(sig);
 }
 
 std::shared_ptr<elastos::SecurityManager::SecurityListener> getSecurityListener(std::weak_ptr<elastos::Contact> contact)

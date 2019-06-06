@@ -10,9 +10,6 @@
 #include <Elastos.Wallet.Utility.h>
 #include <fstream>
 #include <Log.hpp>
-#include <sys/utsname.h>
-#include <unistd.h>
-#include <uuid/uuid.h>
 
 namespace elastos {
 
@@ -24,41 +21,6 @@ namespace elastos {
 /***********************************************/
 /***** static function implement ***************/
 /***********************************************/
-int SecurityManager::GetCurrentDevId(std::string& devId)
-{
-    int ret = ErrCode::UnknownError;
-
-    devId = "";
-
-    std::string sysName;
-    std::string uuidName;
-#if defined(__APPLE__)
-    struct utsname utsName;
-    ret = uname(&utsName);
-    if(ret < 0) {
-        return ErrCode::DevUUIDError;
-    }
-    sysName = utsName.sysname;
-
-    uuid_t uuid = {};
-    struct timespec ts = { .tv_sec = 5, .tv_nsec = 0 };
-    ret = gethostuuid(uuid, &ts);
-    if(ret < 0) {
-        return ErrCode::DevUUIDError;
-    }
-
-    uuid_string_t uuidStr;
-    uuid_unparse_upper(uuid, uuidStr);
-    uuidName = uuidStr;
-#else
-#error "Unsupport Platform"
-#endif
-
-    devId = sysName + "(" + uuidStr + ")";
-
-    return 0;
-}
-
 int SecurityManager::GetElaAddress(const std::string& pubKey, std::string& elaAddr)
 {
     auto keypairAddr = ::getAddress(pubKey.c_str());

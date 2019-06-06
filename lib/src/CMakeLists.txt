@@ -38,7 +38,8 @@ target_link_libraries(Elastos.SDK.Contact PUBLIC
     ${pkg-Elastos.NET.Carrier_STATIC_LDFLAGS}
     crypto
     ssl
-    common)
+    common
+    platform)
 target_link_libraries(Elastos.SDK.Contact PRIVATE
     httpclient
     json)

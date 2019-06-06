@@ -5,6 +5,7 @@ include(../config/cmake/CMakeLists.txt)
 project(Elastos.SDK.Contact)
 add_subdirectory(common)
 add_subdirectory(src)
+add_subdirectory(platform)
 add_subdirectory(wrapper/httpclient)
 add_subdirectory(wrapper/json)
 

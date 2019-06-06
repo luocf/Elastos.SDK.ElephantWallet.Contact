@@ -1,7 +1,7 @@
 #include <Elastos.SDK.Contact.hpp>
 #include <BlkChnClient.hpp>
 #include <iostream>
-#include <execinfo.h>
+#include <Platform.hpp>
 #include <signal.h>
 
 std::string gSavedMnemonic;
@@ -35,21 +35,9 @@ int main(int argc, char **argv)
 }
 
 void signalHandler(int sig) {
-    std::cerr << "Error: signal " << sig << std::endl;
+    std::string backtrace = elastos::Platform::GetBacktrace();
+    std::cerr << backtrace << std::endl;
 
-    void* addrlist[10];
-    int addrlen = backtrace( addrlist, sizeof( addrlist ) / sizeof( void* ));
-    if(addrlen == 0) {
-        std::cerr << std::endl;
-        return;
-    }
-
-    char** symbollist = backtrace_symbols( addrlist, addrlen );
-    for ( int i = 4; i < addrlen; i++ ) {
-        std::cerr << symbollist[i] << std::endl;
-    }
-    free(symbollist);
-
-    exit(1);
+    exit(sig);
 }
 

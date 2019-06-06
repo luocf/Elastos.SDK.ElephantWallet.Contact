@@ -33,7 +33,6 @@ public:
     };
 
     /*** static function and variable ***/
-    static int GetCurrentDevId(std::string& devId);
     static int GetElaAddress(const std::string& pubKey, std::string& elaAddr);
     static int GetDid(const std::string& pubKey, std::string& did);
     static bool IsValidElaAddress(const std::string& code);

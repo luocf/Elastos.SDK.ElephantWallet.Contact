@@ -7,11 +7,13 @@
 
 #include <Elastos.SDK.Contact.hpp>
 
-#include <BlkChnClient.hpp>
+#include "BlkChnClient.hpp"
 #include "ChannelImplCarrier.hpp"
-#include <CompatibleFileSystem.hpp>
-#include <Log.hpp>
-#include <SafePtr.hpp>
+#include "CompatibleFileSystem.hpp"
+#include "Log.hpp"
+#include "Platform.hpp"
+#include "SafePtr.hpp"
+
 
 namespace elastos {
 
@@ -224,7 +226,7 @@ int Contact::setUserInfo()
     }
 
     std::string currDevId;
-    ret = SecurityManager::GetCurrentDevId(currDevId);
+    ret = Platform::GetCurrentDevId(currDevId);
     if(ret < 0) {
         return ret;
     }
