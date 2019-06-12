@@ -1,6 +1,7 @@
 #include <ContactTestCmd.hpp>
 
 #include <iostream>
+#include <iterator>
 #include <sstream>
 
 /* =========================================== */

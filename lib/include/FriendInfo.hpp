@@ -1,6 +1,7 @@
 #ifndef _ELASTOS_FRIEND_INFO_HPP_
 #define _ELASTOS_FRIEND_INFO_HPP_
 
+#include <memory>
 #include "HumanInfo.hpp"
 
 namespace elastos {

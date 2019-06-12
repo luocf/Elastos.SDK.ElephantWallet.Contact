@@ -166,7 +166,7 @@ int HumanInfo::setHumanInfo(Item item, const std::string& value)
         return 0;
     }
 
-    Log::D(Log::TAG, "%s %s=>%s", __PRETTY_FUNCTION__, mCommonInfoMap[item].c_str(), value.c_str());
+    Log::D(Log::TAG, "%s %d %s=>%s", __PRETTY_FUNCTION__, item, mCommonInfoMap[item].c_str(), value.c_str());
 
     if(item == Item::ChainPubKey) {
         std::string expectedDid, expectedElaAddr;

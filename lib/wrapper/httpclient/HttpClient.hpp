@@ -2,10 +2,11 @@
 #define _HTTP_CLIENT_HPP_
 
 #include <map>
+#include <memory>
+#include <mutex>
 #include <sstream>
 #include <string>
 #include <vector>
-#include <memory>
 
 struct curl_slist;
 

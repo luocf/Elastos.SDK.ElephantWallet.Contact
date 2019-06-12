@@ -15,6 +15,8 @@
 #include "PlatformDarwin.hpp"
 #elif defined(__ANDROID__)
 #include "PlatformAndroid.hpp"
+#elif defined(__linux__)
+#include "PlatformUnixLike.hpp"
 #else
 #error "Unsupport Platform"
 #endif
@@ -25,6 +27,8 @@ namespace elastos {
 class Platform : public PlatformDarwin {
 #elif defined(__ANDROID__)
 class Platform : public PlatformAndroid {
+#elif defined(__linux__)
+class Platform : public PlatformUnixLike {
 #else
 #error "Unsupport Platform"
 #endif

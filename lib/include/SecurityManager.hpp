@@ -11,6 +11,7 @@
 #ifndef _ELASTOS_SECURITY_MANAGER_HPP_
 #define _ELASTOS_SECURITY_MANAGER_HPP_
 
+#include <memory>
 #include <string>
 #include <vector>
 

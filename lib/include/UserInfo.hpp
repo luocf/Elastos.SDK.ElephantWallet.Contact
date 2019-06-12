@@ -11,6 +11,7 @@
 #ifndef _ELASTOS_USER_INFO_HPP_
 #define _ELASTOS_USER_INFO_HPP_
 
+#include <memory>
 #include "HumanInfo.hpp"
 #include "IdentifyCode.hpp"
 
