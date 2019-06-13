@@ -7,16 +7,16 @@ message(STATUS "curl include path: ${pkg-curl_INCLUDE_DIRS}")
 message(STATUS "curl library path: ${pkg-curl_STATIC_LDFLAGS}")
 
 set(pkg-Elastos.NET.Carrier_STATIC_LDFLAGS
-    crystal
     elacarrier
     elasession
     flatccrt
     hive-api
     hive-api++
-    pj
-    pjlib-util
     pjmedia
     pjnath
+    pjlib-util
+    pj
+    crystal
     sodium
     srtp
     toxcore)
