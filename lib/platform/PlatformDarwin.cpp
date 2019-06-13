@@ -50,15 +50,6 @@ int PlatformDarwin::GetCurrentDevId(std::string& devId)
 
     devId = "";
 
-    std::string sysName;
-    std::string uuidName;
-    struct utsname utsName;
-    ret = uname(&utsName);
-    if(ret < 0) {
-        return ErrCode::DevUUIDError;
-    }
-    sysName = utsName.sysname;
-
     uuid_t uuid = {};
     struct timespec ts = { .tv_sec = 5, .tv_nsec = 0 };
     ret = gethostuuid(uuid, &ts);
@@ -68,9 +59,23 @@ int PlatformDarwin::GetCurrentDevId(std::string& devId)
 
     uuid_string_t uuidStr;
     uuid_unparse_upper(uuid, uuidStr);
-    uuidName = uuidStr;
+    devId = uuidStr;
 
-    devId = sysName + "(" + uuidName + ")";
+    return 0;
+}
+
+int PlatformDarwin::GetCurrentDevName(std::string& devName)
+{
+    int ret = ErrCode::UnknownError;
+
+    devName = "";
+
+    struct utsname utsName;
+    ret = uname(&utsName);
+    if(ret < 0) {
+        return ErrCode::DevUUIDError;
+    }
+    devName = utsName.sysname;
 
     return 0;
 }

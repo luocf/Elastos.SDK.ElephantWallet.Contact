@@ -231,6 +231,12 @@ int Contact::setUserInfo()
         return ret;
     }
 
+    std::string currDevName;
+    ret = Platform::GetCurrentDevName(currDevName);
+    if(ret < 0) {
+        return ret;
+    }
+
     std::weak_ptr<MessageChannelStrategy> weakChCarrier;
     ret = mMessageManager->getChannel(MessageManager::ChannelType::Carrier, weakChCarrier);
     if(ret < 0) {
@@ -244,7 +250,7 @@ int Contact::setUserInfo()
         return ret;
     }
 
-    ret = userInfo->addCarrierInfo({currDevId, carrierAddr, ""}, UserInfo::Status::Offline);
+    ret = userInfo->addCarrierInfo({currDevId, currDevName, carrierAddr, ""}, UserInfo::Status::Offline);
     if(ret < 0) {
         return ret;
     }

@@ -24,6 +24,7 @@ public:
     /*** static function and variable ***/
     static std::string GetBacktrace();
     static int GetCurrentDevId(std::string& devId);
+    static int GetCurrentDevName(std::string& devName);
 
     /*** class function and variable ***/
 

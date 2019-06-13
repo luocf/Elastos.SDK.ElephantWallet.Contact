@@ -74,7 +74,10 @@ int HumanInfo::addCarrierInfo(const HumanInfo::CarrierInfo& info, const HumanInf
 
     if(correctedInfo.mDevId.empty() == true) {
         auto datatime = DataTime::Current();
-        correctedInfo.mDevId = "unknown-" + datatime;
+        correctedInfo.mDevId = datatime;
+    }
+    if(correctedInfo.mDevName.empty() == true) {
+        correctedInfo.mDevId = "Unknown";
     }
 
     if(correctedInfo.mUsrAddr.empty() == false) {
@@ -288,6 +291,7 @@ HumanInfo::Status HumanInfo::getHumanStatus()
 inline void to_json(Json& j, const HumanInfo::CarrierInfo& info) {
     j = Json {
         {"DevId", info.mDevId},
+        {"DevName", info.mDevName},
         {"UsrAddr", info.mUsrAddr},
         {"UsrId", info.mUsrId},
     };
@@ -295,6 +299,7 @@ inline void to_json(Json& j, const HumanInfo::CarrierInfo& info) {
 
 inline void from_json(const Json& j, HumanInfo::CarrierInfo& info) {
     info.mDevId = j["DevId"];
+    info.mDevName = j["DevName"];
     info.mUsrAddr = j["UsrAddr"];
     info.mUsrId = j["UsrId"];
 }

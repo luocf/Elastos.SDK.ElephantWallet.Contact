@@ -82,6 +82,7 @@ int main(int argc, char **argv)
     userInfo->getAllCarrierInfo(carrierInfoArray);
     for(auto& it: carrierInfoArray) {
         Log::I(Log::TAG, "BoundDevId  : %s", it.mDevId.c_str());
+        Log::I(Log::TAG, "BoundDevName: %s", it.mDevName.c_str());
         Log::I(Log::TAG, "CarrierAddr : %s", it.mUsrAddr.c_str());
         Log::I(Log::TAG, "carrierUsrId: %s", it.mUsrId.c_str());
     }
@@ -150,6 +151,14 @@ std::shared_ptr<elastos::SecurityManager::SecurityListener> getSecurityListener(
         std::vector<uint8_t> onDecryptData(const std::vector<uint8_t>& src) override {
             auto dest = std::vector<uint8_t> {src.rbegin(), src.rend()};
             return dest;
+        }
+
+        std::string onRequestDidPropAppId() override {
+            return "DC92DEC59082610D1D4698F42965381EBBC4EF7DBDA08E4B3894D530608A64AAA65BB82A170FBE16F04B2AF7B25D88350F86F58A7C1F55CC29993B4C4C29E405";
+        }
+
+        std::string onRequestDidAgentAuthData() override {
+            return "id=org.elastos.app.didplugin;time=1547449063900;auth=298b9a09723aef924098f637aaee7658";
         }
 
     private:

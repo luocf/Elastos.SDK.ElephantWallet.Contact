@@ -452,6 +452,7 @@ void MessageManager::MessageListener::onFriendRequest(const std::string& friendC
         FriendInfo::CarrierInfo carrierInfo = {
             .mUsrId = friendCode,
             .mDevId = "",
+            .mDevName = "",
             .mUsrAddr = "",
         };
 

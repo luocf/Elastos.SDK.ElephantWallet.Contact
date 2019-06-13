@@ -46,6 +46,9 @@ public:
     int getUserInfo(std::shared_ptr<UserInfo>& userInfo);
     bool contains(const std::string& userCode);
 
+    int syncUserInfo();
+    int uploadUserInfo();
+
 private:
     /*** type define ***/
 

@@ -51,12 +51,12 @@ std::string PlatformAndroid::GetBacktrace()
 
 int PlatformAndroid::GetCurrentDevId(std::string& devId)
 {
-    int ret = ErrCode::UnknownError;
-
-    // TODO
     throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
+}
 
-    return ret;
+int PlatformAndroid::GetCurrentDevName(std::string& devName);
+{
+    throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
 }
 
 _Unwind_Reason_Code PlatformAndroid::UnwindCallback(struct _Unwind_Context* context, void* arg)

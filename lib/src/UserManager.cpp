@@ -176,6 +176,16 @@ bool UserManager::contains(const std::string& userCode)
     return (ret >=0 ? true : false);
 }
 
+int UserManager::syncUserInfo()
+{
+
+}
+
+int UserManager::uploadUserInfo()
+{
+
+}
+
 /***********************************************/
 /***** class protected function implement  *****/
 /***********************************************/

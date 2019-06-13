@@ -38,6 +38,7 @@ public:
 
     struct CarrierInfo {
         std::string mDevId;
+        std::string mDevName;
         std::string mUsrAddr;
         std::string mUsrId;
     };

@@ -50,20 +50,28 @@ int PlatformUnixLike::GetCurrentDevId(std::string& devId)
 
     devId = "";
 
-    std::string sysName;
+	long hostId = gethostid();
+	std::stringstream hostIdStream;
+	hostIdStream << std::hex << hostId;
+
+    devId = hostIdStream.str();
+
+    return 0;
+}
+
+int PlatformUnixLike::GetCurrentDevName(std::string& devName)
+{
+    int ret = ErrCode::UnknownError;
+
+    devName = "";
+
     std::string uuidName;
     struct utsname utsName;
     ret = uname(&utsName);
     if(ret < 0) {
         return ErrCode::DevUUIDError;
     }
-    sysName = utsName.sysname;
-
-	long hostId = gethostid();
-	std::stringstream hostIdStream;
-	hostIdStream << std::hex << hostId;
-
-    devId = sysName + "(" + hostIdStream.str() + ")";
+    devName = utsName.sysname;
 
     return 0;
 }

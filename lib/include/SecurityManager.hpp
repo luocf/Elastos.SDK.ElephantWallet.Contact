@@ -28,6 +28,10 @@ public:
 
         virtual std::vector<uint8_t> onEncryptData(const std::string& pubKey, const std::vector<uint8_t>& src) = 0;
         virtual std::vector<uint8_t> onDecryptData(const std::vector<uint8_t>& src) = 0;
+
+        virtual std::string onRequestDidPropAppId() = 0;
+        virtual std::string onRequestDidAgentAuthData() = 0;
+
     protected:
         explicit SecurityListener() = default;
         virtual ~SecurityListener() = default;
@@ -54,6 +58,11 @@ public:
 
     int saveCryptoFile(const std::string& filePath, const std::vector<uint8_t>& originData);
     int loadCryptoFile(const std::string& filePath, std::vector<uint8_t>& originData);
+
+    int signData(const std::vector<uint8_t>& src, std::vector<uint8_t>& dest);
+
+    int getDidPropAppId(std::string& appId);
+    int getDidAgentAuthData(std::string& authData);
 
     void clear();
 
