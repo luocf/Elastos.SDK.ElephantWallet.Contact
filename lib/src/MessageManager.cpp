@@ -198,19 +198,11 @@ std::shared_ptr<MessageManager::MessageInfo> MessageManager::makeMessage(Message
     return msgInfo;
 }
 
-std::shared_ptr<MessageManager::MessageInfo> MessageManager::makeMessage(MessageType type,
-                                                                         const std::string& plainContent,
-                                                                         const std::string& cryptoAlgorithm) const
-{
-    std::vector<uint8_t> plainContentBytes(plainContent.begin(), plainContent.end());
-
-    return makeMessage(type, plainContentBytes, cryptoAlgorithm);
-}
-
 std::shared_ptr<MessageManager::MessageInfo> MessageManager::makeTextMessage(const std::string& plainContent,
                                                                              const std::string& cryptoAlgorithm) const
 {
-    return makeMessage(MessageType::MsgText, plainContent, cryptoAlgorithm);
+    std::vector<uint8_t> plainContentBytes(plainContent.begin(), plainContent.end());
+    return makeMessage(MessageType::MsgText, plainContentBytes, cryptoAlgorithm);
 }
 
 int MessageManager::sendMessage(const std::shared_ptr<HumanInfo> humanInfo,
@@ -567,7 +559,8 @@ void MessageManager::MessageListener::onFriendStatusChanged(const std::string& f
             Log::E(Log::TAG, "Failed to serialize user human info.");
             return;
         }
-        auto msgInfo = msgMgr->makeMessage(MessageType::CtrlSyncDesc, humanDesc);
+        std::vector<uint8_t> humanDescBytes(humanDesc.begin(), humanDesc.end());
+        auto msgInfo = msgMgr->makeMessage(MessageType::CtrlSyncDesc, humanDescBytes);
         ret = msgMgr->sendMessage(friendInfo, humanChType, msgInfo);
         if(ret < 0) {
             Log::E(Log::TAG, "Failed to send sync desc message.");

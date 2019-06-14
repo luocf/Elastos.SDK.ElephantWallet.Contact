@@ -41,6 +41,7 @@ public:
         std::string mDevName;
         std::string mUsrAddr;
         std::string mUsrId;
+        long mUpdateTime;
     };
 
     /*** static function and variable ***/

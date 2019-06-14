@@ -213,6 +213,47 @@ int SecurityManager::loadCryptoFile(const std::string& filePath, std::vector<uin
     return 0;
 }
 
+int SecurityManager::signData(const std::vector<uint8_t>& src, std::vector<uint8_t>& dest)
+{
+    if(mSecurityListener == nullptr) {
+        return ErrCode::NoSecurityListener;
+    }
+
+    dest = mSecurityListener->onSignData(src);
+    if(dest.empty() == true) {
+        return ErrCode::BadSecurityValue;
+    }
+
+    return 0;
+}
+
+int SecurityManager::getDidPropAppId(std::string& appId)
+{
+    if(mSecurityListener == nullptr) {
+        return ErrCode::NoSecurityListener;
+    }
+
+    appId = mSecurityListener->onRequestDidPropAppId();
+    if(appId.empty() == true) {
+        return ErrCode::BadSecurityValue;
+    }
+
+    return 0;
+}
+
+int SecurityManager::getDidAgentAuthHeader(std::string& authHeader)
+{
+    if(mSecurityListener == nullptr) {
+        return ErrCode::NoSecurityListener;
+    }
+
+    authHeader = mSecurityListener->onRequestDidAgentAuthHeader();
+    if(authHeader.empty() == true) {
+        return ErrCode::BadSecurityValue;
+    }
+
+    return 0;
+}
 
 /***********************************************/
 /***** class protected function implement  *****/

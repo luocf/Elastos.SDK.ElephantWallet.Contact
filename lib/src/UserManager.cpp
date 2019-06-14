@@ -7,10 +7,12 @@
 
 #include <UserManager.hpp>
 
+#include "BlkChnClient.hpp"
 #include <CompatibleFileSystem.hpp>
 #include <Log.hpp>
 #include <SafePtr.hpp>
 #include <iostream>
+#include <sstream>
 #include <Json.hpp>
 
 
@@ -179,11 +181,49 @@ bool UserManager::contains(const std::string& userCode)
 int UserManager::syncUserInfo()
 {
 
+    throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
+
 }
 
 int UserManager::uploadUserInfo()
 {
+    auto bcClient = BlkChnClient::GetInstance();
 
+    std::vector<HumanInfo::CarrierInfo> carrierInfoArray;
+    int ret = mUserInfo->getAllCarrierInfo(carrierInfoArray);
+    if(ret < 0) {
+        return ret;
+    }
+
+    bool firstItem = true;
+    std::ostringstream sstream;
+    sstream << "[";
+    for(const auto& it: carrierInfoArray) {
+        if(firstItem == false) {
+            sstream << ",";
+        }
+        firstItem = false;
+
+        sstream << "{";
+        sstream <<   "\"CarrierAddr\":" << "\"" << it.mUsrAddr << "\"" << ",";
+        sstream <<   "\"CarrierUsrId\":"   << "\"" << it.mUsrId << "\"" << ",";
+        sstream <<   "\"DeviceInfo\":"  << "{";
+        sstream <<     "\"Id\":"   << "\"" << it.mDevId << "\"" << ",";
+        sstream <<     "\"Name\":" << "\"" << it.mDevName << "\"" << ",";
+        sstream <<     "\"Time\":" << it.mUpdateTime << "";
+        sstream <<   "}";
+        sstream << "}";
+    }
+    sstream << "]";
+
+    std::map<std::string, std::string> propMap;
+    propMap["CarrierID"] = sstream.str();
+    ret = bcClient->uploadDidProps(propMap);
+    if(ret < 0) {
+        return ret;
+    }
+
+    return 0;
 }
 
 /***********************************************/

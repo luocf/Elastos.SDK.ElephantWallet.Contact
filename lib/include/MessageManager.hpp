@@ -128,9 +128,6 @@ public:
     virtual std::shared_ptr<MessageInfo> makeMessage(MessageType type,
                                                      const std::vector<uint8_t>& plainContent,
                                                      const std::string& cryptoAlgorithm = "") const;
-    virtual std::shared_ptr<MessageInfo> makeMessage(MessageType type,
-                                                     const std::string& plainContent,
-                                                     const std::string& cryptoAlgorithm = "") const;
     virtual std::shared_ptr<MessageInfo> makeTextMessage(const std::string& plainContent,
                                                          const std::string& cryptoAlgorithm = "") const;
 

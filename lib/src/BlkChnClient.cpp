@@ -1,7 +1,10 @@
 #include <BlkChnClient.hpp>
 
+#include <iomanip>
 #include <HttpClient.hpp>
 #include <Log.hpp>
+#include <MD5.hpp>
+#include <SafePtr.hpp>
 
 
 namespace elastos {
@@ -53,12 +56,25 @@ int BlkChnClient::getDidProps(const std::set<std::string>& keySet, std::map<std:
 
 int BlkChnClient::uploadDidProps(const std::map<std::string, std::string>& propMap)
 {
+    auto sectyMgr = SAFE_GET_PTR(mSecurityManager);
+    auto config = SAFE_GET_PTR(mConfig);
+
+    std::string appId;
+    int ret = sectyMgr->getDidPropAppId(appId);
+    if(ret < 0) {
+        return ret;
+    }
+
     Json jsonPropProt = Json::object();
     Json jsonPropArray = Json::array();
 
+    std::string didPath = "Apps/" + appId + "/";
     for(const auto& prop: propMap) {
+        std::string propKey = didPath + prop.first;
+        std::string propValue = prop.second;
         Json jsonProp = Json::object();
-        jsonProp[prop.first] = prop.second;
+        jsonProp[DidProtocol::Name::Key] = propKey;
+        jsonProp[DidProtocol::Name::Value] = propValue;
         if(prop.second.empty() == true) {
             jsonProp[DidProtocol::Name::Status] = DidProtocol::Value::Status::Deprecated;
         } else {
@@ -73,17 +89,61 @@ int BlkChnClient::uploadDidProps(const std::map<std::string, std::string>& propM
     jsonPropProt[DidProtocol::Name::Status] = DidProtocol::Value::Status::Normal;
     jsonPropProt[DidProtocol::Name::Properties] = jsonPropArray;
 
-    auto propProtStr = std::make_shared<std::string>(jsonPropProt.dump());
-    // TODO, did prop key, sign, make {msg, sig, pub}
+    auto propProtStr = jsonPropProt.dump();
+    Log::I(Log::TAG, "BlkChnClient::uploadDidProps() propProt: %s", propProtStr.c_str());
+    std::vector<uint8_t> originBytes(propProtStr.begin(), propProtStr.end());
+    std::vector<uint8_t> signedBytes(propProtStr.begin(), propProtStr.end());
+    ret = sectyMgr->signData(originBytes, signedBytes);
+    if(ret < 0) {
+        return ret;
+    }
 
-    auto task = [propProtStr]() {
-        Log::D(Log::TAG, "%s body = %s", __PRETTY_FUNCTION__, propProtStr->c_str());
+    std::string pubKey;
+    ret = sectyMgr->getPublicKey(pubKey);
+    if(ret < 0) {
+        return ret;
+    }
 
-        HttpClient httpClient;
-        // TODO
+    std::string msgStr = MD5::MakeHexString(originBytes);
+    std::string sigStr = MD5::MakeHexString(signedBytes);
 
-    };
-    mTaskThread.post(task);
+    // did prop key, sign, make {msg, sig, pub}
+    std::string reqBody = std::string("{")
+        + "\"pub\":\"" + pubKey + "\","
+        + "\"msg\":\"" + msgStr + "\","
+        + "\"sig\":\"" + sigStr + "\""
+        + "}";
+
+    auto didConfigUrl = config->mDidChainConfig->mUrl;
+    auto agentUploadPath = config->mDidChainConfig->mAgentApi.mUploadDidProps;
+    std::string agentUploadUrl = didConfigUrl + agentUploadPath;
+    std::string authHeader;
+    ret = sectyMgr->getDidAgentAuthHeader(authHeader);
+    if(ret < 0) {
+        return ret;
+    }
+    Log::I(Log::TAG, "reqBody=%s", reqBody.c_str());
+
+    HttpClient httpClient;
+    httpClient.url(agentUploadUrl);
+    httpClient.setHeader("Content-Type", "application/json");
+    httpClient.setHeader("X-Elastos-Agent-Auth", authHeader);
+    ret = httpClient.syncPost(reqBody);
+    if(ret < 0) {
+        return ErrCode::HttpClientError + ret;
+    }
+
+    std::string respBody;
+    ret = httpClient.getResponseBody(respBody);
+    if(ret < 0) {
+        return ErrCode::HttpClientError + ret;
+    }
+    Log::I(Log::TAG, "respBody=%s", respBody.c_str());
+
+    Json jsonResp = Json::parse(respBody);
+    if(jsonResp["status"] != 200) {
+        return ErrCode::BlkChnSetPropError;
+    }
 
     return 0;
 }

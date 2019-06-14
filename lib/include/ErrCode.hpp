@@ -39,6 +39,9 @@ public:
     constexpr static const int ChannelNotSendMessage = -211;
     constexpr static const int ChannelDataTooLarge = -212;
 
+    constexpr static const int BlkChnSetPropError = -300;
+
+    constexpr static const int HttpClientError = -500;
 
     constexpr static const int StdSystemErrorIndex = -1000;
 

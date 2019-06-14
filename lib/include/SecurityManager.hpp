@@ -30,7 +30,10 @@ public:
         virtual std::vector<uint8_t> onDecryptData(const std::vector<uint8_t>& src) = 0;
 
         virtual std::string onRequestDidPropAppId() = 0;
-        virtual std::string onRequestDidAgentAuthData() = 0;
+        virtual std::string onRequestDidAgentAuthHeader() = 0;
+
+
+        virtual std::vector<uint8_t> onSignData(const std::vector<uint8_t>& originData) = 0;
 
     protected:
         explicit SecurityListener() = default;
@@ -62,7 +65,7 @@ public:
     int signData(const std::vector<uint8_t>& src, std::vector<uint8_t>& dest);
 
     int getDidPropAppId(std::string& appId);
-    int getDidAgentAuthData(std::string& authData);
+    int getDidAgentAuthHeader(std::string& authHeader);
 
     void clear();
 
