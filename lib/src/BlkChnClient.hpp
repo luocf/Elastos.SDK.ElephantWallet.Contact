@@ -22,7 +22,7 @@ public:
     /*** class function and variable ***/
     int setConnectTimeout(uint32_t milliSecond);
 
-    int getDidProps(const std::set<std::string>& keySet, std::map<std::string, std::string>& propMap);
+    int getDidProps(const std::string& did, std::map<std::string, std::string>& propMap);
     int uploadDidProps(const std::map<std::string, std::string>& propMap);
 
 protected:
@@ -60,6 +60,7 @@ private:
     /*** class function and variable ***/
     explicit BlkChnClient(std::weak_ptr<Config> config, std::weak_ptr<SecurityManager> sectyMgr);
     virtual ~BlkChnClient();
+    int getDidPropPath(std::string& didPath);
 
     std::weak_ptr<Config> mConfig;
     std::weak_ptr<SecurityManager> mSecurityManager;

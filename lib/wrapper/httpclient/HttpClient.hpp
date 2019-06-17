@@ -25,7 +25,7 @@ public:
 		static constexpr int UserCanceled   = -6;
 		static constexpr int IOFailed       = -7;
 		static constexpr int NetFailed      = -8;
-		static constexpr int CurlBaseCode   = -500;
+		static constexpr int CurlBaseCode   = -100;
 	private:
 		explicit ErrCode() = delete;
 		virtual ~ErrCode() = delete;

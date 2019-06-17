@@ -37,11 +37,15 @@ public:
 
 
     struct CarrierInfo {
-        std::string mDevId;
-        std::string mDevName;
+        struct DeviceInfo {
+            std::string mDevId;
+            std::string mDevName;
+            long mUpdateTime;
+        };
+
         std::string mUsrAddr;
         std::string mUsrId;
-        long mUpdateTime;
+        DeviceInfo mDevInfo;
     };
 
     /*** static function and variable ***/
@@ -65,6 +69,8 @@ public:
     virtual int getHumanStatus(HumanKind kind, Status& status);
     virtual Status getHumanStatus();
 
+    virtual int serializeCarrierInfo(std::string& value) const;
+    virtual int deserializeCarrierInfo(const std::string& value);
     virtual int serialize(std::string& value, bool summaryOnly = false) const;
     virtual int deserialize(const std::string& value, bool summaryOnly = false);
 

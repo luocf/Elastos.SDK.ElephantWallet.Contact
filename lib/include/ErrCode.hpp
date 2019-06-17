@@ -40,6 +40,8 @@ public:
     constexpr static const int ChannelDataTooLarge = -212;
 
     constexpr static const int BlkChnSetPropError = -300;
+    constexpr static const int BlkChnGetPropError = -301;
+    constexpr static const int BlkChnEmptyPropError = -302;
 
     constexpr static const int HttpClientError = -500;
 

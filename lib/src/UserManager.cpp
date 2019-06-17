@@ -75,6 +75,7 @@ int UserManager::loadLocalData()
         return ErrCode::JsonParseException;
     }
 
+    Log::I(Log::TAG, "Success to load local data from: %s.", dataFilePath.c_str());
     return 0;
 }
 
@@ -120,8 +121,20 @@ int UserManager::makeUser()
     mUserInfo = std::make_shared<UserInfo>(weak_from_this());
 
     int ret = loadLocalData();
-    if(ret < 0
-    && ret != ErrCode::FileNotExistsError) {
+    if(ret == 0) {
+        Log::I(Log::TAG, "UserManager::makeUser() Success to recover user from local.");
+    } else if(ret == ErrCode::FileNotExistsError) {
+        Log::I(Log::TAG, "UserManager::makeUser() Local user info not exists.");
+        ret = syncUserInfo();
+        if(ret == 0) {
+            Log::I(Log::TAG, "UserManager::makeUser() Success to recover user from did chain.");
+        } else if(ret == ErrCode::BlkChnEmptyPropError) {
+            Log::I(Log::TAG, "UserManager::makeUser() Can't find user info from local or did chain, make a new user.");
+            ret = 0;
+        }
+    }
+    if(ret < 0) {
+        Log::E(Log::TAG, "UserManager::makeUser() Failed to recover user, ret=%d", ret);
         return ret;
     }
 
@@ -180,44 +193,44 @@ bool UserManager::contains(const std::string& userCode)
 
 int UserManager::syncUserInfo()
 {
+    auto sectyMgr = SAFE_GET_PTR(mSecurityManager);
+    std::string did;
+    int ret = sectyMgr->getDid(did);
+    if(ret < 0) {
+        return ret;
+    }
 
-    throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
+    auto bcClient = BlkChnClient::GetInstance();
+    std::map<std::string, std::string> propMap;
+    ret = bcClient->getDidProps(did, propMap);
+    if(ret < 0) {
+        return ret;
+    }
+    for(const auto& it: propMap) {
+        Log::I(Log::TAG, "UserManager::syncUserInfo() %s:%s", it.first.c_str(), it.second.c_str());
+    }
 
+    std::string carrierInfoStr = propMap["CarrierID"];
+    ret = mUserInfo->deserializeCarrierInfo(carrierInfoStr);
+    if(ret < 0) {
+        return ret;
+    }
+
+    return 0;
 }
 
 int UserManager::uploadUserInfo()
 {
     auto bcClient = BlkChnClient::GetInstance();
 
-    std::vector<HumanInfo::CarrierInfo> carrierInfoArray;
-    int ret = mUserInfo->getAllCarrierInfo(carrierInfoArray);
+    std::string carrierInfoStr;
+    int ret = mUserInfo->serializeCarrierInfo(carrierInfoStr);
     if(ret < 0) {
         return ret;
     }
 
-    bool firstItem = true;
-    std::ostringstream sstream;
-    sstream << "[";
-    for(const auto& it: carrierInfoArray) {
-        if(firstItem == false) {
-            sstream << ",";
-        }
-        firstItem = false;
-
-        sstream << "{";
-        sstream <<   "\"CarrierAddr\":" << "\"" << it.mUsrAddr << "\"" << ",";
-        sstream <<   "\"CarrierUsrId\":"   << "\"" << it.mUsrId << "\"" << ",";
-        sstream <<   "\"DeviceInfo\":"  << "{";
-        sstream <<     "\"Id\":"   << "\"" << it.mDevId << "\"" << ",";
-        sstream <<     "\"Name\":" << "\"" << it.mDevName << "\"" << ",";
-        sstream <<     "\"Time\":" << it.mUpdateTime << "";
-        sstream <<   "}";
-        sstream << "}";
-    }
-    sstream << "]";
-
     std::map<std::string, std::string> propMap;
-    propMap["CarrierID"] = sstream.str();
+    propMap["CarrierID"] = carrierInfoStr;
     ret = bcClient->uploadDidProps(propMap);
     if(ret < 0) {
         return ret;

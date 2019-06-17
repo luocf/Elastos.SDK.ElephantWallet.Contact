@@ -6,7 +6,7 @@
 #include <thread>
 #include <signal.h>
 
-#include <DataTime.hpp>
+#include <DateTime.hpp>
 #include <Platform.hpp>
 #include <Log.hpp>
 #include <MD5.hpp>
@@ -89,8 +89,8 @@ int main(int argc, char **argv)
     std::vector<elastos::UserInfo::CarrierInfo> carrierInfoArray;
     userInfo->getAllCarrierInfo(carrierInfoArray);
     for(auto& it: carrierInfoArray) {
-        Log::I(Log::TAG, "BoundDevId  : %s", it.mDevId.c_str());
-        Log::I(Log::TAG, "BoundDevName: %s", it.mDevName.c_str());
+        Log::I(Log::TAG, "BoundDevId  : %s", it.mDevInfo.mDevId.c_str());
+        Log::I(Log::TAG, "BoundDevName: %s", it.mDevInfo.mDevName.c_str());
         Log::I(Log::TAG, "CarrierAddr : %s", it.mUsrAddr.c_str());
         Log::I(Log::TAG, "carrierUsrId: %s", it.mUsrId.c_str());
     }
@@ -99,6 +99,11 @@ int main(int argc, char **argv)
     if(ret < 0) {
         throw std::runtime_error(std::string("Failed to upload user info! ret=") + std::to_string(ret));
     }
+
+    //ret = userMgr->syncUserInfo();
+    //if(ret < 0) {
+        //throw std::runtime_error(std::string("Failed to get user info! ret=") + std::to_string(ret));
+    //}
 
     loop(fifoFilePath, contact);
 
@@ -158,12 +163,14 @@ std::shared_ptr<elastos::SecurityManager::SecurityListener> getSecurityListener(
         };
 
         std::vector<uint8_t> onEncryptData(const std::string& pubKey, const std::vector<uint8_t>& src) override {
-            auto dest = std::vector<uint8_t> {src.rbegin(), src.rend()};
-            return dest;
+            //auto dest = std::vector<uint8_t> {src.rbegin(), src.rend()};
+            //return dest;
+            return src;
         }
         std::vector<uint8_t> onDecryptData(const std::vector<uint8_t>& src) override {
-            auto dest = std::vector<uint8_t> {src.rbegin(), src.rend()};
-            return dest;
+            //auto dest = std::vector<uint8_t> {src.rbegin(), src.rend()};
+            //return dest;
+            return src;
         }
 
         std::string onRequestDidPropAppId() override {
@@ -173,7 +180,7 @@ std::shared_ptr<elastos::SecurityManager::SecurityListener> getSecurityListener(
         std::string onRequestDidAgentAuthHeader() override {
             std::string appid = "org.elastos.app.didplugin";
             std::string appkey = "b2gvzUM79yLhCbbGNWCuhSsGdqYhA7sS";
-            std::string timestamp = std::to_string(elastos::DataTime::CurrentMS());
+            std::string timestamp = std::to_string(elastos::DateTime::CurrentMS());
             std::string auth = elastos::MD5::Get(appkey + timestamp);
             std::string headerValue = "id=" + appid + ";time=" + timestamp + ";auth=" + auth;
             Log::I(Log::TAG, "onRequestDidAgentAuthHeader() headerValue=%s", headerValue.c_str());

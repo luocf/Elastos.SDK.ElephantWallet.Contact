@@ -49,9 +49,58 @@ int BlkChnClient::setConnectTimeout(uint32_t milliSecond)
     return 0;
 }
 
-int BlkChnClient::getDidProps(const std::set<std::string>& keySet, std::map<std::string, std::string>& propMap)
+int BlkChnClient::getDidProps(const std::string& did, std::map<std::string, std::string>& propMap)
 {
-    throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
+    auto sectyMgr = SAFE_GET_PTR(mSecurityManager);
+    auto config = SAFE_GET_PTR(mConfig);
+
+    std::string didPath;
+    int ret = getDidPropPath(didPath);
+    if(ret < 0) {
+        return ret;
+    }
+
+    auto didConfigUrl = config->mDidChainConfig->mUrl;
+    auto agentGetProps = config->mDidChainConfig->mAgentApi.mGetDidProps;
+    std::string agentGetPropsUrl = didConfigUrl + agentGetProps + did;
+
+    HttpClient httpClient;
+    httpClient.url(agentGetPropsUrl);
+    ret = httpClient.syncGet();
+    if(ret < 0) {
+        return ErrCode::HttpClientError + ret;
+    }
+
+    std::string respBody;
+    ret = httpClient.getResponseBody(respBody);
+    if(ret < 0) {
+        return ErrCode::HttpClientError + ret;
+    }
+    Log::I(Log::TAG, "respBody=%s", respBody.c_str());
+
+    Json jsonResp = Json::parse(respBody);
+    if(jsonResp["status"] != 200) {
+        return ErrCode::BlkChnGetPropError;
+    }
+    std::string result = jsonResp["result"];
+    if(result.empty() == true) {
+        return ErrCode::BlkChnEmptyPropError;
+    }
+
+    Json jsonPropArray = Json::parse(result);
+    for(const auto& it: jsonPropArray){
+        std::string propKey = it["key"];
+        std::string propValue = it["value"];
+
+        size_t pos = propKey.find(didPath);
+        if (pos != std::string::npos) {
+            propKey.erase(pos, didPath.length());
+        }
+
+        propMap[propKey] = propValue;
+    }
+
+    return 0;
 }
 
 int BlkChnClient::uploadDidProps(const std::map<std::string, std::string>& propMap)
@@ -59,16 +108,14 @@ int BlkChnClient::uploadDidProps(const std::map<std::string, std::string>& propM
     auto sectyMgr = SAFE_GET_PTR(mSecurityManager);
     auto config = SAFE_GET_PTR(mConfig);
 
-    std::string appId;
-    int ret = sectyMgr->getDidPropAppId(appId);
+    std::string didPath;
+    int ret = getDidPropPath(didPath);
     if(ret < 0) {
         return ret;
     }
 
     Json jsonPropProt = Json::object();
     Json jsonPropArray = Json::array();
-
-    std::string didPath = "Apps/" + appId + "/";
     for(const auto& prop: propMap) {
         std::string propKey = didPath + prop.first;
         std::string propValue = prop.second;
@@ -166,6 +213,20 @@ BlkChnClient::BlkChnClient(std::weak_ptr<Config> config, std::weak_ptr<SecurityM
 
 BlkChnClient::~BlkChnClient()
 {
+}
+
+int BlkChnClient::getDidPropPath(std::string& didPath)
+{
+    auto sectyMgr = SAFE_GET_PTR(mSecurityManager);
+
+    std::string appId;
+    int ret = sectyMgr->getDidPropAppId(appId);
+    if(ret < 0) {
+        return ret;
+    }
+
+    didPath = "Apps/" + appId + "/";
+    return 0;
 }
 
 } // namespace elastos

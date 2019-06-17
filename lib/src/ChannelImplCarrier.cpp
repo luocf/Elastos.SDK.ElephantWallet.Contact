@@ -41,7 +41,7 @@ int ChannelImplCarrier::GetCarrierUsrIdByAddress(const std::string& address, std
         int err = ela_get_error();
         char strerr_buf[512] = {0};
         ela_get_strerror(err, strerr_buf, sizeof(strerr_buf));
-        Log::E(Log::TAG, "Failed to add friend! ret=%s(0x%x)", strerr_buf, ret);
+        Log::E(Log::TAG, "Failed to get carrier usr id from:%s! ret=%s(0x%x)", address.c_str(), strerr_buf, ret);
         return ErrCode::ChannelFailedCarrier;
     }
 
@@ -166,7 +166,7 @@ int ChannelImplCarrier::getAddress(std::string& address)
         int err = ela_get_error();
         char strerr_buf[512] = {0};
         ela_get_strerror(err, strerr_buf, sizeof(strerr_buf));
-        Log::E(Log::TAG, "Failed to add friend! ret=%s(0x%x)", strerr_buf, ret);
+        Log::E(Log::TAG, "Failed to get address! ret=%s(0x%x)", strerr_buf, ret);
         return ErrCode::ChannelFailedCarrier;
     }
 

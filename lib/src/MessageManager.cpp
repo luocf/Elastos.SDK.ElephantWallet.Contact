@@ -442,10 +442,9 @@ void MessageManager::MessageListener::onFriendRequest(const std::string& friendC
     }
     if(chType == ChannelType::Carrier) {
         FriendInfo::CarrierInfo carrierInfo = {
-            .mUsrId = friendCode,
-            .mDevId = "",
-            .mDevName = "",
             .mUsrAddr = "",
+            .mUsrId = friendCode,
+            .mDevInfo = {"", "", 0},
         };
 
         ret = humanInfo.addCarrierInfo(carrierInfo, HumanInfo::Status::WaitForAccept);

@@ -32,6 +32,9 @@ target_include_directories(Elastos.SDK.Contact PRIVATE
     "${pkg-Elastos.SDK.Keypair.C_INCLUDE_DIRS}"
     "${pkg-curl_INCLUDE_DIRS}"
     "${CMAKE_CURRENT_SOURCE_DIR}/../include")
+target_link_libraries(Elastos.SDK.Contact PRIVATE
+    httpclient
+    json)
 target_link_libraries(Elastos.SDK.Contact PUBLIC
     ${pkg-Elastos.SDK.Keypair.C_STATIC_LDFLAGS}
     ${pkg-curl_STATIC_LDFLAGS}
@@ -40,9 +43,6 @@ target_link_libraries(Elastos.SDK.Contact PUBLIC
     ssl
     common
     platform)
-target_link_libraries(Elastos.SDK.Contact PRIVATE
-    httpclient
-    json)
 #target_link_libraries(Elastos.SDK.Contact PRIVATE
     #thirdparty)
 if("${CFG_TARGET_PLATFORM}" STREQUAL "Android")

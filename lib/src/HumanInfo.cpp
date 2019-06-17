@@ -10,7 +10,7 @@
 #include "ChannelImplCarrier.hpp"
 #include <ctime>
 #include <Json.hpp>
-#include <DataTime.hpp>
+#include <DateTime.hpp>
 #include <Log.hpp>
 #include <SecurityManager.hpp>
 
@@ -72,12 +72,12 @@ int HumanInfo::addCarrierInfo(const HumanInfo::CarrierInfo& info, const HumanInf
 
     HumanInfo::CarrierInfo correctedInfo = info;
 
-    if(correctedInfo.mDevId.empty() == true) {
-        auto datatime = DataTime::Current();
-        correctedInfo.mDevId = datatime;
+    if(correctedInfo.mDevInfo.mDevId.empty() == true) {
+        auto datetime = DateTime::Current();
+        correctedInfo.mDevInfo.mDevId = datetime;
     }
-    if(correctedInfo.mDevName.empty() == true) {
-        correctedInfo.mDevId = "Unknown";
+    if(correctedInfo.mDevInfo.mDevName.empty() == true) {
+        correctedInfo.mDevInfo.mDevId = "Unknown";
     }
 
     if(correctedInfo.mUsrAddr.empty() == false) {
@@ -98,8 +98,11 @@ int HumanInfo::addCarrierInfo(const HumanInfo::CarrierInfo& info, const HumanInf
         }
 
         // found info by usrId
-        if(existsInfo.mDevId == correctedInfo.mDevId
-        && existsInfo.mUsrAddr == correctedInfo.mUsrAddr) { // not changed
+        //if(existsInfo.mDevInfo.mDevId == correctedInfo.mDevInfo.mDevId
+        //&& existsInfo.mUsrAddr == correctedInfo.mUsrAddr) { // not changed
+            //return 0;
+        if(existsInfo.mDevInfo.mDevId == correctedInfo.mDevInfo.mDevId) { // not changed
+            existsInfo.mUsrAddr = correctedInfo.mUsrAddr;
             return 0;
         } else { // update info
             existsInfo = correctedInfo;
@@ -288,20 +291,32 @@ HumanInfo::Status HumanInfo::getHumanStatus()
     return status;
 }
 
-inline void to_json(Json& j, const HumanInfo::CarrierInfo& info) {
+inline void to_json(Json& j, const HumanInfo::CarrierInfo::DeviceInfo& info) {
     j = Json {
         {"DevId", info.mDevId},
         {"DevName", info.mDevName},
-        {"UsrAddr", info.mUsrAddr},
-        {"UsrId", info.mUsrId},
+        {"UpdateTime", info.mUpdateTime},
+    };
+}
+
+inline void from_json(const Json& j, HumanInfo::CarrierInfo::DeviceInfo& info) {
+    info.mDevId = j["DevId"];
+    info.mDevName = j["DevName"];
+    info.mUpdateTime = j["UpdateTime"];
+}
+
+inline void to_json(Json& j, const HumanInfo::CarrierInfo& info) {
+    j = Json {
+        {"CarrierAddr", info.mUsrAddr},
+        {"CarrierId", info.mUsrId},
+        {"DeviceInfo", info.mDevInfo},
     };
 }
 
 inline void from_json(const Json& j, HumanInfo::CarrierInfo& info) {
-    info.mDevId = j["DevId"];
-    info.mDevName = j["DevName"];
-    info.mUsrAddr = j["UsrAddr"];
-    info.mUsrId = j["UsrId"];
+    info.mUsrAddr = j["CarrierAddr"];
+    info.mUsrId = j["CarrierId"];
+    info.mDevInfo = j["DeviceInfo"];
 }
 
 NLOHMANN_JSON_SERIALIZE_ENUM(HumanInfo::Status, {
@@ -310,6 +325,21 @@ NLOHMANN_JSON_SERIALIZE_ENUM(HumanInfo::Status, {
     { HumanInfo::Status::Offline, "Offline"},
     { HumanInfo::Status::Online, "Offline"}, // Online alse save as OffLine
 });
+
+int HumanInfo::serializeCarrierInfo(std::string& value) const
+{
+    Json jsonInfo= Json(mBoundCarrierArray);
+    value = jsonInfo.dump();
+    return 0;
+}
+
+int HumanInfo::deserializeCarrierInfo(const std::string& value)
+{
+    Json jsonInfo= Json::parse(value);
+    mBoundCarrierArray = jsonInfo.get<std::vector<CarrierInfo>>();
+    mBoundCarrierArray.resize(mBoundCarrierArray.size());
+    return 0;
+}
 
 int HumanInfo::serialize(std::string& value, bool summaryOnly) const
 {

@@ -10,6 +10,7 @@
 #include "BlkChnClient.hpp"
 #include "ChannelImplCarrier.hpp"
 #include "CompatibleFileSystem.hpp"
+#include "DateTime.hpp"
 #include "Log.hpp"
 #include "Platform.hpp"
 #include "SafePtr.hpp"
@@ -250,7 +251,8 @@ int Contact::setUserInfo()
         return ret;
     }
 
-    ret = userInfo->addCarrierInfo({currDevId, currDevName, carrierAddr, ""}, UserInfo::Status::Offline);
+    HumanInfo::CarrierInfo info{carrierAddr, "", {currDevId, currDevName, DateTime::CurrentMS()}};
+    ret = userInfo->addCarrierInfo(info, UserInfo::Status::Offline);
     if(ret < 0) {
         return ret;
     }
