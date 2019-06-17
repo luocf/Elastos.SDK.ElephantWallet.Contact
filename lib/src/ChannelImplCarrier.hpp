@@ -35,7 +35,7 @@ public:
                                 std::weak_ptr<Config> config);
     virtual ~ChannelImplCarrier();
 
-    virtual int preset() override;
+    virtual int preset(const std::string& profile) override;
     virtual int open() override;
     virtual int close() override;
 

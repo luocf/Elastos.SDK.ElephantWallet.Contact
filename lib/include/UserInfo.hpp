@@ -36,6 +36,7 @@ public:
     virtual int setHumanInfo(Item item, const std::string& value) override;
 
     virtual int setIdentifyCode(Type type, const std::string& value) override;
+    virtual int getIdentifyCode(Type type, std::string& value) const override;
 
 private:
     /*** type define ***/

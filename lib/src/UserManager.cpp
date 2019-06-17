@@ -10,6 +10,7 @@
 #include "BlkChnClient.hpp"
 #include <CompatibleFileSystem.hpp>
 #include <Log.hpp>
+#include <MessageManager.hpp>
 #include <SafePtr.hpp>
 #include <iostream>
 #include <sstream>
@@ -32,6 +33,7 @@ namespace elastos {
 /***********************************************/
 UserManager::UserManager(std::weak_ptr<SecurityManager> sectyMgr)
     : mSecurityManager(sectyMgr)
+    , mMessageManager()
     , mConfig()
     , mUserListener()
     , mUserInfo()
@@ -47,9 +49,10 @@ void UserManager::setUserListener(std::shared_ptr<UserListener> listener)
     mUserListener = listener;
 }
 
-void UserManager::setConfig(std::weak_ptr<Config> config)
+void UserManager::setConfig(std::weak_ptr<Config> config, std::weak_ptr<MessageManager> msgMgr)
 {
     mConfig = config;
+    mMessageManager = msgMgr;
 }
 
 int UserManager::loadLocalData()
@@ -234,6 +237,30 @@ int UserManager::uploadUserInfo()
     ret = bcClient->uploadDidProps(propMap);
     if(ret < 0) {
         return ret;
+    }
+
+    return 0;
+}
+
+int UserManager::setupMultiDevChannels()
+{
+    auto msgMgr = SAFE_GET_PTR(mMessageManager);
+
+    std::vector<HumanInfo::CarrierInfo> carrierInfoArray;
+    int ret = mUserInfo->getAllCarrierInfo(carrierInfoArray);
+    if(ret < 0) {
+        return ret;
+    }
+
+    for(const auto& carrierInfo: carrierInfoArray) {
+        int ret = msgMgr->requestFriend(carrierInfo.mUsrId,
+                                        MessageManager::ChannelType::Carrier,
+                                        "", false);
+        Log::I(Log::TAG, "UserManager::setupMultiDevChannels() add %s", carrierInfo.mUsrId.c_str());
+        if(ret != ErrCode::ChannelFailedFriendSelf
+        && ret != ErrCode::ChannelFailedFriendExists) {
+            Log::W(Log::TAG, "UserManager::setupMultiDevChannels() Failed to add %s", carrierInfo.mUsrId.c_str());
+        }
     }
 
     return 0;

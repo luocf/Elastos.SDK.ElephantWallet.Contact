@@ -82,12 +82,12 @@ int Contact::start()
         return ret;
     }
 
-    ret = mMessageManager->presetChannels(mConfig);
+    ret = mUserManager->makeUser();
     if(ret < 0) {
         return ret;
     }
 
-    ret = mUserManager->makeUser();
+    ret = mMessageManager->presetChannels(mConfig);
     if(ret < 0) {
         return ret;
     }
@@ -207,7 +207,7 @@ int Contact::initGlobal()
         return ret;
     }
 
-    mUserManager->setConfig(mConfig);
+    mUserManager->setConfig(mConfig, mMessageManager);
     mFriendManager->setConfig(mConfig, mMessageManager);
 
     ret = BlkChnClient::InitInstance(mConfig, mSecurityManager);

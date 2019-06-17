@@ -17,6 +17,8 @@
 
 namespace elastos {
 
+class MessageManager;
+
 class UserManager : public std::enable_shared_from_this<UserManager> {
 public:
     /*** type define ***/
@@ -36,7 +38,7 @@ public:
 
     virtual void setUserListener(std::shared_ptr<UserListener> listener);
 
-    void setConfig(std::weak_ptr<Config> config);
+    void setConfig(std::weak_ptr<Config> config, std::weak_ptr<MessageManager> msgMgr);
 
     int loadLocalData();
     int saveLocalData();
@@ -49,6 +51,8 @@ public:
     int syncUserInfo();
     int uploadUserInfo();
 
+    int setupMultiDevChannels();
+
 private:
     /*** type define ***/
 
@@ -59,6 +63,7 @@ private:
     int syncHistoryInfo();
 
     std::weak_ptr<SecurityManager> mSecurityManager;
+    std::weak_ptr<MessageManager> mMessageManager;
     std::weak_ptr<Config> mConfig;
     std::shared_ptr<UserListener> mUserListener;
     std::shared_ptr<UserInfo> mUserInfo;

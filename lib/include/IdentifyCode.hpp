@@ -15,6 +15,7 @@ public:
         PhoneNumber,
         EmailAddress,
         WechatId,
+        CarrierKey,
     };
 
     /*** static function and variable ***/

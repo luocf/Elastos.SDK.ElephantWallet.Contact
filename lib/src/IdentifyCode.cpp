@@ -8,6 +8,7 @@
 #include <IdentifyCode.hpp>
 
 #include <Json.hpp>
+#include <Platform.hpp>
 
 namespace elastos {
 
@@ -43,6 +44,20 @@ int IdentifyCode::setIdentifyCode(Type type, const std::string& value)
 
 int IdentifyCode::getIdentifyCode(Type type, std::string& value) const
 {
+    //int ret;
+
+    //switch(type) {
+    //case Type::CarrierKey:
+        //std::string devId;
+        //ret = GetCurrentDevId(devId);
+        //if(ret < 0) {
+            //return ret;
+        //}
+        //value = 
+
+    //}
+
+
     throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
 }
 

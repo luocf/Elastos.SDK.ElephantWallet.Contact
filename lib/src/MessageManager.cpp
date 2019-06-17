@@ -94,13 +94,20 @@ int MessageManager::presetChannels(std::weak_ptr<Config> config)
 {
     bool hasFailed = false;
 
+    std::map<ChannelType, std::string> profileMap;
+
+    auto userMgr = SAFE_GET_PTR(mUserManager);
+    std::shared_ptr<UserInfo> userInfo;
+    userMgr->getUserInfo(userInfo);
+
+
     mMessageChannelMap[ChannelType::Carrier] = std::make_shared<ChannelImplCarrier>(static_cast<uint32_t>(ChannelType::Carrier),
                                                                                     mMessageListener,
                                                                                     config);
     // TODO mMessageChannelMap[ChannelType::ElaChain] = std::make_shared<ChannelImplElaChain>(config, mSecurityManager);
 
     for(const auto& channel: mMessageChannelMap) {
-        int ret = channel.second->preset();
+        int ret = channel.second->preset(""); // TODO add carrier secretkey
         if(ret < 0) {
             hasFailed = true;
             Log::W(Log::TAG, "Failed to preset channel %d", channel.first);
@@ -330,6 +337,9 @@ void MessageManager::MessageListener::onStatusChanged(const std::string& userCod
 
     UserInfo::Status oldStatus = userInfo->getHumanStatus();
     if(userChType == ChannelType::Carrier) {
+        if(userStatus == UserInfo::Status::Online) {
+            userMgr->setupMultiDevChannels();
+        }
         ret = userInfo->setCarrierStatus(userCode, userStatus);
     } else {
         throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");

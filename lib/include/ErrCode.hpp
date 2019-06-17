@@ -32,6 +32,8 @@ public:
     constexpr static const int ChannelFailedOpenAll = -201;
     constexpr static const int ChannelFailedMultiOpen = -202;
     constexpr static const int ChannelFailedCarrier = -203;
+    constexpr static const int ChannelFailedFriendExists = -204;
+    constexpr static const int ChannelFailedFriendSelf = -205;
     constexpr static const int ChannelNotFound = -207;
     constexpr static const int ChannelNotReady = -208;
     constexpr static const int ChannelNotEstablished = -209;
