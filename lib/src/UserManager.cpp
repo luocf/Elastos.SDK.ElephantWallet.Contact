@@ -253,10 +253,10 @@ int UserManager::setupMultiDevChannels()
     }
 
     for(const auto& carrierInfo: carrierInfoArray) {
-        int ret = msgMgr->requestFriend(carrierInfo.mUsrId,
+        int ret = msgMgr->requestFriend(carrierInfo.mUsrAddr,
                                         MessageManager::ChannelType::Carrier,
-                                        "", false);
-        Log::I(Log::TAG, "UserManager::setupMultiDevChannels() add %s", carrierInfo.mUsrId.c_str());
+                                        "", true);
+        Log::I(Log::TAG, "UserManager::setupMultiDevChannels() add %s", carrierInfo.mUsrAddr.c_str());
         if(ret != ErrCode::ChannelFailedFriendSelf
         && ret != ErrCode::ChannelFailedFriendExists) {
             Log::W(Log::TAG, "UserManager::setupMultiDevChannels() Failed to add %s", carrierInfo.mUsrId.c_str());
