@@ -39,26 +39,53 @@ IdentifyCode::~IdentifyCode()
 
 int IdentifyCode::setIdentifyCode(Type type, const std::string& value)
 {
-    throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
+    switch(type) {
+    case Type::CarrierKey:
+    {
+        std::string devId;
+        int ret = Platform::GetCurrentDevId(devId);
+        if(ret < 0) {
+            return ret;
+        }
+        mCarrierSecretKeyMap[devId] = value;
+        break;
+    }
+    default:
+        mIdCodeMap[type] = value;
+        break;
+    }
+
+    return 0;
 }
 
 int IdentifyCode::getIdentifyCode(Type type, std::string& value) const
 {
-    //int ret;
 
-    //switch(type) {
-    //case Type::CarrierKey:
-        //std::string devId;
-        //ret = GetCurrentDevId(devId);
-        //if(ret < 0) {
-            //return ret;
-        //}
-        //value = 
+    switch(type) {
+    case Type::CarrierKey:
+    {
+        std::string devId;
+        int ret = Platform::GetCurrentDevId(devId);
+        if(ret < 0) {
+            return ret;
+        }
+        const auto& it = mCarrierSecretKeyMap.find(devId);
+        if(it == mCarrierSecretKeyMap.end()) {
+            return ErrCode::NotFoundError;
+        }
+        value = it->second;
+        break;
+    }
+    default:
+        const auto& it = mIdCodeMap.find(type);
+        if(it == mIdCodeMap.end()) {
+            return ErrCode::NotFoundError;
+        }
+        value = it->second;
+        break;
+    }
 
-    //}
-
-
-    throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
+    return 0;
 }
 
 int IdentifyCode::serialize(std::string& value) const

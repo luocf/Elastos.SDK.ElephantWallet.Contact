@@ -40,6 +40,7 @@ public:
 
         Control = 0x00FF0000,
         CtrlSyncDesc = 0x00010000,
+        AckSyncDesc  = 0x00020000,
     };
 
     struct MessageInfo {

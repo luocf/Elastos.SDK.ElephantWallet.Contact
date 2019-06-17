@@ -37,6 +37,7 @@ NLOHMANN_JSON_SERIALIZE_ENUM(MessageManager::MessageType, {
     { MessageManager::MessageType::MsgTransfer, "MsgTransfer" },
 
     { MessageManager::MessageType::CtrlSyncDesc, "CtrlSyncDesc" },
+    { MessageManager::MessageType::AckSyncDesc, "AckSyncDesc" },
 });
 
 inline void to_json(Json& j, const std::shared_ptr<MessageManager::MessageInfo>& info) {
@@ -144,11 +145,11 @@ int MessageManager::closehannels()
 }
 
 int MessageManager::requestFriend(const std::string& friendAddr,
-                                  ChannelType chType,
+                                  ChannelType humanChType,
                                   const std::string& summary,
                                   bool remoteRequest)
 {
-    auto it = mMessageChannelMap.find(chType);
+    auto it = mMessageChannelMap.find(humanChType);
     if(it == mMessageChannelMap.end()) {
         return ErrCode::ChannelNotFound;
     }
@@ -213,10 +214,10 @@ std::shared_ptr<MessageManager::MessageInfo> MessageManager::makeTextMessage(con
 }
 
 int MessageManager::sendMessage(const std::shared_ptr<HumanInfo> humanInfo,
-                                ChannelType chType,
+                                ChannelType humanChType,
                                 const std::shared_ptr<MessageInfo> msgInfo)
 {
-    auto it = mMessageChannelMap.find(chType);
+    auto it = mMessageChannelMap.find(humanChType);
     if(it == mMessageChannelMap.end()) {
         return ErrCode::ChannelNotFound;
     }
@@ -251,7 +252,7 @@ int MessageManager::sendMessage(const std::shared_ptr<HumanInfo> humanInfo,
     Log::W(Log::TAG, ">>>>>>>>>>>>> %s", jsonStr.c_str());
     std::vector<uint8_t> data(jsonStr.begin(), jsonStr.end());
 
-    if(chType == ChannelType::Carrier) {
+    if(humanChType == ChannelType::Carrier) {
         std::vector<HumanInfo::CarrierInfo> infoArray;
         int ret = humanInfo->getAllCarrierInfo(infoArray);
         if(ret < 0) {
@@ -360,11 +361,18 @@ void MessageManager::MessageListener::onReceivedMessage(const std::string& frien
                                                         const std::vector<uint8_t>& msgContent)
 {
     int ret = ErrCode::UnknownError;
-    ChannelType chType = static_cast<ChannelType>(channelType);
+    ChannelType humanChType = static_cast<ChannelType>(channelType);
 
     auto msgMgr = SAFE_GET_PTR_NO_RETVAL(mMessageManager);
     auto userMgr = SAFE_GET_PTR_NO_RETVAL(msgMgr->mUserManager);
     auto friendMgr = SAFE_GET_PTR_NO_RETVAL(msgMgr->mFriendManager);
+
+    std::shared_ptr<UserInfo> userInfo;
+    ret = userMgr->getUserInfo(userInfo);
+    if(ret < 0) {
+        Log::E(Log::TAG, "Failed to get user info.");
+        return;
+    }
 
     std::string jsonStr(msgContent.begin(), msgContent.end());
     Log::W(Log::TAG, "<<<<<<<<<<<<< %s", jsonStr.c_str());
@@ -386,12 +394,6 @@ void MessageManager::MessageListener::onReceivedMessage(const std::string& frien
 
     std::shared_ptr<HumanInfo> humanInfo;
     if(userMgr->contains(friendCode)) {
-        std::shared_ptr<UserInfo> userInfo;
-        ret = userMgr->getUserInfo(userInfo);
-        if(ret < 0) {
-            Log::E(Log::TAG, "Failed to get user info.");
-            return;
-        }
         humanInfo = userInfo;
     } else {
         std::shared_ptr<FriendInfo> friendInfo;
@@ -403,7 +405,8 @@ void MessageManager::MessageListener::onReceivedMessage(const std::string& frien
         humanInfo = friendInfo;
     }
 
-    if(msgInfo->mType == MessageType::CtrlSyncDesc) {
+    if(msgInfo->mType == MessageType::CtrlSyncDesc
+    || msgInfo->mType == MessageType::AckSyncDesc) {
         std::string humanDesc {msgInfo->mPlainContent.begin(), msgInfo->mPlainContent.end()};
         auto newInfo = HumanInfo();
         newInfo.HumanInfo::deserialize(humanDesc, true);
@@ -413,9 +416,26 @@ void MessageManager::MessageListener::onReceivedMessage(const std::string& frien
         }
 
         humanInfo->mergeHumanInfo(newInfo, HumanInfo::Status::Online);
+
+        if(msgInfo->mType == MessageType::CtrlSyncDesc) {
+            // send latest user desc.
+            std::string humanDesc;
+            ret = userInfo->HumanInfo::serialize(humanDesc, true);
+            if(ret < 0) {
+                Log::E(Log::TAG, "Failed to serialize user human info.");
+                return;
+            }
+            std::vector<uint8_t> humanDescBytes(humanDesc.begin(), humanDesc.end());
+            auto msgInfo = msgMgr->makeMessage(MessageType::AckSyncDesc, humanDescBytes);
+            ret = msgMgr->sendMessage(humanInfo, humanChType, msgInfo);
+            if(ret < 0) {
+                Log::E(Log::TAG, "Failed to send sync desc message.");
+                return;
+            }
+        }
     }
 
-    onReceivedMessage(humanInfo, chType, msgInfo);
+    onReceivedMessage(humanInfo, humanChType, msgInfo);
 }
 
 void MessageManager::MessageListener::onSentMessage(int msgIndex, int errCode)
@@ -428,7 +448,7 @@ void MessageManager::MessageListener::onFriendRequest(const std::string& friendC
                                                       const std::string& details)
 {
     int ret = ErrCode::UnknownError;
-    ChannelType chType = static_cast<ChannelType>(channelType);
+    ChannelType humanChType = static_cast<ChannelType>(channelType);
 
     auto msgMgr = SAFE_GET_PTR_NO_RETVAL(mMessageManager);
     auto userMgr = SAFE_GET_PTR_NO_RETVAL(msgMgr->mUserManager);
@@ -450,7 +470,7 @@ void MessageManager::MessageListener::onFriendRequest(const std::string& friendC
         friendDid = "";
         summary = details;
     }
-    if(chType == ChannelType::Carrier) {
+    if(humanChType == ChannelType::Carrier) {
         FriendInfo::CarrierInfo carrierInfo = {
             .mUsrAddr = "",
             .mUsrId = friendCode,
@@ -505,9 +525,9 @@ void MessageManager::MessageListener::onFriendRequest(const std::string& friendC
     }
 
     if(friendStatus == HumanInfo::Status::Offline) {
-        ret = msgMgr->requestFriend(friendCode, chType, "", false);
+        ret = msgMgr->requestFriend(friendCode, humanChType, "", false);
     } else {
-        msgMgr->mMessageListener->onFriendRequest(friendInfo, chType, summary);
+        msgMgr->mMessageListener->onFriendRequest(friendInfo, humanChType, summary);
     }
 
 }

@@ -36,7 +36,7 @@ private:
     /*** static function and variable ***/
 
     /*** class function and variable ***/
-    std::map<std::string, std::string> mCarrierSecretKeyMap; // DevUUID: CarrierId
+    std::map<std::string, std::string> mCarrierSecretKeyMap; // DevUUID: CarrierKey
     std::map<Type, std::string> mIdCodeMap; // DevUUID: CarrierId
 }; // class IdentifyCode
 

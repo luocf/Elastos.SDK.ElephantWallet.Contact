@@ -93,16 +93,22 @@ int HumanInfo::addCarrierInfo(const HumanInfo::CarrierInfo& info, const HumanInf
 
     for(auto idx = 0; idx < mBoundCarrierArray.size(); idx++) {
         auto& existsInfo = mBoundCarrierArray[idx];
-        if(existsInfo.mUsrId != correctedInfo.mUsrId) {
+
+        if(existsInfo.mDevInfo.mDevId.empty() == false
+        && existsInfo.mDevInfo.mDevId != correctedInfo.mDevInfo.mDevId) { // not changed
             continue;
         }
+
+        //if(existsInfo.mUsrId != correctedInfo.mUsrId) {
+            //continue;
+        //}
 
         // found info by usrId
         //if(existsInfo.mDevInfo.mDevId == correctedInfo.mDevInfo.mDevId
         //&& existsInfo.mUsrAddr == correctedInfo.mUsrAddr) { // not changed
             //return 0;
         if(existsInfo.mDevInfo.mDevId == correctedInfo.mDevInfo.mDevId) { // not changed
-            existsInfo.mUsrAddr = correctedInfo.mUsrAddr;
+            existsInfo = correctedInfo;
             return 0;
         } else { // update info
             existsInfo = correctedInfo;
@@ -337,7 +343,9 @@ int HumanInfo::deserializeCarrierInfo(const std::string& value)
 {
     Json jsonInfo= Json::parse(value);
     mBoundCarrierArray = jsonInfo.get<std::vector<CarrierInfo>>();
-    mBoundCarrierArray.resize(mBoundCarrierArray.size());
+
+    mBoundCarrierStatus.resize(mBoundCarrierArray.size());
+
     return 0;
 }
 

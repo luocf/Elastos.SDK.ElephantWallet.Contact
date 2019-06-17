@@ -36,7 +36,7 @@ int main(int argc, char **argv)
 	const char* nickname = "Friend";
     const char* fifoFilePath = (argc > 1 ? argv[1] : nullptr);
     if(fifoFilePath != nullptr) {
-        gSavedMnemonic = "panda merry use liquid thank segment end federal possible work average diet";
+        gSavedMnemonic = "explain luxury good page require eye pole zone pride grid debris sibling";
         nickname = "Me";
     }
 
