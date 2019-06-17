@@ -1,0 +1,45 @@
+/**
+ * @file	vupnp.h
+ * @brief	VUPnP function
+ * @details	This file contains all the UPNP function declaration.
+ *
+ * @author	xxx
+ * @author	<xxx@xxx.com>
+ * @copyright	(c) 2012 xxx All rights reserved.
+ **/
+
+
+#ifndef __VUPNP_H__
+#define __VUPNP_H__
+
+#include <vupnptypes.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/**
+ * @addtogroup GlobalTypeDefine VUPnP Type Definition
+ * @{
+ **/
+
+/**
+ * @brief	declare the length of UUID string
+ **/
+#define VUPNP_UUID_LEN	37
+
+/** @} GlobalTypeDefine **/
+
+/**
+ * @addtogroup GlobalFunctionInterface VUPnP Interface
+ * @{
+ **/
+
+/** @} GlobalFunctionInterface **/
+
+#ifdef __cplusplus
+}
+#endif
+
+
+#endif // __VUPNP_H__

@@ -1,0 +1,83 @@
+﻿Doxygen操作手顺
+
+一、linux系统
+ 1. 安装doxygen和graphviz。
+ 2. 在shell中执行doxygen Doc/doxygen.cfg。结束后，生成的文档首页在Doc/html/index.html。
+
+二、windows系统
+ 1. 安装doxygen-1.7.3-setup.exe和graphviz-2.26.3.msi后，重启电脑。
+ 2. 执行Doxywizard，File->open，选择Doc/doxygen.cfg，执行run标签的[Run doxygen]，结束后，生成的文档首页在Doc/html/index.html。
+
+
+
+注意事项：
+ 1. 新建文件要保存为utf-8格式，这样可以支持中文注释，否则中文注释乱码。
+
+ 2. 新建文件请参照template文件夹中的文件.
+
+ 2. 需要doxygen生成文档的注释用
+	/*!
+	 * xxx
+	 */
+    的格式在注释对象（变量，类，结构体声明和函数等等）的上面进行注释。
+    不需要doxygen生成文档的注释用
+	/*
+	 * xxx
+	 */
+    注意不要使用/** xxx */，否则会生成文档。
+
+ 3. 单行注释中需要doxygen生成文档的注释用
+	/*! xxx */
+    的格式在注释对象的上面进行注释。
+    不需要doxygen生成文档的注释用
+	/* xxx */ 或 // xxx
+    注释，注意不要使用/// xxx，否则会生成文档。
+
+ 4. 在注释对象后面同一行进行注释，需要doxygen生成文档的注释用
+	/**< xxx */或 ///< xxx
+    的格式在注释对象的上面进行注释。
+    不需要doxygen生成文档的注释用
+	/* xxx */ 或 // xxx注释。
+
+ 5. 除了函数，所有的注释都标注在声明处，函数的注释标注在实现处。
+
+ 6. 函数内部的注释，即使使用doxygen的格式，也不会被处理。
+
+ 7. .h中定义的除class和struct、union及function的部分如define、typedef和enum统一声明在
+	/*!
+	 * @addtogroup GlobalGroup Global Define and Typedef
+	 * @{
+	 */
+	// todo: add define and typedef here
+
+	/*! @} GlobalGroup *
+    之间，方便生成全局的检索。
+
+8. .h中的function声明在
+	/*!
+	 * @addtogroup Globalxxx xxx Interface
+	 * @{
+	 */
+	// todo: add function here
+
+	/*! @} Globalxxx */
+    之间，方便生成全局的检索。例如：
+
+	/*!
+	 * @addtogroup GlobalTemplateC Template C Interface
+	 * @{
+	 */
+	// todo: add function here
+
+	void function(void);
+
+	/*! @} GlobalTemplateC */
+
+9. 注释中,@brief 为简要注释, 简要注释会出现在详细注释的前面，简要注释和详细注释之间要空一行，否则会全变成简要注释了。例如：
+	/*!
+	 * @brief [comment...].
+	 *
+	 * [detailed descriptions...].
+	 */
+
+10. 模板中的[]之间的部分(包括[])需要替换成实际内容，但是@param[in]和@param[out]例外，这是两个完整的doxygen命令，@param[in]表示输入参数，@param[out]表示输出参数。其他部分也可根据实际需要修改。
