@@ -7,6 +7,7 @@
 
 #include "MD5.hpp"
 
+#include <cstring>
 #include <iomanip>
 #include <openssl/md5.h>
 #include <sstream>
