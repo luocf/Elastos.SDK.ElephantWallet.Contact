@@ -347,6 +347,12 @@ int HumanInfo::serialize(std::string& value, bool summaryOnly) const
 
     jsonInfo[JsonKey::CommonInfoMap] = mCommonInfoMap;
     jsonInfo[JsonKey::BoundCarrierArray] = mBoundCarrierArray;
+    if(summaryOnly == true) {
+        for(auto& carrierInfo: jsonInfo[JsonKey::BoundCarrierArray]) {
+            carrierInfo.erase("CarrierId");
+            carrierInfo.erase("DeviceInfo");
+        }
+    }
     if(summaryOnly == false) {
         jsonInfo[JsonKey::BoundCarrierStatus] = mBoundCarrierStatus;
         jsonInfo[JsonKey::StatusMap] = mStatusMap;
