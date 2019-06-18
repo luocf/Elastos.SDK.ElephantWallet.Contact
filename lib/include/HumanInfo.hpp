@@ -2,6 +2,7 @@
 #define _ELASTOS_HUMAN_INFO_HPP_
 
 #include <map>
+#include <memory>
 #include <string>
 #include <vector>
 
