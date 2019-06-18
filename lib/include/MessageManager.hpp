@@ -40,7 +40,6 @@ public:
 
         Control = 0x00FF0000,
         CtrlSyncDesc = 0x00010000,
-        AckSyncDesc  = 0x00020000,
     };
 
     struct MessageInfo {
@@ -145,6 +144,7 @@ private:
     template <class T>
     int getChannel(ChannelType chType, std::weak_ptr<T>& channel);
     std::shared_ptr<MessageInfo> makeMessage(std::shared_ptr<MessageInfo> from, bool ignoreContent = true);
+    int sendDescMessage(const std::shared_ptr<HumanInfo> humanInfo, ChannelType chType);
 
     std::weak_ptr<SecurityManager> mSecurityManager;
     std::weak_ptr<UserManager> mUserManager;

@@ -37,7 +37,6 @@ NLOHMANN_JSON_SERIALIZE_ENUM(MessageManager::MessageType, {
     { MessageManager::MessageType::MsgTransfer, "MsgTransfer" },
 
     { MessageManager::MessageType::CtrlSyncDesc, "CtrlSyncDesc" },
-    { MessageManager::MessageType::AckSyncDesc, "AckSyncDesc" },
 });
 
 inline void to_json(Json& j, const std::shared_ptr<MessageManager::MessageInfo>& info) {
@@ -178,7 +177,7 @@ int MessageManager::requestFriend(const std::string& friendAddr,
     Json jsonInfo = Json::object();
     jsonInfo[JsonKey::Did] = userDid;
     jsonInfo[JsonKey::Summary] = summary;
-    jsonInfo[JsonKey::HumanInfo] = humanInfo;
+    //jsonInfo[JsonKey::HumanInfo] = humanInfo;
 
     auto details = jsonInfo.dump();
     ret = channel->requestFriend(friendAddr, details, remoteRequest);
@@ -405,8 +404,9 @@ void MessageManager::MessageListener::onReceivedMessage(const std::string& frien
         humanInfo = friendInfo;
     }
 
-    if(msgInfo->mType == MessageType::CtrlSyncDesc
-    || msgInfo->mType == MessageType::AckSyncDesc) {
+    //if(msgInfo->mType == MessageType::CtrlSyncDesc
+    //|| msgInfo->mType == MessageType::AckSyncDesc) {
+    if(msgInfo->mType == MessageType::CtrlSyncDesc) {
         std::string humanDesc {msgInfo->mPlainContent.begin(), msgInfo->mPlainContent.end()};
         auto newInfo = HumanInfo();
         newInfo.HumanInfo::deserialize(humanDesc, true);
@@ -417,22 +417,22 @@ void MessageManager::MessageListener::onReceivedMessage(const std::string& frien
 
         humanInfo->mergeHumanInfo(newInfo, HumanInfo::Status::Online);
 
-        if(msgInfo->mType == MessageType::CtrlSyncDesc) {
-            // send latest user desc.
-            std::string humanDesc;
-            ret = userInfo->HumanInfo::serialize(humanDesc, true);
-            if(ret < 0) {
-                Log::E(Log::TAG, "Failed to serialize user human info.");
-                return;
-            }
-            std::vector<uint8_t> humanDescBytes(humanDesc.begin(), humanDesc.end());
-            auto msgInfo = msgMgr->makeMessage(MessageType::AckSyncDesc, humanDescBytes);
-            ret = msgMgr->sendMessage(humanInfo, humanChType, msgInfo);
-            if(ret < 0) {
-                Log::E(Log::TAG, "Failed to send sync desc message.");
-                return;
-            }
-        }
+        //if(msgInfo->mType == MessageType::CtrlSyncDesc) {
+            //// send latest user desc.
+            //std::string humanDesc;
+            //ret = userInfo->HumanInfo::serialize(humanDesc, true);
+            //if(ret < 0) {
+                //Log::E(Log::TAG, "Failed to serialize user human info.");
+                //return;
+            //}
+            //std::vector<uint8_t> humanDescBytes(humanDesc.begin(), humanDesc.end());
+            //auto msgInfo = msgMgr->makeMessage(MessageType::AckSyncDesc, humanDescBytes);
+            //ret = msgMgr->sendMessage(humanInfo, humanChType, msgInfo);
+            //if(ret < 0) {
+                //Log::E(Log::TAG, "Failed to send sync desc message.");
+                //return;
+            //}
+        //}
     }
 
     onReceivedMessage(humanInfo, humanChType, msgInfo);
@@ -461,11 +461,11 @@ void MessageManager::MessageListener::onFriendRequest(const std::string& friendC
         Json jsonInfo= Json::parse(details);
         friendDid = jsonInfo[JsonKey::Did];
         summary = jsonInfo[JsonKey::Summary];
-        int ret = humanInfo.HumanInfo::deserialize(jsonInfo[JsonKey::HumanInfo], true);
-        if(ret < 0) {
-            friendDid = "";
-            summary = details;
-        }
+        //int ret = humanInfo.HumanInfo::deserialize(jsonInfo[JsonKey::HumanInfo], true);
+        //if(ret < 0) {
+            //friendDid = "";
+            //summary = details;
+        //}
     } catch(const std::exception& ex) {
         friendDid = "";
         summary = details;
@@ -503,7 +503,12 @@ void MessageManager::MessageListener::onFriendRequest(const std::string& friendC
     if(friendDid == userDid) {
         ret = userInfo->mergeHumanInfo(humanInfo, HumanInfo::Status::Offline);
         if(ret < 0) {
-            Log::E(Log::TAG, "Failed to add other dev.");
+            Log::E(Log::TAG, "Failed to add other dev. ret=%d", ret);
+            return;
+        }
+        ret = msgMgr->requestFriend(friendCode, humanChType, "", false);
+        if(ret < 0) {
+            Log::E(Log::TAG, "Failed to accept other dev. ret=%d", ret);
             return;
         }
 
@@ -539,6 +544,7 @@ void MessageManager::MessageListener::onFriendStatusChanged(const std::string& f
     int ret = ErrCode::UnknownError;
     ChannelType humanChType = static_cast<ChannelType>(channelType);
     HumanInfo::Status humanStatus = (status == ChannelStatus::Online ? HumanInfo::Status::Online : HumanInfo::Status::Offline);
+    std::shared_ptr<HumanInfo> fromHumanInfo;
 
     auto msgMgr = SAFE_GET_PTR_NO_RETVAL(mMessageManager);
     auto userMgr = SAFE_GET_PTR_NO_RETVAL(msgMgr->mUserManager);
@@ -555,6 +561,8 @@ void MessageManager::MessageListener::onFriendStatusChanged(const std::string& f
     UserInfo::CarrierInfo info;
     ret = userInfo->getCarrierInfoByUsrId(friendCode, info);
     if(ret >= 0) { // found
+        fromHumanInfo = userInfo;
+
         UserInfo::Status oldStatus = userInfo->getHumanStatus();
         if(humanChType == ChannelType::Carrier) {
             userInfo->setCarrierStatus(friendCode, humanStatus);
@@ -570,6 +578,8 @@ void MessageManager::MessageListener::onFriendStatusChanged(const std::string& f
     std::shared_ptr<FriendInfo> friendInfo;
     ret = friendMgr->tryGetFriendInfo(friendCode, friendInfo);
     if(ret >= 0) { // found
+        fromHumanInfo = userInfo;
+
         FriendInfo::Status oldStatus = friendInfo->getHumanStatus();
         if(humanChType == ChannelType::Carrier) {
             friendInfo->setCarrierStatus(friendCode, humanStatus);
@@ -580,25 +590,13 @@ void MessageManager::MessageListener::onFriendStatusChanged(const std::string& f
         if(newStatus != oldStatus) {
             onFriendStatusChanged(friendInfo, humanChType, newStatus);
         }
-
-        // send latest user desc.
-        std::string humanDesc;
-        ret = userInfo->HumanInfo::serialize(humanDesc, true);
-        if(ret < 0) {
-            Log::E(Log::TAG, "Failed to serialize user human info.");
-            return;
-        }
-        std::vector<uint8_t> humanDescBytes(humanDesc.begin(), humanDesc.end());
-        auto msgInfo = msgMgr->makeMessage(MessageType::CtrlSyncDesc, humanDescBytes);
-        ret = msgMgr->sendMessage(friendInfo, humanChType, msgInfo);
-        if(ret < 0) {
-            Log::E(Log::TAG, "Failed to send sync desc message.");
-            return;
-        }
     }
 
+    if(humanStatus == HumanInfo::Status::Online) {
+        std::ignore = msgMgr->sendDescMessage(fromHumanInfo, humanChType);
+    }
 
-    Log::D(Log::TAG, "onFriendStatusChanged() friendCode=%s, ret=%d", friendCode.c_str(), ret);
+    Log::D(Log::TAG, "onFriendStatusChanged() friendCode=%s, status=%d", friendCode.c_str(), humanStatus);
     return;
 }
 
@@ -615,6 +613,34 @@ std::shared_ptr<MessageManager::MessageInfo> MessageManager::makeMessage(std::sh
     auto msgInfo = std::make_shared<Impl>(*from, ignoreContent);
 
     return msgInfo;
+}
+
+int MessageManager::sendDescMessage(const std::shared_ptr<HumanInfo> humanInfo, ChannelType chType)
+{
+    // send latest user desc.
+    auto userMgr = SAFE_GET_PTR(mUserManager);
+    std::shared_ptr<UserInfo> userInfo;
+    int ret = userMgr->getUserInfo(userInfo);
+    if(ret < 0) {
+        Log::E(Log::TAG, "Failed to process send desc message, user info is not exists.");
+        return;
+    }
+
+    std::string humanDesc;
+    ret = userInfo->HumanInfo::serialize(humanDesc, true);
+    if(ret < 0) {
+        Log::E(Log::TAG, "Failed to serialize user human info.");
+        return ret;
+    }
+    std::vector<uint8_t> humanDescBytes(humanDesc.begin(), humanDesc.end());
+    auto msgInfo = msgMgr->makeMessage(MessageType::CtrlSyncDesc, humanDescBytes);
+    ret = msgMgr->sendMessage(humanInfo, chType, msgInfo);
+    if(ret < 0) {
+        Log::E(Log::TAG, "Failed to send sync desc message.");
+        return ret;
+    }
+
+    return 0;
 }
 
 } // namespace elastos

@@ -225,7 +225,7 @@ int HumanInfo::mergeHumanInfo(const HumanInfo& value, const Status status)
     auto it = value.mCommonInfoMap.find(Item::Did);
     if(it != value.mCommonInfoMap.end() && it->second.empty() == false) {
         if(this->mCommonInfoMap[Item::Did].empty() == false
-        && this->mCommonInfoMap[Item::Did] == it->second) {
+        && this->mCommonInfoMap[Item::Did] != it->second) {
             return ErrCode::MergeInfoFailed;
         }
 
@@ -235,7 +235,7 @@ int HumanInfo::mergeHumanInfo(const HumanInfo& value, const Status status)
     it = value.mCommonInfoMap.find(Item::ElaAddress);
     if(it != value.mCommonInfoMap.end() && it->second.empty() == false) {
         if(this->mCommonInfoMap[Item::ElaAddress].empty() == false
-        && this->mCommonInfoMap[Item::ElaAddress] == it->second) {
+        && this->mCommonInfoMap[Item::ElaAddress] != it->second) {
             return ErrCode::MergeInfoFailed;
         }
 
@@ -355,12 +355,12 @@ int HumanInfo::serialize(std::string& value, bool summaryOnly) const
 
     jsonInfo[JsonKey::CommonInfoMap] = mCommonInfoMap;
     jsonInfo[JsonKey::BoundCarrierArray] = mBoundCarrierArray;
-    if(summaryOnly == true) {
-        for(auto& carrierInfo: jsonInfo[JsonKey::BoundCarrierArray]) {
-            carrierInfo.erase("CarrierId");
-            carrierInfo.erase("DeviceInfo");
-        }
-    }
+    //if(summaryOnly == true) {
+        //for(auto& carrierInfo: jsonInfo[JsonKey::BoundCarrierArray]) {
+            //carrierInfo.erase("CarrierId");
+            //carrierInfo.erase("DeviceInfo");
+        //}
+    //}
     if(summaryOnly == false) {
         jsonInfo[JsonKey::BoundCarrierStatus] = mBoundCarrierStatus;
         jsonInfo[JsonKey::StatusMap] = mStatusMap;
@@ -373,6 +373,7 @@ int HumanInfo::serialize(std::string& value, bool summaryOnly) const
 
 int HumanInfo::deserialize(const std::string& value, bool summaryOnly)
 {
+    Log::D(Log::TAG, "HumanInfo::deserialize() value=%s, summaryOnly=%d", value.c_str(), summaryOnly);
     Json jsonInfo;
     try {
         jsonInfo= Json::parse(value);
