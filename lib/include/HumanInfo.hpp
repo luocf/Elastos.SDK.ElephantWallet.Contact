@@ -55,6 +55,9 @@ public:
     explicit HumanInfo();
     virtual ~HumanInfo();
 
+    bool contains(const std::string& humanCode);
+    bool contains(const std::shared_ptr<HumanInfo>& humanInfo);
+
     virtual int addCarrierInfo(const CarrierInfo& info, const Status status = Status::Invalid);
     virtual int getCarrierInfoByUsrId(const std::string& usrId, CarrierInfo& info) const;
     virtual int getAllCarrierInfo(std::vector<CarrierInfo>& infoArray) const;

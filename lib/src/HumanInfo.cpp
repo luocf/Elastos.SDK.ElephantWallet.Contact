@@ -62,6 +62,62 @@ HumanInfo::~HumanInfo()
 {
 }
 
+bool HumanInfo::contains(const std::string& humanCode)
+{
+    auto kind = AnalyzeHumanKind(humanCode);
+
+    int ret = ErrCode::UnknownError;
+    switch(kind) {
+    case HumanKind::Did:
+        {
+            std::string info;
+            ret = getHumanInfo(Item::Did, info);
+        }
+        break;
+    case HumanKind::Ela:
+        {
+            std::string info;
+            ret = getHumanInfo(Item::ElaAddress, info);
+        }
+        break;
+    case HumanKind::Carrier:
+        {
+            CarrierInfo info;
+            ret = getCarrierInfoByUsrId(humanCode, info);
+        }
+        break;
+    default:
+        break;
+    }
+
+    return (ret >=0 ? true : false);
+}
+
+bool HumanInfo::contains(const std::shared_ptr<HumanInfo>& humanInfo)
+{
+    std::string info;
+    int ret = humanInfo->getHumanInfo(Item::Did, info);
+    if(ret >= 0) {
+        return contains(info);
+    }
+
+    ret = humanInfo->getHumanInfo(Item::ElaAddress, info);
+    if(ret >= 0) {
+        return contains(info);
+    }
+
+    std::vector<CarrierInfo> infoArray;
+    ret = humanInfo->getAllCarrierInfo(infoArray);
+    for(const auto& info: infoArray) {
+        bool find = contains(info.mUsrId);
+        if(find == true) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 int HumanInfo::addCarrierInfo(const HumanInfo::CarrierInfo& info, const HumanInfo::Status status)
 {
     Log::D(Log::TAG, " ============    %s", __PRETTY_FUNCTION__);

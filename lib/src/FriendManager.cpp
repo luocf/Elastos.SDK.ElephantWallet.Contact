@@ -42,6 +42,31 @@ FriendManager::~FriendManager()
 {
 }
 
+bool FriendManager::contains(const std::string& friendCode)
+{
+    for(const auto& it: mFriendList) {
+        bool find = it->contains(friendCode);
+        if(find == true) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool FriendManager::contains(const std::shared_ptr<HumanInfo>& friendInfo)
+{
+    for(const auto& it: mFriendList) {
+        bool find = it->contains(friendInfo);
+        if(find == true) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+
 void FriendManager::setFriendListener(std::shared_ptr<FriendListener> listener)
 {
     mFriendListener = listener;

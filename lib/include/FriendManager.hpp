@@ -46,6 +46,9 @@ public:
 
     int restoreFriends();
 
+    bool contains(const std::string& friendCode);
+    bool contains(const std::shared_ptr<HumanInfo>& friendInfo);
+
     virtual int tryAddFriend(const std::string& friendCode, const std::string& summary, bool remoteRequest = true);
     virtual int tryRemoveFriend(const std::string& friendCode);
     virtual int tryGetFriendInfo(const std::string& friendCode, std::shared_ptr<FriendInfo>& friendInfo);

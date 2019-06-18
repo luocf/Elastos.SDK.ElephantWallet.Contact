@@ -165,33 +165,12 @@ int UserManager::getUserInfo(std::shared_ptr<UserInfo>& userInfo)
 
 bool UserManager::contains(const std::string& userCode)
 {
-    auto kind = HumanInfo::AnalyzeHumanKind(userCode);
+    return mUserInfo->contains(userCode);
+}
 
-    int ret = ErrCode::UnknownError;
-    switch(kind) {
-    case HumanInfo::HumanKind::Did:
-        {
-            std::string info;
-            ret = mUserInfo->getHumanInfo(HumanInfo::Item::Did, info);
-        }
-        break;
-    case HumanInfo::HumanKind::Ela:
-        {
-            std::string info;
-            ret = mUserInfo->getHumanInfo(HumanInfo::Item::ElaAddress, info);
-        }
-        break;
-    case HumanInfo::HumanKind::Carrier:
-        {
-            HumanInfo::CarrierInfo info;
-            ret = mUserInfo->getCarrierInfoByUsrId(userCode, info);
-        }
-        break;
-    default:
-        break;
-    }
-
-    return (ret >=0 ? true : false);
+bool UserManager::contains(const std::shared_ptr<HumanInfo>& userInfo)
+{
+    return mUserInfo->contains(userInfo);
 }
 
 int UserManager::syncUserInfo()

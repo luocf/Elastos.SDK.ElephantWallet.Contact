@@ -226,6 +226,11 @@ int MessageManager::sendMessage(const std::shared_ptr<HumanInfo> humanInfo,
         return ErrCode::ChannelNotReady;
     }
 
+    auto userMgr = SAFE_GET_PTR(mUserManager);
+    if(userMgr->contains(humanInfo)) {
+        return ErrCode::InvalidArgument;
+    }
+
     auto cryptoMsgInfo = makeMessage(msgInfo);
     if(msgInfo->mCryptoAlgorithm.empty() == true
     || msgInfo->mCryptoAlgorithm == "plain") {
@@ -253,10 +258,20 @@ int MessageManager::sendMessage(const std::shared_ptr<HumanInfo> humanInfo,
 
     if(humanChType == ChannelType::Carrier) {
         std::vector<HumanInfo::CarrierInfo> infoArray;
-        int ret = humanInfo->getAllCarrierInfo(infoArray);
+
+        std::shared_ptr<UserInfo> userInfo;
+        userMgr->getUserInfo(userInfo);
+        int ret = userInfo->getAllCarrierInfo(infoArray);
         if(ret < 0) {
             return ErrCode::ChannelNotEstablished;
         }
+
+        std::vector<HumanInfo::CarrierInfo> friendArray;
+        ret = humanInfo->getAllCarrierInfo(friendArray);
+        if(ret < 0) {
+            return ErrCode::ChannelNotEstablished;
+        }
+        infoArray.insert(infoArray.end(), friendArray.begin(), friendArray.end());
 
         ret = ErrCode::ChannelNotOnline;
         for(auto& it: infoArray) {
@@ -486,55 +501,58 @@ void MessageManager::MessageListener::onFriendRequest(const std::string& friendC
         return;
     }
 
-    std::shared_ptr<UserInfo> userInfo;
-    ret = userMgr->getUserInfo(userInfo);
-    if(ret < 0) {
-        Log::E(Log::TAG, "Failed to process friend request, user info is not exists.");
-        return;
-    }
-
-    std::string userDid;
-    ret = userInfo->getHumanInfo(HumanInfo::Item::Did, userDid);
-    if(ret < 0) {
-        Log::E(Log::TAG, "Failed to process friend request, user did is not exists.");
-        return;
-    }
-
-    if(friendDid == userDid) {
-        ret = userInfo->mergeHumanInfo(humanInfo, HumanInfo::Status::Offline);
+    if(userMgr->contains(friendCode)) {
+        std::shared_ptr<UserInfo> userInfo;
+        ret = userMgr->getUserInfo(userInfo);
         if(ret < 0) {
-            Log::E(Log::TAG, "Failed to add other dev. ret=%d", ret);
-            return;
-        }
-        ret = msgMgr->requestFriend(friendCode, humanChType, "", false);
-        if(ret < 0) {
-            Log::E(Log::TAG, "Failed to accept other dev. ret=%d", ret);
+            Log::E(Log::TAG, "Failed to process friend request, user info is not exists.");
             return;
         }
 
-        return;
+        std::string userDid;
+        ret = userInfo->getHumanInfo(HumanInfo::Item::Did, userDid);
+        if(ret < 0) {
+            Log::E(Log::TAG, "Failed to process friend request, user did is not exists.");
+            return;
+        }
+
+        if(friendDid == userDid) {
+            ret = userInfo->mergeHumanInfo(humanInfo, HumanInfo::Status::Offline);
+            if(ret < 0) {
+                Log::E(Log::TAG, "Failed to add other dev. ret=%d", ret);
+                return;
+            }
+            ret = msgMgr->requestFriend(friendCode, humanChType, "", false);
+            if(ret < 0) {
+                Log::E(Log::TAG, "Failed to accept other dev. ret=%d", ret);
+                return;
+            }
+
+            return;
+        }
     }
 
-    std::shared_ptr<FriendInfo> friendInfo;
-    auto friendStatus = HumanInfo::Status::Offline;
-    ret = friendMgr->getFriendInfo(FriendInfo::HumanKind::Did, friendDid, friendInfo);
-    if(ret < 0) { // not found
-        friendInfo = std::make_shared<FriendInfo>(friendMgr);
-        friendMgr->addFriendInfo(friendInfo);
-        friendStatus = HumanInfo::Status::WaitForAccept;
-    }
-    ret = friendInfo->mergeHumanInfo(humanInfo, friendStatus);
-    if(ret < 0) {
-        Log::E(Log::TAG, "Failed to add other dev to friend.");
-        return;
-    }
+    if(friendMgr->contains(friendCode)) {
+        std::shared_ptr<FriendInfo> friendInfo;
+        auto friendStatus = HumanInfo::Status::Offline;
+        ret = friendMgr->getFriendInfo(FriendInfo::HumanKind::Did, friendDid, friendInfo);
+        if(ret < 0) { // not found
+            friendInfo = std::make_shared<FriendInfo>(friendMgr);
+            friendMgr->addFriendInfo(friendInfo);
+            friendStatus = HumanInfo::Status::WaitForAccept;
+        }
+        ret = friendInfo->mergeHumanInfo(humanInfo, friendStatus);
+        if(ret < 0) {
+            Log::E(Log::TAG, "Failed to add other dev to friend.");
+            return;
+        }
 
-    if(friendStatus == HumanInfo::Status::Offline) {
-        ret = msgMgr->requestFriend(friendCode, humanChType, "", false);
-    } else {
-        msgMgr->mMessageListener->onFriendRequest(friendInfo, humanChType, summary);
+        if(friendStatus == HumanInfo::Status::Offline) {
+            ret = msgMgr->requestFriend(friendCode, humanChType, "", false);
+        } else {
+            msgMgr->mMessageListener->onFriendRequest(friendInfo, humanChType, summary);
+        }
     }
-
 }
 
 void MessageManager::MessageListener::onFriendStatusChanged(const std::string& friendCode,
@@ -557,38 +575,43 @@ void MessageManager::MessageListener::onFriendStatusChanged(const std::string& f
         return;
     }
 
-    std::string userDid;
-    UserInfo::CarrierInfo info;
-    ret = userInfo->getCarrierInfoByUsrId(friendCode, info);
-    if(ret >= 0) { // found
-        fromHumanInfo = userInfo;
 
-        UserInfo::Status oldStatus = userInfo->getHumanStatus();
-        if(humanChType == ChannelType::Carrier) {
-            userInfo->setCarrierStatus(friendCode, humanStatus);
-        } else {
-            throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
-        }
-        UserInfo::Status newStatus = userInfo->getHumanStatus();
-        if(newStatus != oldStatus) {
-            onStatusChanged(userInfo, humanChType, newStatus);
+    if(userMgr->contains(friendCode)) {
+        std::string userDid;
+        UserInfo::CarrierInfo info;
+        ret = userInfo->getCarrierInfoByUsrId(friendCode, info);
+        if(ret >= 0) { // found
+            fromHumanInfo = userInfo;
+
+            UserInfo::Status oldStatus = userInfo->getHumanStatus();
+            if(humanChType == ChannelType::Carrier) {
+                userInfo->setCarrierStatus(friendCode, humanStatus);
+            } else {
+                throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
+            }
+            UserInfo::Status newStatus = userInfo->getHumanStatus();
+            if(newStatus != oldStatus) {
+                onStatusChanged(userInfo, humanChType, newStatus);
+            }
         }
     }
 
-    std::shared_ptr<FriendInfo> friendInfo;
-    ret = friendMgr->tryGetFriendInfo(friendCode, friendInfo);
-    if(ret >= 0) { // found
-        fromHumanInfo = userInfo;
+    if(friendMgr->contains(friendCode)) {
+        std::shared_ptr<FriendInfo> friendInfo;
+        ret = friendMgr->tryGetFriendInfo(friendCode, friendInfo);
+        if(ret >= 0) { // found
+            fromHumanInfo = userInfo;
 
-        FriendInfo::Status oldStatus = friendInfo->getHumanStatus();
-        if(humanChType == ChannelType::Carrier) {
-            friendInfo->setCarrierStatus(friendCode, humanStatus);
-        } else {
-            throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
-        }
-        FriendInfo::Status newStatus = friendInfo->getHumanStatus();
-        if(newStatus != oldStatus) {
-            onFriendStatusChanged(friendInfo, humanChType, newStatus);
+            FriendInfo::Status oldStatus = friendInfo->getHumanStatus();
+            if(humanChType == ChannelType::Carrier) {
+                friendInfo->setCarrierStatus(friendCode, humanStatus);
+            } else {
+                throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
+            }
+            FriendInfo::Status newStatus = friendInfo->getHumanStatus();
+            if(newStatus != oldStatus) {
+                onFriendStatusChanged(friendInfo, humanChType, newStatus);
+            }
         }
     }
 
@@ -623,7 +646,7 @@ int MessageManager::sendDescMessage(const std::shared_ptr<HumanInfo> humanInfo, 
     int ret = userMgr->getUserInfo(userInfo);
     if(ret < 0) {
         Log::E(Log::TAG, "Failed to process send desc message, user info is not exists.");
-        return;
+        return ret;
     }
 
     std::string humanDesc;
@@ -633,8 +656,8 @@ int MessageManager::sendDescMessage(const std::shared_ptr<HumanInfo> humanInfo, 
         return ret;
     }
     std::vector<uint8_t> humanDescBytes(humanDesc.begin(), humanDesc.end());
-    auto msgInfo = msgMgr->makeMessage(MessageType::CtrlSyncDesc, humanDescBytes);
-    ret = msgMgr->sendMessage(humanInfo, chType, msgInfo);
+    auto msgInfo = makeMessage(MessageType::CtrlSyncDesc, humanDescBytes);
+    ret = sendMessage(humanInfo, chType, msgInfo);
     if(ret < 0) {
         Log::E(Log::TAG, "Failed to send sync desc message.");
         return ret;

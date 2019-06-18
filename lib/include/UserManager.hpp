@@ -40,13 +40,15 @@ public:
 
     void setConfig(std::weak_ptr<Config> config, std::weak_ptr<MessageManager> msgMgr);
 
+    bool contains(const std::string& userCode);
+    bool contains(const std::shared_ptr<HumanInfo>& userInfo);
+
     int loadLocalData();
     int saveLocalData();
     int serialize(std::string& value) const;
 
     int makeUser();
     int getUserInfo(std::shared_ptr<UserInfo>& userInfo);
-    bool contains(const std::string& userCode);
 
     int syncUserInfo();
     int uploadUserInfo();
