@@ -148,6 +148,7 @@ int MessageManager::requestFriend(const std::string& friendAddr,
                                   const std::string& summary,
                                   bool remoteRequest)
 {
+    Log::W(Log::TAG, ">>>>>>>>>>>>> requestFriend code:%s, details=%s", friendAddr.c_str(), summary.c_str());
     auto it = mMessageChannelMap.find(humanChType);
     if(it == mMessageChannelMap.end()) {
         return ErrCode::ChannelNotFound;
@@ -419,6 +420,10 @@ void MessageManager::MessageListener::onReceivedMessage(const std::string& frien
         }
         humanInfo = friendInfo;
     }
+    if(humanInfo.get() == nullptr) {
+            Log::E(Log::TAG, "Failed to get friend info.");
+            return;
+    }
 
     //if(msgInfo->mType == MessageType::CtrlSyncDesc
     //|| msgInfo->mType == MessageType::AckSyncDesc) {
@@ -463,6 +468,7 @@ void MessageManager::MessageListener::onFriendRequest(const std::string& friendC
                                                       uint32_t channelType,
                                                       const std::string& details)
 {
+    Log::W(Log::TAG, ">>>>>>>>>>>>> onFriendRequest code:%s, details=%s", friendCode.c_str(), details.c_str());
     int ret = ErrCode::UnknownError;
     ChannelType humanChType = static_cast<ChannelType>(channelType);
 
@@ -533,7 +539,7 @@ void MessageManager::MessageListener::onFriendRequest(const std::string& friendC
         }
     }
 
-    if(friendMgr->contains(friendDid)) {
+    //if(friendMgr->contains(friendDid)) {
         std::shared_ptr<FriendInfo> friendInfo;
         auto friendStatus = HumanInfo::Status::Offline;
         ret = friendMgr->getFriendInfo(FriendInfo::HumanKind::Did, friendDid, friendInfo);
@@ -542,18 +548,22 @@ void MessageManager::MessageListener::onFriendRequest(const std::string& friendC
             friendMgr->addFriendInfo(friendInfo);
             friendStatus = HumanInfo::Status::WaitForAccept;
         }
+        Log::W(Log::TAG, "=============================================== 1");
         ret = friendInfo->mergeHumanInfo(humanInfo, friendStatus);
         if(ret < 0) {
             Log::E(Log::TAG, "Failed to add other dev to friend.");
             return;
         }
 
+        Log::W(Log::TAG, ">>>>>>>>>>>>> onFriendRequest() friendStatus=%d", friendStatus);
         if(friendStatus == HumanInfo::Status::Offline) {
+            Log::W(Log::TAG, ">>>>>>>>>>>>> onFriendRequest() msgMgr->requestFriend");
             ret = msgMgr->requestFriend(friendCode, humanChType, "", false);
         } else {
+            Log::W(Log::TAG, ">>>>>>>>>>>>> onFriendRequest() msgMgr->mMessageListener->onFriendRequest");
             msgMgr->mMessageListener->onFriendRequest(friendInfo, humanChType, summary);
         }
-    }
+    //}
 }
 
 void MessageManager::MessageListener::onFriendStatusChanged(const std::string& friendCode,
@@ -578,6 +588,7 @@ void MessageManager::MessageListener::onFriendStatusChanged(const std::string& f
 
 
     if(userMgr->contains(friendCode)) {
+        Log::I(Log::TAG, ">>>>>>>>>>>>> onFriendStatusChanged() is myself");
         std::string userDid;
         UserInfo::CarrierInfo info;
         ret = userInfo->getCarrierInfoByUsrId(friendCode, info);
@@ -598,6 +609,7 @@ void MessageManager::MessageListener::onFriendStatusChanged(const std::string& f
     }
 
     if(friendMgr->contains(friendCode)) {
+        Log::I(Log::TAG, ">>>>>>>>>>>>> onFriendStatusChanged() is friend.");
         std::shared_ptr<FriendInfo> friendInfo;
         ret = friendMgr->tryGetFriendInfo(friendCode, friendInfo);
         if(ret >= 0) { // found

@@ -209,8 +209,18 @@ int ChannelImplCarrier::requestFriend(const std::string& friendCode,
 
     int ret = ErrCode::UnknownError;
     if(remoteRequest == true) {
-        const char* hello = (summary.empty() ? "" : summary.c_str());
-        //Log::I(Log::TAG, "ChannelImplCarrier::requestFriend() summary=%s", hello);
+        std::string usrId;
+        ret = GetCarrierUsrIdByAddress(friendCode, usrId);
+        if(ret < 0) {
+            return ret;
+        }
+        bool isAdded = ela_is_friend(mCarrier.get(), usrId.c_str());
+        if(isAdded == true) {
+            ela_remove_friend(mCarrier.get(), usrId.c_str());
+        }
+
+        const char* hello = (summary.empty() ? " " : summary.c_str());
+        Log::I(Log::TAG, "ChannelImplCarrier::requestFriend() summary=%s", hello);
         ret = ela_add_friend(mCarrier.get(), friendCode.c_str(), hello);
     } else {
         ret = ela_accept_friend(mCarrier.get(), friendCode.c_str());
