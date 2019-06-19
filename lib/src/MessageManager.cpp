@@ -613,7 +613,7 @@ void MessageManager::MessageListener::onFriendStatusChanged(const std::string& f
         std::shared_ptr<FriendInfo> friendInfo;
         ret = friendMgr->tryGetFriendInfo(friendCode, friendInfo);
         if(ret >= 0) { // found
-            fromHumanInfo = userInfo;
+            fromHumanInfo = friendInfo;
 
             FriendInfo::Status oldStatus = friendInfo->getHumanStatus();
             if(humanChType == ChannelType::Carrier) {
@@ -628,8 +628,12 @@ void MessageManager::MessageListener::onFriendStatusChanged(const std::string& f
         }
     }
 
-    if(humanStatus == HumanInfo::Status::Online) {
-        std::ignore = msgMgr->sendDescMessage(fromHumanInfo, humanChType);
+    if(fromHumanInfo.get() != nullptr) {
+        if(humanStatus == HumanInfo::Status::Online) {
+            std::ignore = msgMgr->sendDescMessage(fromHumanInfo, humanChType);
+        }
+    } else {
+        Log::W(Log::TAG, "onFriendStatusChanged() friendCode=%s is not managed", friendCode.c_str());
     }
 
     Log::D(Log::TAG, "onFriendStatusChanged() friendCode=%s, status=%d", friendCode.c_str(), humanStatus);

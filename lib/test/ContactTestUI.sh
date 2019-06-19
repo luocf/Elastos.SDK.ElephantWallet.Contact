@@ -10,6 +10,7 @@ FIFO_FILE="$CACHE_DIR/cmdpipe-$RANDOM";
 CMD_LIST=(
     'h' 'help'
     'p' 'print-info'
+    'c' 'print-carrier'
     'a' 'add-friend'
     's' 'send-message'
 )
