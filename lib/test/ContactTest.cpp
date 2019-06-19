@@ -97,10 +97,10 @@ int main(int argc, char **argv)
         Log::I(Log::TAG, "carrierUsrId: %s", it.mUsrId.c_str());
     }
 
-    ret = userMgr->uploadUserInfo();
-    if(ret < 0) {
-        throw std::runtime_error(std::string("Failed to upload user info! ret=") + std::to_string(ret));
-    }
+    //ret = userMgr->uploadUserInfo();
+    //if(ret < 0) {
+        //throw std::runtime_error(std::string("Failed to upload user info! ret=") + std::to_string(ret));
+    //}
 
     //ret = userMgr->syncUserInfo();
     //if(ret < 0) {

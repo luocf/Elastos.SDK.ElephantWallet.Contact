@@ -8,13 +8,19 @@ CACHE_DIR="/tmp/elastos.sdk.contact/test";
 FIFO_FILE="$CACHE_DIR/cmdpipe-$RANDOM";
 
 CMD_LIST=(
-    'h' 'help'
-    'p' 'print-info'
-    'c' 'print-carrier'
-    'a' 'add-friend'
-    's' 'send-message'
+    'h'
+    'p'
+    'c'
+    'u'
+    'a'
+    's'
 )
-
+    #'h' 'help'
+    #'p' 'print-info'
+    #'c' 'print-carrier'
+    #'u' 'upload-info'
+    #'a' 'add-friend'
+    #'s' 'send-message'
 
 EXEC_USER="$SCRIPT_DIR/ContactTest $FIFO_FILE";
 EXEC_FRIEND="$SCRIPT_DIR/ContactTest";

@@ -44,6 +44,9 @@ private:
     static int PrintCarrier(std::shared_ptr<elastos::Contact> contact,
                             const std::vector<std::string>& args,
                             std::string& errMsg);
+    static int UploadUserInfo(std::shared_ptr<elastos::Contact> contact,
+                              const std::vector<std::string>& args,
+                              std::string& errMsg);
     static int AddFriend(std::shared_ptr<elastos::Contact> contact,
                          const std::vector<std::string>& args,
                          std::string& errMsg);
