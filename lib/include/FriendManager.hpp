@@ -60,6 +60,7 @@ public:
     virtual int addFriendInfo(std::shared_ptr<FriendInfo> friendInfo);
     virtual int getFriendInfo(FriendInfo::HumanKind friendKind, const std::string& friendCode,
                               std::shared_ptr<FriendInfo>& friendInfo);
+    virtual int getFriendInfoList(std::vector<std::shared_ptr<FriendInfo>>& friendList);
 
     virtual int acceptFriend(std::shared_ptr<FriendInfo> friendInfo);
 

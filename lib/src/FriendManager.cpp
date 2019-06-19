@@ -261,6 +261,12 @@ int FriendManager::getFriendInfo(FriendInfo::HumanKind friendKind, const std::st
     return ret;
 }
 
+int FriendManager::getFriendInfoList(std::vector<std::shared_ptr<FriendInfo>>& friendList)
+{
+    friendList = mFriendList;
+    return 0;
+}
+
 std::vector<FriendInfo> FriendManager::filterFriends(std::string regex)
 {
     throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
