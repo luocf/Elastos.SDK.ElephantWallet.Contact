@@ -174,7 +174,7 @@ int HumanInfo::addCarrierInfo(const HumanInfo::CarrierInfo& info, const HumanInf
 
     mBoundCarrierArray.push_back(correctedInfo); // if not exists, add new one
     mBoundCarrierStatus.push_back(status);
-    return (mBoundCarrierArray.size() - 1);
+    return mBoundCarrierArray.size();
 }
 
 int HumanInfo::getCarrierInfoByUsrId(const std::string& usrId, HumanInfo::CarrierInfo& info) const

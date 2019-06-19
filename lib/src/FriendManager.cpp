@@ -268,6 +268,7 @@ std::vector<FriendInfo> FriendManager::filterFriends(std::string regex)
 
 int FriendManager::acceptFriend(std::shared_ptr<FriendInfo> friendInfo)
 {
+    Log::I(Log::TAG, "==== %s", __PRETTY_FUNCTION__);
     auto msgMgr = SAFE_GET_PTR(mMessageManager);
 
     std::vector<FriendInfo::CarrierInfo> carrierInfoArray;
@@ -334,7 +335,12 @@ int FriendManager::addFriendByCarrier(const std::string& carrierAddress, const s
     if(ret < 0) { // not found
         friendInfo = std::make_shared<FriendInfo>(weak_from_this());
         mFriendList.push_back(friendInfo);
-        ret = friendInfo->addCarrierInfo({"", carrierAddress, ""}, FriendInfo::Status::WaitForAccept);
+        FriendInfo::CarrierInfo carrierInfo = {
+            .mUsrAddr = carrierAddress,
+            .mUsrId = "",
+            .mDevInfo = {"", "", 0},
+        };
+        ret = friendInfo->addCarrierInfo(carrierInfo, FriendInfo::Status::WaitForAccept);
         if(ret < 0) {
             return ret;
         }
