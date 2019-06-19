@@ -272,13 +272,22 @@ int MessageManager::sendMessage(const std::shared_ptr<HumanInfo> humanInfo,
         if(ret < 0) {
             return ErrCode::ChannelNotEstablished;
         }
+        for(auto& it: infoArray) {
+            Log::I(Log::TAG, "+++++++++++ %s", it.mUsrId.c_str());
+        }
         infoArray.insert(infoArray.end(), friendArray.begin(), friendArray.end());
+        for(auto& it: infoArray) {
+            Log::I(Log::TAG, "----------- %s", it.mUsrId.c_str());
+        }
 
         ret = ErrCode::ChannelNotOnline;
         for(auto& it: infoArray) {
-            HumanInfo::Status status = HumanInfo::Status::Invalid;
-            int r = humanInfo->getCarrierStatus(it.mUsrId, status);
-            if(r < 0 || status != HumanInfo::Status::Online) {
+            HumanInfo::Status status1 = HumanInfo::Status::Invalid;
+            HumanInfo::Status status2 = HumanInfo::Status::Invalid;
+            userInfo->getCarrierStatus(it.mUsrId, status1);
+            humanInfo->getCarrierStatus(it.mUsrId, status2);
+            if(status1 != HumanInfo::Status::Online
+            && status2 != HumanInfo::Status::Online) {
                 continue;
             }
 
@@ -437,6 +446,20 @@ void MessageManager::MessageListener::onReceivedMessage(const std::string& frien
         }
 
         humanInfo->mergeHumanInfo(newInfo, HumanInfo::Status::Online);
+
+        if(friendMgr->contains(humanInfo)) {
+            std::vector<HumanInfo::CarrierInfo> infoArray;
+            int ret = humanInfo->getAllCarrierInfo(infoArray);
+            if(ret > 0) {
+                for(auto& it: infoArray) {
+                    ret = msgMgr->requestFriend(it.mUsrAddr, humanChType, "", true);
+                    if(ret < 0) {
+                        Log::E(Log::TAG, "Failed to add  other dev to friend. ret=%d", ret);
+                    }
+                }
+            }
+        }
+
 
         //if(msgInfo->mType == MessageType::CtrlSyncDesc) {
             //// send latest user desc.
