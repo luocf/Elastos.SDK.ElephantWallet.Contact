@@ -38,6 +38,8 @@ int main(int argc, char **argv)
     if(fifoFilePath != nullptr) {
         gSavedMnemonic = "explain luxury good page require eye pole zone pride grid debris sibling";
         nickname = "Me";
+    } else {
+        gSavedMnemonic = "verify choose injury illegal quit tornado access plunge six crucial voyage lecture";
     }
 
     Log::I(Log::TAG, "Start Contact Test.");

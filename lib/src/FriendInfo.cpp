@@ -128,6 +128,23 @@ int FriendInfo::setHumanInfo(Item item, const std::string& value)
     return 0;
 }
 
+int FriendInfo::mergeHumanInfo(const HumanInfo& value, const Status status)
+{
+    int ret = HumanInfo::mergeHumanInfo(value, status);
+    Log::D(Log::TAG, "%s ret=%d", __PRETTY_FUNCTION__, ret);
+    if(ret < 0) { // error or not changed
+        return ret;
+    }
+
+    auto friendMgr = SAFE_GET_PTR(mFriendManager);
+    ret = friendMgr->saveLocalData();
+    if(ret < 0) {
+        return ret;
+    }
+
+    return 0;
+}
+
 /***********************************************/
 /***** class protected function implement  *****/
 /***********************************************/

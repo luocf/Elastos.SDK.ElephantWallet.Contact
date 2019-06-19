@@ -226,10 +226,9 @@ int MessageManager::sendMessage(const std::shared_ptr<HumanInfo> humanInfo,
         return ErrCode::ChannelNotReady;
     }
 
-    auto userMgr = SAFE_GET_PTR(mUserManager);
-    if(userMgr->contains(humanInfo)) {
-        return ErrCode::InvalidArgument;
-    }
+    //if(userMgr->contains(humanInfo)) {
+        //return ErrCode::InvalidArgument;
+    //}
 
     auto cryptoMsgInfo = makeMessage(msgInfo);
     if(msgInfo->mCryptoAlgorithm.empty() == true
@@ -259,6 +258,7 @@ int MessageManager::sendMessage(const std::shared_ptr<HumanInfo> humanInfo,
     if(humanChType == ChannelType::Carrier) {
         std::vector<HumanInfo::CarrierInfo> infoArray;
 
+        auto userMgr = SAFE_GET_PTR(mUserManager);
         std::shared_ptr<UserInfo> userInfo;
         userMgr->getUserInfo(userInfo);
         int ret = userInfo->getAllCarrierInfo(infoArray);
@@ -281,9 +281,10 @@ int MessageManager::sendMessage(const std::shared_ptr<HumanInfo> humanInfo,
                 continue;
             }
 
+            Log::I(Log::TAG, ">>>>>>>>>>> send message to %s", it.mUsrId.c_str());
             ret = channel->sendMessage(it.mUsrId, data);
             if(ret < 0) {
-                return ret;
+                //return;
             }
         }
         return ret;
@@ -501,7 +502,7 @@ void MessageManager::MessageListener::onFriendRequest(const std::string& friendC
         return;
     }
 
-    if(userMgr->contains(friendCode)) {
+    if(userMgr->contains(friendDid)) {
         std::shared_ptr<UserInfo> userInfo;
         ret = userMgr->getUserInfo(userInfo);
         if(ret < 0) {
@@ -532,7 +533,7 @@ void MessageManager::MessageListener::onFriendRequest(const std::string& friendC
         }
     }
 
-    if(friendMgr->contains(friendCode)) {
+    if(friendMgr->contains(friendDid)) {
         std::shared_ptr<FriendInfo> friendInfo;
         auto friendStatus = HumanInfo::Status::Offline;
         ret = friendMgr->getFriendInfo(FriendInfo::HumanKind::Did, friendDid, friendInfo);
@@ -659,7 +660,7 @@ int MessageManager::sendDescMessage(const std::shared_ptr<HumanInfo> humanInfo, 
     auto msgInfo = makeMessage(MessageType::CtrlSyncDesc, humanDescBytes);
     ret = sendMessage(humanInfo, chType, msgInfo);
     if(ret < 0) {
-        Log::E(Log::TAG, "Failed to send sync desc message.");
+        Log::E(Log::TAG, "Failed to send sync desc message. ret=%d", ret);
         return ret;
     }
 

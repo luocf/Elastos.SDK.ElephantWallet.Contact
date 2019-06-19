@@ -34,6 +34,7 @@ public:
 
     virtual int addCarrierInfo(const CarrierInfo& info, const Status status) override;
     virtual int setHumanInfo(Item item, const std::string& value) override;
+    virtual int mergeHumanInfo(const HumanInfo& value, const Status status) override;
 
     virtual int setIdentifyCode(Type type, const std::string& value) override;
     virtual int getIdentifyCode(Type type, std::string& value) const override;
