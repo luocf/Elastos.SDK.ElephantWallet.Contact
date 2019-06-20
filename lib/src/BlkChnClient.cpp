@@ -54,47 +54,29 @@ int BlkChnClient::getDidProps(const std::string& did, std::map<std::string, std:
     auto sectyMgr = SAFE_GET_PTR(mSecurityManager);
     auto config = SAFE_GET_PTR(mConfig);
 
-    std::string didPath;
-    int ret = getDidPropPath(didPath);
+    auto agentGetProps = config->mDidChainConfig->mAgentApi.mGetDidProps;
+    std::string agentGetPropsPath = agentGetProps + did;
+
+    std::string propArrayStr;
+    int ret = getDidPropFromDidChn(agentGetPropsPath, propArrayStr);
     if(ret < 0) {
         return ret;
     }
 
-    auto didConfigUrl = config->mDidChainConfig->mUrl;
-    auto agentGetProps = config->mDidChainConfig->mAgentApi.mGetDidProps;
-    std::string agentGetPropsUrl = didConfigUrl + agentGetProps + did;
-
-    HttpClient httpClient;
-    httpClient.url(agentGetPropsUrl);
-    ret = httpClient.syncGet();
+    std::string keyPath;
+    ret = getPropKeyPath(keyPath);
     if(ret < 0) {
-        return ErrCode::HttpClientError + ret;
+        return ret;
     }
 
-    std::string respBody;
-    ret = httpClient.getResponseBody(respBody);
-    if(ret < 0) {
-        return ErrCode::HttpClientError + ret;
-    }
-    Log::I(Log::TAG, "respBody=%s", respBody.c_str());
-
-    Json jsonResp = Json::parse(respBody);
-    if(jsonResp["status"] != 200) {
-        return ErrCode::BlkChnGetPropError;
-    }
-    std::string result = jsonResp["result"];
-    if(result.empty() == true) {
-        return ErrCode::BlkChnEmptyPropError;
-    }
-
-    Json jsonPropArray = Json::parse(result);
+    Json jsonPropArray = Json::parse(propArrayStr);
     for(const auto& it: jsonPropArray){
         std::string propKey = it["key"];
         std::string propValue = it["value"];
 
-        size_t pos = propKey.find(didPath);
+        size_t pos = propKey.find(keyPath);
         if (pos != std::string::npos) {
-            propKey.erase(pos, didPath.length());
+            propKey.erase(pos, keyPath.length());
         }
 
         propMap[propKey] = propValue;
@@ -108,8 +90,8 @@ int BlkChnClient::uploadDidProps(const std::map<std::string, std::string>& propM
     auto sectyMgr = SAFE_GET_PTR(mSecurityManager);
     auto config = SAFE_GET_PTR(mConfig);
 
-    std::string didPath;
-    int ret = getDidPropPath(didPath);
+    std::string keyPath;
+    int ret = getPropKeyPath(keyPath);
     if(ret < 0) {
         return ret;
     }
@@ -117,7 +99,7 @@ int BlkChnClient::uploadDidProps(const std::map<std::string, std::string>& propM
     Json jsonPropProt = Json::object();
     Json jsonPropArray = Json::array();
     for(const auto& prop: propMap) {
-        std::string propKey = didPath + prop.first;
+        std::string propKey = keyPath + prop.first;
         std::string propValue = prop.second;
         Json jsonProp = Json::object();
         jsonProp[DidProtocol::Name::Key] = propKey;
@@ -195,6 +177,33 @@ int BlkChnClient::uploadDidProps(const std::map<std::string, std::string>& propM
     return 0;
 }
 
+int BlkChnClient::getDidPropHistory(const std::string& did, const std::string& key, std::vector<std::string>& values)
+{
+    auto sectyMgr = SAFE_GET_PTR(mSecurityManager);
+    auto config = SAFE_GET_PTR(mConfig);
+
+    std::string keyPath;
+    int ret = getPropKeyPath(keyPath);
+    if(ret < 0) {
+        return ret;
+    }
+
+    auto agentGetProps = config->mDidChainConfig->mAgentApi.mGetDidProps;
+    auto agentDidPropHistory = config->mDidChainConfig->mAgentApi.mDidPropHistory;
+    std::string agentGetPropHistoryPath = agentGetProps + did + agentDidPropHistory + keyPath + key;
+
+    std::string propArrayStr;
+    ret = getDidPropFromDidChn(agentGetPropHistoryPath, propArrayStr);
+    if(ret < 0) {
+        return ret;
+    }
+
+    Json jsonPropArray = Json::parse(propArrayStr);
+    values = jsonPropArray.get<std::vector<std::string>>();
+
+    return 0;
+}
+
 /* =========================================== */
 /* === class protected function implement  === */
 /* =========================================== */
@@ -215,7 +224,42 @@ BlkChnClient::~BlkChnClient()
 {
 }
 
-int BlkChnClient::getDidPropPath(std::string& didPath)
+int BlkChnClient::getDidPropFromDidChn(const std::string& path, std::string& result)
+{
+    auto sectyMgr = SAFE_GET_PTR(mSecurityManager);
+    auto config = SAFE_GET_PTR(mConfig);
+
+    auto didConfigUrl = config->mDidChainConfig->mUrl;
+    std::string agentUrl = didConfigUrl + path;
+
+    HttpClient httpClient;
+    httpClient.url(agentUrl);
+    int ret = httpClient.syncGet();
+    if(ret < 0) {
+        return ErrCode::HttpClientError + ret;
+    }
+
+    std::string respBody;
+    ret = httpClient.getResponseBody(respBody);
+    if(ret < 0) {
+        return ErrCode::HttpClientError + ret;
+    }
+    Log::I(Log::TAG, "respBody=%s", respBody.c_str());
+
+    Json jsonResp = Json::parse(respBody);
+    if(jsonResp["status"] != 200) {
+        return ErrCode::BlkChnGetPropError;
+    }
+
+    result = jsonResp["result"];
+    if(result.empty() == true) {
+        return ErrCode::BlkChnEmptyPropError;
+    }
+
+    return 0;
+}
+
+int BlkChnClient::getPropKeyPath(std::string& keyPath)
 {
     auto sectyMgr = SAFE_GET_PTR(mSecurityManager);
 
@@ -225,8 +269,9 @@ int BlkChnClient::getDidPropPath(std::string& didPath)
         return ret;
     }
 
-    didPath = "Apps/" + appId + "/";
+    keyPath = "Apps/" + appId + "/";
     return 0;
 }
+
 
 } // namespace elastos

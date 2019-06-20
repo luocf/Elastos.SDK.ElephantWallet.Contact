@@ -25,6 +25,9 @@ public:
     int getDidProps(const std::string& did, std::map<std::string, std::string>& propMap);
     int uploadDidProps(const std::map<std::string, std::string>& propMap);
 
+    //int getDidProp(const std::string& did, const std::string& key, std::string& value);
+    int getDidPropHistory(const std::string& did, const std::string& key, std::vector<std::string>& values);
+
 protected:
     /*** type define ***/
 
@@ -60,7 +63,9 @@ private:
     /*** class function and variable ***/
     explicit BlkChnClient(std::weak_ptr<Config> config, std::weak_ptr<SecurityManager> sectyMgr);
     virtual ~BlkChnClient();
-    int getDidPropPath(std::string& didPath);
+    int getDidPropFromDidChn(const std::string& path, std::string& result);
+
+    int getPropKeyPath(std::string& keyPath);
 
     std::weak_ptr<Config> mConfig;
     std::weak_ptr<SecurityManager> mSecurityManager;
