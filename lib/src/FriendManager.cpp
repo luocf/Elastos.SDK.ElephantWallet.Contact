@@ -422,9 +422,19 @@ int FriendManager::addFriendByDid(const std::string& did, const std::string& sum
 
     mFriendList.push_back(friendInfo);
     mNotUploadFriendList.push_back(friendInfo);
-    std::string friendData;
-    friendInfo->HumanInfo::serialize(friendData);
-    Log::I(Log::TAG, "FriendManager::addFriendByDid() Add friend: %s.", friendData.c_str());
+
+    std::vector<FriendInfo::CarrierInfo> carrierInfoArray;
+    ret = friendInfo->getAllCarrierInfo(carrierInfoArray);
+    if(ret < 0) {
+        return ret;
+    }
+    for(const auto& info: carrierInfoArray) {
+        ret = addFriendByCarrier(info.mUsrAddr, summary, true);
+        if(ret < 0) {
+            return ret;
+        }
+    }
+
     Log::I(Log::TAG, "FriendManager::addFriendByDid() Add friend did: %s.", did.c_str());
 
     return 0;

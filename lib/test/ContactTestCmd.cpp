@@ -136,6 +136,11 @@ int ContactTestCmd::UploadInfo(std::shared_ptr<elastos::Contact> contact,
                                const std::vector<std::string>& args,
                                std::string& errMsg)
 {
+    if(args.size() < 2) {
+        errMsg = "Bad input";
+        return -1;
+    }
+
     std::string value;
 
     auto weakUserMgr = contact->getUserManager();
@@ -166,6 +171,11 @@ int ContactTestCmd::AddFriend(std::shared_ptr<elastos::Contact> contact,
                               const std::vector<std::string>& args,
                               std::string& errMsg)
 {
+    if(args.size() < 2) {
+        errMsg = "Bad input count: " + std::to_string(args.size());
+        return -1;
+    }
+
     auto weakFriendMgr = contact->getFriendManager();
     auto friendMgr = weakFriendMgr.lock();
     if(friendMgr.get() == nullptr) {
@@ -190,6 +200,11 @@ int ContactTestCmd::SendMessage(std::shared_ptr<elastos::Contact> contact,
                                 const std::vector<std::string>& args,
                                 std::string& errMsg)
 {
+    if(args.size() < 4) {
+        errMsg = "Bad input";
+        return -1;
+    }
+
     auto friendCode = args.size() > 1 ? args[1] : "";
     auto channelType = args.size() > 2 ? args[2] : "";
     auto msg = args.size() > 3 ? args[3] : "";
