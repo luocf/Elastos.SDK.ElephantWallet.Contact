@@ -68,6 +68,9 @@ public:
 
     virtual std::vector<FriendInfo> filterFriends(std::string regex);
 
+    int syncFriendInfo();
+    int uploadFriendInfo();
+
 private:
     /*** type define ***/
 
@@ -90,6 +93,7 @@ private:
     std::weak_ptr<Config> mConfig;
     std::shared_ptr<FriendListener> mFriendListener;
     std::vector<std::shared_ptr<FriendInfo>> mFriendList;
+    std::vector<std::shared_ptr<FriendInfo>> mNotUploadFriendList;
 
 }; // class FriendManager
 

@@ -6,6 +6,7 @@
 #include <set>
 #include <Config.hpp>
 #include <Json.hpp>
+#include <HumanInfo.hpp>
 #include <SecurityManager.hpp>
 #include <ThreadPool.hpp>
 
@@ -22,11 +23,17 @@ public:
     /*** class function and variable ***/
     int setConnectTimeout(uint32_t milliSecond);
 
-    int getDidProps(const std::string& did, std::map<std::string, std::string>& propMap);
-    int uploadDidProps(const std::map<std::string, std::string>& propMap);
+    int downloadAllDidProps(const std::string& did, std::map<std::string, std::string>& propMap);
+    int uploadAllDidProps(const std::map<std::string, std::string>& propMap);
+
+    int downloadDidProp(const std::string& did, const std::string& key, std::string& prop);
+    int uploadDidProp(const std::string& key, const std::string& prop);
 
     //int getDidProp(const std::string& did, const std::string& key, std::string& value);
     int getDidPropHistory(const std::string& did, const std::string& key, std::vector<std::string>& values);
+
+    int downloadHumanInfo(const std::string& did, std::shared_ptr<HumanInfo>& humanInfo);
+    int uploadHumanInfo(const std::shared_ptr<HumanInfo>& humanInfo);
 
 protected:
     /*** type define ***/

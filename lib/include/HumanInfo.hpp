@@ -34,8 +34,8 @@ public:
         WaitForAccept = 0x1,
         Offline = 0x2,
         Online = 0x4,
+        Removed = 0x8,
     };
-
 
     struct CarrierInfo {
         struct DeviceInfo {
@@ -61,9 +61,12 @@ public:
 
     virtual int addCarrierInfo(const CarrierInfo& info, const Status status = Status::Invalid);
     virtual int getCarrierInfoByUsrId(const std::string& usrId, CarrierInfo& info) const;
+    virtual int getCarrierInfoByDevId(const std::string& devId, CarrierInfo& info) const;
     virtual int getAllCarrierInfo(std::vector<CarrierInfo>& infoArray) const;
     virtual int setCarrierStatus(const std::string& usrId, const Status status);
     virtual int getCarrierStatus(const std::string& usrId, Status& status) const;
+    virtual int serialize(const CarrierInfo& info, std::string& value) const;
+    virtual int deserialize(const std::string& value, CarrierInfo& info) const;
 
     virtual int setHumanInfo(Item item, const std::string& value);
     virtual int getHumanInfo(Item item, std::string& value) const;
@@ -73,11 +76,8 @@ public:
     virtual int getHumanStatus(HumanKind kind, Status& status);
     virtual Status getHumanStatus();
 
-    virtual int serializeCarrierInfo(std::string& value) const;
-    virtual int deserializeCarrierInfo(const std::string& value);
     virtual int serialize(std::string& value, bool summaryOnly = false) const;
     virtual int deserialize(const std::string& value, bool summaryOnly = false);
-
 protected:
     /*** type define ***/
 

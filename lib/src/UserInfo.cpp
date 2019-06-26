@@ -41,6 +41,18 @@ UserInfo::~UserInfo()
 {
 }
 
+int UserInfo::serialize(const CarrierInfo& info, std::string& value) const
+{
+    int ret = HumanInfo::serialize(info, value);
+    return ret;
+}
+
+int UserInfo::deserialize(const std::string& value, CarrierInfo& info) const
+{
+    int ret = HumanInfo::deserialize(value, info);
+    return ret;
+}
+
 int UserInfo::serialize(std::string& value, bool summaryOnly) const
 {
     Json jsonInfo = Json::object();

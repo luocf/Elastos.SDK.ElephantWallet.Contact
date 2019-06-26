@@ -8,7 +8,9 @@
 #include <FriendManager.hpp>
 
 #include <algorithm>
+#include "BlkChnClient.hpp"
 #include <CompatibleFileSystem.hpp>
+#include <DateTime.hpp>
 #include <Elastos.Wallet.Utility.h>
 #include <Log.hpp>
 #include <Json.hpp>
@@ -35,6 +37,7 @@ FriendManager::FriendManager(std::weak_ptr<SecurityManager> sectyMgr)
     , mMessageManager()
     , mFriendListener()
     , mFriendList()
+    , mNotUploadFriendList()
 {
 }
 
@@ -160,6 +163,11 @@ int FriendManager::restoreFriends()
         return ret;
     }
 
+    ret = syncFriendInfo();
+    if(ret < 0) {
+        return ret;
+    }
+
     return 0;
 }
 
@@ -272,6 +280,84 @@ std::vector<FriendInfo> FriendManager::filterFriends(std::string regex)
     throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
 }
 
+int FriendManager::syncFriendInfo()
+{
+    auto sectyMgr = SAFE_GET_PTR(mSecurityManager);
+    std::string did;
+    int ret = sectyMgr->getDid(did);
+    if(ret < 0) {
+        return ret;
+    }
+
+    auto bcClient = BlkChnClient::GetInstance();
+
+    std::vector<std::string> propHistory;
+    ret = bcClient->getDidPropHistory(did, "FriendID", propHistory);
+    if(ret < 0
+    && ret != ErrCode::BlkChnEmptyPropError) {
+        return ret;
+    }
+
+    std::vector<std::string> friendDidArray;
+    for(const auto& it: propHistory) {
+        Json jsonInfo = Json::parse(it);
+        std::string did = jsonInfo["Did"];
+        int status = jsonInfo["Status"];
+        long updateTime = jsonInfo["UpdateTime"];
+
+        // TODO remove friend filt
+        friendDidArray.push_back(did);
+    }
+
+    for(const auto& it: friendDidArray) {
+        auto friendInfo = std::make_shared<FriendInfo>(weak_from_this());
+        auto humanInfo = std::static_pointer_cast<HumanInfo>(friendInfo);
+        int ret = bcClient->downloadHumanInfo(it, humanInfo);
+        if(ret < 0) {
+            Log::W(Log::TAG, "FriendManager::syncFriendInfo() Failed to add friend did: %s.", did.c_str());
+            continue;
+        }
+
+        mFriendList.push_back(friendInfo);
+
+        Log::I(Log::TAG, "FriendManager::syncFriendInfo() Add friend did: %s.", did.c_str());
+    }
+
+    return 0;
+}
+
+int FriendManager::uploadFriendInfo()
+{
+    auto bcClient = BlkChnClient::GetInstance();
+
+    for(const auto& it: mNotUploadFriendList) {
+        std::string did;
+        int ret = it->getHumanInfo(HumanInfo::Item::Did, did);
+        if(ret < 0) {
+            Log::W(Log::TAG, "FriendManager::uploadFriendInfo() Failed get friend did.");
+        }
+        int status = static_cast<int>(it->getHumanStatus());
+        long updateTime = DateTime::CurrentMS();
+
+        Json jsonInfo = Json::object();
+        jsonInfo["Did"] = did;
+        jsonInfo["Status"] = status;
+        jsonInfo["UpdateTime"] = updateTime;
+
+        std::map<std::string, std::string> propMap;
+        propMap["FriendID"] = jsonInfo.dump();
+        ret = bcClient->uploadAllDidProps(propMap);
+        if(ret < 0) {
+            Log::I(Log::TAG, "UserManager::uploadFriendInfo() Failed to upload did: %s", did.c_str());
+            continue;
+        }
+
+        Log::I(Log::TAG, "UserManager::uploadFriendInfo() Success to upload did: %s", did.c_str());
+    }
+
+    return 0;
+}
+
 int FriendManager::acceptFriend(std::shared_ptr<FriendInfo> friendInfo)
 {
     Log::I(Log::TAG, "==== %s", __PRETTY_FUNCTION__);
@@ -318,14 +404,30 @@ int FriendManager::acceptFriend(std::shared_ptr<FriendInfo> friendInfo)
 /***********************************************/
 int FriendManager::addFriendByDid(const std::string& did, const std::string& summary, bool remoteRequest)
 {
-    //if(::isDidValid(did) == false) {
-        //return ErrCode::InvalidArgument;
-    //}
-    //
-    //auto msgMgr = SAFE_GET_PTR(mMessageManager);
-    //int ret = msgMgr->requestFriend(did, 
+    auto bcClient = BlkChnClient::GetInstance();
 
-    throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
+    auto humanInfo = std::make_shared<HumanInfo>();
+    int ret = bcClient->downloadHumanInfo(did, humanInfo);
+    if(ret < 0) {
+        Log::W(Log::TAG, "FriendManager::addFriendByDid() Failed to add friend did: %s.", did.c_str());
+        return ret;
+    }
+
+    auto friendInfo = std::make_shared<FriendInfo>(weak_from_this());
+    ret = friendInfo->mergeHumanInfo(*humanInfo, HumanInfo::Status::WaitForAccept);
+    if(ret < 0) {
+        Log::W(Log::TAG, "FriendManager::addFriendByDid() Failed to merge friend did: %s.", did.c_str());
+        return ret;
+    }
+
+    mFriendList.push_back(friendInfo);
+    mNotUploadFriendList.push_back(friendInfo);
+    std::string friendData;
+    friendInfo->HumanInfo::serialize(friendData);
+    Log::I(Log::TAG, "FriendManager::addFriendByDid() Add friend: %s.", friendData.c_str());
+    Log::I(Log::TAG, "FriendManager::addFriendByDid() Add friend did: %s.", did.c_str());
+
+    return 0;
 }
 
 int FriendManager::addFriendByCarrier(const std::string& carrierAddress, const std::string& summary, bool remoteRequest)
@@ -341,6 +443,7 @@ int FriendManager::addFriendByCarrier(const std::string& carrierAddress, const s
     if(ret < 0) { // not found
         friendInfo = std::make_shared<FriendInfo>(weak_from_this());
         mFriendList.push_back(friendInfo);
+        mNotUploadFriendList.push_back(friendInfo);
         FriendInfo::CarrierInfo carrierInfo = {
             .mUsrAddr = carrierAddress,
             .mUsrId = "",

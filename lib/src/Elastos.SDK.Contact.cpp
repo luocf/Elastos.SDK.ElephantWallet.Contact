@@ -257,6 +257,11 @@ int Contact::setUserInfo()
         return ret;
     }
 
+    ret = mUserManager->uploadUserInfo();
+    if(ret < 0) {
+        return ret;
+    }
+
     return 0;
 }
 

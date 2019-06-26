@@ -163,12 +163,13 @@ int HumanInfo::addCarrierInfo(const HumanInfo::CarrierInfo& info, const HumanInf
         //if(existsInfo.mDevInfo.mDevId == correctedInfo.mDevInfo.mDevId
         //&& existsInfo.mUsrAddr == correctedInfo.mUsrAddr) { // not changed
             //return 0;
-        if(existsInfo.mDevInfo.mDevId == correctedInfo.mDevInfo.mDevId) { // not changed
-            existsInfo = correctedInfo;
-            return 0;
-        } else { // update info
-            existsInfo = correctedInfo;
-            return idx;
+        if(existsInfo.mDevInfo.mDevId == correctedInfo.mDevInfo.mDevId) { // found same dev
+            if(existsInfo.mDevInfo.mUpdateTime >= correctedInfo.mDevInfo.mUpdateTime) { // not changed
+                return ErrCode::IgnoreMergeOldInfo;
+            } else { // update info
+                existsInfo = correctedInfo;
+                return idx;
+            }
         }
     }
 
@@ -179,9 +180,22 @@ int HumanInfo::addCarrierInfo(const HumanInfo::CarrierInfo& info, const HumanInf
 
 int HumanInfo::getCarrierInfoByUsrId(const std::string& usrId, HumanInfo::CarrierInfo& info) const
 {
-    info = {"", "", ""};
+    info = {"", "", {"", "", 0}};
     for(auto idx = 0; idx < mBoundCarrierArray.size(); idx++) {
         if(mBoundCarrierArray[idx].mUsrId == usrId) {
+            info = mBoundCarrierArray[idx];
+            return idx;
+        }
+    }
+
+    return ErrCode::NotFoundError;
+}
+
+int HumanInfo::getCarrierInfoByDevId(const std::string& devId, CarrierInfo& info) const
+{
+    info = {"", "", {"", "", 0}};
+    for(auto idx = 0; idx < mBoundCarrierArray.size(); idx++) {
+        if(mBoundCarrierArray[idx].mDevInfo.mDevId == devId) {
             info = mBoundCarrierArray[idx];
             return idx;
         }
@@ -388,20 +402,17 @@ NLOHMANN_JSON_SERIALIZE_ENUM(HumanInfo::Status, {
     { HumanInfo::Status::Online, "Offline"}, // Online alse save as OffLine
 });
 
-int HumanInfo::serializeCarrierInfo(std::string& value) const
+int HumanInfo::serialize(const CarrierInfo& info, std::string& value) const
 {
-    Json jsonInfo= Json(mBoundCarrierArray);
+    Json jsonInfo= Json(info);
     value = jsonInfo.dump();
     return 0;
 }
 
-int HumanInfo::deserializeCarrierInfo(const std::string& value)
+int HumanInfo::deserialize(const std::string& value, CarrierInfo& info) const
 {
     Json jsonInfo= Json::parse(value);
-    mBoundCarrierArray = jsonInfo.get<std::vector<CarrierInfo>>();
-
-    mBoundCarrierStatus.resize(mBoundCarrierArray.size());
-
+    info = jsonInfo.get<CarrierInfo>();
     return 0;
 }
 

@@ -26,7 +26,7 @@ int main(int argc, char **argv)
     std::map<std::string, std::string> propMap;
     propMap["key1"] = "value1";
     propMap["key2"] = "value2";
-    ret = bcClient->uploadDidProps(propMap);
+    ret = bcClient->uploadAllDidProps(propMap);
     if(ret < 0) {
         throw std::runtime_error(std::string("Failed to upload did props! ret=") + std::to_string(ret));
     }

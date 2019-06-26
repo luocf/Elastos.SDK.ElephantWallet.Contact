@@ -4,6 +4,7 @@
 #include <HttpClient.hpp>
 #include <Log.hpp>
 #include <MD5.hpp>
+#include <Platform.hpp>
 #include <SafePtr.hpp>
 
 
@@ -49,7 +50,7 @@ int BlkChnClient::setConnectTimeout(uint32_t milliSecond)
     return 0;
 }
 
-int BlkChnClient::getDidProps(const std::string& did, std::map<std::string, std::string>& propMap)
+int BlkChnClient::downloadAllDidProps(const std::string& did, std::map<std::string, std::string>& propMap)
 {
     auto sectyMgr = SAFE_GET_PTR(mSecurityManager);
     auto config = SAFE_GET_PTR(mConfig);
@@ -85,7 +86,7 @@ int BlkChnClient::getDidProps(const std::string& did, std::map<std::string, std:
     return 0;
 }
 
-int BlkChnClient::uploadDidProps(const std::map<std::string, std::string>& propMap)
+int BlkChnClient::uploadAllDidProps(const std::map<std::string, std::string>& propMap)
 {
     auto sectyMgr = SAFE_GET_PTR(mSecurityManager);
     auto config = SAFE_GET_PTR(mConfig);
@@ -119,7 +120,7 @@ int BlkChnClient::uploadDidProps(const std::map<std::string, std::string>& propM
     jsonPropProt[DidProtocol::Name::Properties] = jsonPropArray;
 
     auto propProtStr = jsonPropProt.dump();
-    Log::I(Log::TAG, "BlkChnClient::uploadDidProps() propProt: %s", propProtStr.c_str());
+    Log::I(Log::TAG, "BlkChnClient::uploadAllDidProps() propProt: %s", propProtStr.c_str());
     std::vector<uint8_t> originBytes(propProtStr.begin(), propProtStr.end());
     std::vector<uint8_t> signedBytes(propProtStr.begin(), propProtStr.end());
     ret = sectyMgr->signData(originBytes, signedBytes);
@@ -177,9 +178,51 @@ int BlkChnClient::uploadDidProps(const std::map<std::string, std::string>& propM
     return 0;
 }
 
+int BlkChnClient::downloadDidProp(const std::string& did, const std::string& key, std::string& prop)
+{
+    prop = "";
+
+    auto config = SAFE_GET_PTR(mConfig);
+
+    std::string keyPath;
+    int ret = getPropKeyPath(keyPath);
+    if(ret < 0) {
+        return ret;
+    }
+
+    auto agentGetProps = config->mDidChainConfig->mAgentApi.mGetDidProps;
+    auto agentDidProp = config->mDidChainConfig->mAgentApi.mDidProp;
+    std::string agentGetPropPath = agentGetProps + did + agentDidProp + keyPath + key;
+
+    std::string propArrayStr;
+    ret = getDidPropFromDidChn(agentGetPropPath, propArrayStr);
+    if(ret < 0) {
+        return ret;
+    }
+
+    Json jsonPropArray = Json::parse(propArrayStr);
+    for(const auto& it: jsonPropArray) {
+        std::string propKey = it["key"];
+        if(keyPath + key != propKey) {
+            continue;
+        }
+
+        prop = it["value"];
+        return 0;
+    }
+
+    return ErrCode::BlkChnGetPropError;
+}
+
+int BlkChnClient::uploadDidProp(const std::string& key, const std::string& prop)
+{
+    throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
+}
+
 int BlkChnClient::getDidPropHistory(const std::string& did, const std::string& key, std::vector<std::string>& values)
 {
-    auto sectyMgr = SAFE_GET_PTR(mSecurityManager);
+    values.clear();
+
     auto config = SAFE_GET_PTR(mConfig);
 
     std::string keyPath;
@@ -199,7 +242,98 @@ int BlkChnClient::getDidPropHistory(const std::string& did, const std::string& k
     }
 
     Json jsonPropArray = Json::parse(propArrayStr);
-    values = jsonPropArray.get<std::vector<std::string>>();
+    for(const auto& it: jsonPropArray) {
+        values.push_back(it["value"]);
+    }
+
+    return 0;
+}
+
+int BlkChnClient::downloadHumanInfo(const std::string& did, std::shared_ptr<HumanInfo>& humanInfo)
+{
+    humanInfo = std::make_shared<HumanInfo>();
+
+    std::string pubKey;
+    int ret = downloadDidProp(did, "PublicKey", pubKey);
+    if(ret < 0) {
+        return ret;
+    }
+
+    std::string expectedDid;
+    ret = SecurityManager::GetDid(pubKey, expectedDid);
+    if(ret < 0) {
+        return ret;
+    }
+
+    ret = humanInfo->setHumanInfo(HumanInfo::Item::ChainPubKey, pubKey);
+    if(ret < 0) {
+        return ret;
+    }
+
+    std::vector<std::string> propHistory;
+    ret = getDidPropHistory(did, "CarrierID", propHistory);
+    if(ret < 0) {
+        return ret;
+    }
+
+    for(const auto& it: propHistory) {
+        HumanInfo::CarrierInfo carrierInfo;
+        ret = humanInfo->deserialize(it, carrierInfo);
+        if(ret < 0) {
+            Log::W(Log::TAG, "BlkChnClient::downloadHumanInfo() Failed to sync CarrierId: %s", it.c_str());
+            continue; // ignore error
+        }
+
+        ret = humanInfo->addCarrierInfo(carrierInfo, HumanInfo::Status::Offline);
+        if(ret < 0) {
+            if(ret == ErrCode::IgnoreMergeOldInfo) {
+                Log::I(Log::TAG, "BlkChnClient::downloadHumanInfo() Ignore to sync CarrierId: %s", it.c_str());
+            } else {
+                Log::W(Log::TAG, "BlkChnClient::downloadHumanInfo() Failed to sync carrier info. CarrierId: %s", it.c_str());
+            }
+            continue; // ignore error
+        }
+
+        Log::I(Log::TAG, "BlkChnClient::downloadHumanInfo() Success to sync CarrierId: %s", it.c_str());
+    }
+
+    return 0;
+}
+
+int BlkChnClient::uploadHumanInfo(const std::shared_ptr<HumanInfo>& humanInfo)
+{
+    std::string pubKey;
+    int ret = humanInfo->getHumanInfo(HumanInfo::Item::ChainPubKey, pubKey);
+    if(ret < 0) {
+        return ret;
+    }
+
+    std::string devId;
+    ret = Platform::GetCurrentDevId(devId);
+    if(ret < 0) {
+        return ret;
+    }
+
+    HumanInfo::CarrierInfo carrierInfo;
+    ret = humanInfo->getCarrierInfoByDevId(devId, carrierInfo);
+    if(ret < 0) {
+        return ret;
+    }
+
+    std::string carrierInfoStr;
+    ret = humanInfo->serialize(carrierInfo, carrierInfoStr);
+    if(ret < 0) {
+        return ret;
+    }
+
+    std::map<std::string, std::string> propMap;
+    propMap["PublicKey"] = pubKey;
+    propMap["CarrierID"] = carrierInfoStr;
+    ret = uploadAllDidProps(propMap);
+    if(ret < 0) {
+        return ret;
+    }
+
 
     return 0;
 }

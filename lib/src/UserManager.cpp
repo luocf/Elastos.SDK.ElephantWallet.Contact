@@ -12,6 +12,7 @@
 #include <Log.hpp>
 #include <MessageManager.hpp>
 #include <SafePtr.hpp>
+#include <Platform.hpp>
 #include <iostream>
 #include <sstream>
 #include <Json.hpp>
@@ -183,17 +184,14 @@ int UserManager::syncUserInfo()
     }
 
     auto bcClient = BlkChnClient::GetInstance();
-    std::map<std::string, std::string> propMap;
-    ret = bcClient->getDidProps(did, propMap);
+
+    auto humanInfo = std::make_shared<HumanInfo>();
+    ret = bcClient->downloadHumanInfo(did, humanInfo);
     if(ret < 0) {
         return ret;
     }
-    for(const auto& it: propMap) {
-        Log::I(Log::TAG, "UserManager::syncUserInfo() %s:%s", it.first.c_str(), it.second.c_str());
-    }
 
-    std::string carrierInfoStr = propMap["CarrierID"];
-    ret = mUserInfo->deserializeCarrierInfo(carrierInfoStr);
+    ret = mUserInfo->mergeHumanInfo(*humanInfo, HumanInfo::Status::Offline);
     if(ret < 0) {
         return ret;
     }
@@ -205,15 +203,7 @@ int UserManager::uploadUserInfo()
 {
     auto bcClient = BlkChnClient::GetInstance();
 
-    std::string carrierInfoStr;
-    int ret = mUserInfo->serializeCarrierInfo(carrierInfoStr);
-    if(ret < 0) {
-        return ret;
-    }
-
-    std::map<std::string, std::string> propMap;
-    propMap["CarrierID"] = carrierInfoStr;
-    ret = bcClient->uploadDidProps(propMap);
+    int ret = bcClient->uploadHumanInfo(mUserInfo);
     if(ret < 0) {
         return ret;
     }

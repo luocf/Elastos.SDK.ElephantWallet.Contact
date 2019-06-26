@@ -11,7 +11,7 @@ const std::vector<ContactTestCmd::CommandInfo> ContactTestCmd::gCommandInfoList 
     { 'h', "help",            ContactTestCmd::Help,           "      Print help usages." },
     { 'p', "print-info",      ContactTestCmd::PrintInfo,      "Print current contact infos." },
     { 'c', "print-carrier",   ContactTestCmd::PrintCarrier,   "Print current carrier infos." },
-    { 'u', "upload-userinfo", ContactTestCmd::UploadUserInfo, "upload user info." },
+    { 'u', "upload-info",     ContactTestCmd::UploadInfo,     "upload info u [u or f]." },
     { 'a', "add-friend",      ContactTestCmd::AddFriend,      "Add a friend by [did, ela address or carrier address]." },
     { 's', "send-message",    ContactTestCmd::SendMessage,    "Send message to a friend like: s [friendCode] [chType(1 or 2)] [msg]" },
 };
@@ -132,21 +132,32 @@ int ContactTestCmd::PrintCarrier(std::shared_ptr<elastos::Contact> contact,
     return 0;
 }
 
-int ContactTestCmd::UploadUserInfo(std::shared_ptr<elastos::Contact> contact,
-                                   const std::vector<std::string>& args,
-                                   std::string& errMsg)
+int ContactTestCmd::UploadInfo(std::shared_ptr<elastos::Contact> contact,
+                               const std::vector<std::string>& args,
+                               std::string& errMsg)
 {
     std::string value;
 
     auto weakUserMgr = contact->getUserManager();
     auto userMgr = weakUserMgr.lock();
+    auto weakFriendMgr = contact->getFriendManager();
+    auto friendMgr = weakFriendMgr.lock();
 
-    int ret = userMgr->uploadUserInfo();
-    if(ret < 0) {
-        errMsg = "Failed to upload user info. ret=" + std::to_string(ret);
-        return -1;
+    auto type = args.size() > 1 ? args[1] : "u";
+
+    if(type.find("f") == 0) {
+        int ret = friendMgr->uploadFriendInfo();
+        if(ret < 0) {
+            errMsg = "Failed to upload friend info. ret=" + std::to_string(ret);
+            return -1;
+        }
+    } else {
+        int ret = userMgr->uploadUserInfo();
+        if(ret < 0) {
+            errMsg = "Failed to upload user info. ret=" + std::to_string(ret);
+            return -1;
+        }
     }
-
 
     return 0;
 }
