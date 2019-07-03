@@ -41,7 +41,7 @@ int ChannelImplCarrier::GetCarrierUsrIdByAddress(const std::string& address, std
         int err = ela_get_error();
         char strerr_buf[512] = {0};
         ela_get_strerror(err, strerr_buf, sizeof(strerr_buf));
-        Log::E(Log::TAG, "Failed to add friend! ret=%s(0x%x)", strerr_buf, ret);
+        Log::E(Log::TAG, "Failed to get carrier usr id from:%s! ret=%s(0x%x)", address.c_str(), strerr_buf, err);
         return ErrCode::ChannelFailedCarrier;
     }
 
@@ -69,7 +69,7 @@ ChannelImplCarrier::~ChannelImplCarrier()
 {
 }
 
-int ChannelImplCarrier::preset()
+int ChannelImplCarrier::preset(const std::string& profile)
 {
     if(mCarrier != nullptr) {
         return ErrCode::ChannelFailedMultiOpen;
@@ -89,6 +89,9 @@ int ChannelImplCarrier::preset()
 
     carrierOpts.udp_enabled = config->mCarrierConfig->mEnableUdp;
     carrierOpts.persistent_location = config->mUserDataDir.c_str();
+    if(profile.empty() == false) {
+        carrierOpts.secret_key = profile.c_str();
+    }
 
     // set BootstrapNode
     size_t carrierNodeSize = config->mCarrierConfig->mBootstrapNodes.size();
@@ -134,6 +137,13 @@ int ChannelImplCarrier::preset()
         return ErrCode::ChannelFailedCarrier;
     }
 
+    std::string address;
+    int ret = ChannelImplCarrier::getAddress(address);
+    if(ret < 0) {
+        return ret;
+    }
+    Log::I(Log::TAG, "ChannelImplCarrier::preset() Success new carrier on address: %s.", address.c_str());
+
     return 0;
 }
 
@@ -166,7 +176,7 @@ int ChannelImplCarrier::getAddress(std::string& address)
         int err = ela_get_error();
         char strerr_buf[512] = {0};
         ela_get_strerror(err, strerr_buf, sizeof(strerr_buf));
-        Log::E(Log::TAG, "Failed to add friend! ret=%s(0x%x)", strerr_buf, ret);
+        Log::E(Log::TAG, "Failed to get address! ret=%s(0x%x)", strerr_buf, err);
         return ErrCode::ChannelFailedCarrier;
     }
 
@@ -189,18 +199,41 @@ int ChannelImplCarrier::requestFriend(const std::string& friendCode,
         return ErrCode::InvalidArgument;
     }
 
+    std::string selfAddr, selfUsrId;
+    getAddress(selfAddr);
+    GetCarrierUsrIdByAddress(selfAddr, selfUsrId);
+    if(friendCode == selfAddr
+    || friendCode == selfUsrId) {
+        return ErrCode::ChannelFailedFriendSelf;
+    }
+
     int ret = ErrCode::UnknownError;
     if(remoteRequest == true) {
+        //std::string usrId;
+        //ret = GetCarrierUsrIdByAddress(friendCode, usrId);
+        //if(ret < 0) {
+            //return ret;
+        //}
+        //bool isAdded = ela_is_friend(mCarrier.get(), usrId.c_str());
+        //if(isAdded == true) {
+            //ela_remove_friend(mCarrier.get(), usrId.c_str());
+        //}
+
         const char* hello = (summary.empty() ? " " : summary.c_str());
+        Log::I(Log::TAG, "ChannelImplCarrier::requestFriend() summary=%s", hello);
         ret = ela_add_friend(mCarrier.get(), friendCode.c_str(), hello);
     } else {
         ret = ela_accept_friend(mCarrier.get(), friendCode.c_str());
     }
     if(ret != 0) {
         int err = ela_get_error();
+        if(err == ELA_GENERAL_ERROR(ELAERR_ALREADY_EXIST)) {
+            return ErrCode::ChannelFailedFriendExists;
+        }
+
         char strerr_buf[512] = {0};
         ela_get_strerror(err, strerr_buf, sizeof(strerr_buf));
-        Log::E(Log::TAG, "Failed to add friend! ret=%s(0x%x)", strerr_buf, ret);
+        Log::E(Log::TAG, "Failed to add friend! ret=%s(0x%x)", strerr_buf, err);
         return ErrCode::ChannelFailedCarrier;
     }
 
@@ -231,7 +264,7 @@ int ChannelImplCarrier::sendMessage(const std::string& friendCode,
             int err = ela_get_error();
             char strerr_buf[512] = {0};
             ela_get_strerror(err, strerr_buf, sizeof(strerr_buf));
-            Log::E(Log::TAG, "Failed to send message! ret=%s(0x%x)", strerr_buf, ret);
+            Log::E(Log::TAG, "Failed to send message! ret=%s(0x%x)", strerr_buf, err);
             return ErrCode::ChannelNotSendMessage;
         }
     }

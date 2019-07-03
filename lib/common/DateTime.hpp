@@ -1,6 +1,6 @@
 /**
- * @file	DataTime.hpp
- * @brief	DataTime
+ * @file	DateTime.hpp
+ * @brief	DateTime
  * @details	
  *
  * @author	xxx
@@ -8,8 +8,8 @@
  * @copyright	(c) 2012 xxx All rights reserved.
  **/
 
-#ifndef _ELASTOS_DATATIME_HPP_
-#define _ELASTOS_DATATIME_HPP_
+#ifndef _ELASTOS_DATETIME_HPP_
+#define _ELASTOS_DATETIME_HPP_
 
 #include <chrono>
 #include <string>
@@ -20,7 +20,7 @@ namespace elastos {
 
 using std::chrono::system_clock;
 
-class DataTime final {
+class DateTime final {
 public:
     /*** type define ***/
 
@@ -42,6 +42,12 @@ public:
         return std::string(buf) + milliseconds_str;
     }
 
+    static long CurrentMS() {
+        system_clock::time_point tp = system_clock::now();
+        std::chrono::milliseconds now = std::chrono::duration_cast<std::chrono::milliseconds>(tp.time_since_epoch());
+        return now.count();
+    }
+
     /*** class function and variable ***/
 
 
@@ -51,11 +57,11 @@ protected:
     /*** static function and variable ***/
 
     /*** class function and variable ***/
-    explicit DataTime() = delete;
-    virtual ~DataTime() = delete;
+    explicit DateTime() = delete;
+    virtual ~DateTime() = delete;
 
-}; // class DataTime
+}; // class DateTime
 
 } // namespace elastos
 
-#endif /* _ELASTOS_DATATIME_HPP_ */
+#endif /* _ELASTOS_DATETIME_HPP_ */

@@ -6,10 +6,15 @@
 #include <thread>
 #include <signal.h>
 
+#include <DateTime.hpp>
 #include <Platform.hpp>
 #include <Log.hpp>
+#include <MD5.hpp>
 #include "ContactTestCmd.hpp"
 #include "ContactTestListener.hpp"
+
+const char* keypairLanguage = "english";
+const char* keypairWords = "";
 
 std::string gSavedMnemonic;
 std::string gCachedMnemonic;
@@ -19,18 +24,22 @@ void signalHandler(int sig);
 std::shared_ptr<elastos::SecurityManager::SecurityListener> getSecurityListener(std::weak_ptr<elastos::Contact> contact);
 std::shared_ptr<elastos::UserManager::UserListener> getUserListener();
 std::shared_ptr<elastos::FriendManager::FriendListener> getFriendListener();
+void ensureCachedMnemonic();
 std::string getPublicKey();
+std::string getPrivateKey();
 
 int main(int argc, char **argv)
 {
     signal(SIGSEGV, signalHandler);
     signal(SIGABRT, signalHandler);
 
-    const char* nickname = "Friend";
+	const char* nickname = "Friend";
     const char* fifoFilePath = (argc > 1 ? argv[1] : nullptr);
     if(fifoFilePath != nullptr) {
-        gSavedMnemonic = "panda merry use liquid thank segment end federal possible work average diet";
+        gSavedMnemonic = "enact tank inmate false describe brass slab stove smart guilt door hen";
         nickname = "Me";
+    } else {
+        gSavedMnemonic = "reopen mechanic feed suspect bus session write spoon indoor raw apology acquire";
     }
 
     Log::I(Log::TAG, "Start Contact Test.");
@@ -57,8 +66,9 @@ int main(int argc, char **argv)
 
     gCachedMnemonic.clear();
 
+    auto userMgr = contact->getUserManager().lock();
     std::shared_ptr<elastos::UserInfo> userInfo;
-    ret = contact->getUserManager().lock()->getUserInfo(userInfo);
+    ret = userMgr->getUserInfo(userInfo);
     if(ret < 0) {
         throw std::runtime_error(std::string("Failed to get user info! ret=") + std::to_string(ret));
     }
@@ -81,10 +91,21 @@ int main(int argc, char **argv)
     std::vector<elastos::UserInfo::CarrierInfo> carrierInfoArray;
     userInfo->getAllCarrierInfo(carrierInfoArray);
     for(auto& it: carrierInfoArray) {
-        Log::I(Log::TAG, "BoundDevId  : %s", it.mDevId.c_str());
+        Log::I(Log::TAG, "BoundDevId  : %s", it.mDevInfo.mDevId.c_str());
+        Log::I(Log::TAG, "BoundDevName: %s", it.mDevInfo.mDevName.c_str());
         Log::I(Log::TAG, "CarrierAddr : %s", it.mUsrAddr.c_str());
         Log::I(Log::TAG, "carrierUsrId: %s", it.mUsrId.c_str());
     }
+
+    //ret = userMgr->uploadUserInfo();
+    //if(ret < 0) {
+        //throw std::runtime_error(std::string("Failed to upload user info! ret=") + std::to_string(ret));
+    //}
+
+    //ret = userMgr->syncUserInfo();
+    //if(ret < 0) {
+        //throw std::runtime_error(std::string("Failed to get user info! ret=") + std::to_string(ret));
+    //}
 
     loop(fifoFilePath, contact);
 
@@ -114,7 +135,12 @@ void loop(const char* fifoFilePath, std::shared_ptr<elastos::Contact> contact)
                 Log::I(Log::TAG, "Success to exec: %s", cmdLine.c_str());
             }
         } else {
-            std::this_thread::sleep_for (std::chrono::seconds(1));
+            std::string input;
+            std::cin >> input;
+            if (input.find("q") == 0) {
+                return;
+            }
+            std::cout << "Unknown input: " << input << std::endl;
         }
     }
 }
@@ -144,12 +170,46 @@ std::shared_ptr<elastos::SecurityManager::SecurityListener> getSecurityListener(
         };
 
         std::vector<uint8_t> onEncryptData(const std::string& pubKey, const std::vector<uint8_t>& src) override {
-            auto dest = std::vector<uint8_t> {src.rbegin(), src.rend()};
-            return dest;
+            //auto dest = std::vector<uint8_t> {src.rbegin(), src.rend()};
+            //return dest;
+            return src;
         }
         std::vector<uint8_t> onDecryptData(const std::vector<uint8_t>& src) override {
-            auto dest = std::vector<uint8_t> {src.rbegin(), src.rend()};
-            return dest;
+            //auto dest = std::vector<uint8_t> {src.rbegin(), src.rend()};
+            //return dest;
+            return src;
+        }
+
+        std::string onRequestDidPropAppId() override {
+            return "DC92DEC59082610D1D4698F42965381EBBC4EF7DBDA08E4B3894D530608A64AAA65BB82A170FBE16F04B2AF7B25D88350F86F58A7C1F55CC29993B4C4C29E405";
+        }
+
+        std::string onRequestDidAgentAuthHeader() override {
+            std::string appid = "org.elastos.debug.didplugin";
+            std::string appkey = "b2gvzUM79yLhCbbGNWCuhSsGdqYhA7sS";
+            std::string timestamp = std::to_string(elastos::DateTime::CurrentMS());
+            std::string auth = elastos::MD5::Get(appkey + timestamp);
+            std::string headerValue = "id=" + appid + ";time=" + timestamp + ";auth=" + auth;
+            Log::I(Log::TAG, "onRequestDidAgentAuthHeader() headerValue=%s", headerValue.c_str());
+
+            return headerValue;
+        }
+
+        std::vector<uint8_t> onSignData(const std::vector<uint8_t>& originData) override {
+            std::string privKey = getPrivateKey();
+
+            std::vector<uint8_t> signedData;
+
+            void* keypairSignedData = nullptr;
+            int keypairSignedSize = ::sign(privKey.c_str(), originData.data(), originData.size(), &keypairSignedData);
+            if(keypairSignedSize <= 0) {
+                return signedData;
+            }
+
+            uint8_t* keypairSignedDataPtr = reinterpret_cast<uint8_t*>(keypairSignedData);
+            signedData = std::vector<uint8_t>(keypairSignedDataPtr, keypairSignedDataPtr + keypairSignedSize);
+
+            return signedData;
         }
 
     private:
@@ -196,25 +256,28 @@ std::shared_ptr<elastos::FriendManager::FriendListener> getFriendListener()
     return std::make_shared<FriendListener>();
 }
 
-std::string getPublicKey()
+void ensureCachedMnemonic()
 {
-    const char* language = "english";
-    const char* words = "";
-
     if(gCachedMnemonic.empty() == true) {
         //std::string password;
         //std::cout << "input password: ";
         //std::getline(std::cin, password);
 
         if(gSavedMnemonic.empty() == true) {
-            gSavedMnemonic = ::generateMnemonic(language, words);
+            gSavedMnemonic = ::generateMnemonic(keypairLanguage, keypairWords);
             Log::I(Log::TAG, "generate mnemonic: %s", gSavedMnemonic.c_str());
         }
         gCachedMnemonic = gSavedMnemonic;
     }
 
+}
+
+std::string getPublicKey()
+{
+    ensureCachedMnemonic();
+
     void* seedData = nullptr;
-    int seedSize = ::getSeedFromMnemonic(&seedData, gCachedMnemonic.c_str(), language, words, "");
+    int seedSize = ::getSeedFromMnemonic(&seedData, gCachedMnemonic.c_str(), keypairLanguage, keypairWords, "");
 
     auto pubKey = ::getSinglePublicKey(seedData, seedSize);
     freeBuf(seedData);
@@ -222,6 +285,23 @@ std::string getPublicKey()
     std::string retval = pubKey;
     freeBuf(pubKey);
 
-    return pubKey;
+    return retval;
+
+}
+
+std::string getPrivateKey()
+{
+    ensureCachedMnemonic();
+
+    void* seedData = nullptr;
+    int seedSize = ::getSeedFromMnemonic(&seedData, gCachedMnemonic.c_str(), keypairLanguage, keypairWords, "");
+
+    auto privKey = ::getSinglePrivateKey(seedData, seedSize);
+    freeBuf(seedData);
+
+    std::string retval = privKey;
+    freeBuf(privKey);
+
+    return retval;
 
 }

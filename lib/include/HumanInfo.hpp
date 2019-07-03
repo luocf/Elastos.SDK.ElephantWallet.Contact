@@ -2,6 +2,7 @@
 #define _ELASTOS_HUMAN_INFO_HPP_
 
 #include <map>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -33,13 +34,19 @@ public:
         WaitForAccept = 0x1,
         Offline = 0x2,
         Online = 0x4,
+        Removed = 0x8,
     };
 
-
     struct CarrierInfo {
-        std::string mDevId;
+        struct DeviceInfo {
+            std::string mDevId;
+            std::string mDevName;
+            long mUpdateTime;
+        };
+
         std::string mUsrAddr;
         std::string mUsrId;
+        DeviceInfo mDevInfo;
     };
 
     /*** static function and variable ***/
@@ -49,11 +56,17 @@ public:
     explicit HumanInfo();
     virtual ~HumanInfo();
 
+    bool contains(const std::string& humanCode);
+    bool contains(const std::shared_ptr<HumanInfo>& humanInfo);
+
     virtual int addCarrierInfo(const CarrierInfo& info, const Status status = Status::Invalid);
     virtual int getCarrierInfoByUsrId(const std::string& usrId, CarrierInfo& info) const;
+    virtual int getCarrierInfoByDevId(const std::string& devId, CarrierInfo& info) const;
     virtual int getAllCarrierInfo(std::vector<CarrierInfo>& infoArray) const;
     virtual int setCarrierStatus(const std::string& usrId, const Status status);
     virtual int getCarrierStatus(const std::string& usrId, Status& status) const;
+    virtual int serialize(const CarrierInfo& info, std::string& value) const;
+    virtual int deserialize(const std::string& value, CarrierInfo& info) const;
 
     virtual int setHumanInfo(Item item, const std::string& value);
     virtual int getHumanInfo(Item item, std::string& value) const;
@@ -65,7 +78,6 @@ public:
 
     virtual int serialize(std::string& value, bool summaryOnly = false) const;
     virtual int deserialize(const std::string& value, bool summaryOnly = false);
-
 protected:
     /*** type define ***/
 

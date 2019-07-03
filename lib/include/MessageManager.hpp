@@ -128,9 +128,6 @@ public:
     virtual std::shared_ptr<MessageInfo> makeMessage(MessageType type,
                                                      const std::vector<uint8_t>& plainContent,
                                                      const std::string& cryptoAlgorithm = "") const;
-    virtual std::shared_ptr<MessageInfo> makeMessage(MessageType type,
-                                                     const std::string& plainContent,
-                                                     const std::string& cryptoAlgorithm = "") const;
     virtual std::shared_ptr<MessageInfo> makeTextMessage(const std::string& plainContent,
                                                          const std::string& cryptoAlgorithm = "") const;
 
@@ -147,6 +144,7 @@ private:
     template <class T>
     int getChannel(ChannelType chType, std::weak_ptr<T>& channel);
     std::shared_ptr<MessageInfo> makeMessage(std::shared_ptr<MessageInfo> from, bool ignoreContent = true);
+    int sendDescMessage(const std::shared_ptr<HumanInfo> humanInfo, ChannelType chType);
 
     std::weak_ptr<SecurityManager> mSecurityManager;
     std::weak_ptr<UserManager> mUserManager;

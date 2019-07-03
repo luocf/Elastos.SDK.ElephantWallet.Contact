@@ -46,6 +46,9 @@ public:
 
     int restoreFriends();
 
+    bool contains(const std::string& friendCode);
+    bool contains(const std::shared_ptr<HumanInfo>& friendInfo);
+
     virtual int tryAddFriend(const std::string& friendCode, const std::string& summary, bool remoteRequest = true);
     virtual int tryRemoveFriend(const std::string& friendCode);
     virtual int tryGetFriendInfo(const std::string& friendCode, std::shared_ptr<FriendInfo>& friendInfo);
@@ -57,12 +60,16 @@ public:
     virtual int addFriendInfo(std::shared_ptr<FriendInfo> friendInfo);
     virtual int getFriendInfo(FriendInfo::HumanKind friendKind, const std::string& friendCode,
                               std::shared_ptr<FriendInfo>& friendInfo);
+    virtual int getFriendInfoList(std::vector<std::shared_ptr<FriendInfo>>& friendList);
 
     virtual int acceptFriend(std::shared_ptr<FriendInfo> friendInfo);
 
     //virtual int getAllFriendInfo(std::shared_ptr<FriendInfo>& friendInfo);
 
     virtual std::vector<FriendInfo> filterFriends(std::string regex);
+
+    int syncFriendInfo();
+    int uploadFriendInfo();
 
 private:
     /*** type define ***/
@@ -86,6 +93,7 @@ private:
     std::weak_ptr<Config> mConfig;
     std::shared_ptr<FriendListener> mFriendListener;
     std::vector<std::shared_ptr<FriendInfo>> mFriendList;
+    std::vector<std::shared_ptr<FriendInfo>> mNotUploadFriendList;
 
 }; // class FriendManager
 

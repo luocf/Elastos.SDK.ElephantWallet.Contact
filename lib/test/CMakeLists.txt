@@ -10,6 +10,7 @@ target_include_directories(ContactTest PRIVATE
     "${CMAKE_CURRENT_SOURCE_DIR}/../src"
     "${CMAKE_CURRENT_SOURCE_DIR}/../wrapper/json"
     "${CMAKE_INSTALL_PREFIX}/include")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g")
 target_link_libraries(ContactTest PUBLIC
     Elastos.SDK.Contact)
 configure_file("ContactTestUI.sh" "${CMAKE_CURRENT_BINARY_DIR}/ContactTestUI.sh" COPYONLY)

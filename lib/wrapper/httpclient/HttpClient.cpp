@@ -314,6 +314,7 @@ int HttpClient::makeCurl(std::shared_ptr<void>& curlHandlePtr, std::shared_ptr<s
 	if(mUrl.empty() == true) {
 		return ErrCode::UrlNotExists;
 	}
+    Log::I(Log::TAG, "HttpClient::makeCurl() url=%s", mUrl.c_str());
 	curle = curl_easy_setopt(curlHandlePtr.get(), CURLOPT_URL, mUrl.c_str());
 	CHECK_ERROR(curle);
 
@@ -323,6 +324,7 @@ int HttpClient::makeCurl(std::shared_ptr<void>& curlHandlePtr, std::shared_ptr<s
 		auto& name = key;
 		for(auto& value: val) {
 			std::string header = (name + ": " + value);
+            Log::I(Log::TAG, "HttpClient::makeCurl() header=%s", header.c_str());
 			curlHeaders = curl_slist_append(curlHeaders, header.c_str());
 		}
 

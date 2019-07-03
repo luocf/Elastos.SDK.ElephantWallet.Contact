@@ -1,7 +1,14 @@
 #include <BlkChnClient.hpp>
 
+#include <iomanip>
+
+#include <DateTime.hpp>
+#include <ErrCode.hpp>
 #include <HttpClient.hpp>
 #include <Log.hpp>
+#include <MD5.hpp>
+#include <Platform.hpp>
+#include <SafePtr.hpp>
 
 
 namespace elastos {
@@ -28,6 +35,11 @@ int BlkChnClient::InitInstance(std::weak_ptr<Config> config, std::weak_ptr<Secur
     HttpClient::InitGlobal();
     gBlkChnClient = std::make_shared<Impl>(config, sectyMgr);
 
+    int ret = gBlkChnClient->startMonitor();
+    if (ret < 0) {
+        return 0;
+    }
+
     return 0;
 }
 
@@ -46,19 +58,82 @@ int BlkChnClient::setConnectTimeout(uint32_t milliSecond)
     return 0;
 }
 
-int BlkChnClient::getDidProps(const std::set<std::string>& keySet, std::map<std::string, std::string>& propMap)
+int BlkChnClient::appendMoniter(const std::string& path, const MonitorCallback& callback)
 {
-    throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
+    if(path.empty() == true) {
+        return ErrCode::InvalidArgument;
+    }
+
+	std::lock_guard<std::mutex> lock(mMonitor.mMonitorMutex);
+    mMonitor.mMonitorCallbackMap[path] = callback;
+
+    return 0;
 }
 
-int BlkChnClient::uploadDidProps(const std::map<std::string, std::string>& propMap)
+int BlkChnClient::removeMoniter(const std::string& path)
 {
+	std::lock_guard<std::mutex> lock(mMonitor.mMonitorMutex);
+    mMonitor.mMonitorCallbackMap.erase(path);
+
+    return 0;
+}
+
+int BlkChnClient::downloadAllDidProps(const std::string& did, std::map<std::string, std::string>& propMap)
+{
+    auto sectyMgr = SAFE_GET_PTR(mSecurityManager);
+    auto config = SAFE_GET_PTR(mConfig);
+
+    auto agentGetProps = config->mDidChainConfig->mAgentApi.mGetDidProps;
+    std::string agentGetPropsPath = agentGetProps + did;
+
+    std::string propArrayStr;
+    int ret = getDidPropFromDidChn(agentGetPropsPath, propArrayStr);
+    if(ret < 0) {
+        return ret;
+    }
+
+    std::string keyPath;
+    ret = getPropKeyPathPrefix(keyPath);
+    if(ret < 0) {
+        return ret;
+    }
+
+    Json jsonPropArray = Json::parse(propArrayStr);
+    for(const auto& it: jsonPropArray){
+        std::string propKey = it["key"];
+        std::string propValue = it["value"];
+
+        size_t pos = propKey.find(keyPath);
+        if (pos != std::string::npos) {
+            propKey.erase(pos, keyPath.length());
+        }
+
+        propMap[propKey] = propValue;
+    }
+
+    return 0;
+}
+
+int BlkChnClient::uploadAllDidProps(const std::map<std::string, std::string>& propMap)
+{
+    auto sectyMgr = SAFE_GET_PTR(mSecurityManager);
+    auto config = SAFE_GET_PTR(mConfig);
+
     Json jsonPropProt = Json::object();
     Json jsonPropArray = Json::array();
-
     for(const auto& prop: propMap) {
+        std::string keyPath;
+        int ret = getPropKeyPath(prop.first, keyPath);
+        if (ret < 0)
+        {
+            return ret;
+        }
+
+        std::string propKey = keyPath;
+        std::string propValue = prop.second;
         Json jsonProp = Json::object();
-        jsonProp[prop.first] = prop.second;
+        jsonProp[DidProtocol::Name::Key] = propKey;
+        jsonProp[DidProtocol::Name::Value] = propValue;
         if(prop.second.empty() == true) {
             jsonProp[DidProtocol::Name::Status] = DidProtocol::Value::Status::Deprecated;
         } else {
@@ -73,17 +148,234 @@ int BlkChnClient::uploadDidProps(const std::map<std::string, std::string>& propM
     jsonPropProt[DidProtocol::Name::Status] = DidProtocol::Value::Status::Normal;
     jsonPropProt[DidProtocol::Name::Properties] = jsonPropArray;
 
-    auto propProtStr = std::make_shared<std::string>(jsonPropProt.dump());
-    // TODO, did prop key, sign, make {msg, sig, pub}
+    auto propProtStr = jsonPropProt.dump();
+    Log::I(Log::TAG, "BlkChnClient::uploadAllDidProps() propProt: %s", propProtStr.c_str());
+    std::vector<uint8_t> originBytes(propProtStr.begin(), propProtStr.end());
+    std::vector<uint8_t> signedBytes(propProtStr.begin(), propProtStr.end());
+    int ret = sectyMgr->signData(originBytes, signedBytes);
+    if(ret < 0) {
+        return ret;
+    }
 
-    auto task = [propProtStr]() {
-        Log::D(Log::TAG, "%s body = %s", __PRETTY_FUNCTION__, propProtStr->c_str());
+    std::string pubKey;
+    ret = sectyMgr->getPublicKey(pubKey);
+    if(ret < 0) {
+        return ret;
+    }
 
-        HttpClient httpClient;
-        // TODO
+    std::string msgStr = MD5::MakeHexString(originBytes);
+    std::string sigStr = MD5::MakeHexString(signedBytes);
 
-    };
-    mTaskThread.post(task);
+    // did prop key, sign, make {msg, sig, pub}
+    std::string reqBody = std::string("{")
+        + "\"pub\":\"" + pubKey + "\","
+        + "\"msg\":\"" + msgStr + "\","
+        + "\"sig\":\"" + sigStr + "\""
+        + "}";
+
+    auto didConfigUrl = config->mDidChainConfig->mUrl;
+    auto agentUploadPath = config->mDidChainConfig->mAgentApi.mUploadDidProps;
+    std::string agentUploadUrl = didConfigUrl + agentUploadPath;
+    std::string authHeader;
+    ret = sectyMgr->getDidAgentAuthHeader(authHeader);
+    if(ret < 0) {
+        return ret;
+    }
+    Log::I(Log::TAG, "reqBody=%s", reqBody.c_str());
+
+    HttpClient httpClient;
+    httpClient.url(agentUploadUrl);
+    httpClient.setHeader("Content-Type", "application/json");
+    httpClient.setHeader("X-Elastos-Agent-Auth", authHeader);
+    ret = httpClient.syncPost(reqBody);
+    if(ret < 0) {
+        return ErrCode::HttpClientError + ret;
+    }
+
+    std::string respBody;
+    ret = httpClient.getResponseBody(respBody);
+    if(ret < 0) {
+        return ErrCode::HttpClientError + ret;
+    }
+    Log::I(Log::TAG, "respBody=%s", respBody.c_str());
+
+    Json jsonResp = Json::parse(respBody);
+    if(jsonResp["status"] != 200) {
+        return ErrCode::BlkChnSetPropError;
+    }
+
+    return 0;
+}
+
+int BlkChnClient::downloadDidProp(const std::string& did, const std::string& key, std::string& prop)
+{
+    prop = "";
+
+    auto config = SAFE_GET_PTR(mConfig);
+
+    std::string keyPath;
+    int ret = getPropKeyPath(key, keyPath);
+    if(ret < 0) {
+        return ret;
+    }
+
+    auto agentGetProps = config->mDidChainConfig->mAgentApi.mGetDidProps;
+    auto agentDidProp = config->mDidChainConfig->mAgentApi.mDidProp;
+    std::string agentGetPropPath = agentGetProps + did + agentDidProp + keyPath;
+
+    std::string propArrayStr;
+    ret = getDidPropFromDidChn(agentGetPropPath, propArrayStr);
+    if(ret < 0) {
+        return ret;
+    }
+
+    Json jsonPropArray = Json::parse(propArrayStr);
+    for(const auto& it: jsonPropArray) {
+        std::string propKey = it["key"];
+        if(keyPath != propKey) {
+            continue;
+        }
+
+        prop = it["value"];
+        return 0;
+    }
+
+    return ErrCode::BlkChnGetPropError;
+}
+
+int BlkChnClient::uploadDidProp(const std::string& key, const std::string& prop)
+{
+    throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
+}
+
+int BlkChnClient::getDidPropHistory(const std::string& did, const std::string& key, std::vector<std::string>& values)
+{
+    values.clear();
+
+    std::string agentGetPropHistoryPath;
+    int ret = getDidPropHistoryPath(did, key, agentGetPropHistoryPath);
+    if(ret < 0) {
+        return ret;
+    }
+
+    std::string propArrayStr;
+    ret = getDidPropFromDidChn(agentGetPropHistoryPath, propArrayStr);
+    if(ret < 0) {
+        return ret;
+    }
+
+    Json jsonPropArray = Json::parse(propArrayStr);
+    for(const auto& it: jsonPropArray) {
+        values.push_back(it["value"]);
+    }
+
+    return 0;
+}
+
+int BlkChnClient::getDidPropHistoryPath(const std::string& did, const std::string& key, std::string& path)
+{
+    path.clear();
+
+    auto config = SAFE_GET_PTR(mConfig);
+
+    std::string keyPath;
+    int ret = getPropKeyPath(key, keyPath);
+    if(ret < 0) {
+        return ret;
+    }
+
+    auto agentGetProps = config->mDidChainConfig->mAgentApi.mGetDidProps;
+    auto agentDidPropHistory = config->mDidChainConfig->mAgentApi.mDidPropHistory;
+    path = agentGetProps + did + agentDidPropHistory + keyPath;
+
+    return 0;
+}
+
+int BlkChnClient::downloadHumanInfo(const std::string& did, std::shared_ptr<HumanInfo>& humanInfo)
+{
+    humanInfo = std::make_shared<HumanInfo>();
+
+    std::string pubKey;
+    int ret = downloadDidProp(did, NamePublicKey, pubKey);
+    if(ret < 0) {
+        return ret;
+    }
+
+    std::string expectedDid;
+    ret = SecurityManager::GetDid(pubKey, expectedDid);
+    if(ret < 0) {
+        return ret;
+    }
+
+    ret = humanInfo->setHumanInfo(HumanInfo::Item::ChainPubKey, pubKey);
+    if(ret < 0) {
+        return ret;
+    }
+
+    std::vector<std::string> propHistory;
+    ret = getDidPropHistory(did, NameCarrierId, propHistory);
+    if(ret < 0) {
+        return ret;
+    }
+
+    for(const auto& it: propHistory) {
+        HumanInfo::CarrierInfo carrierInfo;
+        ret = humanInfo->deserialize(it, carrierInfo);
+        if(ret < 0) {
+            Log::W(Log::TAG, "BlkChnClient::downloadHumanInfo() Failed to sync CarrierId: %s", it.c_str());
+            continue; // ignore error
+        }
+
+        ret = humanInfo->addCarrierInfo(carrierInfo, HumanInfo::Status::Offline);
+        if(ret < 0) {
+            if(ret == ErrCode::IgnoreMergeOldInfo) {
+                Log::I(Log::TAG, "BlkChnClient::downloadHumanInfo() Ignore to sync CarrierId: %s", it.c_str());
+            } else {
+                Log::W(Log::TAG, "BlkChnClient::downloadHumanInfo() Failed to sync carrier info. CarrierId: %s", it.c_str());
+            }
+            continue; // ignore error
+        }
+
+        Log::I(Log::TAG, "BlkChnClient::downloadHumanInfo() Success to sync CarrierId: %s", it.c_str());
+    }
+
+    return 0;
+}
+
+int BlkChnClient::uploadHumanInfo(const std::shared_ptr<HumanInfo>& humanInfo)
+{
+    std::string pubKey;
+    int ret = humanInfo->getHumanInfo(HumanInfo::Item::ChainPubKey, pubKey);
+    if(ret < 0) {
+        return ret;
+    }
+
+    std::string devId;
+    ret = Platform::GetCurrentDevId(devId);
+    if(ret < 0) {
+        return ret;
+    }
+
+    HumanInfo::CarrierInfo carrierInfo;
+    ret = humanInfo->getCarrierInfoByDevId(devId, carrierInfo);
+    if(ret < 0) {
+        return ret;
+    }
+
+    std::string carrierInfoStr;
+    ret = humanInfo->serialize(carrierInfo, carrierInfoStr);
+    if(ret < 0) {
+        return ret;
+    }
+
+    std::map<std::string, std::string> propMap;
+    propMap["PublicKey"] = pubKey;
+    propMap["CarrierID"] = carrierInfoStr;
+    ret = uploadAllDidProps(propMap);
+    if(ret < 0) {
+        return ret;
+    }
+
 
     return 0;
 }
@@ -99,13 +391,110 @@ int BlkChnClient::uploadDidProps(const std::map<std::string, std::string>& propM
 BlkChnClient::BlkChnClient(std::weak_ptr<Config> config, std::weak_ptr<SecurityManager> sectyMgr)
     : mConfig(config)
     , mSecurityManager(sectyMgr)
-    , mTaskThread()
     , mConnectTimeoutMS(10000)
+    , mMonitor()
 {
 }
 
 BlkChnClient::~BlkChnClient()
 {
 }
+
+int BlkChnClient::startMonitor()
+{
+    mMonitor.mMonitorLooper = [&]() {
+        long current = DateTime::CurrentMS();
+        Log::I(Log::TAG, "current timestamp=%lld", current);
+        std::map<std::string, MonitorCallback> monitorCallbackMap;
+        {
+            std::lock_guard<std::mutex> lock(mMonitor.mMonitorMutex);
+            monitorCallbackMap = mMonitor.mMonitorCallbackMap;
+        }
+
+        for(const auto& it: monitorCallbackMap) {
+            auto& keyPath = it.first;
+            auto& callback = it.second;
+
+            std::string result;
+            int ret = getDidPropFromDidChn(keyPath, result);
+            callback(ret, keyPath, result);
+        }
+
+        int ret = mMonitor.mMonitorThread.sleepMS(mMonitor.mMonitorPendingMS);
+        mMonitor.mMonitorThread.post(mMonitor.mMonitorLooper);
+    };
+
+    mMonitor.mMonitorThread.post(mMonitor.mMonitorLooper);
+
+    return 0;
+}
+
+int BlkChnClient::getDidPropFromDidChn(const std::string& path, std::string& result)
+{
+    auto sectyMgr = SAFE_GET_PTR(mSecurityManager);
+    auto config = SAFE_GET_PTR(mConfig);
+
+    auto didConfigUrl = config->mDidChainConfig->mUrl;
+    std::string agentUrl = didConfigUrl + path;
+
+    HttpClient httpClient;
+    httpClient.url(agentUrl);
+    int ret = httpClient.syncGet();
+    if(ret < 0) {
+        return ErrCode::HttpClientError + ret;
+    }
+
+    std::string respBody;
+    ret = httpClient.getResponseBody(respBody);
+    if(ret < 0) {
+        return ErrCode::HttpClientError + ret;
+    }
+    Log::I(Log::TAG, "respBody=%s", respBody.c_str());
+
+    Json jsonResp = Json::parse(respBody);
+    int status = jsonResp["status"];
+    if(status != 200) {
+        return ErrCode::BlkChnGetPropError;
+    }
+
+    result = jsonResp["result"];
+    if(result.empty() == true) {
+        return ErrCode::BlkChnEmptyPropError;
+    }
+
+    return 0;
+}
+
+int BlkChnClient::getPropKeyPathPrefix(std::string& keyPathPrefix)
+{
+    auto sectyMgr = SAFE_GET_PTR(mSecurityManager);
+
+    std::string appId;
+    int ret = sectyMgr->getDidPropAppId(appId);
+    if(ret < 0) {
+        return ret;
+    }
+
+    keyPathPrefix = "Apps/" + appId + "/";
+    return 0;
+}
+
+int BlkChnClient::getPropKeyPath(const std::string& key, std::string& keyPath)
+{
+    if(key == "PublicKey") {
+        keyPath = key;
+        return 0;
+    }
+
+    std::string keyPathPrefix;
+    int ret = getPropKeyPathPrefix(keyPathPrefix);
+    if(ret < 0) {
+        return ret;
+    }
+
+    keyPath = keyPathPrefix + key;
+    return 0;
+}
+
 
 } // namespace elastos

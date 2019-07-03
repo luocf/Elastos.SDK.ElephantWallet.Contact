@@ -7,10 +7,14 @@
 
 #include <UserManager.hpp>
 
+#include "BlkChnClient.hpp"
 #include <CompatibleFileSystem.hpp>
 #include <Log.hpp>
+#include <MessageManager.hpp>
 #include <SafePtr.hpp>
+#include <Platform.hpp>
 #include <iostream>
+#include <sstream>
 #include <Json.hpp>
 
 
@@ -30,6 +34,7 @@ namespace elastos {
 /***********************************************/
 UserManager::UserManager(std::weak_ptr<SecurityManager> sectyMgr)
     : mSecurityManager(sectyMgr)
+    , mMessageManager()
     , mConfig()
     , mUserListener()
     , mUserInfo()
@@ -45,9 +50,10 @@ void UserManager::setUserListener(std::shared_ptr<UserListener> listener)
     mUserListener = listener;
 }
 
-void UserManager::setConfig(std::weak_ptr<Config> config)
+void UserManager::setConfig(std::weak_ptr<Config> config, std::weak_ptr<MessageManager> msgMgr)
 {
     mConfig = config;
+    mMessageManager = msgMgr;
 }
 
 int UserManager::loadLocalData()
@@ -73,6 +79,7 @@ int UserManager::loadLocalData()
         return ErrCode::JsonParseException;
     }
 
+    Log::I(Log::TAG, "Success to load local data from: %s.", dataFilePath.c_str());
     return 0;
 }
 
@@ -118,8 +125,20 @@ int UserManager::makeUser()
     mUserInfo = std::make_shared<UserInfo>(weak_from_this());
 
     int ret = loadLocalData();
-    if(ret < 0
-    && ret != ErrCode::FileNotExistsError) {
+    if(ret == 0) {
+        Log::I(Log::TAG, "UserManager::makeUser() Success to recover user from local.");
+    } else if(ret == ErrCode::FileNotExistsError) {
+        Log::I(Log::TAG, "UserManager::makeUser() Local user info not exists.");
+        ret = syncUserInfo();
+        if(ret == 0) {
+            Log::I(Log::TAG, "UserManager::makeUser() Success to recover user from did chain.");
+        } else if(ret == ErrCode::BlkChnEmptyPropError) {
+            Log::I(Log::TAG, "UserManager::makeUser() Can't find user info from local or did chain, make a new user.");
+            ret = 0;
+        }
+    }
+    if(ret < 0) {
+        Log::E(Log::TAG, "UserManager::makeUser() Failed to recover user, ret=%d", ret);
         return ret;
     }
 
@@ -147,33 +166,74 @@ int UserManager::getUserInfo(std::shared_ptr<UserInfo>& userInfo)
 
 bool UserManager::contains(const std::string& userCode)
 {
-    auto kind = HumanInfo::AnalyzeHumanKind(userCode);
+    return mUserInfo->contains(userCode);
+}
 
-    int ret = ErrCode::UnknownError;
-    switch(kind) {
-    case HumanInfo::HumanKind::Did:
-        {
-            std::string info;
-            ret = mUserInfo->getHumanInfo(HumanInfo::Item::Did, info);
-        }
-        break;
-    case HumanInfo::HumanKind::Ela:
-        {
-            std::string info;
-            ret = mUserInfo->getHumanInfo(HumanInfo::Item::ElaAddress, info);
-        }
-        break;
-    case HumanInfo::HumanKind::Carrier:
-        {
-            HumanInfo::CarrierInfo info;
-            ret = mUserInfo->getCarrierInfoByUsrId(userCode, info);
-        }
-        break;
-    default:
-        break;
+bool UserManager::contains(const std::shared_ptr<HumanInfo>& userInfo)
+{
+    return mUserInfo->contains(userInfo);
+}
+
+int UserManager::syncUserInfo()
+{
+    auto sectyMgr = SAFE_GET_PTR(mSecurityManager);
+    std::string did;
+    int ret = sectyMgr->getDid(did);
+    if(ret < 0) {
+        return ret;
     }
 
-    return (ret >=0 ? true : false);
+    auto bcClient = BlkChnClient::GetInstance();
+
+    auto humanInfo = std::make_shared<HumanInfo>();
+    ret = bcClient->downloadHumanInfo(did, humanInfo);
+    if(ret < 0) {
+        return ret;
+    }
+
+    ret = mUserInfo->mergeHumanInfo(*humanInfo, HumanInfo::Status::Offline);
+    if(ret < 0) {
+        return ret;
+    }
+
+    return 0;
+}
+
+int UserManager::uploadUserInfo()
+{
+    auto bcClient = BlkChnClient::GetInstance();
+
+    int ret = bcClient->uploadHumanInfo(mUserInfo);
+    if(ret < 0) {
+        return ret;
+    }
+
+    return 0;
+}
+
+int UserManager::setupMultiDevChannels()
+{
+    auto msgMgr = SAFE_GET_PTR(mMessageManager);
+
+    std::vector<HumanInfo::CarrierInfo> carrierInfoArray;
+    int ret = mUserInfo->getAllCarrierInfo(carrierInfoArray);
+    if(ret < 0) {
+        return ret;
+    }
+
+    for(const auto& carrierInfo: carrierInfoArray) {
+        int ret = msgMgr->requestFriend(carrierInfo.mUsrAddr,
+                                        MessageManager::ChannelType::Carrier,
+                                        "", true);
+        Log::I(Log::TAG, "UserManager::setupMultiDevChannels() add %s", carrierInfo.mUsrAddr.c_str());
+        if(ret < 0
+        && ret != ErrCode::ChannelFailedFriendSelf
+        && ret != ErrCode::ChannelFailedFriendExists) {
+            Log::W(Log::TAG, "UserManager::setupMultiDevChannels() Failed to add %s ret=%d", carrierInfo.mUsrAddr.c_str(), ret);
+        }
+    }
+
+    return 0;
 }
 
 /***********************************************/

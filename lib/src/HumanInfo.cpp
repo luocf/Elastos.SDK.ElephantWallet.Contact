@@ -10,7 +10,7 @@
 #include "ChannelImplCarrier.hpp"
 #include <ctime>
 #include <Json.hpp>
-#include <DataTime.hpp>
+#include <DateTime.hpp>
 #include <Log.hpp>
 #include <SecurityManager.hpp>
 
@@ -62,6 +62,62 @@ HumanInfo::~HumanInfo()
 {
 }
 
+bool HumanInfo::contains(const std::string& humanCode)
+{
+    auto kind = AnalyzeHumanKind(humanCode);
+
+    int ret = ErrCode::UnknownError;
+    switch(kind) {
+    case HumanKind::Did:
+        {
+            std::string info;
+            ret = getHumanInfo(Item::Did, info);
+        }
+        break;
+    case HumanKind::Ela:
+        {
+            std::string info;
+            ret = getHumanInfo(Item::ElaAddress, info);
+        }
+        break;
+    case HumanKind::Carrier:
+        {
+            CarrierInfo info;
+            ret = getCarrierInfoByUsrId(humanCode, info);
+        }
+        break;
+    default:
+        break;
+    }
+
+    return (ret >=0 ? true : false);
+}
+
+bool HumanInfo::contains(const std::shared_ptr<HumanInfo>& humanInfo)
+{
+    std::string info;
+    int ret = humanInfo->getHumanInfo(Item::Did, info);
+    if(ret >= 0) {
+        return contains(info);
+    }
+
+    ret = humanInfo->getHumanInfo(Item::ElaAddress, info);
+    if(ret >= 0) {
+        return contains(info);
+    }
+
+    std::vector<CarrierInfo> infoArray;
+    ret = humanInfo->getAllCarrierInfo(infoArray);
+    for(const auto& info: infoArray) {
+        bool find = contains(info.mUsrId);
+        if(find == true) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 int HumanInfo::addCarrierInfo(const HumanInfo::CarrierInfo& info, const HumanInfo::Status status)
 {
     Log::D(Log::TAG, " ============    %s", __PRETTY_FUNCTION__);
@@ -72,9 +128,12 @@ int HumanInfo::addCarrierInfo(const HumanInfo::CarrierInfo& info, const HumanInf
 
     HumanInfo::CarrierInfo correctedInfo = info;
 
-    if(correctedInfo.mDevId.empty() == true) {
-        auto datatime = DataTime::Current();
-        correctedInfo.mDevId = "unknown-" + datatime;
+    if(correctedInfo.mDevInfo.mDevId.empty() == true) {
+        auto datetime = DateTime::Current();
+        correctedInfo.mDevInfo.mDevId = datetime;
+    }
+    if(correctedInfo.mDevInfo.mDevName.empty() == true) {
+        correctedInfo.mDevInfo.mDevId = "Unknown";
     }
 
     if(correctedInfo.mUsrAddr.empty() == false) {
@@ -90,30 +149,53 @@ int HumanInfo::addCarrierInfo(const HumanInfo::CarrierInfo& info, const HumanInf
 
     for(auto idx = 0; idx < mBoundCarrierArray.size(); idx++) {
         auto& existsInfo = mBoundCarrierArray[idx];
-        if(existsInfo.mUsrId != correctedInfo.mUsrId) {
+
+        if(existsInfo.mDevInfo.mDevId.empty() == false
+        && existsInfo.mDevInfo.mDevId != correctedInfo.mDevInfo.mDevId) { // not changed
             continue;
         }
 
+        //if(existsInfo.mUsrId != correctedInfo.mUsrId) {
+            //continue;
+        //}
+
         // found info by usrId
-        if(existsInfo.mDevId == correctedInfo.mDevId
-        && existsInfo.mUsrAddr == correctedInfo.mUsrAddr) { // not changed
-            return 0;
-        } else { // update info
-            existsInfo = correctedInfo;
-            return idx;
+        //if(existsInfo.mDevInfo.mDevId == correctedInfo.mDevInfo.mDevId
+        //&& existsInfo.mUsrAddr == correctedInfo.mUsrAddr) { // not changed
+            //return 0;
+        if(existsInfo.mDevInfo.mDevId == correctedInfo.mDevInfo.mDevId) { // found same dev
+            if(existsInfo.mDevInfo.mUpdateTime >= correctedInfo.mDevInfo.mUpdateTime) { // not changed
+                return ErrCode::IgnoreMergeOldInfo;
+            } else { // update info
+                existsInfo = correctedInfo;
+                return idx;
+            }
         }
     }
 
     mBoundCarrierArray.push_back(correctedInfo); // if not exists, add new one
     mBoundCarrierStatus.push_back(status);
-    return (mBoundCarrierArray.size() - 1);
+    return mBoundCarrierArray.size();
 }
 
 int HumanInfo::getCarrierInfoByUsrId(const std::string& usrId, HumanInfo::CarrierInfo& info) const
 {
-    info = {"", "", ""};
+    info = {"", "", {"", "", 0}};
     for(auto idx = 0; idx < mBoundCarrierArray.size(); idx++) {
         if(mBoundCarrierArray[idx].mUsrId == usrId) {
+            info = mBoundCarrierArray[idx];
+            return idx;
+        }
+    }
+
+    return ErrCode::NotFoundError;
+}
+
+int HumanInfo::getCarrierInfoByDevId(const std::string& devId, CarrierInfo& info) const
+{
+    info = {"", "", {"", "", 0}};
+    for(auto idx = 0; idx < mBoundCarrierArray.size(); idx++) {
+        if(mBoundCarrierArray[idx].mDevInfo.mDevId == devId) {
             info = mBoundCarrierArray[idx];
             return idx;
         }
@@ -166,7 +248,7 @@ int HumanInfo::setHumanInfo(Item item, const std::string& value)
         return 0;
     }
 
-    Log::D(Log::TAG, "%s %s=>%s", __PRETTY_FUNCTION__, mCommonInfoMap[item].c_str(), value.c_str());
+    Log::D(Log::TAG, "%s %d %s=>%s", __PRETTY_FUNCTION__, item, mCommonInfoMap[item].c_str(), value.c_str());
 
     if(item == Item::ChainPubKey) {
         std::string expectedDid, expectedElaAddr;
@@ -213,7 +295,7 @@ int HumanInfo::mergeHumanInfo(const HumanInfo& value, const Status status)
     auto it = value.mCommonInfoMap.find(Item::Did);
     if(it != value.mCommonInfoMap.end() && it->second.empty() == false) {
         if(this->mCommonInfoMap[Item::Did].empty() == false
-        && this->mCommonInfoMap[Item::Did] == it->second) {
+        && this->mCommonInfoMap[Item::Did] != it->second) {
             return ErrCode::MergeInfoFailed;
         }
 
@@ -223,7 +305,7 @@ int HumanInfo::mergeHumanInfo(const HumanInfo& value, const Status status)
     it = value.mCommonInfoMap.find(Item::ElaAddress);
     if(it != value.mCommonInfoMap.end() && it->second.empty() == false) {
         if(this->mCommonInfoMap[Item::ElaAddress].empty() == false
-        && this->mCommonInfoMap[Item::ElaAddress] == it->second) {
+        && this->mCommonInfoMap[Item::ElaAddress] != it->second) {
             return ErrCode::MergeInfoFailed;
         }
 
@@ -285,18 +367,32 @@ HumanInfo::Status HumanInfo::getHumanStatus()
     return status;
 }
 
-inline void to_json(Json& j, const HumanInfo::CarrierInfo& info) {
+inline void to_json(Json& j, const HumanInfo::CarrierInfo::DeviceInfo& info) {
     j = Json {
         {"DevId", info.mDevId},
-        {"UsrAddr", info.mUsrAddr},
-        {"UsrId", info.mUsrId},
+        {"DevName", info.mDevName},
+        {"UpdateTime", info.mUpdateTime},
+    };
+}
+
+inline void from_json(const Json& j, HumanInfo::CarrierInfo::DeviceInfo& info) {
+    info.mDevId = j["DevId"];
+    info.mDevName = j["DevName"];
+    info.mUpdateTime = j["UpdateTime"];
+}
+
+inline void to_json(Json& j, const HumanInfo::CarrierInfo& info) {
+    j = Json {
+        {"CarrierAddr", info.mUsrAddr},
+        {"CarrierId", info.mUsrId},
+        {"DeviceInfo", info.mDevInfo},
     };
 }
 
 inline void from_json(const Json& j, HumanInfo::CarrierInfo& info) {
-    info.mDevId = j["DevId"];
-    info.mUsrAddr = j["UsrAddr"];
-    info.mUsrId = j["UsrId"];
+    info.mUsrAddr = j["CarrierAddr"];
+    info.mUsrId = j["CarrierId"];
+    info.mDevInfo = j["DeviceInfo"];
 }
 
 NLOHMANN_JSON_SERIALIZE_ENUM(HumanInfo::Status, {
@@ -306,12 +402,32 @@ NLOHMANN_JSON_SERIALIZE_ENUM(HumanInfo::Status, {
     { HumanInfo::Status::Online, "Offline"}, // Online alse save as OffLine
 });
 
+int HumanInfo::serialize(const CarrierInfo& info, std::string& value) const
+{
+    Json jsonInfo= Json(info);
+    value = jsonInfo.dump();
+    return 0;
+}
+
+int HumanInfo::deserialize(const std::string& value, CarrierInfo& info) const
+{
+    Json jsonInfo= Json::parse(value);
+    info = jsonInfo.get<CarrierInfo>();
+    return 0;
+}
+
 int HumanInfo::serialize(std::string& value, bool summaryOnly) const
 {
     Json jsonInfo = Json::object();
 
     jsonInfo[JsonKey::CommonInfoMap] = mCommonInfoMap;
     jsonInfo[JsonKey::BoundCarrierArray] = mBoundCarrierArray;
+    //if(summaryOnly == true) {
+        //for(auto& carrierInfo: jsonInfo[JsonKey::BoundCarrierArray]) {
+            //carrierInfo.erase("CarrierId");
+            //carrierInfo.erase("DeviceInfo");
+        //}
+    //}
     if(summaryOnly == false) {
         jsonInfo[JsonKey::BoundCarrierStatus] = mBoundCarrierStatus;
         jsonInfo[JsonKey::StatusMap] = mStatusMap;
@@ -324,6 +440,7 @@ int HumanInfo::serialize(std::string& value, bool summaryOnly) const
 
 int HumanInfo::deserialize(const std::string& value, bool summaryOnly)
 {
+    Log::D(Log::TAG, "HumanInfo::deserialize() value=%s, summaryOnly=%d", value.c_str(), summaryOnly);
     Json jsonInfo;
     try {
         jsonInfo= Json::parse(value);

@@ -22,6 +22,7 @@ public:
     constexpr static const int JsonParseException = -10;
     constexpr static const int ConflictWithExpectedError = -11;
     constexpr static const int MergeInfoFailed = -12;
+    constexpr static const int IgnoreMergeOldInfo = -13;
 
     constexpr static const int InvalidLocalDataDir = -50;
     constexpr static const int NoSecurityListener = -51;
@@ -32,6 +33,8 @@ public:
     constexpr static const int ChannelFailedOpenAll = -201;
     constexpr static const int ChannelFailedMultiOpen = -202;
     constexpr static const int ChannelFailedCarrier = -203;
+    constexpr static const int ChannelFailedFriendExists = -204;
+    constexpr static const int ChannelFailedFriendSelf = -205;
     constexpr static const int ChannelNotFound = -207;
     constexpr static const int ChannelNotReady = -208;
     constexpr static const int ChannelNotEstablished = -209;
@@ -39,6 +42,11 @@ public:
     constexpr static const int ChannelNotSendMessage = -211;
     constexpr static const int ChannelDataTooLarge = -212;
 
+    constexpr static const int BlkChnSetPropError = -300;
+    constexpr static const int BlkChnGetPropError = -301;
+    constexpr static const int BlkChnEmptyPropError = -302;
+
+    constexpr static const int HttpClientError = -500;
 
     constexpr static const int StdSystemErrorIndex = -1000;
 

@@ -26,6 +26,7 @@ public:
 
     virtual int addCarrierInfo(const CarrierInfo& info, const Status status) override;
     virtual int setHumanInfo(Item item, const std::string& value) override;
+    virtual int mergeHumanInfo(const HumanInfo& value, const Status status) override;
 
 private:
     /*** type define ***/

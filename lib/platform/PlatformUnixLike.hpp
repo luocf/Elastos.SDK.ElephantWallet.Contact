@@ -1,6 +1,6 @@
 /**
- * @file	PlatformDarwin.hpp
- * @brief	PlatformDarwin
+ * @file	PlatformUnixLike.hpp
+ * @brief	PlatformUnixLike
  * @details	
  *
  * @author	xxx
@@ -8,16 +8,16 @@
  * @copyright	(c) 2012 xxx All rights reserved.
  **/
 
-#ifndef _ELASTOS_PLATFORM_DARWIN_HPP_
-#define _ELASTOS_PLATFORM_DARWIN_HPP_
+#ifndef _ELASTOS_PLATFORM_UNIXLIKE_HPP_
+#define _ELASTOS_PLATFORM_UNIXLIKE_HPP_
 
-#if defined(__APPLE__)
+#if defined(__linux__)
 
 #include <string>
 
 namespace elastos {
 
-class PlatformDarwin {
+class PlatformUnixLike {
 public:
     /*** type define ***/
 
@@ -34,13 +34,14 @@ private:
     /*** static function and variable ***/
 
     /*** class function and variable ***/
-    explicit PlatformDarwin() = delete;
-    virtual ~PlatformDarwin() = delete;
+    explicit PlatformUnixLike() = delete;
+    virtual ~PlatformUnixLike() = delete;
 
-}; // class PlatformDarwin
+}; // class PlatformUnixLike
 
 } // namespace elastos
 
-#endif /* defined(__APPLE__) */
+#endif /* __linux__ */
 
-#endif /* _ELASTOS_PLATFORM_DARWIN_HPP_ */
+#endif /* _ELASTOS_PLATFORM_UNIXLIKE_HPP_ */
+

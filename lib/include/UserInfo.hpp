@@ -29,13 +29,18 @@ public:
     explicit UserInfo(std::weak_ptr<UserManager> userMgr);
     virtual ~UserInfo();
 
+    virtual int serialize(const CarrierInfo& info, std::string& value) const override;
+    virtual int deserialize(const std::string& value, CarrierInfo& info) const override;
+
     virtual int serialize(std::string& value, bool summaryOnly = false) const override;
     virtual int deserialize(const std::string& value, bool summaryOnly = false) override;
 
     virtual int addCarrierInfo(const CarrierInfo& info, const Status status) override;
     virtual int setHumanInfo(Item item, const std::string& value) override;
+    virtual int mergeHumanInfo(const HumanInfo& value, const Status status) override;
 
     virtual int setIdentifyCode(Type type, const std::string& value) override;
+    virtual int getIdentifyCode(Type type, std::string& value) const override;
 
 private:
     /*** type define ***/

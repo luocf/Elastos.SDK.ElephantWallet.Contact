@@ -53,7 +53,7 @@ public:
     /*** static function and variable ***/
 
     /*** class function and variable ***/
-    virtual int preset() = 0;
+    virtual int preset(const std::string& profile) = 0;
     virtual int open() = 0;
     virtual int close() = 0;
 

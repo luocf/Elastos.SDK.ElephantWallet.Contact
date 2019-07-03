@@ -49,6 +49,8 @@ public:
         struct AgentApi {
             std::string mGetDidProps;
             std::string mUploadDidProps;
+            std::string mDidPropHistory;
+            std::string mDidProp;
         };
         std::string mDidUrl;
         AgentApi mAgentApi;

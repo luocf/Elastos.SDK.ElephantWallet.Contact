@@ -20,6 +20,7 @@ namespace elastos {
 /***** static function implement ***************/
 /***********************************************/
 
+
 /***********************************************/
 /***** class public function implement  ********/
 /***********************************************/
@@ -51,16 +52,40 @@ ThreadPool::~ThreadPool()
 
 	// Wait for threads to finish before we exit
 	for(size_t idx = 0; idx < mThreadPool.size(); idx++) {
-		if(mThreadPool[idx].joinable()) {
+		auto& it = mThreadPool[idx];
+		if(it.joinable()) {
             Log::D(Log::TAG, "%s Joining thread %d until completion...", __PRETTY_FUNCTION__, idx);
-			mThreadPool[idx].join();
+			it.join();
 		}
 	}
     mThreadPool.clear();
 }
 
+int ThreadPool::sleepMS(long milliSecond)
+{
+	auto interval = 100; // ms
+	auto elapsed = 0;
+    do {
+		auto remains = milliSecond - elapsed;
+		auto needsleep = interval < remains  ? interval : remains;
+
+		std::this_thread::sleep_for(std::chrono::milliseconds(needsleep));
+		elapsed += needsleep;
+		if(mQuit == true) {
+			return -1;
+		}
+
+	} while (elapsed < milliSecond);
+
+	return 0;
+}
+
 void ThreadPool::post(const Task& task)
 {
+	if(mQuit == true) {
+		return;
+	}
+
 	std::unique_lock<std::mutex> lock(mMutex);
 	mTaskQueue.push(task);
 
@@ -72,6 +97,10 @@ void ThreadPool::post(const Task& task)
 
 void ThreadPool::post(Task&& task)
 {
+	if(mQuit == true) {
+		return;
+	}
+
 	std::unique_lock<std::mutex> lock(mMutex);
 	mTaskQueue.push(std::move(task));
 

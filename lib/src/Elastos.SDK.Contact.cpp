@@ -10,6 +10,7 @@
 #include "BlkChnClient.hpp"
 #include "ChannelImplCarrier.hpp"
 #include "CompatibleFileSystem.hpp"
+#include "DateTime.hpp"
 #include "Log.hpp"
 #include "Platform.hpp"
 #include "SafePtr.hpp"
@@ -81,12 +82,12 @@ int Contact::start()
         return ret;
     }
 
-    ret = mMessageManager->presetChannels(mConfig);
+    ret = mUserManager->makeUser();
     if(ret < 0) {
         return ret;
     }
 
-    ret = mUserManager->makeUser();
+    ret = mMessageManager->presetChannels(mConfig);
     if(ret < 0) {
         return ret;
     }
@@ -206,7 +207,7 @@ int Contact::initGlobal()
         return ret;
     }
 
-    mUserManager->setConfig(mConfig);
+    mUserManager->setConfig(mConfig, mMessageManager);
     mFriendManager->setConfig(mConfig, mMessageManager);
 
     ret = BlkChnClient::InitInstance(mConfig, mSecurityManager);
@@ -231,6 +232,12 @@ int Contact::setUserInfo()
         return ret;
     }
 
+    std::string currDevName;
+    ret = Platform::GetCurrentDevName(currDevName);
+    if(ret < 0) {
+        return ret;
+    }
+
     std::weak_ptr<MessageChannelStrategy> weakChCarrier;
     ret = mMessageManager->getChannel(MessageManager::ChannelType::Carrier, weakChCarrier);
     if(ret < 0) {
@@ -244,10 +251,16 @@ int Contact::setUserInfo()
         return ret;
     }
 
-    ret = userInfo->addCarrierInfo({currDevId, carrierAddr, ""}, UserInfo::Status::Offline);
+    HumanInfo::CarrierInfo info{carrierAddr, "", {currDevId, currDevName, DateTime::CurrentMS()}};
+    ret = userInfo->addCarrierInfo(info, UserInfo::Status::Offline);
     if(ret < 0) {
         return ret;
     }
+
+    //ret = mUserManager->uploadUserInfo();
+    //if(ret < 0) {
+        //return ret;
+    //}
 
     return 0;
 }

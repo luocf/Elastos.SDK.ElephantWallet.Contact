@@ -1,13 +1,13 @@
 //
-//  PlatformDarwin.cpp
+//  PlatformUnixLike.cpp
 //
 //  Created by mengxk on 19/03/16.
 //  Copyright © 2016 mengxk. All rights reserved.
 //
 
-#if defined(__APPLE__)
+#if defined(__linux__)
 
-#include "PlatformDarwin.hpp"
+#include "PlatformUnixLike.hpp"
 
 #include <execinfo.h>
 #include <sstream>
@@ -27,7 +27,7 @@ namespace elastos {
 /***********************************************/
 /***** static function implement ***************/
 /***********************************************/
-std::string PlatformDarwin::GetBacktrace() {
+std::string PlatformUnixLike::GetBacktrace() {
     void* addrlist[512];
     int addrlen = backtrace( addrlist, sizeof( addrlist ) / sizeof( void* ));
     if(addrlen == 0) {
@@ -44,32 +44,28 @@ std::string PlatformDarwin::GetBacktrace() {
     return sstream.str();
 }
 
-int PlatformDarwin::GetCurrentDevId(std::string& devId)
+int PlatformUnixLike::GetCurrentDevId(std::string& devId)
 {
     int ret = ErrCode::UnknownError;
 
     devId = "";
 
-    uuid_t uuid = {};
-    struct timespec ts = { .tv_sec = 5, .tv_nsec = 0 };
-    ret = gethostuuid(uuid, &ts);
-    if(ret < 0) {
-        return ErrCode::DevUUIDError;
-    }
+	long hostId = gethostid();
+	std::stringstream hostIdStream;
+	hostIdStream << std::hex << hostId;
 
-    uuid_string_t uuidStr;
-    uuid_unparse_upper(uuid, uuidStr);
-    devId = uuidStr;
+    devId = hostIdStream.str();
 
     return 0;
 }
 
-int PlatformDarwin::GetCurrentDevName(std::string& devName)
+int PlatformUnixLike::GetCurrentDevName(std::string& devName)
 {
     int ret = ErrCode::UnknownError;
 
     devName = "";
 
+    std::string uuidName;
     struct utsname utsName;
     ret = uname(&utsName);
     if(ret < 0) {
@@ -95,4 +91,4 @@ int PlatformDarwin::GetCurrentDevName(std::string& devName)
 
 } // namespace elastos
 
-#endif /* defined(__APPLE__) */
+#endif /* __linux__ */

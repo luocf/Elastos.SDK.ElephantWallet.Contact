@@ -33,7 +33,7 @@ ChannelImplElaChain::~ChannelImplElaChain()
 {
 }
 
-int ChannelImplElaChain::preset()
+int ChannelImplElaChain::preset(const std::string& profile)
 {
     throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
 }
