@@ -1,6 +1,9 @@
 #include <BlkChnClient.hpp>
 
 #include <iomanip>
+
+#include <DateTime.hpp>
+#include <ErrCode.hpp>
 #include <HttpClient.hpp>
 #include <Log.hpp>
 #include <MD5.hpp>
@@ -32,6 +35,11 @@ int BlkChnClient::InitInstance(std::weak_ptr<Config> config, std::weak_ptr<Secur
     HttpClient::InitGlobal();
     gBlkChnClient = std::make_shared<Impl>(config, sectyMgr);
 
+    int ret = gBlkChnClient->startMonitor();
+    if (ret < 0) {
+        return 0;
+    }
+
     return 0;
 }
 
@@ -50,6 +58,26 @@ int BlkChnClient::setConnectTimeout(uint32_t milliSecond)
     return 0;
 }
 
+int BlkChnClient::appendMoniter(const std::string& path, const MonitorCallback& callback)
+{
+    if(path.empty() == true) {
+        return ErrCode::InvalidArgument;
+    }
+
+	std::lock_guard<std::mutex> lock(mMonitor.mMonitorMutex);
+    mMonitor.mMonitorCallbackMap[path] = callback;
+
+    return 0;
+}
+
+int BlkChnClient::removeMoniter(const std::string& path)
+{
+	std::lock_guard<std::mutex> lock(mMonitor.mMonitorMutex);
+    mMonitor.mMonitorCallbackMap.erase(path);
+
+    return 0;
+}
+
 int BlkChnClient::downloadAllDidProps(const std::string& did, std::map<std::string, std::string>& propMap)
 {
     auto sectyMgr = SAFE_GET_PTR(mSecurityManager);
@@ -65,7 +93,7 @@ int BlkChnClient::downloadAllDidProps(const std::string& did, std::map<std::stri
     }
 
     std::string keyPath;
-    ret = getPropKeyPath(keyPath);
+    ret = getPropKeyPathPrefix(keyPath);
     if(ret < 0) {
         return ret;
     }
@@ -91,16 +119,17 @@ int BlkChnClient::uploadAllDidProps(const std::map<std::string, std::string>& pr
     auto sectyMgr = SAFE_GET_PTR(mSecurityManager);
     auto config = SAFE_GET_PTR(mConfig);
 
-    std::string keyPath;
-    int ret = getPropKeyPath(keyPath);
-    if(ret < 0) {
-        return ret;
-    }
-
     Json jsonPropProt = Json::object();
     Json jsonPropArray = Json::array();
     for(const auto& prop: propMap) {
-        std::string propKey = keyPath + prop.first;
+        std::string keyPath;
+        int ret = getPropKeyPath(prop.first, keyPath);
+        if (ret < 0)
+        {
+            return ret;
+        }
+
+        std::string propKey = keyPath;
         std::string propValue = prop.second;
         Json jsonProp = Json::object();
         jsonProp[DidProtocol::Name::Key] = propKey;
@@ -123,7 +152,7 @@ int BlkChnClient::uploadAllDidProps(const std::map<std::string, std::string>& pr
     Log::I(Log::TAG, "BlkChnClient::uploadAllDidProps() propProt: %s", propProtStr.c_str());
     std::vector<uint8_t> originBytes(propProtStr.begin(), propProtStr.end());
     std::vector<uint8_t> signedBytes(propProtStr.begin(), propProtStr.end());
-    ret = sectyMgr->signData(originBytes, signedBytes);
+    int ret = sectyMgr->signData(originBytes, signedBytes);
     if(ret < 0) {
         return ret;
     }
@@ -185,14 +214,14 @@ int BlkChnClient::downloadDidProp(const std::string& did, const std::string& key
     auto config = SAFE_GET_PTR(mConfig);
 
     std::string keyPath;
-    int ret = getPropKeyPath(keyPath);
+    int ret = getPropKeyPath(key, keyPath);
     if(ret < 0) {
         return ret;
     }
 
     auto agentGetProps = config->mDidChainConfig->mAgentApi.mGetDidProps;
     auto agentDidProp = config->mDidChainConfig->mAgentApi.mDidProp;
-    std::string agentGetPropPath = agentGetProps + did + agentDidProp + keyPath + key;
+    std::string agentGetPropPath = agentGetProps + did + agentDidProp + keyPath;
 
     std::string propArrayStr;
     ret = getDidPropFromDidChn(agentGetPropPath, propArrayStr);
@@ -203,7 +232,7 @@ int BlkChnClient::downloadDidProp(const std::string& did, const std::string& key
     Json jsonPropArray = Json::parse(propArrayStr);
     for(const auto& it: jsonPropArray) {
         std::string propKey = it["key"];
-        if(keyPath + key != propKey) {
+        if(keyPath != propKey) {
             continue;
         }
 
@@ -223,17 +252,11 @@ int BlkChnClient::getDidPropHistory(const std::string& did, const std::string& k
 {
     values.clear();
 
-    auto config = SAFE_GET_PTR(mConfig);
-
-    std::string keyPath;
-    int ret = getPropKeyPath(keyPath);
+    std::string agentGetPropHistoryPath;
+    int ret = getDidPropHistoryPath(did, key, agentGetPropHistoryPath);
     if(ret < 0) {
         return ret;
     }
-
-    auto agentGetProps = config->mDidChainConfig->mAgentApi.mGetDidProps;
-    auto agentDidPropHistory = config->mDidChainConfig->mAgentApi.mDidPropHistory;
-    std::string agentGetPropHistoryPath = agentGetProps + did + agentDidPropHistory + keyPath + key;
 
     std::string propArrayStr;
     ret = getDidPropFromDidChn(agentGetPropHistoryPath, propArrayStr);
@@ -249,12 +272,31 @@ int BlkChnClient::getDidPropHistory(const std::string& did, const std::string& k
     return 0;
 }
 
+int BlkChnClient::getDidPropHistoryPath(const std::string& did, const std::string& key, std::string& path)
+{
+    path.clear();
+
+    auto config = SAFE_GET_PTR(mConfig);
+
+    std::string keyPath;
+    int ret = getPropKeyPath(key, keyPath);
+    if(ret < 0) {
+        return ret;
+    }
+
+    auto agentGetProps = config->mDidChainConfig->mAgentApi.mGetDidProps;
+    auto agentDidPropHistory = config->mDidChainConfig->mAgentApi.mDidPropHistory;
+    path = agentGetProps + did + agentDidPropHistory + keyPath;
+
+    return 0;
+}
+
 int BlkChnClient::downloadHumanInfo(const std::string& did, std::shared_ptr<HumanInfo>& humanInfo)
 {
     humanInfo = std::make_shared<HumanInfo>();
 
     std::string pubKey;
-    int ret = downloadDidProp(did, "PublicKey", pubKey);
+    int ret = downloadDidProp(did, NamePublicKey, pubKey);
     if(ret < 0) {
         return ret;
     }
@@ -271,7 +313,7 @@ int BlkChnClient::downloadHumanInfo(const std::string& did, std::shared_ptr<Huma
     }
 
     std::vector<std::string> propHistory;
-    ret = getDidPropHistory(did, "CarrierID", propHistory);
+    ret = getDidPropHistory(did, NameCarrierId, propHistory);
     if(ret < 0) {
         return ret;
     }
@@ -349,13 +391,42 @@ int BlkChnClient::uploadHumanInfo(const std::shared_ptr<HumanInfo>& humanInfo)
 BlkChnClient::BlkChnClient(std::weak_ptr<Config> config, std::weak_ptr<SecurityManager> sectyMgr)
     : mConfig(config)
     , mSecurityManager(sectyMgr)
-    , mTaskThread()
     , mConnectTimeoutMS(10000)
+    , mMonitor()
 {
 }
 
 BlkChnClient::~BlkChnClient()
 {
+}
+
+int BlkChnClient::startMonitor()
+{
+    mMonitor.mMonitorLooper = [&]() {
+        long current = DateTime::CurrentMS();
+        Log::I(Log::TAG, "current timestamp=%lld", current);
+        std::map<std::string, MonitorCallback> monitorCallbackMap;
+        {
+            std::lock_guard<std::mutex> lock(mMonitor.mMonitorMutex);
+            monitorCallbackMap = mMonitor.mMonitorCallbackMap;
+        }
+
+        for(const auto& it: monitorCallbackMap) {
+            auto& keyPath = it.first;
+            auto& callback = it.second;
+
+            std::string result;
+            int ret = getDidPropFromDidChn(keyPath, result);
+            callback(ret, keyPath, result);
+        }
+
+        int ret = mMonitor.mMonitorThread.sleepMS(mMonitor.mMonitorPendingMS);
+        mMonitor.mMonitorThread.post(mMonitor.mMonitorLooper);
+    };
+
+    mMonitor.mMonitorThread.post(mMonitor.mMonitorLooper);
+
+    return 0;
 }
 
 int BlkChnClient::getDidPropFromDidChn(const std::string& path, std::string& result)
@@ -381,7 +452,8 @@ int BlkChnClient::getDidPropFromDidChn(const std::string& path, std::string& res
     Log::I(Log::TAG, "respBody=%s", respBody.c_str());
 
     Json jsonResp = Json::parse(respBody);
-    if(jsonResp["status"] != 200) {
+    int status = jsonResp["status"];
+    if(status != 200) {
         return ErrCode::BlkChnGetPropError;
     }
 
@@ -393,7 +465,7 @@ int BlkChnClient::getDidPropFromDidChn(const std::string& path, std::string& res
     return 0;
 }
 
-int BlkChnClient::getPropKeyPath(std::string& keyPath)
+int BlkChnClient::getPropKeyPathPrefix(std::string& keyPathPrefix)
 {
     auto sectyMgr = SAFE_GET_PTR(mSecurityManager);
 
@@ -403,7 +475,24 @@ int BlkChnClient::getPropKeyPath(std::string& keyPath)
         return ret;
     }
 
-    keyPath = "Apps/" + appId + "/";
+    keyPathPrefix = "Apps/" + appId + "/";
+    return 0;
+}
+
+int BlkChnClient::getPropKeyPath(const std::string& key, std::string& keyPath)
+{
+    if(key == "PublicKey") {
+        keyPath = key;
+        return 0;
+    }
+
+    std::string keyPathPrefix;
+    int ret = getPropKeyPathPrefix(keyPathPrefix);
+    if(ret < 0) {
+        return ret;
+    }
+
+    keyPath = keyPathPrefix + key;
     return 0;
 }
 

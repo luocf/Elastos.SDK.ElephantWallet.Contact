@@ -452,7 +452,7 @@ void MessageManager::MessageListener::onReceivedMessage(const std::string& frien
             int ret = humanInfo->getAllCarrierInfo(infoArray);
             if(ret > 0) {
                 for(auto& it: infoArray) {
-                    ret = msgMgr->requestFriend(it.mUsrAddr, humanChType, "", true);
+                    ret = msgmgr->requestfriend(it.musraddr, humanchtype, "", true);
                     if(ret < 0) {
                         Log::E(Log::TAG, "Failed to add  other dev to friend. ret=%d", ret);
                     }

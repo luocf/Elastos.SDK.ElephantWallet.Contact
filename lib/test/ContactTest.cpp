@@ -135,7 +135,12 @@ void loop(const char* fifoFilePath, std::shared_ptr<elastos::Contact> contact)
                 Log::I(Log::TAG, "Success to exec: %s", cmdLine.c_str());
             }
         } else {
-            std::this_thread::sleep_for (std::chrono::seconds(1));
+            std::string input;
+            std::cin >> input;
+            if (input.find("q") == 0) {
+                return;
+            }
+            std::cout << "Unknown input: " << input << std::endl;
         }
     }
 }
@@ -180,7 +185,7 @@ std::shared_ptr<elastos::SecurityManager::SecurityListener> getSecurityListener(
         }
 
         std::string onRequestDidAgentAuthHeader() override {
-            std::string appid = "org.elastos.app.didplugin";
+            std::string appid = "org.elastos.debug.didplugin";
             std::string appkey = "b2gvzUM79yLhCbbGNWCuhSsGdqYhA7sS";
             std::string timestamp = std::to_string(elastos::DateTime::CurrentMS());
             std::string auth = elastos::MD5::Get(appkey + timestamp);

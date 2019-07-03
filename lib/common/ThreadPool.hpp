@@ -33,6 +33,8 @@ public:
     explicit ThreadPool(const std::string& threadName = "", size_t threadCnt = 1);
     virtual ~ThreadPool();
 
+    int sleepMS(long milliSecond);
+
     // post and copy
     void post(const Task& task);
     // post and move
