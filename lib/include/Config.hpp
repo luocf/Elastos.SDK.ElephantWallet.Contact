@@ -2,6 +2,7 @@
 #define _ELASTOS_CONFIG_HPP_
 
 #include <map>
+#include <memory>
 #include <string>
 #include <vector>
 

@@ -7,6 +7,7 @@
 
 #include <ChannelImplCarrier.hpp>
 
+#include <cstring>
 #include <Log.hpp>
 #include <SafePtr.hpp>
 
