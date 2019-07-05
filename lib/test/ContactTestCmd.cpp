@@ -7,11 +7,11 @@
 /* =========================================== */
 /* === static variables initialize =========== */
 /* =========================================== */
-const std::vector<ContactTestCmd::CommandInfo> ContactTestCmd::gCommandInfoList {
+const std::vector<ContactTestCmd::CommandInfo> ContactTestCmd::gCommandInfoList{
     { 'h', "help",            ContactTestCmd::Help,           "      Print help usages." },
     { 'p', "print-info",      ContactTestCmd::PrintInfo,      "Print current contact infos." },
     { 'c', "print-carrier",   ContactTestCmd::PrintCarrier,   "Print current carrier infos." },
-    { 'u', "upload-info",     ContactTestCmd::UploadInfo,     "upload info u [u or f]." },
+    { 'u', "upload-info",     ContactTestCmd::UploadInfo,     "upload info to did chain." },
     { 'a', "add-friend",      ContactTestCmd::AddFriend,      "Add a friend by [did, ela address or carrier address]." },
     { 's', "send-message",    ContactTestCmd::SendMessage,    "Send message to a friend like: s [friendCode] [chType(1 or 2)] [msg]" },
 };
@@ -32,7 +32,7 @@ int ContactTestCmd::Do(std::shared_ptr<elastos::Contact> contact,
     std::istringstream iss(trimCmdLine);
     std::vector<std::string> args {std::istream_iterator<std::string>{iss},
                                    std::istream_iterator<std::string>{}};
-    if(args.size() <= 0) {
+    if (args.size() <= 0) {
         return 0;
     }
     const auto& cmd = args[0];
@@ -136,32 +136,10 @@ int ContactTestCmd::UploadInfo(std::shared_ptr<elastos::Contact> contact,
                                const std::vector<std::string>& args,
                                std::string& errMsg)
 {
-    if(args.size() < 2) {
-        errMsg = "Bad input";
-        return -1;
-    }
-
-    std::string value;
-
-    auto weakUserMgr = contact->getUserManager();
-    auto userMgr = weakUserMgr.lock();
-    auto weakFriendMgr = contact->getFriendManager();
-    auto friendMgr = weakFriendMgr.lock();
-
-    auto type = args.size() > 1 ? args[1] : "u";
-
-    if(type.find("f") == 0) {
-        int ret = friendMgr->uploadFriendInfo();
-        if(ret < 0) {
-            errMsg = "Failed to upload friend info. ret=" + std::to_string(ret);
-            return -1;
-        }
-    } else {
-        int ret = userMgr->uploadUserInfo();
-        if(ret < 0) {
-            errMsg = "Failed to upload user info. ret=" + std::to_string(ret);
-            return -1;
-        }
+    int ret = contact->syncInfoUploadToDidChain();
+    if (ret < 0) {
+      errMsg = "Failed to upload info. ret=" + std::to_string(ret);
+      return -1;
     }
 
     return 0;

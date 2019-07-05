@@ -118,6 +118,35 @@ bool HumanInfo::contains(const std::shared_ptr<HumanInfo>& humanInfo)
     return false;
 }
 
+int HumanInfo::getHumanCode(std::string& humanCode) const
+{
+    // 1. did friend
+    int ret = getHumanInfo(Item::Did, humanCode);
+    if(ret == 0) {
+        return 0;
+    }
+
+    // 2. carrier friend
+    auto carrierSize = mBoundCarrierArray.size();
+    assert(carrierSize <= 1); // only did friend can own multi carrier info
+    if (carrierSize > 0) {
+        const auto& carrierInfo = mBoundCarrierArray[0];
+        humanCode = carrierInfo.mUsrAddr;
+        if (humanCode.empty() == false) {
+            return 0;
+        }
+    }
+
+    // 3. ela friend
+    ret = getHumanInfo(Item::ElaAddress, humanCode);
+    if(ret == 0) {
+        return 0;
+    }
+
+    assert(false); // never reached
+    return ErrCode::NotFoundError;
+}
+
 int HumanInfo::addCarrierInfo(const HumanInfo::CarrierInfo& info, const HumanInfo::Status status)
 {
     Log::D(Log::TAG, " ============    %s", __PRETTY_FUNCTION__);
@@ -395,12 +424,15 @@ inline void from_json(const Json& j, HumanInfo::CarrierInfo& info) {
     info.mDevInfo = j["DeviceInfo"];
 }
 
-NLOHMANN_JSON_SERIALIZE_ENUM(HumanInfo::Status, {
-    { HumanInfo::Status::Invalid, "Invalid"},
-    { HumanInfo::Status::WaitForAccept, "WaitForAccept"},
-    { HumanInfo::Status::Offline, "Offline"},
-    { HumanInfo::Status::Online, "Offline"}, // Online alse save as OffLine
-});
+NLOHMANN_JSON_SERIALIZE_ENUM(
+    HumanInfo::Status,
+    {
+        {HumanInfo::Status::Invalid, "Invalid"},
+        {HumanInfo::Status::WaitForAccept, "WaitForAccept"},
+        {HumanInfo::Status::Offline, "Offline"},
+        {HumanInfo::Status::Online, "Offline"},  // Online alse save as OffLine
+    }
+);
 
 int HumanInfo::serialize(const CarrierInfo& info, std::string& value) const
 {

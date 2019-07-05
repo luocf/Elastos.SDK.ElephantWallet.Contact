@@ -371,7 +371,7 @@ void MessageManager::MessageListener::onStatusChanged(const std::string& userCod
         throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
     }
     if(ret < 0) {
-        Log::E(Log::TAG, "Failed to set status.");
+        Log::E(Log::TAG, "Failed to set status. ret=%d", ret);
         return;
     }
 
@@ -645,6 +645,12 @@ void MessageManager::MessageListener::onFriendStatusChanged(const std::string& f
                 throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
             }
             FriendInfo::Status newStatus = friendInfo->getHumanStatus();
+            if(oldStatus == FriendInfo::Status::WaitForAccept) {
+                ret = friendMgr->cacheFriendToDidChain(friendInfo);
+                if(ret < 0) {
+                    Log::W(Log::TAG, "Failed to cache friend %s to did chain.", friendCode.c_str());
+                }
+            }
             if(newStatus != oldStatus) {
                 onFriendStatusChanged(friendInfo, humanChType, newStatus);
             }

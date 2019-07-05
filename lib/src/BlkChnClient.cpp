@@ -64,7 +64,7 @@ int BlkChnClient::appendMoniter(const std::string& path, const MonitorCallback& 
         return ErrCode::InvalidArgument;
     }
 
-	std::lock_guard<std::mutex> lock(mMonitor.mMonitorMutex);
+	std::lock_guard<std::recursive_mutex> lock(mMutex);
     mMonitor.mMonitorCallbackMap[path] = callback;
 
     return 0;
@@ -72,7 +72,7 @@ int BlkChnClient::appendMoniter(const std::string& path, const MonitorCallback& 
 
 int BlkChnClient::removeMoniter(const std::string& path)
 {
-	std::lock_guard<std::mutex> lock(mMonitor.mMonitorMutex);
+	std::lock_guard<std::recursive_mutex> lock(mMutex);
     mMonitor.mMonitorCallbackMap.erase(path);
 
     return 0;
@@ -87,7 +87,7 @@ int BlkChnClient::downloadAllDidProps(const std::string& did, std::map<std::stri
     std::string agentGetPropsPath = agentGetProps + did;
 
     std::string propArrayStr;
-    int ret = getDidPropFromDidChn(agentGetPropsPath, propArrayStr);
+    int ret = downloadDidPropFromDidChn(agentGetPropsPath, propArrayStr);
     if(ret < 0) {
         return ret;
     }
@@ -114,7 +114,18 @@ int BlkChnClient::downloadAllDidProps(const std::string& did, std::map<std::stri
     return 0;
 }
 
-int BlkChnClient::uploadAllDidProps(const std::map<std::string, std::string>& propMap)
+// int BlkChnClient::uploadAllDidProps(const std::map<std::string, std::string>& propMap)
+// {
+//     std::string txid;
+//     int ret = uploadAllDidProps(propMap, txid);
+//     if (ret < 0) {
+//         return ret;
+//     }
+
+//     return 0;
+// }
+
+int BlkChnClient::uploadAllDidProps(const std::multimap<std::string, std::string>& propMap, std::string& txid)
 {
     auto sectyMgr = SAFE_GET_PTR(mSecurityManager);
     auto config = SAFE_GET_PTR(mConfig);
@@ -124,8 +135,7 @@ int BlkChnClient::uploadAllDidProps(const std::map<std::string, std::string>& pr
     for(const auto& prop: propMap) {
         std::string keyPath;
         int ret = getPropKeyPath(prop.first, keyPath);
-        if (ret < 0)
-        {
+        if (ret < 0) {
             return ret;
         }
 
@@ -204,6 +214,11 @@ int BlkChnClient::uploadAllDidProps(const std::map<std::string, std::string>& pr
         return ErrCode::BlkChnSetPropError;
     }
 
+    txid = jsonResp["result"];
+    if(txid.empty() == true) {
+        return ErrCode::BlkChnBadTxIdError;
+    }
+
     return 0;
 }
 
@@ -224,7 +239,7 @@ int BlkChnClient::downloadDidProp(const std::string& did, const std::string& key
     std::string agentGetPropPath = agentGetProps + did + agentDidProp + keyPath;
 
     std::string propArrayStr;
-    ret = getDidPropFromDidChn(agentGetPropPath, propArrayStr);
+    ret = downloadDidPropFromDidChn(agentGetPropPath, propArrayStr);
     if(ret < 0) {
         return ret;
     }
@@ -243,12 +258,12 @@ int BlkChnClient::downloadDidProp(const std::string& did, const std::string& key
     return ErrCode::BlkChnGetPropError;
 }
 
-int BlkChnClient::uploadDidProp(const std::string& key, const std::string& prop)
-{
-    throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
-}
+// int BlkChnClient::uploadDidProp(const std::string& key, const std::string& prop)
+// {
+//     throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
+// }
 
-int BlkChnClient::getDidPropHistory(const std::string& did, const std::string& key, std::vector<std::string>& values)
+int BlkChnClient::downloadDidPropHistory(const std::string& did, const std::string& key, std::vector<std::string>& values)
 {
     values.clear();
 
@@ -259,7 +274,7 @@ int BlkChnClient::getDidPropHistory(const std::string& did, const std::string& k
     }
 
     std::string propArrayStr;
-    ret = getDidPropFromDidChn(agentGetPropHistoryPath, propArrayStr);
+    ret = downloadDidPropFromDidChn(agentGetPropHistoryPath, propArrayStr);
     if(ret < 0) {
         return ret;
     }
@@ -313,7 +328,7 @@ int BlkChnClient::downloadHumanInfo(const std::string& did, std::shared_ptr<Huma
     }
 
     std::vector<std::string> propHistory;
-    ret = getDidPropHistory(did, NameCarrierId, propHistory);
+    ret = downloadDidPropHistory(did, NameCarrierId, propHistory);
     if(ret < 0) {
         return ret;
     }
@@ -342,40 +357,65 @@ int BlkChnClient::downloadHumanInfo(const std::string& did, std::shared_ptr<Huma
     return 0;
 }
 
-int BlkChnClient::uploadHumanInfo(const std::shared_ptr<HumanInfo>& humanInfo)
+// int BlkChnClient::uploadHumanInfo(const std::shared_ptr<HumanInfo>& humanInfo)
+// {
+//     std::string pubKey;
+//     int ret = humanInfo->getHumanInfo(HumanInfo::Item::ChainPubKey, pubKey);
+//     if(ret < 0) {
+//         return ret;
+//     }
+
+//     std::string devId;
+//     ret = Platform::GetCurrentDevId(devId);
+//     if(ret < 0) {
+//         return ret;
+//     }
+
+//     HumanInfo::CarrierInfo carrierInfo;
+//     ret = humanInfo->getCarrierInfoByDevId(devId, carrierInfo);
+//     if(ret < 0) {
+//         return ret;
+//     }
+
+//     std::string carrierInfoStr;
+//     ret = humanInfo->serialize(carrierInfo, carrierInfoStr);
+//     if(ret < 0) {
+//         return ret;
+//     }
+
+//     std::map<std::string, std::string> propMap;
+//     propMap["PublicKey"] = pubKey;
+//     propMap["CarrierID"] = carrierInfoStr;
+//     ret = uploadAllDidProps(propMap);
+//     if(ret < 0) {
+//         return ret;
+//     }
+
+
+//     return 0;
+// }
+
+int BlkChnClient::cacheDidProp(const std::string& key, const std::string& value)
 {
-    std::string pubKey;
-    int ret = humanInfo->getHumanInfo(HumanInfo::Item::ChainPubKey, pubKey);
+    Log::I(Log::TAG, "BlkChnClient::cacheDidProp() key=%s, value=%s", key.c_str(), value.c_str());
+
+    std::lock_guard<std::recursive_mutex> lock(mMutex);
+    mDidPropCache.insert({key, value});
+
+    return 0;
+}
+
+int BlkChnClient::uploadCachedDidProp()
+{
+    std::lock_guard<std::recursive_mutex> lock(mMutex);
+
+    std::string txid;
+    int ret = uploadAllDidProps(mDidPropCache, txid);
     if(ret < 0) {
         return ret;
     }
-
-    std::string devId;
-    ret = Platform::GetCurrentDevId(devId);
-    if(ret < 0) {
-        return ret;
-    }
-
-    HumanInfo::CarrierInfo carrierInfo;
-    ret = humanInfo->getCarrierInfoByDevId(devId, carrierInfo);
-    if(ret < 0) {
-        return ret;
-    }
-
-    std::string carrierInfoStr;
-    ret = humanInfo->serialize(carrierInfo, carrierInfoStr);
-    if(ret < 0) {
-        return ret;
-    }
-
-    std::map<std::string, std::string> propMap;
-    propMap["PublicKey"] = pubKey;
-    propMap["CarrierID"] = carrierInfoStr;
-    ret = uploadAllDidProps(propMap);
-    if(ret < 0) {
-        return ret;
-    }
-
+    mDidPropCache.clear();
+    lastCacheUploadTxId = txid;
 
     return 0;
 }
@@ -392,6 +432,10 @@ BlkChnClient::BlkChnClient(std::weak_ptr<Config> config, std::weak_ptr<SecurityM
     : mConfig(config)
     , mSecurityManager(sectyMgr)
     , mConnectTimeoutMS(10000)
+    , mMutex()
+    , mPropKeyPathPrefix()
+    , mDidPropCache()
+    , lastCacheUploadTxId()
     , mMonitor()
 {
 }
@@ -407,7 +451,7 @@ int BlkChnClient::startMonitor()
         Log::I(Log::TAG, "current timestamp=%lld", current);
         std::map<std::string, MonitorCallback> monitorCallbackMap;
         {
-            std::lock_guard<std::mutex> lock(mMonitor.mMonitorMutex);
+            std::lock_guard<std::recursive_mutex> lock(mMutex);
             monitorCallbackMap = mMonitor.mMonitorCallbackMap;
         }
 
@@ -416,7 +460,7 @@ int BlkChnClient::startMonitor()
             auto& callback = it.second;
 
             std::string result;
-            int ret = getDidPropFromDidChn(keyPath, result);
+            int ret = downloadDidPropFromDidChn(keyPath, result);
             callback(ret, keyPath, result);
         }
 
@@ -429,7 +473,7 @@ int BlkChnClient::startMonitor()
     return 0;
 }
 
-int BlkChnClient::getDidPropFromDidChn(const std::string& path, std::string& result)
+int BlkChnClient::downloadDidPropFromDidChn(const std::string& path, std::string& result)
 {
     auto sectyMgr = SAFE_GET_PTR(mSecurityManager);
     auto config = SAFE_GET_PTR(mConfig);
@@ -467,6 +511,12 @@ int BlkChnClient::getDidPropFromDidChn(const std::string& path, std::string& res
 
 int BlkChnClient::getPropKeyPathPrefix(std::string& keyPathPrefix)
 {
+    std::lock_guard<std::recursive_mutex> lock(mMutex);
+    
+    if(mPropKeyPathPrefix.empty() == false) {
+        return 0;
+    }
+
     auto sectyMgr = SAFE_GET_PTR(mSecurityManager);
 
     std::string appId;
@@ -474,8 +524,10 @@ int BlkChnClient::getPropKeyPathPrefix(std::string& keyPathPrefix)
     if(ret < 0) {
         return ret;
     }
+    mPropKeyPathPrefix = "Apps/" + appId + "/";
 
-    keyPathPrefix = "Apps/" + appId + "/";
+    keyPathPrefix = mPropKeyPathPrefix;
+
     return 0;
 }
 

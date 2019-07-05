@@ -39,7 +39,7 @@ int main(int argc, char **argv)
         gSavedMnemonic = "enact tank inmate false describe brass slab stove smart guilt door hen";
         nickname = "Me";
     } else {
-        gSavedMnemonic = "reopen mechanic feed suspect bus session write spoon indoor raw apology acquire";
+        // gSavedMnemonic = "glove deputy vibrant autumn gain thrive report indicate quantum parade ginger trumpet";
     }
 
     Log::I(Log::TAG, "Start Contact Test.");

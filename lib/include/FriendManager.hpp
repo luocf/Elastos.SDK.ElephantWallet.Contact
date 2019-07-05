@@ -44,7 +44,7 @@ public:
     int saveLocalData();
     int serialize(std::string& value) const;
 
-    int restoreFriends();
+    int restoreFriendsInfo();
 
     bool contains(const std::string& friendCode);
     bool contains(const std::shared_ptr<HumanInfo>& friendInfo);
@@ -68,9 +68,10 @@ public:
 
     virtual std::vector<FriendInfo> filterFriends(std::string regex);
 
-    int syncFriendInfo();
-    int uploadFriendInfo();
+    int syncDidChainData();
+    // int uploadFriendInfo();
 
+    int cacheFriendToDidChain(std::shared_ptr<FriendInfo> friendInfo);
 private:
     /*** type define ***/
 
@@ -93,7 +94,6 @@ private:
     std::weak_ptr<Config> mConfig;
     std::shared_ptr<FriendListener> mFriendListener;
     std::vector<std::shared_ptr<FriendInfo>> mFriendList;
-    std::vector<std::shared_ptr<FriendInfo>> mNotUploadFriendList;
 
 }; // class FriendManager
 

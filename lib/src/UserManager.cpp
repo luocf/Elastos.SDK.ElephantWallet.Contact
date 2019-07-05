@@ -9,6 +9,7 @@
 
 #include "BlkChnClient.hpp"
 #include <CompatibleFileSystem.hpp>
+#include <DateTime.hpp>
 #include <Log.hpp>
 #include <MessageManager.hpp>
 #include <SafePtr.hpp>
@@ -120,7 +121,7 @@ int UserManager::serialize(std::string& value) const
     return 0;
 }
 
-int UserManager::makeUser()
+int UserManager::restoreUserInfo()
 {
     mUserInfo = std::make_shared<UserInfo>(weak_from_this());
 
@@ -129,29 +130,92 @@ int UserManager::makeUser()
         Log::I(Log::TAG, "UserManager::makeUser() Success to recover user from local.");
     } else if(ret == ErrCode::FileNotExistsError) {
         Log::I(Log::TAG, "UserManager::makeUser() Local user info not exists.");
-        ret = syncUserInfo();
+        ret = syncDidChainData();
         if(ret == 0) {
             Log::I(Log::TAG, "UserManager::makeUser() Success to recover user from did chain.");
         } else if(ret == ErrCode::BlkChnEmptyPropError) {
             Log::I(Log::TAG, "UserManager::makeUser() Can't find user info from local or did chain, make a new user.");
-            ret = 0;
+            ret = ErrCode::EmptyInfoError;
         }
     }
-    if(ret < 0) {
+    if(ret < 0
+    && ret != ErrCode::EmptyInfoError) {
         Log::E(Log::TAG, "UserManager::makeUser() Failed to recover user, ret=%d", ret);
         return ret;
     }
 
+    return 0;
+}
+
+int UserManager::newUserInfo()
+{
+    Log::V(Log::TAG, "%s", __PRETTY_FUNCTION__);
+
+    mUserInfo = std::make_shared<UserInfo>(weak_from_this());
+
     auto sectyMgr = SAFE_GET_PTR(mSecurityManager);
     std::string pubKey, did, elaAddr;
-    ret = sectyMgr->getPublicKey(pubKey);
+    int ret = sectyMgr->getPublicKey(pubKey);
     if(ret < 0) {
         return ret;
     }
     mUserInfo->setHumanInfo(UserInfo::Item::ChainPubKey, pubKey);
 
+    std::string currDevId;
+    ret = Platform::GetCurrentDevId(currDevId);
+    if(ret < 0) {
+        return ret;
+    }
+
+    std::string currDevName;
+    ret = Platform::GetCurrentDevName(currDevName);
+    if(ret < 0) {
+        return ret;
+    }
+
+    auto msgMgr = SAFE_GET_PTR(mMessageManager);
+
+    std::weak_ptr<MessageChannelStrategy> weakChCarrier;
+    ret = msgMgr->getChannel(MessageManager::ChannelType::Carrier, weakChCarrier);
+    if(ret < 0) {
+        return ret;
+    }
+    auto chCarrier = SAFE_GET_PTR(weakChCarrier);
+
+    std::string carrierAddr;
+    ret = chCarrier->getAddress(carrierAddr);
+    if(ret < 0) {
+        return ret;
+    }
+
+    HumanInfo::CarrierInfo carrierInfo{carrierAddr, "", {currDevId, currDevName, DateTime::CurrentMS()}};
+    ret = mUserInfo->addCarrierInfo(carrierInfo, UserInfo::Status::Offline);
+    if(ret < 0) {
+        return ret;
+    }
+
+    ret = mUserInfo->getCarrierInfoByDevId(currDevId, carrierInfo);
+    if(ret < 0) {
+        return ret;
+    }
+
+    std::string carrierInfoStr;
+    ret = mUserInfo->serialize(carrierInfo, carrierInfoStr);
+    if(ret < 0) {
+        return ret;
+    }
+
+    auto bcClient = BlkChnClient::GetInstance();
+    ret = bcClient->cacheDidProp("CarrierID", carrierInfoStr);
+    if(ret < 0) {
+        return ret;
+    }
+
+    Log::V(Log::TAG, "%s new carrier info: %s", __PRETTY_FUNCTION__, carrierInfoStr.c_str());
+
     return 0;
 }
+
 
 int UserManager::getUserInfo(std::shared_ptr<UserInfo>& userInfo)
 {
@@ -174,7 +238,7 @@ bool UserManager::contains(const std::shared_ptr<HumanInfo>& userInfo)
     return mUserInfo->contains(userInfo);
 }
 
-int UserManager::syncUserInfo()
+int UserManager::syncDidChainData()
 {
     auto sectyMgr = SAFE_GET_PTR(mSecurityManager);
     std::string did;
@@ -199,17 +263,17 @@ int UserManager::syncUserInfo()
     return 0;
 }
 
-int UserManager::uploadUserInfo()
-{
-    auto bcClient = BlkChnClient::GetInstance();
+// int UserManager::uploadUserInfo()
+// {
+//     auto bcClient = BlkChnClient::GetInstance();
 
-    int ret = bcClient->uploadHumanInfo(mUserInfo);
-    if(ret < 0) {
-        return ret;
-    }
+//     int ret = bcClient->uploadHumanInfo(mUserInfo);
+//     if(ret < 0) {
+//         return ret;
+//     }
 
-    return 0;
-}
+//     return 0;
+// }
 
 int UserManager::setupMultiDevChannels()
 {

@@ -153,7 +153,7 @@ private:
 
     std::map<ChannelType, std::shared_ptr<MessageChannelStrategy>> mMessageChannelMap;
 
-    friend class Contact;
+    friend class UserManager;
 }; // class MessageManager
 
 /***********************************************/

@@ -23,6 +23,7 @@ public:
     constexpr static const int ConflictWithExpectedError = -11;
     constexpr static const int MergeInfoFailed = -12;
     constexpr static const int IgnoreMergeOldInfo = -13;
+    constexpr static const int EmptyInfoError = -14;
 
     constexpr static const int InvalidLocalDataDir = -50;
     constexpr static const int NoSecurityListener = -51;
@@ -45,6 +46,7 @@ public:
     constexpr static const int BlkChnSetPropError = -300;
     constexpr static const int BlkChnGetPropError = -301;
     constexpr static const int BlkChnEmptyPropError = -302;
+    constexpr static const int BlkChnBadTxIdError = -303;
 
     constexpr static const int HttpClientError = -500;
 

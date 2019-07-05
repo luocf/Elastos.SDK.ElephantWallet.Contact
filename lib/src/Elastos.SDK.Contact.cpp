@@ -82,22 +82,26 @@ int Contact::start()
         return ret;
     }
 
-    ret = mUserManager->makeUser();
-    if(ret < 0) {
+    ret = mUserManager->restoreUserInfo();
+    if(ret < 0
+    && ret != ErrCode::EmptyInfoError) {
         return ret;
     }
+    bool successLoadInfo = (ret != ErrCode::EmptyInfoError);
 
     ret = mMessageManager->presetChannels(mConfig);
     if(ret < 0) {
         return ret;
     }
 
-    ret = setUserInfo();
-    if(ret < 0) {
-        return ret;
+    if(successLoadInfo == false) {
+        ret = mUserManager->newUserInfo();
+        if (ret < 0) {
+            return ret;
+        }
     }
 
-    ret = mFriendManager->restoreFriends();
+    ret = mFriendManager->restoreFriendsInfo();
     if(ret < 0) {
         return ret;
     }
@@ -107,6 +111,25 @@ int Contact::start()
         return ret;
     }
 
+    return 0;
+}
+
+int Contact::syncInfoDownloadFromDidChain()
+{
+    throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
+}
+
+int Contact::syncInfoUploadToDidChain()
+{
+    auto bcClient = BlkChnClient::GetInstance();
+    if(bcClient.get() == nullptr) {
+        return ErrCode::NotReadyError;
+    }
+
+    int ret = bcClient->uploadCachedDidProp();
+    if(ret < 0) {
+        return ret;
+    }
 
     return 0;
 }
@@ -214,53 +237,6 @@ int Contact::initGlobal()
     if(ret < 0) {
         return ret;
     }
-
-    return 0;
-}
-
-int Contact::setUserInfo()
-{
-    std::shared_ptr<UserInfo> userInfo;
-    int ret = mUserManager->getUserInfo(userInfo);
-    if(ret < 0) {
-        return ret;
-    }
-
-    std::string currDevId;
-    ret = Platform::GetCurrentDevId(currDevId);
-    if(ret < 0) {
-        return ret;
-    }
-
-    std::string currDevName;
-    ret = Platform::GetCurrentDevName(currDevName);
-    if(ret < 0) {
-        return ret;
-    }
-
-    std::weak_ptr<MessageChannelStrategy> weakChCarrier;
-    ret = mMessageManager->getChannel(MessageManager::ChannelType::Carrier, weakChCarrier);
-    if(ret < 0) {
-        return ret;
-    }
-    auto chCarrier = SAFE_GET_PTR(weakChCarrier);
-
-    std::string carrierAddr;
-    ret = chCarrier->getAddress(carrierAddr);
-    if(ret < 0) {
-        return ret;
-    }
-
-    HumanInfo::CarrierInfo info{carrierAddr, "", {currDevId, currDevName, DateTime::CurrentMS()}};
-    ret = userInfo->addCarrierInfo(info, UserInfo::Status::Offline);
-    if(ret < 0) {
-        return ret;
-    }
-
-    //ret = mUserManager->uploadUserInfo();
-    //if(ret < 0) {
-        //return ret;
-    //}
 
     return 0;
 }

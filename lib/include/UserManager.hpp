@@ -47,11 +47,12 @@ public:
     int saveLocalData();
     int serialize(std::string& value) const;
 
-    int makeUser();
+    int restoreUserInfo();
+    int newUserInfo();
     int getUserInfo(std::shared_ptr<UserInfo>& userInfo);
 
-    int syncUserInfo();
-    int uploadUserInfo();
+    int syncDidChainData();
+    // int uploadUserInfo();
 
     int setupMultiDevChannels();
 

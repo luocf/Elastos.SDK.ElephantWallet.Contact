@@ -31,7 +31,17 @@ public:
     private:
         static std::string sLocalDataDir;
         friend class Contact;
-    };
+    }; // class Factory
+
+    class Listener { // TODO
+    public:
+        virtual void onRequest() = 0;
+        virtual void onEvent() = 0;
+        virtual void onError(int errCode) = 0;
+    protected:
+        explicit Listener() = default;
+        virtual ~Listener() = default;
+    }; // class ContactListener
 
     /*** static function and variable ***/
 
@@ -48,6 +58,9 @@ public:
 
     int start();
 
+    int syncInfoDownloadFromDidChain();
+    int syncInfoUploadToDidChain();
+
 private:
     /*** type define ***/
 
@@ -58,7 +71,6 @@ private:
     virtual ~Contact();
     int getUserDataDir(std::string& dir);
     int initGlobal();
-    int setUserInfo();
 
     std::shared_ptr<SecurityManager> mSecurityManager;
     std::shared_ptr<UserManager> mUserManager;

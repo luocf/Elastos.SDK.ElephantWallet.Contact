@@ -32,17 +32,20 @@ public:
     int removeMoniter(const std::string& path);
 
     int downloadAllDidProps(const std::string& did, std::map<std::string, std::string>& propMap);
-    int uploadAllDidProps(const std::map<std::string, std::string>& propMap);
+    // int uploadAllDidProps(const std::map<std::string, std::string>& propMap);
 
     int downloadDidProp(const std::string& did, const std::string& key, std::string& prop);
-    int uploadDidProp(const std::string& key, const std::string& prop);
+    // int uploadDidProp(const std::string& key, const std::string& prop);
 
     //int getDidProp(const std::string& did, const std::string& key, std::string& value);
-    int getDidPropHistory(const std::string& did, const std::string& key, std::vector<std::string>& values);
     int getDidPropHistoryPath(const std::string& did, const std::string& key, std::string& path);
+    int downloadDidPropHistory(const std::string& did, const std::string& key, std::vector<std::string>& values);
 
     int downloadHumanInfo(const std::string& did, std::shared_ptr<HumanInfo>& humanInfo);
-    int uploadHumanInfo(const std::shared_ptr<HumanInfo>& humanInfo);
+    // int uploadHumanInfo(const std::shared_ptr<HumanInfo>& humanInfo);
+
+    int cacheDidProp(const std::string& key, const std::string& value);
+    int uploadCachedDidProp();
 
 protected:
     /*** type define ***/
@@ -78,7 +81,6 @@ private:
         constexpr static uint32_t mMonitorPendingMS = 10000;
 
         ThreadPool mMonitorThread;
-        std::mutex mMonitorMutex;
         std::map<std::string, MonitorCallback> mMonitorCallbackMap;
 
         std::function<void()> mMonitorLooper;
@@ -92,7 +94,8 @@ private:
     virtual ~BlkChnClient();
     int startMonitor();
 
-    int getDidPropFromDidChn(const std::string& path, std::string& result);
+    int downloadDidPropFromDidChn(const std::string& path, std::string& result);
+    int uploadAllDidProps(const std::multimap<std::string, std::string>& propMap, std::string& txid);
 
     int getPropKeyPathPrefix(std::string& keyPathPrefix);
     int getPropKeyPath(const std::string& key, std::string& keyPath);
@@ -101,6 +104,10 @@ private:
     std::weak_ptr<SecurityManager> mSecurityManager;
     uint32_t mConnectTimeoutMS;
 
+    std::recursive_mutex mMutex;
+    std::string mPropKeyPathPrefix;
+    std::multimap<std::string, std::string> mDidPropCache;
+    std::string lastCacheUploadTxId;
     Monitor mMonitor;
 };
 
