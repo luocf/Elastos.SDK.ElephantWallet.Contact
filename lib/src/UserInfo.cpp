@@ -10,6 +10,7 @@
 
 #include <Log.hpp>
 #include <Json.hpp>
+#include <Platform.hpp>
 #include <SafePtr.hpp>
 
 namespace elastos {
@@ -165,17 +166,6 @@ int UserInfo::setIdentifyCode(Type type, const std::string& value)
 
     return 0;
 }
-
-int UserInfo::getIdentifyCode(Type type, std::string& value) const
-{
-    int ret = IdentifyCode::getIdentifyCode(type, value);
-    if(ret <= 0) { // error or not changed
-        return ret;
-    }
-
-    return 0;
-}
-
 
 /***********************************************/
 /***** class protected function implement  *****/

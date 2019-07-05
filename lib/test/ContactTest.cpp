@@ -19,6 +19,9 @@ const char* keypairWords = "";
 std::string gSavedMnemonic;
 std::string gCachedMnemonic;
 
+std::thread gCmdPipeMonitor;
+bool gQuitFlag = false;
+
 void loop(const char* fifoFilePath, std::shared_ptr<elastos::Contact> contact);
 void signalHandler(int sig);
 std::shared_ptr<elastos::SecurityManager::SecurityListener> getSecurityListener(std::weak_ptr<elastos::Contact> contact);
@@ -39,7 +42,7 @@ int main(int argc, char **argv)
         gSavedMnemonic = "enact tank inmate false describe brass slab stove smart guilt door hen";
         nickname = "Me";
     } else {
-        // gSavedMnemonic = "glove deputy vibrant autumn gain thrive report indicate quantum parade ginger trumpet";
+        gSavedMnemonic = "exhaust muffin exist useless cheese donkey supreme question imitate any pipe lesson";
     }
 
     Log::I(Log::TAG, "Start Contact Test.");
@@ -112,36 +115,61 @@ int main(int argc, char **argv)
     return 0;
 }
 
-void loop(const char* fifoFilePath, std::shared_ptr<elastos::Contact> contact)
+void processCmd(const std::string& cmdLine, std::shared_ptr<elastos::Contact> contact)
 {
-    while (true) {
-        if(fifoFilePath != nullptr) {
+    if (cmdLine.empty() == true) {
+        std::cout << "# ";
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        return;
+    }
+    Log::I(Log::TAG, "==> Received Command: %s", cmdLine.c_str());
+
+    std::string errMsg;
+    int ret = ContactTestCmd::Do(contact, cmdLine, errMsg);
+    if (ret < 0) {
+        Log::E(Log::TAG, "ErrCode(%d): %s", ret, errMsg.c_str());
+    } else {
+        Log::I(Log::TAG, "Success to exec: %s", cmdLine.c_str());
+    }
+    std::cout << "# ";
+}
+
+void monitorCmdPipe(const char* fifoFilePath, std::shared_ptr<elastos::Contact> contact) {
+    if (fifoFilePath == nullptr) {
+        return;
+    }
+
+    auto funcPipeMonitor = [=] {
+        while (true) {
             std::string cmdLine;
             std::ifstream fifoStream(fifoFilePath, std::ifstream::in);
             std::getline(fifoStream, cmdLine);
             fifoStream.close();
 
-            if(cmdLine.empty() == true) {
-                std::this_thread::sleep_for (std::chrono::milliseconds(100));
-                continue;
-            }
-            Log::I(Log::TAG, "==> Received Command: %s", cmdLine.c_str());
-
-            std::string errMsg;
-            int ret = ContactTestCmd::Do(contact, cmdLine, errMsg);
-            if(ret < 0) {
-                Log::E(Log::TAG, "ErrCode(%d): %s", ret, errMsg.c_str());
-            } else {
-                Log::I(Log::TAG, "Success to exec: %s", cmdLine.c_str());
-            }
-        } else {
-            std::string input;
-            std::cin >> input;
-            if (input.find("q") == 0) {
+            if (cmdLine == "q" || cmdLine == "quit") {
+                gQuitFlag = true;
                 return;
             }
-            std::cout << "Unknown input: " << input << std::endl;
+            processCmd(cmdLine, contact);
+        };
+    };
+
+    gCmdPipeMonitor = std::thread (funcPipeMonitor);
+}
+
+void loop(const char* fifoFilePath, std::shared_ptr<elastos::Contact> contact)
+{
+    monitorCmdPipe(fifoFilePath, contact);
+
+    while (true) {
+        std::string cmdLine;
+        std::getline(std::cin, cmdLine);
+
+        if (cmdLine == "q" || cmdLine == "quit") {
+            gQuitFlag = true;
+            return;
         }
+        processCmd(cmdLine, contact);
     }
 }
 

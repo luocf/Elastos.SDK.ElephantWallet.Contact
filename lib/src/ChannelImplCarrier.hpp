@@ -39,6 +39,7 @@ public:
     virtual int open() override;
     virtual int close() override;
 
+    virtual int getSecretKey(std::string& secKey) override;
     virtual int getAddress(std::string& address) override;
 
     virtual bool isReady() override;

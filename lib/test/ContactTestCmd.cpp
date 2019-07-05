@@ -4,16 +4,20 @@
 #include <iterator>
 #include <sstream>
 
+#include <BlkChnClient.hpp>
+
 /* =========================================== */
 /* === static variables initialize =========== */
 /* =========================================== */
 const std::vector<ContactTestCmd::CommandInfo> ContactTestCmd::gCommandInfoList{
-    { 'h', "help",            ContactTestCmd::Help,           "      Print help usages." },
-    { 'p', "print-info",      ContactTestCmd::PrintInfo,      "Print current contact infos." },
-    { 'c', "print-carrier",   ContactTestCmd::PrintCarrier,   "Print current carrier infos." },
-    { 'u', "upload-info",     ContactTestCmd::UploadInfo,     "upload info to did chain." },
-    { 'a', "add-friend",      ContactTestCmd::AddFriend,      "Add a friend by [did, ela address or carrier address]." },
-    { 's', "send-message",    ContactTestCmd::SendMessage,    "Send message to a friend like: s [friendCode] [chType(1 or 2)] [msg]" },
+    { 'q', "quit",             nullptr,                         "\t\tQuit." },
+    { 'h', "help",             ContactTestCmd::Help,            "\t\tPrint help usages." },
+    { 'p', "print-info",       ContactTestCmd::PrintInfo,       "\tPrint current contact infos." },
+    { 'c', "print-carrier",    ContactTestCmd::PrintCarrier,    "\tPrint current carrier infos." },
+    { 'd', "print-cachedinfo", ContactTestCmd::PrintCachedInfo, "Print current carrier infos." },
+    { 'u', "upload-info",      ContactTestCmd::UploadInfo,      "\tUpload info to did chain." },
+    { 'a', "add-friend",       ContactTestCmd::AddFriend,       "\tAdd a friend by [did, ela address or carrier address]." },
+    { 's', "send-message",     ContactTestCmd::SendMessage,     "\tSend message to a friend like: s [friendCode] [chType(1 or 2)] [msg]" },
 };
 
 /* =========================================== */
@@ -71,6 +75,7 @@ int ContactTestCmd::Help(std::shared_ptr<elastos::Contact> contact,
     for(const auto& cmdInfo : gCommandInfoList) {
         std::cout << "  " << cmdInfo.mCmd << " | " << cmdInfo.mLongCmd << ": " << cmdInfo.mUsage << std::endl;
     }
+    std::cout << std::endl;
 
     return 0;
 }
@@ -128,6 +133,22 @@ int ContactTestCmd::PrintCarrier(std::shared_ptr<elastos::Contact> contact,
             std::cout << " addr:" << it.mUsrAddr << ", id:" << it.mUsrId  << std::endl;
         }
     }
+
+    return 0;
+}
+
+int ContactTestCmd::PrintCachedInfo(std::shared_ptr<elastos::Contact> contact,
+                                    const std::vector<std::string>& args,
+                                    std::string& errMsg)
+{
+    auto bcClient = elastos::BlkChnClient::GetInstance();
+
+    std::string value;
+    bcClient->printCachedDidProp(value);
+
+    std::cout << "==========================" << std::endl;
+    std::cout << value << std::endl;
+    std::cout << std::endl;
 
     return 0;
 }

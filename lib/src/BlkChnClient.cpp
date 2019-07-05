@@ -127,6 +127,10 @@ int BlkChnClient::downloadAllDidProps(const std::string& did, std::map<std::stri
 
 int BlkChnClient::uploadAllDidProps(const std::multimap<std::string, std::string>& propMap, std::string& txid)
 {
+    if(propMap.empty() == true) {
+        return ErrCode::InvalidArgument;
+    }
+
     auto sectyMgr = SAFE_GET_PTR(mSecurityManager);
     auto config = SAFE_GET_PTR(mConfig);
 
@@ -420,6 +424,19 @@ int BlkChnClient::uploadCachedDidProp()
     return 0;
 }
 
+int BlkChnClient::printCachedDidProp(std::string& output)
+{
+    std::lock_guard<std::recursive_mutex> lock(mMutex);
+
+    output = "";
+    for(const auto& it: mDidPropCache) {
+        auto pretty = elastos::Json(it.second);
+        output += (it.first + ": " + pretty.dump(2) + "\n");
+    }
+
+    return 0;
+}
+
 /* =========================================== */
 /* === class protected function implement  === */
 /* =========================================== */
@@ -513,18 +530,18 @@ int BlkChnClient::getPropKeyPathPrefix(std::string& keyPathPrefix)
 {
     std::lock_guard<std::recursive_mutex> lock(mMutex);
     
-    if(mPropKeyPathPrefix.empty() == false) {
-        return 0;
-    }
+    if(mPropKeyPathPrefix.empty() == true) {
+        auto sectyMgr = SAFE_GET_PTR(mSecurityManager);
 
-    auto sectyMgr = SAFE_GET_PTR(mSecurityManager);
+        std::string appId;
+        int ret = sectyMgr->getDidPropAppId(appId);
+        if (ret < 0)
+        {
+            return ret;
+        }
 
-    std::string appId;
-    int ret = sectyMgr->getDidPropAppId(appId);
-    if(ret < 0) {
-        return ret;
+        mPropKeyPathPrefix = "Apps/" + appId + "/";
     }
-    mPropKeyPathPrefix = "Apps/" + appId + "/";
 
     keyPathPrefix = mPropKeyPathPrefix;
 
@@ -544,7 +561,7 @@ int BlkChnClient::getPropKeyPath(const std::string& key, std::string& keyPath)
         return ret;
     }
 
-    keyPath = keyPathPrefix + key;
+    keyPath = (keyPathPrefix + key);
     return 0;
 }
 

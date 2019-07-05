@@ -134,13 +134,12 @@ int UserManager::restoreUserInfo()
         if(ret == 0) {
             Log::I(Log::TAG, "UserManager::makeUser() Success to recover user from did chain.");
         } else if(ret == ErrCode::BlkChnEmptyPropError) {
-            Log::I(Log::TAG, "UserManager::makeUser() Can't find user info from local or did chain, make a new user.");
+            Log::I(Log::TAG, "UserManager::makeUser() Can't find user info from local or did chain.");
             ret = ErrCode::EmptyInfoError;
         }
     }
-    if(ret < 0
-    && ret != ErrCode::EmptyInfoError) {
-        Log::E(Log::TAG, "UserManager::makeUser() Failed to recover user, ret=%d", ret);
+    if(ret < 0) {
+        Log::W(Log::TAG, "UserManager::makeUser() Failed to restore user, ret=%d", ret);
         return ret;
     }
 
@@ -182,6 +181,17 @@ int UserManager::newUserInfo()
     }
     auto chCarrier = SAFE_GET_PTR(weakChCarrier);
 
+    std::string carrierSecKey;
+    ret = chCarrier->getSecretKey(carrierSecKey);
+    if(ret < 0) {
+        return ret;
+    }
+
+    ret = mUserInfo->setIdentifyCode(UserInfo::Type::CarrierSecKey, carrierSecKey);
+    if(ret < 0) {
+        return ret;
+    }
+
     std::string carrierAddr;
     ret = chCarrier->getAddress(carrierAddr);
     if(ret < 0) {
@@ -205,8 +215,18 @@ int UserManager::newUserInfo()
         return ret;
     }
 
+    std::string identifyCodeStr;
+    ret = mUserInfo->IdentifyCode::serialize(identifyCodeStr, true, false);
+    if(ret < 0) {
+        return ret;
+    }
+
     auto bcClient = BlkChnClient::GetInstance();
     ret = bcClient->cacheDidProp("CarrierID", carrierInfoStr);
+    if(ret < 0) {
+        return ret;
+    }
+    ret = bcClient->cacheDidProp("IdentifyCode", identifyCodeStr);
     if(ret < 0) {
         return ret;
     }
@@ -249,14 +269,36 @@ int UserManager::syncDidChainData()
 
     auto bcClient = BlkChnClient::GetInstance();
 
+    std::vector<std::string> identifyCodeArray;
+    ret = bcClient->downloadDidPropHistory(did, "IdentifyCode", identifyCodeArray);
+    if(ret < 0) {
+        Log::W(Log::TAG, "UserManager::syncDidChainData() Failed to download IdentifyCode.");
+    }
+    for(const auto& it: identifyCodeArray) {
+        IdentifyCode identifyCode;
+        ret = identifyCode.deserialize(it);
+        if (ret < 0) {
+            Log::W(Log::TAG, "UserManager::syncDidChainData() Failed to deserialize IdentifyCode: %s.", it.c_str());
+            continue;
+        }
+
+        ret = mUserInfo->mergeIdentifyCode(identifyCode);
+        if (ret < 0) {
+            Log::W(Log::TAG, "UserManager::syncDidChainData() Failed to merge IdentifyCode: %s.", it.c_str());
+            continue;
+        }
+    }
+
     auto humanInfo = std::make_shared<HumanInfo>();
     ret = bcClient->downloadHumanInfo(did, humanInfo);
     if(ret < 0) {
+        Log::W(Log::TAG, "UserManager::syncDidChainData() Failed to download HumanInfo.");
         return ret;
     }
 
     ret = mUserInfo->mergeHumanInfo(*humanInfo, HumanInfo::Status::Offline);
     if(ret < 0) {
+        Log::W(Log::TAG, "UserManager::syncDidChainData() Failed to merge HumanInfo.");
         return ret;
     }
 

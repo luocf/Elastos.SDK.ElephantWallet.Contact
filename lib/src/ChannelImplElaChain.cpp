@@ -48,6 +48,11 @@ int ChannelImplElaChain::close()
     throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
 }
 
+int ChannelImplElaChain::getSecretKey(std::string& secKey)
+{
+    throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
+}
+
 int ChannelImplElaChain::getAddress(std::string& address)
 {
     throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");

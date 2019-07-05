@@ -297,27 +297,23 @@ int FriendManager::syncDidChainData()
         return ret;
     }
 
-    std::vector<std::string> friendDidArray;
+    std::vector<std::string> friendCodeArray;
     for(const auto& it: propHistory) {
         Json jsonInfo = Json::parse(it);
-        std::string did = jsonInfo["Did"];
+        std::string friendCode = jsonInfo["FriendCode"];
         int status = jsonInfo["Status"];
         long updateTime = jsonInfo["UpdateTime"];
 
         // TODO remove friend filt
-        friendDidArray.push_back(did);
+        friendCodeArray.push_back(friendCode);
     }
 
-    for(const auto& it: friendDidArray) {
-        auto friendInfo = std::make_shared<FriendInfo>(weak_from_this());
-        auto humanInfo = std::static_pointer_cast<HumanInfo>(friendInfo);
-        int ret = bcClient->downloadHumanInfo(it, humanInfo);
+    for(const auto& it: friendCodeArray) {
+        int ret = tryAddFriend(it, "", false);
         if(ret < 0) {
-            Log::W(Log::TAG, "FriendManager::syncFriendInfo() Failed to add friend did: %s.", did.c_str());
+            Log::W(Log::TAG, "FriendManager::syncFriendInfo() Failed to add friend code: %s.", did.c_str());
             continue;
         }
-
-        mFriendList.push_back(friendInfo);
 
         Log::I(Log::TAG, "FriendManager::syncFriendInfo() Add friend did: %s.", did.c_str());
     }

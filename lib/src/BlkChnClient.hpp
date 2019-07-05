@@ -46,6 +46,7 @@ public:
 
     int cacheDidProp(const std::string& key, const std::string& value);
     int uploadCachedDidProp();
+    int printCachedDidProp(std::string& output);
 
 protected:
     /*** type define ***/

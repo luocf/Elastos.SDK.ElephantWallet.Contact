@@ -168,6 +168,22 @@ int ChannelImplCarrier::close()
     return 0;
 }
 
+int ChannelImplCarrier::getSecretKey(std::string& secKey)
+{
+    char key[ELA_MAX_SECRET_KEY_LEN + 1] = {0};
+    auto ret = ela_get_secret_key(mCarrier.get(), key, sizeof(key));
+    if(ret == nullptr) {
+        int err = ela_get_error();
+        char strerr_buf[512] = {0};
+        ela_get_strerror(err, strerr_buf, sizeof(strerr_buf));
+        Log::E(Log::TAG, "Failed to get address! ret=%s(0x%x)", strerr_buf, err);
+        return ErrCode::ChannelFailedCarrier;
+    }
+
+    secKey = key;
+    return 0;
+}
+
 int ChannelImplCarrier::getAddress(std::string& address)
 {
     char addr[ELA_MAX_ADDRESS_LEN + 1] = {0};

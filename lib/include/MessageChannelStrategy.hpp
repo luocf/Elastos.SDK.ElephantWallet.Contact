@@ -57,6 +57,7 @@ public:
     virtual int open() = 0;
     virtual int close() = 0;
 
+    virtual int getSecretKey(std::string& secKey) = 0;
     virtual int getAddress(std::string& address) = 0;
 
     virtual bool isReady() = 0;

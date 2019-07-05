@@ -11,11 +11,11 @@ namespace elastos {
 class IdentifyCode {
 public:
     /*** type define ***/
-    enum Type {
-        PhoneNumber,
+    enum class Type: int {
+        PhoneNumber = 1,
         EmailAddress,
         WechatId,
-        CarrierKey,
+        CarrierSecKey,
     };
 
     /*** static function and variable ***/
@@ -27,9 +27,13 @@ public:
     virtual int setIdentifyCode(Type type, const std::string& value);
     virtual int getIdentifyCode(Type type, std::string& value) const;
 
-    virtual int serialize(std::string& value) const;
+    virtual int serialize(std::string& value,
+                          bool withCarrierSecKey = true,
+                          bool withIdCode = true) const;
     virtual int deserialize(const std::string& value);
+    // virtual int print(std::string value);
 
+    virtual int mergeIdentifyCode(const IdentifyCode& value);
 private:
     /*** type define ***/
 
@@ -37,7 +41,8 @@ private:
 
     /*** class function and variable ***/
     std::map<std::string, std::string> mCarrierSecretKeyMap; // DevUUID: CarrierKey
-    std::map<Type, std::string> mIdCodeMap; // DevUUID: CarrierId
+    std::map<Type, std::string> mIdCodeMap;
+    long mUpdateTime;
 }; // class IdentifyCode
 
 } // namespace elastos

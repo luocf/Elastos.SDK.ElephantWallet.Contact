@@ -100,6 +100,11 @@ int MessageManager::presetChannels(std::weak_ptr<Config> config)
     std::shared_ptr<UserInfo> userInfo;
     userMgr->getUserInfo(userInfo);
 
+    // CarrierInfo carrierInfo = {"", "", {"", "", 0}};
+    // int ret = userInfo->getCurrDevCarrierInfo(carrierInfo);
+    // if(ret < 0) {
+    //     Log::W(Log::TAG, "Failed to get current dev carrier info.");
+    // }
 
     mMessageChannelMap[ChannelType::Carrier] = std::make_shared<ChannelImplCarrier>(static_cast<uint32_t>(ChannelType::Carrier),
                                                                                     mMessageListener,
@@ -107,7 +112,18 @@ int MessageManager::presetChannels(std::weak_ptr<Config> config)
     // TODO mMessageChannelMap[ChannelType::ElaChain] = std::make_shared<ChannelImplElaChain>(config, mSecurityManager);
 
     for(const auto& channel: mMessageChannelMap) {
-        int ret = channel.second->preset(""); // TODO add carrier secretkey
+        std::string profile;
+        if(channel.first == ChannelType::Carrier) {
+            std::string carrierSecKey;
+            int ret = userInfo->getIdentifyCode(UserInfo::Type::CarrierSecKey, carrierSecKey);
+            if (ret == 0) {
+                profile = carrierSecKey;
+            } else {
+                Log::W(Log::TAG, "Failed to get current dev carrier secret key.");
+            }
+        }
+
+        int ret = channel.second->preset(profile); // TODO add carrier secretkey
         if(ret < 0) {
             hasFailed = true;
             Log::W(Log::TAG, "Failed to preset channel %d", channel.first);
