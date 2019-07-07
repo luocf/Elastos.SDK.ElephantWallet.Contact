@@ -60,7 +60,7 @@ int PlatformDarwin::GetCurrentDevId(std::string& devId)
     uuid_string_t uuidStr;
     uuid_unparse_upper(uuid, uuidStr);
     devId = uuidStr;
-    devId += "aaa";
+    // devId += "aaa";
 
     return 0;
 }
