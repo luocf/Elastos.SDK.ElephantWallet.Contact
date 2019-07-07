@@ -111,7 +111,7 @@ int Contact::start()
         return ret;
     }
 
-    ret = mUserManager->monitorDidChainData();
+    // ret = mUserManager->monitorDidChainData();
     if(ret < 0) {
         return ret;
     }
