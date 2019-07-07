@@ -146,11 +146,11 @@ int UserManager::restoreUserInfo()
     return 0;
 }
 
-int UserManager::newUserInfo()
+int UserManager::newUserInfo(bool onlyCarrierInfo)
 {
     Log::V(Log::TAG, "%s", __PRETTY_FUNCTION__);
 
-    mUserInfo = std::make_shared<UserInfo>(weak_from_this());
+    // mUserInfo = std::make_shared<UserInfo>(weak_from_this());
 
     auto sectyMgr = SAFE_GET_PTR(mSecurityManager);
     std::string pubKey;
@@ -222,9 +222,11 @@ int UserManager::newUserInfo()
     }
 
     auto bcClient = BlkChnClient::GetInstance();
-    ret = bcClient->cacheDidProp("PublicKey", pubKey);
-    if(ret < 0) {
-        return ret;
+    if (onlyCarrierInfo == false) {
+        ret = bcClient->cacheDidProp("PublicKey", pubKey);
+        if (ret < 0) {
+            return ret;
+        }
     }
     ret = bcClient->cacheDidProp("CarrierID", carrierInfoStr);
     if(ret < 0) {
@@ -305,6 +307,13 @@ int UserManager::syncDidChainData()
         Log::W(Log::TAG, "UserManager::syncDidChainData() Failed to merge HumanInfo.");
         return ret;
     }
+
+    std::string pubKey;
+    ret = sectyMgr->getPublicKey(pubKey);
+    if(ret < 0) {
+        return ret;
+    }
+    mUserInfo->setHumanInfo(UserInfo::Item::ChainPubKey, pubKey);
 
     return 0;
 }

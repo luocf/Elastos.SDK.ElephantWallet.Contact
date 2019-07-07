@@ -88,14 +88,23 @@ int Contact::start()
         return ret;
     }
     bool successLoadInfo = (ret != ErrCode::EmptyInfoError);
+    bool successLoadCarrier = false;
+
+    std::shared_ptr<UserInfo> userInfo;
+    mUserManager->getUserInfo(userInfo);
+    std::string carrierSecKey;
+    ret = userInfo->getIdentifyCode(UserInfo::Type::CarrierSecKey, carrierSecKey);
+    if (ret == 0) {
+        successLoadCarrier = true;
+    }
 
     ret = mMessageManager->presetChannels(mConfig);
     if(ret < 0) {
         return ret;
     }
 
-    if(successLoadInfo == false) {
-        ret = mUserManager->newUserInfo();
+    if(successLoadInfo == false || successLoadCarrier == false) {
+        ret = mUserManager->newUserInfo(successLoadInfo == true);
         if (ret < 0) {
             return ret;
         }
