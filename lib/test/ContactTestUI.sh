@@ -30,6 +30,7 @@ CMD_LIST=(
 EXEC_USER="$SCRIPT_DIR/ContactTest $FIFO_FILE";
 EXEC_FRIEND="$SCRIPT_DIR/ContactTest";
 
+mkdir -p $(dirname "$SHCFG_FILE");
 echo ""                                     >  "$SHCFG_FILE";
 echo "alias tmux='$(which tmux)';"          >> "$SHCFG_FILE";
 echo "alias clear='$(which clear)';"        >> "$SHCFG_FILE";

@@ -52,6 +52,7 @@ public:
     int getUserInfo(std::shared_ptr<UserInfo>& userInfo);
 
     int syncDidChainData();
+    int monitorDidChainData();
     // int uploadUserInfo();
 
     int setupMultiDevChannels();

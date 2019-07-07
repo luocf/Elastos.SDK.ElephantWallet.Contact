@@ -87,7 +87,7 @@ int BlkChnClient::downloadAllDidProps(const std::string& did, std::map<std::stri
     std::string agentGetPropsPath = agentGetProps + did;
 
     std::string propArrayStr;
-    int ret = downloadDidPropFromDidChn(agentGetPropsPath, propArrayStr);
+    int ret = downloadFromDidChn(agentGetPropsPath, propArrayStr);
     if(ret < 0) {
         return ret;
     }
@@ -243,7 +243,7 @@ int BlkChnClient::downloadDidProp(const std::string& did, const std::string& key
     std::string agentGetPropPath = agentGetProps + did + agentDidProp + keyPath;
 
     std::string propArrayStr;
-    ret = downloadDidPropFromDidChn(agentGetPropPath, propArrayStr);
+    ret = downloadFromDidChn(agentGetPropPath, propArrayStr);
     if(ret < 0) {
         return ret;
     }
@@ -278,7 +278,7 @@ int BlkChnClient::downloadDidPropHistory(const std::string& did, const std::stri
     }
 
     std::string propArrayStr;
-    ret = downloadDidPropFromDidChn(agentGetPropHistoryPath, propArrayStr);
+    ret = downloadFromDidChn(agentGetPropHistoryPath, propArrayStr);
     if(ret < 0) {
         return ret;
     }
@@ -419,7 +419,26 @@ int BlkChnClient::uploadCachedDidProp()
         return ret;
     }
     mDidPropCache.clear();
-    lastCacheUploadTxId = txid;
+
+    // auto config = SAFE_GET_PTR(mConfig);
+    // std::string getTxPath = config->mDidChainConfig->mApi.mGetTx + txid;
+    // auto confirmFunc = [=] (int errcode, const std::string& keyPath, const std::string& result) {
+    //     std::string result;
+    //     int ret = downloadFromDidChain(getTxPath, result);
+    //     if(ret < 0) {
+    //         return;
+    //     }
+
+    //     Json jsonResult = Json::parse(result);
+    //     int blockHeight = jsonResult["Height"];
+
+    //     removeMoniter(getTxPath);
+    // };
+
+    // ret = BlkChnClient::appendMoniter(getTxPath, confirmFunc);
+    // if(ret < 0) {
+    //     return ret;
+    // }
 
     return 0;
 }
@@ -452,7 +471,6 @@ BlkChnClient::BlkChnClient(std::weak_ptr<Config> config, std::weak_ptr<SecurityM
     , mMutex()
     , mPropKeyPathPrefix()
     , mDidPropCache()
-    , lastCacheUploadTxId()
     , mMonitor()
 {
 }
@@ -477,7 +495,7 @@ int BlkChnClient::startMonitor()
             auto& callback = it.second;
 
             std::string result;
-            int ret = downloadDidPropFromDidChn(keyPath, result);
+            int ret = downloadFromDidChn(keyPath, result);
             callback(ret, keyPath, result);
         }
 
@@ -490,7 +508,7 @@ int BlkChnClient::startMonitor()
     return 0;
 }
 
-int BlkChnClient::downloadDidPropFromDidChn(const std::string& path, std::string& result)
+int BlkChnClient::downloadFromDidChn(const std::string& path, std::string& result)
 {
     auto sectyMgr = SAFE_GET_PTR(mSecurityManager);
     auto config = SAFE_GET_PTR(mConfig);
@@ -535,8 +553,7 @@ int BlkChnClient::getPropKeyPathPrefix(std::string& keyPathPrefix)
 
         std::string appId;
         int ret = sectyMgr->getDidPropAppId(appId);
-        if (ret < 0)
-        {
+        if (ret < 0) {
             return ret;
         }
 

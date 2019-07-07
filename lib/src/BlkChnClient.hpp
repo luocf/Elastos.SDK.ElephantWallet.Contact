@@ -95,7 +95,7 @@ private:
     virtual ~BlkChnClient();
     int startMonitor();
 
-    int downloadDidPropFromDidChn(const std::string& path, std::string& result);
+    int downloadFromDidChn(const std::string& path, std::string& result);
     int uploadAllDidProps(const std::multimap<std::string, std::string>& propMap, std::string& txid);
 
     int getPropKeyPathPrefix(std::string& keyPathPrefix);
@@ -108,7 +108,6 @@ private:
     std::recursive_mutex mMutex;
     std::string mPropKeyPathPrefix;
     std::multimap<std::string, std::string> mDidPropCache;
-    std::string lastCacheUploadTxId;
     Monitor mMonitor;
 };
 

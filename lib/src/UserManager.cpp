@@ -153,7 +153,7 @@ int UserManager::newUserInfo()
     mUserInfo = std::make_shared<UserInfo>(weak_from_this());
 
     auto sectyMgr = SAFE_GET_PTR(mSecurityManager);
-    std::string pubKey, did, elaAddr;
+    std::string pubKey;
     int ret = sectyMgr->getPublicKey(pubKey);
     if(ret < 0) {
         return ret;
@@ -222,6 +222,10 @@ int UserManager::newUserInfo()
     }
 
     auto bcClient = BlkChnClient::GetInstance();
+    ret = bcClient->cacheDidProp("PublicKey", pubKey);
+    if(ret < 0) {
+        return ret;
+    }
     ret = bcClient->cacheDidProp("CarrierID", carrierInfoStr);
     if(ret < 0) {
         return ret;
@@ -303,6 +307,30 @@ int UserManager::syncDidChainData()
     }
 
     return 0;
+}
+
+int UserManager::monitorDidChainData()
+{
+    throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
+    // std::string did;
+    // int ret = sectyMgr->getDid(did);
+    // if(ret < 0) {
+    //     return ret;
+    // }
+
+    // auto callback = std::function<void(int errcode, const std::string& keyPath, const std::string& result)>;
+
+    // auto bcClient = BlkChnClient::GetInstance();
+    // int ret = bcClient->getDidPropHistoryPath(did, "CarrierID")
+
+    //     int ret = appendMoniter(const std::string& path,
+    //                             const MonitorCallback& callback);
+    // //     if(ret < 0) {
+    // //         return ret;
+    // //     }
+
+    // //     return 0;
+
 }
 
 // int UserManager::uploadUserInfo()

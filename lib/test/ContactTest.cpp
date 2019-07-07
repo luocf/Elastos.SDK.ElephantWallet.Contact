@@ -39,10 +39,10 @@ int main(int argc, char **argv)
 	const char* nickname = "Friend";
     const char* fifoFilePath = (argc > 1 ? argv[1] : nullptr);
     if(fifoFilePath != nullptr) {
-        gSavedMnemonic = "enact tank inmate false describe brass slab stove smart guilt door hen";
+        gSavedMnemonic = "bachelor sail glove swing despair lawsuit exhibit travel slot practice latin glass";
         nickname = "Me";
     } else {
-        gSavedMnemonic = "exhaust muffin exist useless cheese donkey supreme question imitate any pipe lesson";
+        gSavedMnemonic = "nature blouse motor thunder job sadness olympic feel client perfect uphold link";
     }
 
     Log::I(Log::TAG, "Start Contact Test.");
