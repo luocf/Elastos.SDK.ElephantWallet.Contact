@@ -54,7 +54,7 @@ int PlatformAndroid::GetCurrentDevId(std::string& devId)
     throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
 }
 
-int PlatformAndroid::GetCurrentDevName(std::string& devName);
+int PlatformAndroid::GetCurrentDevName(std::string& devName)
 {
     throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
 }

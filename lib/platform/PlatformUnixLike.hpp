@@ -11,7 +11,7 @@
 #ifndef _ELASTOS_PLATFORM_UNIXLIKE_HPP_
 #define _ELASTOS_PLATFORM_UNIXLIKE_HPP_
 
-#if defined(__linux__)
+#if defined(__linux__) and not defined(__ANDROID__)
 
 #include <string>
 

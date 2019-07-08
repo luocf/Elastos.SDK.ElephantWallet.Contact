@@ -17,9 +17,9 @@ set(pkg-Elastos.NET.Carrier_STATIC_LDFLAGS
     pjlib-util
     pj
     crystal
-    sodium
     srtp
-    toxcore)
+    toxcore
+    sodium)
 
 file( GLOB Elastos.SDK.Contact-SOURCES "*.cpp" "*/*.cpp")
 file( GLOB Elastos.SDK.Contact-HEADERS "../include/*.hpp" )
