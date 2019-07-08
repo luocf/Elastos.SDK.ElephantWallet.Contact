@@ -37,7 +37,7 @@ Config::~Config()
 
 int Config::load()
 {
-    auto cfgFilePath = std::filesystem::path(mUserDataDir.c_str()) / ConfigFileName;
+    auto cfgFilePath = elastos::filesystem::path(mUserDataDir.c_str()) / ConfigFileName;
 
     int ret = loadDefaultValues();
     return ret;

@@ -18,5 +18,5 @@ dependencies {
     compileOnly(project(":crosspl:anno"))
     kapt(project(":crosspl:anno"))
 
-    implementation(project(":crosspl:lib"))
+    api(project(":crosspl:lib"))
 }

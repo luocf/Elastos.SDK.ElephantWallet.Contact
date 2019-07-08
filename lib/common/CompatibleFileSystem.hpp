@@ -11,12 +11,15 @@
 #ifndef _ELASTOS_FILE_SYSTEM_HPP_
 #define _ELASTOS_FILE_SYSTEM_HPP_
 
-#if defined(__ANDROID__) || defined(__linux__)
-#include <filesystem>
-#elif defined(__APPLE__)
+#if defined(__APPLE__) || defined(__ANDROID__) || defined(__linux__)
 #include "ghc-filesystem.hpp"
-namespace std {
+namespace elastos {
 namespace filesystem = ghc::filesystem;
+}
+#else
+#include <experimental/filesystem>
+namespace elastos {
+    namespace filesystem = std::experimental::filesystem;
 }
 #endif /* defined(__APPLE__) || defined(__ANDROID__) */
 

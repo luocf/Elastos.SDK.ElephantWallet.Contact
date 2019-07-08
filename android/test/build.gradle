@@ -1,28 +1,8 @@
 apply plugin: 'com.android.application'
 
-android {
-    compileOptions {
-        targetCompatibility JavaVersion.VERSION_1_8
-        sourceCompatibility JavaVersion.VERSION_1_8
-    }
-
-    compileSdkVersion 27
-    defaultConfig {
-        applicationId "org.elastos.sdk.contact.test"
-        minSdkVersion 19
-        targetSdkVersion 27
-        versionCode 1
-        versionName "1.0"
-    }
-    buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-        }
-    }
-}
+apply from: "$rootProject.projectDir/gradle/android.gradle"
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation project(path: ":lib")
+    implementation(project(":lib"))
 }
+

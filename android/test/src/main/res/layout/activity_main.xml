@@ -13,22 +13,18 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content" >
-            <Button android:id="@+id/btn_test_mnemonic"
+            <Button android:id="@+id/btn_test_preset"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Test\nMnemonic"/>
-            <Button android:id="@+id/btn_test_singlewallet"
+                android:text="Test\nPreset"/>
+            <Button android:id="@+id/btn_test_newcontact"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="test Single"/>
-            <Button android:id="@+id/btn_test_hdwallet"
+                android:text="Test\nNewContact"/>
+            <Button android:id="@+id/btn_test_start"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Test\nHDWallet"/>
-            <Button android:id="@+id/btn_test_did"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Test\nDID"/>
+                android:text="Test\nStart"/>
         </LinearLayout>
         <LinearLayout
             android:layout_width="match_parent"

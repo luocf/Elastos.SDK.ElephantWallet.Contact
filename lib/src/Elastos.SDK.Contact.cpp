@@ -29,6 +29,7 @@ std::string Contact::Factory::sLocalDataDir;
 
 void Contact::Factory::SetLogLevel(int level)
 {
+    Log::D(Log::TAG, "set log level: %d", level);
     Log::SetLevel(static_cast<Log::Level>(level));
 }
 
@@ -39,7 +40,7 @@ int Contact::Factory::SetLocalDataDir(const std::string& dir)
     }
 
     std::error_code stdErrCode;
-    bool ret = std::filesystem::create_directories(dir, stdErrCode);
+    bool ret = elastos::filesystem::create_directories(dir, stdErrCode);
     if(ret == false
     || stdErrCode.value() != 0) {
         int errCode = ErrCode::StdSystemErrorIndex - stdErrCode.value();
@@ -49,6 +50,7 @@ int Contact::Factory::SetLocalDataDir(const std::string& dir)
     }
 
     sLocalDataDir = dir;
+    Log::D(Log::TAG, "set local data dir: %d", sLocalDataDir.c_str());
 
     return 0;
 }
@@ -195,13 +197,13 @@ int Contact::getUserDataDir(std::string& dir)
     if(Factory::sLocalDataDir.empty()) {
         return ErrCode::InvalidLocalDataDir;
     }
-    bool isDir = std::filesystem::is_directory(Factory::sLocalDataDir);
+    bool isDir = elastos::filesystem::is_directory(Factory::sLocalDataDir);
     if(isDir == false) {
         return ErrCode::InvalidLocalDataDir;
     }
-    auto perms = std::filesystem::status(Factory::sLocalDataDir).permissions();
-    if((perms & std::filesystem::perms::owner_read) == std::filesystem::perms::none
-    || (perms & std::filesystem::perms::owner_write) == std::filesystem::perms::none) {
+    auto perms = elastos::filesystem::status(Factory::sLocalDataDir).permissions();
+    if((perms & elastos::filesystem::perms::owner_read) == elastos::filesystem::perms::none
+    || (perms & elastos::filesystem::perms::owner_write) == elastos::filesystem::perms::none) {
         return ErrCode::InvalidLocalDataDir;
     }
 
@@ -211,9 +213,9 @@ int Contact::getUserDataDir(std::string& dir)
         return ret;
     }
 
-    auto userDataDir = std::filesystem::path(Factory::sLocalDataDir) / did;
+    auto userDataDir = elastos::filesystem::path(Factory::sLocalDataDir) / did;
     std::error_code stdErrCode;
-    bool bret = std::filesystem::create_directories(userDataDir, stdErrCode);
+    bool bret = elastos::filesystem::create_directories(userDataDir, stdErrCode);
     if(bret == false
     || stdErrCode.value() != 0) {
         int errCode = ErrCode::StdSystemErrorIndex - stdErrCode.value();

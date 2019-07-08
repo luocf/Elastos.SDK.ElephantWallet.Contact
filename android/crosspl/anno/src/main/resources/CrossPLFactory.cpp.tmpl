@@ -19,7 +19,7 @@ namespace crosspl {
 /***********************************************/
 int CrossPLFactory::OnLoad(JavaVM* jvm)
 {
-  __android_log_print(ANDROID_LOG_DEBUG, "crosspl", "%s", __PRETTY_FUNCTION__);
+  __android_log_print(ANDROID_LOG_INFO, "crosspl", "%s", __PRETTY_FUNCTION__);
   int ret = 0;
 
   CrossPLUtils::SetJavaVM(jvm);

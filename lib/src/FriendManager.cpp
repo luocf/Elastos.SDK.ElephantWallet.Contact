@@ -83,7 +83,7 @@ void FriendManager::setConfig(std::weak_ptr<Config> config, std::weak_ptr<Messag
 int FriendManager::loadLocalData()
 {
     auto config = SAFE_GET_PTR(mConfig);
-    auto dataFilePath = std::filesystem::path(config->mUserDataDir.c_str()) / DataFileName;
+    auto dataFilePath = elastos::filesystem::path(config->mUserDataDir.c_str()) / DataFileName;
 
     auto sectyMgr = SAFE_GET_PTR(mSecurityManager);
     std::vector<uint8_t> originData;
@@ -123,7 +123,7 @@ int FriendManager::saveLocalData()
     }
 
     auto config = SAFE_GET_PTR(mConfig);
-    auto dataFilePath = std::filesystem::path(config->mUserDataDir.c_str()) / DataFileName;
+    auto dataFilePath = elastos::filesystem::path(config->mUserDataDir.c_str()) / DataFileName;
 
     auto sectyMgr = SAFE_GET_PTR(mSecurityManager);
     std::vector<uint8_t> originData {friendData.begin(), friendData.end()};

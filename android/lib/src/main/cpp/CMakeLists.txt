@@ -18,8 +18,11 @@ add_subdirectory(base/platform)
 add_subdirectory(base/wrapper/httpclient)
 add_subdirectory(base/wrapper/json)
 
-add_library( Elastos.SDK.Contact.Jni SHARED
-        BlockChainNode_jni.cpp )
+
+file( GLOB Elastos.SDK.Contact.Jni-SOURCES "*.cpp")
+add_library(Elastos.SDK.Contact.Jni SHARED
+            ${CROSSPL_PROXY_SOURCES}
+            ${Elastos.SDK.Contact.Jni-SOURCES} )
 
 #target_include_directories( Elastos.SDK.Contact.Jni PRIVATE "${Elastos.SDK.Contact.Jni.C-HeaderDir}" )
 target_link_libraries( Elastos.SDK.Contact.Jni Elastos.SDK.Contact )

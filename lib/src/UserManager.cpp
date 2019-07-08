@@ -60,7 +60,7 @@ void UserManager::setConfig(std::weak_ptr<Config> config, std::weak_ptr<MessageM
 int UserManager::loadLocalData()
 {
     auto config = SAFE_GET_PTR(mConfig);
-    auto dataFilePath = std::filesystem::path(config->mUserDataDir.c_str()) / DataFileName;
+    auto dataFilePath = elastos::filesystem::path(config->mUserDataDir.c_str()) / DataFileName;
 
     auto sectyMgr = SAFE_GET_PTR(mSecurityManager);
     std::vector<uint8_t> originData;
@@ -93,7 +93,7 @@ int UserManager::saveLocalData()
     }
 
     auto config = SAFE_GET_PTR(mConfig);
-    auto dataFilePath = std::filesystem::path(config->mUserDataDir.c_str()) / DataFileName;
+    auto dataFilePath = elastos::filesystem::path(config->mUserDataDir.c_str()) / DataFileName;
 
     auto sectyMgr = SAFE_GET_PTR(mSecurityManager);
     std::vector<uint8_t> originData {userData.begin(), userData.end()};

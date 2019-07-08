@@ -177,7 +177,7 @@ class CrossClassInfo {
             .replace(TmplKeyNativeFunction, nativeFuncList)
             .replace(TmplKeyJniNativeMethods, jniNativeMethodList)
             .replace(TmplKeyKotlinStaticNativeMethods, kotlinStaticNativeMethodList)
-            .replace(TmplKeyJniJavaClass, javaInfo.className.replace(".", "/"))
+            .replace(TmplKeyJniJavaClass, javaInfo.classPath)
 
         return content
     }
