@@ -111,7 +111,7 @@ class CrossMethodInfo {
             }
         var content = "$retTypeStr $className$methodName($TmplKeyArguments)"
 
-        var arguments = "uint64_t platformHandle"
+        var arguments = "int64_t platformHandle"
         for(idx in paramsType.indices) {
             val type = paramsType[idx].toCppString(true)
             arguments += ", $type var$idx"

@@ -2,8 +2,9 @@
 #define _CROSSPL_CROSSRUNNABLE_HPP_
 
 #include <functional>
+#include "CrossBase.hpp"
 
-class CrossRunnable final {
+class CrossRunnable final: ::CrossBase {
 public:
   /*** type define ***/
   explicit CrossRunnable(std::function<void()> callback);

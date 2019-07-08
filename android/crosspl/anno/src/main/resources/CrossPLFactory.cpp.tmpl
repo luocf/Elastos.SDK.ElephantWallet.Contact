@@ -50,7 +50,7 @@ int CrossPLFactory::OnLoad(JavaVM* jvm)
     __android_log_print(ANDROID_LOG_ERROR, "crosspl", "JNI_OnLoad(): dlerror=%s", dlerror());
     throw std::runtime_error("Failed to load function.");
   }
-  methodRegCreateCppObjFunc(crosspl::CrossPLFactory::createCppObject);
+  methodRegCreateCppObjFunc(crosspl::CrossPLFactory::CreateCppObject);
 
   methodName = "RegDestroyCppObjFunc";
   auto methodRegDestroyCppObjFunc = (void(*)(int(*)(const char*,int64_t)))dlsym(dylib, methodName);
@@ -59,12 +59,30 @@ int CrossPLFactory::OnLoad(JavaVM* jvm)
     __android_log_print(ANDROID_LOG_ERROR, "crosspl", "JNI_OnLoad(): dlerror=%s", dlerror());
     throw std::runtime_error("Failed to load function.");
   }
-  methodRegDestroyCppObjFunc(crosspl::CrossPLFactory::destroyCppObject);
+  methodRegDestroyCppObjFunc(crosspl::CrossPLFactory::DestroyCppObject);
+
+//  methodName = "RegCreateJavaObjFunc";
+//  auto methodRegCreateJavaObjFunc = (void(*)(int64_t(*)(const char*,int64_t)))dlsym(dylib, methodName);
+//  if(methodRegCreateJavaObjFunc == nullptr) {
+//    __android_log_print(ANDROID_LOG_ERROR, "crosspl", "JNI_OnLoad(): Failed to load function %s.", methodName);
+//    __android_log_print(ANDROID_LOG_ERROR, "crosspl", "JNI_OnLoad(): dlerror=%s", dlerror());
+//    throw std::runtime_error("Failed to load function.");
+//  }
+//  methodRegCreateJavaObjFunc(crosspl::CrossPLFactory::CreateJavaObject);
+//
+//  methodName = "RegDestroyJavaObjFunc";
+//  auto methodRegDestroyJavaObjFunc = (void(*)(int(*)(const char*,int64_t)))dlsym(dylib, methodName);
+//  if(methodRegDestroyJavaObjFunc == nullptr) {
+//    __android_log_print(ANDROID_LOG_ERROR, "crosspl", "JNI_OnLoad(): Failed to load function %s.", methodName);
+//    __android_log_print(ANDROID_LOG_ERROR, "crosspl", "JNI_OnLoad(): dlerror=%s", dlerror());
+//    throw std::runtime_error("Failed to load function.");
+//  }
+//  methodRegDestroyJavaObjFunc(crosspl::CrossPLFactory::DestroyJavaObject);
 
   return 0;
 }
 
-int64_t CrossPLFactory::createCppObject(const char* javaClassName)
+int64_t CrossPLFactory::CreateCppObject(const char* javaClassName)
 {
   __android_log_print(ANDROID_LOG_DEBUG, "crosspl", "%s %s", __PRETTY_FUNCTION__, javaClassName);
   void* ptr = nullptr;
@@ -75,7 +93,7 @@ int64_t CrossPLFactory::createCppObject(const char* javaClassName)
   return cppHandle;
 }
 
-int CrossPLFactory::destroyCppObject(const char* javaClassName, int64_t cppHandle)
+int CrossPLFactory::DestroyCppObject(const char* javaClassName, int64_t cppHandle)
 {
   if(cppHandle == 0) {
     return -1;
@@ -86,6 +104,63 @@ int CrossPLFactory::destroyCppObject(const char* javaClassName, int64_t cppHandl
 
   return -1;
 }
+
+//int64_t CrossPLFactory::CreateJavaObject(const char* cppClassName, int64_t cppHandle)
+//{
+//  __android_log_print(ANDROID_LOG_DEBUG, "crosspl", "%s %s", __PRETTY_FUNCTION__, cppClassName);
+//  const char* javaClassPath = GetJavaClassPath(cppClassName);
+//  if(javaClassPath == nullptr) {
+//    return 0;
+//  }
+//
+//  jclass jclassCrossBase = GetJavaClass(jenv, JavaClassPath);
+//  jmethodID jmethodCrossBase  = jenv->GetMethodID(jclassCrossBase, "<init>", "(J)V");
+//
+//  auto jobjectCrossBase = JniUtils::GetObjectSafely(jenv, jclassCrossBase, jmethodCrossBase, cppHandle)
+//  auto jglobalCrossBase = env->NewGlobalRef(jobjectCrossBase.get());
+//
+//  auto javaHandle = reinterpret_cast<int64_t>(jglobalCrossBase);
+//  return javaHandle;
+//}
+//
+//int CrossPLFactory::DestroyJavaObject(const char* cppClassName, int64_t javaHandle)
+//{
+//  __android_log_print(ANDROID_LOG_DEBUG, "crosspl", "%s %s", __PRETTY_FUNCTION__, cppClassName);
+//  const char* javaClassPath = GetJavaClassPath(cppClassName);
+//  if(javaClassPath == nullptr) {
+//    return 0;
+//  }
+//
+//  auto jobjectCrossBase = reinterpret_cast<jobject>(javaHandle);
+//  env->DeleteGlobalRef(jobjectCrossBase);
+//
+//  return 0;
+//}
+
+const char* CrossPLFactory::GetJavaClassPath(const char* cppClassName)
+{
+%GetJavaClassPath%
+
+  return nullptr;
+}
+
+bool CrossPLFactory::EndsWith(const char* data, const char* ending)
+{
+    if(data == nullptr
+    || ending == nullptr) {
+        return false;
+    }
+
+    size_t dataLen = std::strlen(data);
+    size_t endsLen = std::strlen(ending);
+    if(dataLen < endsLen) {
+        return false;
+    }
+
+    int ret = std::strcmp(data + (dataLen - endsLen), ending);
+    return (ret == 0);
+}
+
 
 /***********************************************/
 /***** class public function implement  ********/
@@ -99,7 +174,6 @@ int CrossPLFactory::destroyCppObject(const char* javaClassName, int64_t cppHandl
 /***********************************************/
 /***** class private function implement  *******/
 /***********************************************/
-
 
 } // namespace crosspl
 

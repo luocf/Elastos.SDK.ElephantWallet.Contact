@@ -15,13 +15,18 @@ public:
   static int OnLoad(JavaVM* jvm);
 
   /*** class function and variable ***/
-  static int64_t createCppObject(const char* javaClassName);
-  static int destroyCppObject(const char* javaClassName, int64_t cppHandle);
+  static int64_t CreateCppObject(const char* javaClassName);
+  static int DestroyCppObject(const char* javaClassName, int64_t cppHandle);
+
+//  static int64_t CreateJavaObject(const char* cppClassName, int64_t cppHandle);
+//  static int DestroyJavaObject(const char* cppClassName, int64_t cppHandle);
 
 private:
   /*** type define ***/
 
   /*** static function and variable ***/
+  static const char* GetJavaClassPath(const char* cppClassName);
+  static bool EndsWith(const char* data, const char* ending);
 
   /*** class function and variable ***/
 

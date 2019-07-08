@@ -49,7 +49,7 @@ public:
 
     template <class T>
     static jobject SafeCastCrossObject(JNIEnv* jenv, const T* data) {
-      uint64_t ret = data->getPlatformHandle();
+      int64_t ret = data->getPlatformHandle();
       return reinterpret_cast<jobject>(ret);
     }
 

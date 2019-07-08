@@ -37,18 +37,6 @@ open class CrossBase
         }
 
         @CrossInterface
-        private fun CreatePlatformObject(className: String, nativeHandle: Long): CrossBase {
-            val clazz = Class.forName(className).kotlin as KClass<out CrossBase>
-            val platformObject = clazz.primaryConstructor!!.call(nativeHandle)
-            return platformObject
-        }
-
-        @CrossInterface
-        private fun DestroyPlatformObject(className: String, platformObject: CrossBase) {
-            platformObject.finalize()
-        }
-
-        @CrossInterface
         private external fun CreateNativeObject(className: String): Long
 
         @CrossInterface
