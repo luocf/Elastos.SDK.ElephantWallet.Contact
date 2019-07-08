@@ -1,0 +1,57 @@
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion rootProject.ext.compileSdkVersion
+
+    defaultConfig {
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+
+        versionCode rootProject.ext.versionCode
+        versionName rootProject.ext.versionName
+
+        externalNativeBuild {
+            cmake {
+                arguments "-DCFG_DEPENS_DIR=${rootProject.rootDir}/../build/sysroot/Android/"
+            }
+        }
+        ndk {
+            abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86_64'
+        }
+
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    externalNativeBuild {
+        cmake {
+            path "src/main/cpp/CMakeLists.txt"
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar', '*.aar'])
+}
+
+clean {
+    delete '.externalNativeBuild'
+}
+
+//task buildDepends(type: Exec) {
+//    commandLine 'bash', '-c', "export ANDROID_NDK_HOME=${android.ndkDirectory}; ${rootProject.projectDir}/scripts/build-depends.sh"
+//}
+//preBuild.dependsOn buildDepends
+
+//project.ext {
+//    extractNativeRunBefore = [ 'externalNativeBuild${buildType}' ]
+//    extractNativeRunAfter = null
+//    extractNativeMap = [ "Elastos.SDK.Wallet.C" : "$projectDir/libs/Elastos.SDK.Wallet.C.aar" ]
+//}
+//apply from: "$projectDir/task-extract-native.gradle"
+
