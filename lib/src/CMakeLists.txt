@@ -26,8 +26,7 @@ file( GLOB Elastos.SDK.Contact-HEADERS "../include/*.hpp" )
 
 add_library(Elastos.SDK.Contact)
 target_sources(Elastos.SDK.Contact PRIVATE
-    ${Elastos.SDK.Contact-SOURCES}
-    $<TARGET_OBJECTS:httpclient>)
+    ${Elastos.SDK.Contact-SOURCES})
 target_include_directories(Elastos.SDK.Contact PRIVATE
     "${pkg-Elastos.SDK.Keypair.C_INCLUDE_DIRS}"
     "${pkg-curl_INCLUDE_DIRS}"
@@ -42,6 +41,7 @@ target_link_libraries(Elastos.SDK.Contact PUBLIC
     crypto
     ssl
     common
+    httpclient
     platform)
 #target_link_libraries(Elastos.SDK.Contact PRIVATE
     #thirdparty)

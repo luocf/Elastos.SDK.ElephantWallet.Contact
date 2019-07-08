@@ -1,22 +1,25 @@
-cmake_minimum_required(VERSION 3.4.1)
+cmake_minimum_required(VERSION 3.10)
+
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_C_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 find_package(PkgConfig REQUIRED)
-set(ENV{PKG_CONFIG_PATH}  "${CFG_DEPENS_DIR}/${ANDROID_ABI}/lib/pkgconfig")
+set(ENV{PKG_CONFIG_PATH}  "${CFG_DEPENDS_DIR}/${ANDROID_ABI}/lib/pkgconfig")
+include_directories("${CFG_DEPENDS_DIR}/${ANDROID_ABI}/include")
 
-#add_subdirectory(../../../../../lib/common ../../../../../build/android)
-#add_subdirectory(../../../../../lib/src  ../../../../../build/android)
-#add_subdirectory(../../../../../lib/platform ../../../../../build/android)
-#add_subdirectory(../../../../../lib/wrapper/httpclient ../../../../../build/android)
-#add_subdirectory(../../../../../lib/wrapper/json ../../../../../build/android)
 add_subdirectory(base/common)
+add_subdirectory(base/src)
+add_subdirectory(base/platform)
+add_subdirectory(base/wrapper/httpclient)
+add_subdirectory(base/wrapper/json)
 
-add_library( Elastos.SDK.Contact SHARED
+add_library( Elastos.SDK.Contact.Jni SHARED
         BlockChainNode_jni.cpp )
 
-file(GLOB Elastos.SDK.Contact.C-AllLibs "${CFG_ELASTOS_SDK_WALLET_C_DIR}/jni/${ANDROID_ABI}/*")
-file(GLOB Elastos.SDK.Contact.C-Libraries ${Elastos.SDK.Contact.C-AllLibs} ${Elastos.SDK.Contact.C-AllLibs}) ## fix library order issue
-file(GLOB Elastos.SDK.Contact.C-HeaderDir "${CFG_ELASTOS_SDK_WALLET_C_DIR}/jni/include")
-target_include_directories( Elastos.SDK.Contact PRIVATE "${Elastos.SDK.Contact.C-HeaderDir}" )
-target_link_libraries( Elastos.SDK.Contact "${Elastos.SDK.Contact.C-Libraries}" )
+#target_include_directories( Elastos.SDK.Contact.Jni PRIVATE "${Elastos.SDK.Contact.Jni.C-HeaderDir}" )
+target_link_libraries( Elastos.SDK.Contact.Jni Elastos.SDK.Contact )
 
-target_link_libraries( Elastos.SDK.Contact log )
+target_link_libraries( Elastos.SDK.Contact.Jni log )

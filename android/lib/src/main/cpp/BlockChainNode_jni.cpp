@@ -1,6 +1,6 @@
 #include <jni.h>
 #include <string>
-//#include "BlockChainNode.h"
+#include "Elastos.SDK.Contact.hpp"
 
 //using namespace elastos;
 

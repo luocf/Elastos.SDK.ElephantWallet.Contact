@@ -4,7 +4,11 @@ message(STATUS "openssl library path: ${pkg-openssl_STATIC_LDFLAGS}")
 
 file( GLOB COMMON_SOURCES "*.cpp" )
 
-add_library(common OBJECT ${COMMON_SOURCES})
+if(${CMAKE_VERSION} VERSION_LESS "3.12")
+    add_library(common STATIC ${COMMON_SOURCES})
+else()
+    add_library(common OBJECT ${COMMON_SOURCES})
+endif()
 target_include_directories(common PUBLIC
     "${CMAKE_CURRENT_SOURCE_DIR}"
     "${pkg-openssl_INCLUDE_DIRS}")
