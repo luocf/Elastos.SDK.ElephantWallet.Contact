@@ -1,0 +1,70 @@
+#include "%ClassName%.proxy.hpp"
+
+#include <CrossPLUtils.hpp>
+#include <%ClassName%.hpp>
+
+namespace crosspl {
+namespace proxy {
+/***********************************************/
+/***** static variables initialize *************/
+/***********************************************/
+
+
+/***********************************************/
+/***** static function implement ***************/
+/***********************************************/
+int %ClassName%::RegisterNativeMethods(JNIEnv* jenv)
+{
+  const JNINativeMethod methodArray[] = {
+%JniNativeMethods%
+  };
+  int methodArraySize = sizeof(methodArray)/sizeof(*methodArray);
+
+  jclass jclazz = jenv->FindClass("%JniJavaClass%");
+  if(jclazz == nullptr) {
+    return -1;
+  }
+  int ret = jenv->RegisterNatives(jclazz, methodArray, methodArraySize);
+  if(ret < 0) {
+    return ret;
+  }
+
+
+  const JNINativeMethod kotlinStaticMethodArray[] = {
+%KotlinStaticNativeMethods%
+  };
+  int kotlinStaticMethodArraySize = sizeof(kotlinStaticMethodArray)/sizeof(*kotlinStaticMethodArray);
+
+  if(kotlinStaticMethodArraySize > 0) {
+    jclazz = jenv->FindClass("%JniJavaClass%$Companion");
+    if(jclazz == nullptr) {
+      return -1;
+    }
+    ret = jenv->RegisterNatives(jclazz, kotlinStaticMethodArray, kotlinStaticMethodArraySize);
+    if(ret < 0) {
+      return ret;
+    }
+  }
+
+  return 0;
+}
+
+%PlatformFunction%
+
+%NativeFunction%
+
+/***********************************************/
+/***** class public function implement  ********/
+/***********************************************/
+
+/***********************************************/
+/***** class protected function implement  *****/
+/***********************************************/
+
+
+/***********************************************/
+/***** class private function implement  *******/
+/***********************************************/
+
+} // namespace proxy
+} // namespace crosspl

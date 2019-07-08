@@ -1,0 +1,40 @@
+#ifndef _CROSSPL_PROXY_%ClassName%_HPP_
+#define _CROSSPL_PROXY_%ClassName%_HPP_
+
+#include <jni.h>
+#include <functional>
+#include <string>
+#include <sstream>
+#include <vector>
+
+#include <experimental-span.hpp>
+
+class CrossBase;
+
+namespace crosspl {
+namespace proxy {
+
+class %ClassName% {
+public:
+  /*** type define ***/
+
+  /*** static function and variable ***/
+  static int RegisterNativeMethods(JNIEnv* jenv);
+%PlatformFunction%
+
+  /*** class function and variable ***/
+
+private:
+  /*** type define ***/
+
+  /*** static function and variable ***/
+%NativeFunction%
+
+  /*** class function and variable ***/
+
+}; // class %ClassName%
+
+} // namespace proxy
+} // namespace crosspl
+
+#endif /* _CROSSPL_PROXY_%ClassName%_HPP_ */

@@ -1,0 +1,31 @@
+#ifndef _CROSSPL_CrossPLFactory_HPP_
+#define _CROSSPL_CrossPLFactory_HPP_
+
+#include <jni.h>
+
+#include <experimental-span.hpp>
+
+namespace crosspl {
+
+class CrossPLFactory {
+public:
+  /*** type define ***/
+
+  /*** static function and variable ***/
+  static int OnLoad(JavaVM* jvm);
+
+  /*** class function and variable ***/
+  static int64_t createCppObject(const char* javaClassName);
+  static int destroyCppObject(const char* javaClassName, int64_t cppHandle);
+
+private:
+  /*** type define ***/
+
+  /*** static function and variable ***/
+
+  /*** class function and variable ***/
+
+}; // class CrossPLFactory
+} // namespace crosspl
+
+#endif /* _CROSSPL_CrossPLFactory_HPP_ */

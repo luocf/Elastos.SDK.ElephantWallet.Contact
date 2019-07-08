@@ -1,0 +1,14 @@
+file( GLOB CROSSPL_PROXY_HEADERS
+%CrossProxyHeaders%
+)
+
+file( GLOB CROSSPL_PROXY_SOURCES
+%CrossProxySources%
+)
+
+set( CMAKE_INCLUDE_CURRENT_DIR TRUE ) # dir which includes this CMakeFiles.txt
+include_directories(
+%CrossProxyHeaderDir%
+)
+
+

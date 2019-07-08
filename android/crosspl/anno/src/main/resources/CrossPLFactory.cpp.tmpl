@@ -1,0 +1,121 @@
+#include "CrossPLFactory.hpp"
+
+#include <android/log.h>
+#include <cstring>
+#include <dlfcn.h>
+#include <CrossPLUtils.hpp>
+
+%IncludeProxyHpp%
+
+namespace crosspl {
+
+/***********************************************/
+/***** static variables initialize *************/
+/***********************************************/
+
+
+/***********************************************/
+/***** static function implement ***************/
+/***********************************************/
+int CrossPLFactory::OnLoad(JavaVM* jvm)
+{
+  __android_log_print(ANDROID_LOG_DEBUG, "crosspl", "%s", __PRETTY_FUNCTION__);
+  int ret = 0;
+
+  CrossPLUtils::SetJavaVM(jvm);
+  auto jenv = CrossPLUtils::SafeGetEnv();
+
+%RegisterNativeMethods%
+  if(ret == 0) {
+    __android_log_print(ANDROID_LOG_DEBUG, "crosspl", "JNI_OnLoad(): Success to register jni methods.");
+  } else {
+    __android_log_print(ANDROID_LOG_ERROR, "crosspl", "JNI_OnLoad(): Failed to register jni methods.");
+    __android_log_print(ANDROID_LOG_ERROR, "crosspl", "JNI_OnLoad(): dlerror=%s", dlerror());
+    throw std::runtime_error("Failed to register jni methods.");
+  }
+
+  void* dylib  = dlopen("libcrosspl.so", RTLD_LAZY | RTLD_GLOBAL);
+  if(dylib) {
+    __android_log_print(ANDROID_LOG_DEBUG, "crosspl", "JNI_OnLoad(): Success to load library crosspl.");
+  } else {
+    __android_log_print(ANDROID_LOG_ERROR, "crosspl", "JNI_OnLoad(): Failed to load library crosspl.");
+    __android_log_print(ANDROID_LOG_ERROR, "crosspl", "JNI_OnLoad(): dlerror=%s", dlerror());
+    throw std::runtime_error("Failed to load library crosspl.");
+  }
+
+  const char* methodName = "RegCreateCppObjFunc";
+  auto methodRegCreateCppObjFunc = (void(*)(int64_t(*)(const char*)))dlsym(dylib, methodName);
+  if(methodRegCreateCppObjFunc == nullptr) {
+    __android_log_print(ANDROID_LOG_ERROR, "crosspl", "JNI_OnLoad(): Failed to load function %s.", methodName);
+    __android_log_print(ANDROID_LOG_ERROR, "crosspl", "JNI_OnLoad(): dlerror=%s", dlerror());
+    throw std::runtime_error("Failed to load function.");
+  }
+  methodRegCreateCppObjFunc(crosspl::CrossPLFactory::createCppObject);
+
+  methodName = "RegDestroyCppObjFunc";
+  auto methodRegDestroyCppObjFunc = (void(*)(int(*)(const char*,int64_t)))dlsym(dylib, methodName);
+  if(methodRegDestroyCppObjFunc == nullptr) {
+    __android_log_print(ANDROID_LOG_ERROR, "crosspl", "JNI_OnLoad(): Failed to load function %s.", methodName);
+    __android_log_print(ANDROID_LOG_ERROR, "crosspl", "JNI_OnLoad(): dlerror=%s", dlerror());
+    throw std::runtime_error("Failed to load function.");
+  }
+  methodRegDestroyCppObjFunc(crosspl::CrossPLFactory::destroyCppObject);
+
+  return 0;
+}
+
+int64_t CrossPLFactory::createCppObject(const char* javaClassName)
+{
+  __android_log_print(ANDROID_LOG_DEBUG, "crosspl", "%s %s", __PRETTY_FUNCTION__, javaClassName);
+  void* ptr = nullptr;
+
+%CreateCppObject%
+
+  auto cppHandle = reinterpret_cast<int64_t>(ptr);
+  return cppHandle;
+}
+
+int CrossPLFactory::destroyCppObject(const char* javaClassName, int64_t cppHandle)
+{
+  if(cppHandle == 0) {
+    return -1;
+  }
+  __android_log_print(ANDROID_LOG_DEBUG, "crosspl", "%s %s", __PRETTY_FUNCTION__, javaClassName);
+
+%DestroyCppObject%
+
+  return -1;
+}
+
+/***********************************************/
+/***** class public function implement  ********/
+/***********************************************/
+
+/***********************************************/
+/***** class protected function implement  *****/
+/***********************************************/
+
+
+/***********************************************/
+/***** class private function implement  *******/
+/***********************************************/
+
+
+} // namespace crosspl
+
+extern "C"
+JNIEXPORT jint JNICALL
+%JniOnLoad%(JavaVM *jvm, void *jreserved)
+{
+  __android_log_print(ANDROID_LOG_INFO, "crosspl", "JNI_OnLoad() in CrossPL is running.");
+
+  int ret = crosspl::CrossPLFactory::OnLoad(jvm);
+  if(ret != 0) {
+    __android_log_print(ANDROID_LOG_ERROR, "crosspl", "JNI_OnLoad(): Failed to .");
+    return JNI_ERR;
+  }
+
+  __android_log_print(ANDROID_LOG_INFO, "crosspl", "JNI_OnLoad() register CrossPL native methods.");
+
+  return JNI_VERSION_1_6;
+}
