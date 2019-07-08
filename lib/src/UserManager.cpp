@@ -320,26 +320,64 @@ int UserManager::syncDidChainData()
 
 int UserManager::monitorDidChainData()
 {
-    throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
-    // std::string did;
-    // int ret = sectyMgr->getDid(did);
-    // if(ret < 0) {
-    //     return ret;
-    // }
+    auto sectyMgr = SAFE_GET_PTR(mSecurityManager);
 
-    // auto callback = std::function<void(int errcode, const std::string& keyPath, const std::string& result)>;
+    std::string did;
+    int ret = sectyMgr->getDid(did);
+    if(ret < 0) {
+        return ret;
+    }
 
-    // auto bcClient = BlkChnClient::GetInstance();
-    // int ret = bcClient->getDidPropHistoryPath(did, "CarrierID")
+    auto callback = [&](int errcode, const std::string& keyPath, const std::string& result) {
+        Log::I(Log::TAG, "UserManager::monitorDidChainData() ecode=%d, path=%s, result=%s", errcode, keyPath.c_str(), result.c_str());
+        
+        auto humanInfo = std::make_shared<HumanInfo>();
+        std::vector<std::string> values;
 
-    //     int ret = appendMoniter(const std::string& path,
-    //                             const MonitorCallback& callback);
-    // //     if(ret < 0) {
-    // //         return ret;
-    // //     }
+        Json jsonPropArray = Json::parse(result);
+        for (const auto& it : jsonPropArray) {
+            values.push_back(it["value"]);
+        }
 
-    // //     return 0;
+        for(const auto& it: values) {
+            HumanInfo::CarrierInfo carrierInfo;
+            ret = humanInfo->deserialize(it, carrierInfo);
+            if(ret < 0) {
+                Log::W(Log::TAG, "UserManager::monitorDidChainData() Failed to sync CarrierId: %s", it.c_str());
+                continue; // ignore error
+            }
 
+            ret = humanInfo->addCarrierInfo(carrierInfo, HumanInfo::Status::Offline);
+            if(ret < 0) {
+                if(ret == ErrCode::IgnoreMergeOldInfo) {
+                    Log::I(Log::TAG, "UserManager::monitorDidChainData() Ignore to sync CarrierId: %s", it.c_str());
+                } else {
+                    Log::W(Log::TAG, "UserManager::monitorDidChainData() Failed to sync carrier info. CarrierId: %s", it.c_str());
+                }
+                continue; // ignore error
+            }
+
+            Log::I(Log::TAG, "BlkChnClient::downloadHumanInfo() Success to sync CarrierId: %s", it.c_str());
+        }
+
+        ret = mUserInfo->mergeHumanInfo(*humanInfo, HumanInfo::Status::Offline);
+    };
+
+    auto bcClient = BlkChnClient::GetInstance();
+
+    std::string keyPath;
+    ret = bcClient->getDidPropHistoryPath(did, "CarrierID", keyPath);
+    if (ret < 0) {
+        return ret;
+    }
+
+    Log::I(Log::TAG, "UserManager::monitorDidChainData() keyPath=%s", keyPath.c_str());
+    ret = bcClient->appendMoniter(keyPath, callback);
+    if (ret < 0) {
+        return ret;
+    }
+
+    return 0;
 }
 
 // int UserManager::uploadUserInfo()

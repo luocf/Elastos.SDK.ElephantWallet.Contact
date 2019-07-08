@@ -321,6 +321,65 @@ int FriendManager::syncDidChainData()
     return 0;
 }
 
+int FriendManager::monitorDidChainData()
+{
+    auto sectyMgr = SAFE_GET_PTR(mSecurityManager);
+
+    std::string did;
+    int ret = sectyMgr->getDid(did);
+    if(ret < 0) {
+        return ret;
+    }
+
+    auto callback = [&](int errcode, const std::string& keyPath, const std::string& result) {
+        Log::I(Log::TAG, "UserManager::monitorDidChainData() ecode=%d, path=%s, result=%s", errcode, keyPath.c_str(), result.c_str());
+
+        std::vector<std::string> values;
+
+        Json jsonPropArray = Json::parse(result);
+        for(const auto& it: jsonPropArray) {
+            values.push_back(it["value"]);
+        }
+
+        std::vector<std::string> friendCodeArray;
+        for(const auto& it: values) {
+            Json jsonInfo = Json::parse(it);
+            std::string friendCode = jsonInfo["FriendCode"];
+            int status = jsonInfo["Status"];
+            long updateTime = jsonInfo["UpdateTime"];
+
+            // TODO remove friend filt
+            friendCodeArray.push_back(friendCode);
+        }
+
+        for(const auto& it: friendCodeArray) {
+            int ret = tryAddFriend(it, "", false);
+            if(ret < 0) {
+                Log::W(Log::TAG, "FriendManager::syncFriendInfo() Failed to add friend code: %s.", did.c_str());
+                continue;
+            }
+
+            Log::I(Log::TAG, "FriendManager::syncFriendInfo() Add friend did: %s.", did.c_str());
+        }
+    };
+
+    auto bcClient = BlkChnClient::GetInstance();
+
+    std::string keyPath;
+    ret = bcClient->getDidPropHistoryPath(did, "FriendID", keyPath);
+    if (ret < 0) {
+        return ret;
+    }
+
+    Log::I(Log::TAG, "FriendManager::monitorDidChainData() keyPath=%s", keyPath.c_str());
+    ret = bcClient->appendMoniter(keyPath, callback);
+    if (ret < 0) {
+        return ret;
+    }
+
+    return 0;
+}
+
 // int FriendManager::uploadFriendInfo()
 // {
 //     auto bcClient = BlkChnClient::GetInstance();
