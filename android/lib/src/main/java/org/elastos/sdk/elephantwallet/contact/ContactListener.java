@@ -7,7 +7,11 @@ import org.elastos.tools.crosspl.annotation.CrossClass;
 import org.elastos.tools.crosspl.annotation.CrossInterface;
 
 @CrossClass
-abstract class ContactListener  extends CrossBase {
+abstract class ContactListener extends CrossBase {
+    public ContactListener() {
+        super(ContactListener.class.getName(), 0);
+    }
+
     public abstract void onRequest(Request request);
     public abstract void onEvent(Event event);
     public abstract void onError(int errCode, String errStr);

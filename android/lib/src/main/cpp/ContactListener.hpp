@@ -20,10 +20,10 @@ public:
     /*** static function and variable ***/
 
     /*** class function and variable ***/
-    explicit ContactListener() = default;
-    virtual ~ContactListener() = default;
+    explicit ContactListener();
+    virtual ~ContactListener();
 
-    std::span<int8_t> onCallback(int type, const std::span<int8_t>& args);
+    std::shared_ptr<std::span<int8_t>> onCallback(int type, const std::span<int8_t>& args);
 
 private:
     /*** type define ***/

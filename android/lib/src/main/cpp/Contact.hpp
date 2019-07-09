@@ -11,7 +11,9 @@
 #ifndef _ELASTOS_SDK_JNI_CONTACT_HPP_
 #define _ELASTOS_SDK_JNI_CONTACT_HPP_
 
-class CrossBase;
+#include <CrossBase.hpp>
+#include <ContactListener.hpp>
+#include "ContactListener.hpp"
 
 class Contact {
 public:
@@ -20,10 +22,10 @@ public:
     /*** static function and variable ***/
 
     /*** class function and variable ***/
-    explicit Contact() = default;
-    virtual ~Contact() = default;
+    explicit Contact();
+    virtual ~Contact();
 
-//    void setListener();
+    void setListener(CrossBase* listener);
 
 private:
     /*** type define ***/
@@ -31,6 +33,8 @@ private:
     /*** static function and variable ***/
 
     /*** class function and variable ***/
+    ContactListener* mListener;
+
 }; // class Contact
 
 #endif /* _ELASTOS_SDK_JNI_CONTACT_HPP_ */

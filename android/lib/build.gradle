@@ -8,8 +8,11 @@ android {
         externalNativeBuild {
             cmake {
                 arguments "-DCROSSPL_CMAKEFILE='${buildDir}/tmp/CrossPL/crosspl.cmake'"
-                arguments "-DCROSSPL_LIB_DIR=" + project(':crosspl:lib').projectDir + "/src/main/cpp" // TODO: not perfect
                 arguments "-DCFG_DEPENDS_DIR=${rootProject.rootDir}/../build/sysroot/Android/"
+
+                // TODO: not perfect
+                arguments "-DCROSSPL_LIB_HEADERDIR=" + project(':crosspl:lib').projectDir + "/src/main/cpp"
+                arguments "-DCROSSPL_LIB_LIBS=" + project(':crosspl:lib').buildDir + "/intermediates/intermediate-jars/debug/jni/armeabi-v7a/libcrosspl.so"
             }
         }
     }
@@ -21,3 +24,12 @@ dependencies {
 
     api(project(":crosspl:lib"))
 }
+
+//project.ext {
+//    extractNativeRunBefore = [ 'externalNativeBuild${buildType}' ]
+//    extractNativeRunAfter = [ ':crosspl:lib:bundle${buildType}' ]
+//    extractNativeMap = [
+//            'crosspl-lib': project(':crosspl:lib').buildDir.absolutePath + '/outputs/aar/v8-engine-${buildTypeLowerCase}.aar',
+//    ]
+//}
+//apply from: "$rootProject.ext.gradleStoreDir/task-extract-native.gradle"

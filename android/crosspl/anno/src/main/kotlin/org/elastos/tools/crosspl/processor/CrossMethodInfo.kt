@@ -139,13 +139,14 @@ class CrossMethodInfo {
                         "unbindPlatformHandle" -> {
                             var ret = ""
                             ret += "${CrossTmplUtils.TabSpace}auto var$idx = 0;\n"
-                            ret += "${CrossTmplUtils.TabSpace}auto crossBase = CrossPLUtils::SafeCastCrossObject<::$cppClassName>(jenv, jvar$idx);\n"
-                            ret += "${CrossTmplUtils.TabSpace}jobject jCrossBase = CrossPLUtils::SafeCastCrossObject<::$cppClassName>(jenv, crossBase);\n"
+                            ret += "${CrossTmplUtils.TabSpace}auto crossBase = CrossPLUtils::SafeCastCrossObject<::CrossBase>(jenv, jvar$idx);\n"
+                            ret += "${CrossTmplUtils.TabSpace}jobject jCrossBase = CrossPLUtils::SafeCastCrossObject<::CrossBase>(jenv, crossBase);\n"
                             ret += "${CrossTmplUtils.TabSpace}CrossPLUtils::DelGlobalObject(jenv, jCrossBase);\n"
 
                             ret
                         }
-                        else -> "${CrossTmplUtils.TabSpace}auto var$idx = CrossPLUtils::SafeCastCrossObject<$cppClassName>(jenv, jvar$idx);\n"
+//                        else -> "${CrossTmplUtils.TabSpace}auto var$idx = CrossPLUtils::SafeCastCrossObject<$cppClassName>(jenv, jvar$idx);\n"
+                        else -> "${CrossTmplUtils.TabSpace}auto var$idx = CrossPLUtils::SafeCastCrossObject<::CrossBase>(jenv, jvar$idx);\n"
                     }
                 }
                 else                                -> "${CrossTmplUtils.TabSpace}auto var$idx = CrossPLUtils::SafeCast$type(jenv, jvar$idx);\n"
@@ -179,7 +180,8 @@ class CrossMethodInfo {
                     || methodName == "unbindPlatformHandle") {
                         "var$idx, "
                     } else {
-                        "var$idx.get(), "
+//                        "var$idx.get(), "
+                        "var$idx, "
                     }
                 }
                 else                             -> "var$idx.get(), "

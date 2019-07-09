@@ -8,11 +8,14 @@ import kotlin.reflect.full.primaryConstructor
 
 @CrossClass
 open class CrossBase
-    protected constructor(private var nativeHandle: Long = 0) {
+    protected constructor(
+            className: String,
+            var nativeHandle: Long = 0)
+{
 
     init {
         if(nativeHandle == 0L) {
-            nativeHandle = CreateNativeObject(this.javaClass.name)
+            nativeHandle = CreateNativeObject(className)
         }
         Log.i(Utils.TAG, "construct " + toString())
         if(nativeHandle == 0L) {

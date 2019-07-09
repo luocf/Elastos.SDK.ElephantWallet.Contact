@@ -14,7 +14,9 @@ class ContactFactory extends CrossBase {
     @CrossInterface
     public static native int SetLocalDataDir(String dir);
 
-    protected ContactFactory() { }
+    protected ContactFactory() {
+        super(ContactFactory.class.getName(), 0);
+    }
 
     static {
         System.loadLibrary("Elastos.SDK.Contact.Jni");

@@ -82,10 +82,9 @@ int CrossPLFactory::OnLoad(JavaVM* jvm)
   return 0;
 }
 
-int64_t CrossPLFactory::CreateCppObject(const char* javaClassName)
-{
+int64_t CrossPLFactory::CreateCppObject(const char* javaClassName) {
   __android_log_print(ANDROID_LOG_DEBUG, "crosspl", "%s %s", __PRETTY_FUNCTION__, javaClassName);
-  void* ptr = nullptr;
+  void *ptr = nullptr;
 
 %CreateCppObject%
 

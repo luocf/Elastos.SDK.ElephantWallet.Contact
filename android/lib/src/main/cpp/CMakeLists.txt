@@ -24,7 +24,8 @@ add_library(Elastos.SDK.Contact.Jni SHARED
             ${CROSSPL_PROXY_SOURCES}
             ${Elastos.SDK.Contact.Jni-SOURCES} )
 
-target_include_directories( Elastos.SDK.Contact.Jni PRIVATE "${CROSSPL_LIB_DIR}" )
+target_include_directories( Elastos.SDK.Contact.Jni PRIVATE "${CROSSPL_LIB_HEADERDIR}" )
 target_link_libraries( Elastos.SDK.Contact.Jni Elastos.SDK.Contact )
+target_link_libraries( Elastos.SDK.Contact.Jni ${CROSSPL_LIB_LIBS} )
 
 target_link_libraries( Elastos.SDK.Contact.Jni log )

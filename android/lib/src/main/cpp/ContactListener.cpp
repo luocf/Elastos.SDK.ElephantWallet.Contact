@@ -8,6 +8,7 @@
 #include <ContactListener.hpp>
 
 #include <ContactListener.proxy.hpp>
+#include "Log.hpp"
 
 /***********************************************/
 /***** static variables initialize *************/
@@ -17,17 +18,26 @@
 /***** static function implement ***************/
 /***********************************************/
 
-std::span<int8_t> onCallback(int type, const std::span<int8_t>& args)
-{
-    int64_t platformHandle = getPlatformHandle();
-    auto ret = crosspl::proxy::onCallback(platformHandle, type, args);
-
-    return ret.relaese();
-}
-
 /***********************************************/
 /***** class public function implement  ********/
 /***********************************************/
+ContactListener::ContactListener()
+{
+    Log::I(Log::TAG, "%s", __PRETTY_FUNCTION__);
+}
+ContactListener::~ContactListener()
+{
+    Log::I(Log::TAG, "%s", __PRETTY_FUNCTION__);
+}
+
+std::shared_ptr<std::span<int8_t>> ContactListener::onCallback(int type, const std::span<int8_t>& args)
+{
+    int64_t platformHandle = getPlatformHandle();
+    auto ret = crosspl::proxy::ContactListener::onCallback(platformHandle, type, &args);
+
+    return ret;
+}
+
 
 /***********************************************/
 /***** class protected function implement  *****/

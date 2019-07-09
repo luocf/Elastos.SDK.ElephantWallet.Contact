@@ -22,8 +22,8 @@ public:
     static int SetLocalDataDir(const std::string& dir);
 
     /*** class function and variable ***/
-    explicit ContactFactory() = default;
-    virtual ~ContactFactory() = default;
+    explicit ContactFactory();
+    virtual ~ContactFactory();
 
 private:
     /*** type define ***/
