@@ -42,7 +42,7 @@ public:
     static int SafeCopyByteBufferToJava(JNIEnv* jenv, jobject jcopyTo, const std::vector<int8_t>* data);
 
     static int64_t AddGlobalObject(JNIEnv* jenv, jobject jobj);
-    static jobject UnsafeCastGlobalObject(int64_t obj);
+    static std::shared_ptr<_jobject> SafeCastGlobalObject(JNIEnv* jenv, int64_t obj);
     static void DelGlobalObject(JNIEnv* jenv, jobject jobj);
 
     template <class T>

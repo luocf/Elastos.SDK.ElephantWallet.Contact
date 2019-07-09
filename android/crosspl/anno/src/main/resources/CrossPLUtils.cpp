@@ -447,15 +447,31 @@ int64_t CrossPLUtils::AddGlobalObject(JNIEnv* jenv, jobject jobj)
     return obj;
 }
 
-jobject CrossPLUtils::UnsafeCastGlobalObject(int64_t obj)
+std::shared_ptr<_jobject> CrossPLUtils::SafeCastGlobalObject(JNIEnv* jenv, int64_t obj)
 {
+    std::shared_ptr<_jobject> ret;
+    std::thread::id threadId = std::this_thread::get_id();
+
     if(obj == 0) {
         return nullptr;
     }
 
-    auto jobj = reinterpret_cast<jobject>(obj);
+    auto creater = [=]() -> jobject {
+        auto jobj = reinterpret_cast<jobject>(obj);
 
-    return jobj;
+        EnsureRunOnThread(threadId);
+        jobject ptr = jenv->NewLocalRef(jobj);
+        return ptr;
+    };
+
+    auto deleter = [=](jobject ptr) -> void {
+        EnsureRunOnThread(threadId);
+        jenv->DeleteLocalRef(ptr);
+    };
+
+    ret = std::shared_ptr<_jobject>(creater(), deleter);
+
+    return ret;
 }
 
 void CrossPLUtils::DelGlobalObject(JNIEnv* jenv, jobject jobj)

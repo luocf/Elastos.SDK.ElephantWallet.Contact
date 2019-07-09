@@ -119,6 +119,7 @@ void CrossBase::DestroyPlatformObject(const char* cppClassName, int64_t platform
 
 CrossBase::CrossBase()
 //    : CrossBase(0)
+    : mPlatformHandle(0)
 {
 }
 

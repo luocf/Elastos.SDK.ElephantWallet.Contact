@@ -37,6 +37,8 @@ void Contact::setListener(CrossBase* listener)
 
     mListener = dynamic_cast<ContactListener*>(listener);
 
+    mListener->onCallback(0, nullptr);
+
     return;
 }
 

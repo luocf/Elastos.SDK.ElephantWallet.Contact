@@ -30,10 +30,10 @@ ContactListener::~ContactListener()
     Log::I(Log::TAG, "%s", __PRETTY_FUNCTION__);
 }
 
-std::shared_ptr<std::span<int8_t>> ContactListener::onCallback(int type, const std::span<int8_t>& args)
+std::shared_ptr<std::span<int8_t>> ContactListener::onCallback(int type, const std::span<int8_t>* args)
 {
     int64_t platformHandle = getPlatformHandle();
-    auto ret = crosspl::proxy::ContactListener::onCallback(platformHandle, type, &args);
+    auto ret = crosspl::proxy::ContactListener::onCallback(platformHandle, type, args);
 
     return ret;
 }

@@ -226,7 +226,7 @@ class CrossMethodInfo {
         var suffixContent = ""
 
         prefixContent += "${CrossTmplUtils.TabSpace}auto jenv = CrossPLUtils::SafeGetEnv();\n"
-        prefixContent += "${CrossTmplUtils.TabSpace}auto jobj = reinterpret_cast<jobject>(platformHandle);\n"
+        prefixContent += "${CrossTmplUtils.TabSpace}auto jobj = CrossPLUtils::SafeCastGlobalObject(jenv.get(), platformHandle);\n"
         for(idx in paramsType.indices) {
             var type = paramsType[idx]
             val isPrimitiveType = type.isPrimitiveType()
@@ -269,7 +269,7 @@ class CrossMethodInfo {
         val objContent =
             when {
                 isStatic -> "jclazz"
-                else     -> "jobj"
+                else     -> "jobj.get()"
             }
         funcContent += "Method"
 

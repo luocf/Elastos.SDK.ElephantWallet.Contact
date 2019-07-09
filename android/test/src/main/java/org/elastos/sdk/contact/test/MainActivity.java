@@ -39,6 +39,10 @@ public class MainActivity extends Activity {
             String message = testDelContact();
             txtMsg.setText(message);
         });
+        findViewById(R.id.btn_test_dellistener).setOnClickListener((view) -> {
+            String message = testDelListener();
+            txtMsg.setText(message);
+        });
     }
 
 
@@ -59,7 +63,11 @@ public class MainActivity extends Activity {
             return "Failed to call Contact.Factory.Create()";
         }
 
-        Contact.Listener listener = new Contact.Listener() {
+        if(mContactListener != null) {
+            mContactListener.unbind(); // to release native ref
+            mContactListener = null;
+        }
+        mContactListener = new Contact.Listener() {
             @Override
             public void onRequest(Request request) {
 
@@ -75,7 +83,8 @@ public class MainActivity extends Activity {
 
             }
         };
-        mContact.setListener(listener);
+        mContactListener.bind(); // MUST call listener.unbind() by manual to release it
+        mContact.setListener(mContactListener);
 
         return "Success to create a contact instance.";
     }
@@ -90,9 +99,21 @@ public class MainActivity extends Activity {
         }
 
         mContact = null;
-        System.gc();
+        System.gc(); // to test memory release
         return "Success to delete a contact instance.";
     }
 
+    private String testDelListener() {
+        if(mContactListener == null) {
+            return "Contact is null.";
+        }
+
+        mContactListener.unbind(); // to release native ref
+        mContactListener = null;
+        System.gc(); // to test memory release
+        return "Success to delete a contact listener instance.";
+    }
+
     Contact mContact;
+    Contact.Listener mContactListener;
 }
