@@ -11,9 +11,9 @@
 #ifndef _ELASTOS_SDK_JNI_CONTACT_LISTENER_HPP_
 #define _ELASTOS_SDK_JNI_CONTACT_LISTENER_HPP_
 
-class CrossBase;
+#include <CrossBase.hpp>
 
-class ContactListener {
+class ContactListener : public CrossBase {
 public:
     /*** type define ***/
 
@@ -22,6 +22,8 @@ public:
     /*** class function and variable ***/
     explicit ContactListener() = default;
     virtual ~ContactListener() = default;
+
+    std::span<int8_t> onCallback(int type, const std::span<int8_t>& args);
 
 private:
     /*** type define ***/

@@ -10,27 +10,23 @@ import org.elastos.tools.crosspl.annotation.CrossInterface;
 public final class Contact extends CrossBase {
     static final String TAG = "elastos";
 
-    @CrossClass
-    public static final class Factory extends CrossBase {
-        @CrossInterface
-        public static native void SetLogLevel(int level);
-
-        @CrossInterface
-        public static native int SetLocalDataDir(String dir);
-
+    public static final class Factory extends ContactFactory {
         public static Contact Create() {
             return new Contact();
         }
 
         private Factory() { }
-
-        static {
-            System.loadLibrary("Elastos.SDK.Contact.Jni");
-        }
     } // class Factory
 
-//    @CrossInterface
-//    public native void setListener();
+    public abstract static class Listener extends ContactListener {
+    } // class Factory
+
+    @CrossInterface
+    public native void setListener(Listener listener);
 
     private Contact() { }
+
+    static {
+        System.loadLibrary("Elastos.SDK.Contact.Jni");
+    }
 }

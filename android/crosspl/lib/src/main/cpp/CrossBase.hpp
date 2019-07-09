@@ -16,7 +16,7 @@ void RegDestroyJavaObjFunc(int(*func)(const char*,int64_t));
 class CrossBase {
 public:
   /*** type define ***/
-  explicit CrossBase(int64_t platformHandle);
+//  explicit CrossBase(int64_t platformHandle);
   explicit CrossBase();
   virtual ~CrossBase();
 
@@ -28,6 +28,9 @@ public:
   static void DestroyPlatformObject(const char* cppClassName, int64_t platformHandle);
 
   /*** class function and variable ***/
+  void bindPlatformHandle(int64_t platformHandle);
+  void unbindPlatformHandle(int64_t platformHandle);
+
   int64_t getPlatformHandle() const;
 
 private:

@@ -25,10 +25,25 @@ open class CrossBase
         Log.i(Utils.TAG, "deconstruct " + toString())
     }
 
+    fun bind() {
+        bindPlatformHandle(this)
+    }
+
+    fun unbind() {
+        unbindPlatformHandle(this)
+    }
+
     @CrossInterface
     override fun toString(): String {
         return "${this.javaClass.name}{nativeHandle=${nativeHandle}}"
     }
+
+    @CrossInterface
+    private external fun bindPlatformHandle(thisObj: CrossBase)
+
+    @CrossInterface
+    private external fun unbindPlatformHandle(thisObj: CrossBase)
+
 
 //    private var nativeHandle: Long = 0
     private companion object {
@@ -41,7 +56,11 @@ open class CrossBase
 
         @CrossInterface
         private external fun DestroyNativeObject(className: String, nativeHandle: Long)
+
+//        @CrossInterface
+//        private external fun BindPlatformObject(obj: CrossBase): Long
+//
+//        @CrossInterface
+//        private external fun UnbindPlatformObject(obj: CrossBase): Long
     }
-
-
 }

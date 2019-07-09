@@ -291,6 +291,7 @@ std::shared_ptr<_jobject> CrossPLUtils::SafeCastFunction(JNIEnv* jenv, const std
 //        jobject jobj = jenv->NewObject(jclazz, jconstructor);
 
  //       return jobj;
+          return nullptr;
     };
     auto deleter = [=](jobject ptr) -> void {
         EnsureRunOnThread(threadId);
@@ -434,6 +435,38 @@ int CrossPLUtils::SafeCopyByteBufferToJava(JNIEnv* jenv, jobject jcopyTo, const 
     return 0;
 }
 
+int64_t CrossPLUtils::AddGlobalObject(JNIEnv* jenv, jobject jobj)
+{
+    if(jobj == nullptr) {
+        return 0;
+    }
+
+    auto jGlobalObj = jenv->NewGlobalRef(jobj);
+    auto obj = reinterpret_cast<int64_t>(jGlobalObj);
+
+    return obj;
+}
+
+jobject CrossPLUtils::UnsafeCastGlobalObject(int64_t obj)
+{
+    if(obj == 0) {
+        return nullptr;
+    }
+
+    auto jobj = reinterpret_cast<jobject>(obj);
+
+    return jobj;
+}
+
+void CrossPLUtils::DelGlobalObject(JNIEnv* jenv, jobject jobj)
+{
+    if(jobj == nullptr) {
+        return;
+    }
+
+    jenv->DeleteGlobalRef(jobj);
+}
+
 void* CrossPLUtils::SafeCastCrossObject(JNIEnv* jenv, jobject jdata)
 {
     jclass jclazz = jenv->GetObjectClass(jdata);
@@ -444,7 +477,6 @@ void* CrossPLUtils::SafeCastCrossObject(JNIEnv* jenv, jobject jdata)
 
     return reinterpret_cast<void*>(jnativeHandle);
 }
-
 
 /***********************************************/
 /***** class public function implement  ********/

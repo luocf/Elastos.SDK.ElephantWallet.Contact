@@ -5,9 +5,9 @@
 //  Copyright © 2016 mengxk. All rights reserved.
 //
 
-#include <Contact_Factory.hpp>
+#include <ContactListener.hpp>
 
-#include <Elastos.SDK.Contact.hpp>
+#include <ContactListener.proxy.hpp>
 
 /***********************************************/
 /***** static variables initialize *************/
@@ -17,18 +17,12 @@
 /***** static function implement ***************/
 /***********************************************/
 
-void Contact_Factory::SetLogLevel(int level)
+std::span<int8_t> onCallback(int type, const std::span<int8_t>& args)
 {
-    elastos::Contact::Factory::SetLogLevel(level);
+    int64_t platformHandle = getPlatformHandle();
+    auto ret = crosspl::proxy::onCallback(platformHandle, type, args);
 
-    return;
-}
-
-int Contact_Factory::SetLocalDataDir(const std::string& dir)
-{
-    int ret = elastos::Contact::Factory::SetLocalDataDir(dir);
-
-    return ret;
+    return ret.relaese();
 }
 
 /***********************************************/

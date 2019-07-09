@@ -21,7 +21,7 @@
 /***********************************************/
 static auto gCreateCppObjFuncList = std::list<int64_t(*)(const char*)>();
 static auto gDestroyCppObjFuncList = std::list<int(*)(const char*,int64_t)>();
-static auto gCreateJavaObjFuncList = std::list<int64_t(*)(const char*, int64_t)>();
+static auto gCreateJavaObjFuncList = std::list<int64_t(*)(const char*,int64_t)>();
 static auto gDestroyJavaObjFuncList = std::list<int(*)(const char*,int64_t)>();
 
 void RegCreateCppObjFunc(int64_t(*func)(const char*))
@@ -109,29 +109,39 @@ void CrossBase::DestroyPlatformObject(const char* cppClassName, int64_t platform
 /***********************************************/
 /***** class public function implement  ********/
 /***********************************************/
-CrossBase::CrossBase(int64_t platformHandle)
-    : mPlatformHandle(platformHandle)
-{
-    if(platformHandle == 0) {
-        platformHandle = CreatePlatformObject(typeid(this).name(), reinterpret_cast<int64_t>(this));
-    }
-}
+//CrossBase::CrossBase(int64_t platformHandle)
+//    : mPlatformHandle(platformHandle)
+//{
+//    if(platformHandle == 0) {
+//        platformHandle = CreatePlatformObject(typeid(this).name(), reinterpret_cast<int64_t>(this));
+//    }
+//}
 
 CrossBase::CrossBase()
-    : CrossBase(0)
+//    : CrossBase(0)
 {
 }
 
 CrossBase::~CrossBase()
 {
-    if(mPlatformHandle == 0) {
-        for(auto func: gCreateJavaObjFuncList) {
-            int ret = func(typeid(this).name(), mPlatformHandle);
-            if(ret == 0) { // success
-                break;
-            }
-        }
-    }
+//    if(mPlatformHandle == 0) {
+//        for(auto func: gDestroyJavaObjFuncList) {
+//            int ret = func(typeid(this).name(), mPlatformHandle);
+//            if(ret == 0) { // success
+//                break;
+//            }
+//        }
+//    }
+}
+
+void CrossBase::bindPlatformHandle(int64_t platformHandle)
+{
+    mPlatformHandle = platformHandle;
+}
+
+void CrossBase::unbindPlatformHandle(int64_t platformHandle)
+{
+    mPlatformHandle = 0;
 }
 
 int64_t CrossBase::getPlatformHandle() const

@@ -128,8 +128,26 @@ class CrossMethodInfo {
             var type = paramsType[idx]
             val isPrimitiveType = type.isPrimitiveType()
             prefixContent += when {
-                isPrimitiveType                     -> "${CrossTmplUtils.TabSpace}${type.toCppString()} var$idx = jvar$idx;\n"
-                type == CrossVariableType.CROSSBASE -> "${CrossTmplUtils.TabSpace}auto var$idx = CrossPLUtils::SafeCastCrossObject<$cppClassName>(jenv, jvar$idx);\n"
+                isPrimitiveType                     -> {
+                    "${CrossTmplUtils.TabSpace}${type.toCppString()} var$idx = jvar$idx;\n"
+                }
+                type == CrossVariableType.CROSSBASE -> {
+                    when (methodName) {
+                        "bindPlatformHandle" -> {
+                            "${CrossTmplUtils.TabSpace}auto var$idx = CrossPLUtils::AddGlobalObject(jenv, jvar$idx);\n"
+                        }
+                        "unbindPlatformHandle" -> {
+                            var ret = ""
+                            ret += "${CrossTmplUtils.TabSpace}auto var$idx = 0;\n"
+                            ret += "${CrossTmplUtils.TabSpace}auto crossBase = CrossPLUtils::SafeCastCrossObject<::$cppClassName>(jenv, jvar$idx);\n"
+                            ret += "${CrossTmplUtils.TabSpace}jobject jCrossBase = CrossPLUtils::SafeCastCrossObject<::$cppClassName>(jenv, crossBase);\n"
+                            ret += "${CrossTmplUtils.TabSpace}CrossPLUtils::DelGlobalObject(jenv, jCrossBase);\n"
+
+                            ret
+                        }
+                        else -> "${CrossTmplUtils.TabSpace}auto var$idx = CrossPLUtils::SafeCastCrossObject<$cppClassName>(jenv, jvar$idx);\n"
+                    }
+                }
                 else                                -> "${CrossTmplUtils.TabSpace}auto var$idx = CrossPLUtils::SafeCast$type(jenv, jvar$idx);\n"
             }
 
@@ -156,6 +174,14 @@ class CrossMethodInfo {
             argusContent += when {
                 isPrimitiveType                  -> "var$idx, "
                 type == CrossVariableType.STRING -> "var$idx.get(), "
+                type == CrossVariableType.CROSSBASE -> {
+                    if(methodName == "bindPlatformHandle"
+                    || methodName == "unbindPlatformHandle") {
+                        "var$idx, "
+                    } else {
+                        "var$idx.get(), "
+                    }
+                }
                 else                             -> "var$idx.get(), "
             }
         }

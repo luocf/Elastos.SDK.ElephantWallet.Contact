@@ -8,6 +8,7 @@ android {
         externalNativeBuild {
             cmake {
                 arguments "-DCROSSPL_CMAKEFILE='${buildDir}/tmp/CrossPL/crosspl.cmake'"
+                arguments "-DCROSSPL_LIB_DIR=" + project(':crosspl:lib').projectDir + "/src/main/cpp" // TODO: not perfect
                 arguments "-DCFG_DEPENDS_DIR=${rootProject.rootDir}/../build/sysroot/Android/"
             }
         }

@@ -1,5 +1,5 @@
 /**
- * @file	Contact_Factory.hpp
+ * @file	ContactFactory.hpp
  * @brief	Contact
  * @details
  *
@@ -13,7 +13,7 @@
 
 #include <string>
 
-class Contact_Factory {
+class ContactFactory {
 public:
     /*** type define ***/
 
@@ -22,8 +22,8 @@ public:
     static int SetLocalDataDir(const std::string& dir);
 
     /*** class function and variable ***/
-    explicit Contact_Factory() = default;
-    virtual ~Contact_Factory() = default;
+    explicit ContactFactory() = default;
+    virtual ~ContactFactory() = default;
 
 private:
     /*** type define ***/

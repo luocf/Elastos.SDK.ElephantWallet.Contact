@@ -27,10 +27,17 @@ public class MainActivity extends Activity {
             txtMsg.setText(message);
         });
         findViewById(R.id.btn_test_newcontact).setOnClickListener((view) -> {
-            testNewContact();
+            String message = testNewContact();
+            txtMsg.setText(message);
         });
         findViewById(R.id.btn_test_start).setOnClickListener((view) -> {
-            testStart();
+            String message = testStart();
+            txtMsg.setText(message);
+        });
+
+        findViewById(R.id.btn_test_delcontact).setOnClickListener((view) -> {
+            String message = testDelContact();
+            txtMsg.setText(message);
         });
     }
 
@@ -40,18 +47,52 @@ public class MainActivity extends Activity {
 
         int ret = Contact.Factory.SetLocalDataDir(this.getCacheDir().getAbsolutePath());
         if(ret < 0) {
-            throw new RuntimeException("Failed to call Contact.Factory.SetLocalDataDir() ret=" + ret);
+            return "Failed to call Contact.Factory.SetLocalDataDir() ret=" + ret;
         }
 
-        return null;
+        return "Success to preset factory.";
     }
 
     private String testNewContact() {
-        return null;
+        mContact = Contact.Factory.Create();
+        if(mContact == null) {
+            return "Failed to call Contact.Factory.Create()";
+        }
+
+        Contact.Listener listener = new Contact.Listener() {
+            @Override
+            public void onRequest(Request request) {
+
+            }
+
+            @Override
+            public void onEvent(Event event) {
+
+            }
+
+            @Override
+            public void onError(int errCode, String errStr) {
+
+            }
+        };
+        mContact.setListener(listener);
+
+        return "Success to create a contact instance.";
     }
 
     private String testStart() {
         return null;
     }
 
+    private String testDelContact() {
+        if(mContact == null) {
+            return "Contact is null.";
+        }
+
+        mContact = null;
+        System.gc();
+        return "Success to delete a contact instance.";
+    }
+
+    Contact mContact;
 }
