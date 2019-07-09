@@ -27,7 +27,7 @@ public:
         explicit UserListener() = default;
         virtual ~UserListener() = default;
 
-        virtual int onSigninDevicesOverflow(const std::weak_ptr<HumanInfo> userInfo, int capacity) = 0;
+//        virtual int onSigninDevicesOverflow(const std::weak_ptr<HumanInfo> userInfo, int capacity) = 0;
     };
 
     /*** static function and variable ***/

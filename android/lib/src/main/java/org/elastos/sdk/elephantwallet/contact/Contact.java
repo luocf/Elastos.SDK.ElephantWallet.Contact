@@ -25,12 +25,15 @@ public final class Contact extends CrossBase {
         setListener((CrossBase)listener);
     }
 
-    private Contact() {
-        super(Contact.class.getName(), 0);
-    }
+    @CrossInterface
+    public native int start();
 
     @CrossInterface
     private native void setListener(CrossBase listener);
+
+    private Contact() {
+        super(Contact.class.getName(), 0);
+    }
 
     static {
         System.loadLibrary("Elastos.SDK.Contact.Jni");

@@ -11,9 +11,9 @@
 #ifndef _ELASTOS_SDK_JNI_CONTACT_HPP_
 #define _ELASTOS_SDK_JNI_CONTACT_HPP_
 
-#include <CrossBase.hpp>
 #include <ContactListener.hpp>
-#include "ContactListener.hpp"
+#include <CrossBase.hpp>
+#include <Elastos.SDK.Contact.hpp>
 
 class Contact {
 public:
@@ -26,6 +26,8 @@ public:
     virtual ~Contact();
 
     void setListener(CrossBase* listener);
+    int start();
+
 
 private:
     /*** type define ***/
@@ -33,6 +35,7 @@ private:
     /*** static function and variable ***/
 
     /*** class function and variable ***/
+    std::shared_ptr<elastos::Contact> mContactImpl;
     ContactListener* mListener;
 
 }; // class Contact

@@ -7,7 +7,6 @@
 
 #include <Contact.hpp>
 
-#include <Elastos.SDK.Contact.hpp>
 #include "Log.hpp"
 
 /***********************************************/
@@ -23,8 +22,11 @@
 /***** class public function implement  ********/
 /***********************************************/
 Contact::Contact()
+        : mContactImpl()
 {
     Log::I(Log::TAG, "%s", __PRETTY_FUNCTION__);
+
+    mContactImpl = elastos::Contact::Factory::Create();
 }
 Contact::~Contact()
 {
@@ -36,10 +38,22 @@ void Contact::setListener(CrossBase* listener)
     Log::I(Log::TAG, "%s", __PRETTY_FUNCTION__);
 
     mListener = dynamic_cast<ContactListener*>(listener);
+//    mListener->onCallback(0, nullptr);
 
-    mListener->onCallback(0, nullptr);
+    auto sectyListener = mListener->getSecurityListener();
+    auto msgListener = mListener->getMessageListener();
+    mContactImpl->setListener(sectyListener, nullptr, nullptr, msgListener);
 
     return;
+}
+
+int Contact::start()
+{
+    Log::I(Log::TAG, "%s", __PRETTY_FUNCTION__);
+
+    int ret = mContactImpl->start();
+
+    return ret;
 }
 
 /***********************************************/

@@ -21,13 +21,14 @@ public class MainActivity extends Activity {
         super.onStart();
 
         TextView txtMsg = findViewById(R.id.txt_message);
+        TextView txtCallbackMsg = findViewById(R.id.txt_callback);
 
         findViewById(R.id.btn_test_preset).setOnClickListener((view) -> {
             String message = testPreset();
             txtMsg.setText(message);
         });
         findViewById(R.id.btn_test_newcontact).setOnClickListener((view) -> {
-            String message = testNewContact();
+            String message = testNewContact(txtCallbackMsg);
             txtMsg.setText(message);
         });
         findViewById(R.id.btn_test_start).setOnClickListener((view) -> {
@@ -57,7 +58,7 @@ public class MainActivity extends Activity {
         return "Success to preset factory.";
     }
 
-    private String testNewContact() {
+    private String testNewContact(TextView txtCbMsg) {
         mContact = Contact.Factory.Create();
         if(mContact == null) {
             return "Failed to call Contact.Factory.Create()";
@@ -70,17 +71,27 @@ public class MainActivity extends Activity {
         mContactListener = new Contact.Listener() {
             @Override
             public void onRequest(Request request) {
-
+                String msg = txtCbMsg.getText().toString();
+                msg += "\n";
+                msg += request;
+                txtCbMsg.setText(msg);
             }
 
             @Override
             public void onEvent(Event event) {
-
+                String msg = txtCbMsg.getText().toString();
+                msg += "\n";
+                msg += event;
+                txtCbMsg.setText(msg);
             }
 
             @Override
             public void onError(int errCode, String errStr) {
-
+                String msg = txtCbMsg.getText().toString();
+                msg += "\nonError";
+                msg += " errCode=" + errCode;
+                msg += " errStr=" + errStr;
+                txtCbMsg.setText(msg);
             }
         };
         mContactListener.bind(); // MUST call listener.unbind() by manual to release it
@@ -90,7 +101,16 @@ public class MainActivity extends Activity {
     }
 
     private String testStart() {
-        return null;
+        if(mContact == null) {
+            return "Contact is null.";
+        }
+
+        int ret = mContact.start();
+        if(ret < 0) {
+            return "Failed to start contact instance. ret=" + ret;
+        }
+
+        return "Success to start contact instance.";
     }
 
     private String testDelContact() {

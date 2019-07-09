@@ -27,8 +27,8 @@ public:
         explicit FriendListener() = default;
         virtual ~FriendListener() = default;
 
-        virtual int onFriendRequest(FriendInfo friendInfo, std::string message) = 0;
-        virtual void onStatusChanged(FriendInfo friendInfo, uint64_t status) = 0;
+//        virtual int onFriendRequest(FriendInfo friendInfo, std::string message) = 0;
+//        virtual void onStatusChanged(FriendInfo friendInfo, uint64_t status) = 0;
     };
 
     /*** static function and variable ***/
