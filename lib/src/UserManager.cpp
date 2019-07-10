@@ -297,15 +297,14 @@ int UserManager::syncDidChainData()
 
     auto humanInfo = std::make_shared<HumanInfo>();
     ret = bcClient->downloadHumanInfo(did, humanInfo);
-    if(ret < 0) {
+    if(ret >= 0) {
+        ret = mUserInfo->mergeHumanInfo(*humanInfo, HumanInfo::Status::Offline);
+        if(ret < 0) {
+            Log::W(Log::TAG, "UserManager::syncDidChainData() Failed to merge HumanInfo.");
+            return ret;
+        }
+    } else {
         Log::W(Log::TAG, "UserManager::syncDidChainData() Failed to download HumanInfo.");
-        return ret;
-    }
-
-    ret = mUserInfo->mergeHumanInfo(*humanInfo, HumanInfo::Status::Offline);
-    if(ret < 0) {
-        Log::W(Log::TAG, "UserManager::syncDidChainData() Failed to merge HumanInfo.");
-        return ret;
     }
 
     std::string pubKey;

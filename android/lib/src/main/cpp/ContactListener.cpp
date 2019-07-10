@@ -28,6 +28,10 @@ ContactListener::ContactListener()
         , mMessageListener()
 {
     Log::I(Log::TAG, "%s", __PRETTY_FUNCTION__);
+
+    mSecurityListener = makeSecurityListener();
+    mMessageListener = makeMessageListener();
+
     std::lock_guard<std::recursive_mutex> lock(sContactListenerMutex);
     sContactListenerInstance = this;
 }
@@ -72,8 +76,7 @@ std::shared_ptr<elastos::SecurityManager::SecurityListener> ContactListener::mak
                 return "";
             }
 
-            int type = CallbackType::PackRequest(CallbackType::PublicKey);
-            auto ret = sContactListenerInstance->onCallback(type, nullptr);
+            auto ret = sContactListenerInstance->onRequest(RequestType::PublicKey, nullptr, nullptr);
             if(ret.get() == nullptr) {
                 return "";
             }
@@ -83,14 +86,41 @@ std::shared_ptr<elastos::SecurityManager::SecurityListener> ContactListener::mak
         }
 
         std::vector<uint8_t> onEncryptData(const std::string& pubKey, const std::vector<uint8_t>& src) override {
+            std::lock_guard<std::recursive_mutex> lock(sContactListenerMutex);
             Log::I(Log::TAG, "%s", __PRETTY_FUNCTION__);
+            if(sContactListenerInstance == nullptr) {
+                Log::W(Log::TAG, "ContactListener has been destroyed.");
+                return std::vector<uint8_t>();
+            }
+
+            const std::span<uint8_t> data(const_cast<uint8_t*>(src.data()), src.size());
+            auto ret = sContactListenerInstance->onRequest(RequestType::EncryptData, pubKey.c_str(), &data);
+            if(ret.get() == nullptr) {
+                return std::vector<uint8_t>();
+            }
+
+            std::vector<uint8_t> cryptoData(ret->data(), ret->data() + ret->size());
+            return cryptoData;
         }
         std::vector<uint8_t> onDecryptData(const std::vector<uint8_t>& src) override {
             Log::I(Log::TAG, "%s", __PRETTY_FUNCTION__);
         }
 
         std::string onRequestDidPropAppId() override {
+            std::lock_guard<std::recursive_mutex> lock(sContactListenerMutex);
             Log::I(Log::TAG, "%s", __PRETTY_FUNCTION__);
+            if(sContactListenerInstance == nullptr) {
+                Log::W(Log::TAG, "ContactListener has been destroyed.");
+                return "";
+            }
+
+            auto ret = sContactListenerInstance->onRequest(RequestType::DidPropAppId, nullptr, nullptr);
+            if(ret.get() == nullptr) {
+                return "";
+            }
+
+            std::string appId(reinterpret_cast<char*>(ret->data()));
+            return appId;
         }
 
         std::string onRequestDidAgentAuthHeader() override {
@@ -144,12 +174,24 @@ std::shared_ptr<elastos::MessageManager::MessageListener> ContactListener::makeM
     return std::make_shared<MessageListener>();
 }
 
-std::shared_ptr<std::span<int8_t>> ContactListener::onCallback(int type, const std::span<int8_t>* args)
+std::shared_ptr<std::span<uint8_t>> ContactListener::onRequest(RequestType type,
+                                                              const char* pubKey,
+                                                              const std::span<uint8_t>* data)
 {
     int64_t platformHandle = getPlatformHandle();
-    auto ret = crosspl::proxy::ContactListener::onCallback(platformHandle, type, args);
+    auto ret = crosspl::proxy::ContactListener::onRequest(platformHandle,
+                                                          static_cast<int>(type), pubKey, data);
 
     return ret;
 }
 
-
+void ContactListener::onEvent(EventType type,
+                              const std::string& humanCode,
+                              ContactChannel channelType,
+                              const std::span<uint8_t>* data)
+{
+    int64_t platformHandle = getPlatformHandle();
+    crosspl::proxy::ContactListener::onEvent(platformHandle,
+                                             static_cast<int>(type), humanCode.c_str(), static_cast<int>(channelType), data);
+    return;
+}

@@ -1,16 +1,10 @@
 cmake_minimum_required(VERSION 3.4.1)
 
-include( "${CROSSPL_CMAKEFILE}" )
+include( "${CROSSPL_DIR}/crosspl.cmake" )
 
-add_library( crosspl SHARED )
-target_sources( crosspl PRIVATE
-        ${CROSSPL_PROXY_SOURCES}
-        utils/Log.cpp
-        utils/JniUtils.cpp
-        CrossBase.cpp
-        CrossRunnable.cpp
-)
-target_include_directories( crosspl PRIVATE )
+file( GLOB crosspl-SOURCES "*.cpp" "utils/*.cpp")
+add_library( crosspl SHARED
+        ${crosspl-SOURCES}
+        ${CROSSPL_PROXY_SOURCES})
 
-find_library( log-lib log )
 target_link_libraries( crosspl log )

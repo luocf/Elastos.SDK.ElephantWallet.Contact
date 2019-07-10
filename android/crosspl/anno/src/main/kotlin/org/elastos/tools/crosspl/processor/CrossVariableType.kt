@@ -77,10 +77,10 @@ enum class CrossVariableType {
         )
         val classTypeMap = mapOf(
             STRING       to "const char*",
-            BYTEARRAY    to "std::span<int8_t>",
+            BYTEARRAY    to "std::span<uint8_t>",
             FUNCTION     to "std::function<void()>",
             STRINGBUFFER to "std::stringstream",
-            BYTEBUFFER   to "std::vector<int8_t>",
+            BYTEBUFFER   to "std::vector<uint8_t>",
             CROSSBASE    to "::CrossBase"
         )
 

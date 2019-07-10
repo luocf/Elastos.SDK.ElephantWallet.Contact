@@ -1,6 +1,5 @@
 package org.elastos.sdk.elephantwallet.contact;
 
-import android.telecom.Call;
 import android.util.Log;
 
 import org.elastos.tools.crosspl.CrossBase;
@@ -9,41 +8,15 @@ import org.elastos.tools.crosspl.annotation.CrossInterface;
 
 @CrossClass
 abstract class ContactListener extends CrossBase {
-    public interface CallbackType {
-        static final int Error = -10000;
-        static final int Request = 20000;
-        static final int Event = 30000;
-
-        // request
-        static final int PublicKey = 1;
-        static final int EncryptData = 2;
-        static final int DecryptData = 3;
-        static final int DidPropAppId = 4;
-        static final int DidAgentAuthHeader = 5;
-        static final int SignData = 6;
-
-
-        static final int StatusChanged = 10;
-        static final int ReceivedMessage = 11;
-        static final int SentMessage = 12;
-        static final int FriendRequest = 13;
-        static final int FriendStatusChanged = 14;
-
-        static int GetKind(int type) {
-            if(type < 0) {
-                return Error;
-            } else if (type > Request && type < Event ) {
-                return Request;
-            } else if (type > Event ) {
-                return Event;
-            } else {
-                throw new RuntimeException("Unknown ContactListener.CallbackType: " + type);
-            }
+    public class RequestArgs extends org.elastos.sdk.elephantwallet.contact.internal.RequestArgs {
+        private RequestArgs(int type, String pubKey, byte[] data) {
+            super(type, pubKey, data);
         }
+    }
 
-        static int UnpackType(int type) {
-            int kind = GetKind(type);
-            return (type - kind);
+    public class EventArgs extends org.elastos.sdk.elephantwallet.contact.internal.EventArgs {
+        public EventArgs(int type, String humanCode, int channelType, byte[] data) {
+            super(type, humanCode, channelType, data);
         }
     }
 
@@ -51,58 +24,29 @@ abstract class ContactListener extends CrossBase {
         super(ContactListener.class.getName(), 0);
     }
 
-    public abstract void onRequest(Request request);
-    public abstract void onEvent(Event event);
+    public abstract byte[] onRequest(RequestArgs request);
+    public abstract void onEvent(EventArgs event);
     public abstract void onError(int errCode, String errStr);
 
-    public class Request {
-
-    }
-
-    public class Event {
-
-    }
-
-    public static <T extends Request> T Cast(Request request) {
-        T ret = null;
-        if (request.getClass() == ret.getClass()) {
-            return (T) request;
-        }
-
-        throw new RuntimeException("Failed to cast request to " + ret.getClass());
-    }
-
-    public static <T extends Event> T Cast(Event request) {
-        T ret = null;
-        if (request.getClass() == ret.getClass()) {
-            return (T) request;
-        }
-
-        throw new RuntimeException("Failed to cast event to " + ret.getClass());
-    }
-
-
     @CrossInterface
-    private byte[] onCallback(int type, byte[] args) {
-        Log.i(Contact.TAG, "ContactListener.onCallback()");
+    private byte[] onRequest(int reqType, String pubKey, byte[] data) {
+        Log.i(Contact.TAG, "ContactListener.onRequest()");
 
-        byte[] ret = null;
+        RequestArgs args = new RequestArgs(reqType, pubKey, data);
+        byte[] ret = onRequest(args);
 
-        int kind = CallbackType.GetKind(type);
-        switch (kind) {
-            case CallbackType.Error:
-                int code = CallbackType.UnpackType(type);
-                onError(code, null);
-                break;
-            case CallbackType.Request:
-                onRequest(null);
-                break;
-            case CallbackType.Event:
-                onEvent(null);
-                break;
-        }
+        String aaa = new String(ret);
 
         return ret;
+    }
+
+    @CrossInterface
+    private void onEvent(int eventType, String humanCode, int channelType, byte[] data) {
+        Log.i(Contact.TAG, "ContactListener.onRequest()");
+
+        EventArgs args = new EventArgs(eventType, humanCode, channelType, data);
+        onEvent(args);
+        return;
     }
 
     static {

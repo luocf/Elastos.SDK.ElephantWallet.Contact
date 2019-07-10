@@ -2,9 +2,13 @@ package org.elastos.sdk.contact.test;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Process;
 import android.widget.TextView;
 
 import org.elastos.sdk.elephantwallet.contact.Contact;
+import org.elastos.sdk.elephantwallet.contact.internal.RequestArgs;
 
 public class MainActivity extends Activity {
     private static final String TAG = "ContactTest";
@@ -14,6 +18,13 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        Process.killProcess(Process.myPid());
     }
 
     @Override
@@ -70,19 +81,24 @@ public class MainActivity extends Activity {
         }
         mContactListener = new Contact.Listener() {
             @Override
-            public void onRequest(Request request) {
+            public byte[] onRequest(RequestArgs request) {
+                byte[] ret = processRequest(request);
+
                 String msg = txtCbMsg.getText().toString();
                 msg += "\n";
-                msg += request;
-                txtCbMsg.setText(msg);
+                msg += "onRequest(): req=" + request + "\n";
+                msg += "onRequest(): resp=" + ret + "\n";
+                appendCbMessage(txtCbMsg, msg);
+
+                return ret;
             }
 
             @Override
-            public void onEvent(Event event) {
+            public void onEvent(EventArgs event) {
                 String msg = txtCbMsg.getText().toString();
                 msg += "\n";
                 msg += event;
-                txtCbMsg.setText(msg);
+                appendCbMessage(txtCbMsg, msg);
             }
 
             @Override
@@ -91,7 +107,7 @@ public class MainActivity extends Activity {
                 msg += "\nonError";
                 msg += " errCode=" + errCode;
                 msg += " errStr=" + errStr;
-                txtCbMsg.setText(msg);
+                appendCbMessage(txtCbMsg, msg);
             }
         };
         mContactListener.bind(); // MUST call listener.unbind() by manual to release it
@@ -105,10 +121,13 @@ public class MainActivity extends Activity {
             return "Contact is null.";
         }
 
-        int ret = mContact.start();
-        if(ret < 0) {
-            return "Failed to start contact instance. ret=" + ret;
-        }
+        mThread = new Thread(() -> {
+            int ret = mContact.start();
+        });
+        mThread.start();
+//        if(ret < 0) {
+//            return "Failed to start contact instance. ret=" + ret;
+//        }
 
         return "Success to start contact instance.";
     }
@@ -134,6 +153,54 @@ public class MainActivity extends Activity {
         return "Success to delete a contact listener instance.";
     }
 
+    private byte[] processRequest(RequestArgs request) {
+        byte[] response = null;
+
+        switch (request.type) {
+            case PublicKey:
+                response = mSecret.publicKey.getBytes();
+                break;
+            case EncryptData:
+                break;
+            case DecryptData:
+                break;
+            case DidPropAppId:
+                String appId = "DC92DEC59082610D1D4698F42965381EBBC4EF7DBDA08E4B3894D530608A64AAA65BB82A170FBE16F04B2AF7B25D88350F86F58A7C1F55CC29993B4C4C29E405";
+                response = appId.getBytes();
+                break;
+            case DidAgentAuthHeader:
+                break;
+            case SignData:
+                break;
+        }
+
+
+        return response;
+    }
+
+    private void appendCbMessage(TextView txtCbMsg, String msg) {
+        Handler handler = new Handler(Looper.getMainLooper());
+        handler.post(() -> {
+            txtCbMsg.setText(msg);
+        });
+    }
+
+    class Secret {
+        Secret(String pubKey, String privKey) {
+           this.publicKey = pubKey;
+           this.privateKey = privKey;
+        }
+
+        final String publicKey;
+        final String privateKey;
+    }
+
+    Secret mSecret = new Secret(
+            "02bc11aa5c35acda6f6f219b94742dd9a93c1d11c579f98f7e3da05ad910a48306",
+            "543c241f89bebb660157bcd12d7ab67cf69f3158240a808b22eb98447bad205d"
+    );
     Contact mContact;
     Contact.Listener mContactListener;
+
+    Thread mThread;
 }

@@ -7,7 +7,7 @@ android {
     defaultConfig {
         externalNativeBuild {
             cmake {
-                arguments "-DCROSSPL_CMAKEFILE='${buildDir}/tmp/CrossPL/crosspl.cmake'"
+                arguments "-DCROSSPL_DIR='${buildDir}/tmp/CrossPL/'"
             }
         }
     }

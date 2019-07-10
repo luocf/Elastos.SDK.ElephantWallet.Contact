@@ -1,4 +1,5 @@
 #include "CrossPLUtils.hpp"
+#include "../../../../../../../../../../Library/Android/sdk/ndk-bundle/toolchains/llvm/prebuilt/darwin-x86_64/sysroot/usr/include/jni.h"
 
 #include <android/log.h>
 #include <vector>
@@ -134,29 +135,31 @@ std::shared_ptr<std::function<void()>> CrossPLUtils::SafeCastFunction(JNIEnv* je
     return ret;
 }
 
-std::shared_ptr<std::span<int8_t>> CrossPLUtils::SafeCastByteArray(JNIEnv* jenv, jbyteArray jdata)
+std::shared_ptr<std::span<uint8_t>> CrossPLUtils::SafeCastByteArray(JNIEnv* jenv, jbyteArray jdata)
 {
-    std::shared_ptr<std::span<int8_t>> ret;
+    std::shared_ptr<std::span<uint8_t>> ret;
     std::thread::id threadId = std::this_thread::get_id();
 
     if(jdata == nullptr) {
         return ret; // nullptr
     }
 
-    auto creater = [=]() -> std::span<int8_t>* {
+    auto creater = [=]() -> std::span<uint8_t>* {
         EnsureRunOnThread(threadId);
+        auto jenv = SafeGetEnv();
         jbyte* arrayPtr = jenv->GetByteArrayElements(jdata, nullptr);
         jsize arrayLen = jenv->GetArrayLength(jdata);
-        auto retPtr = new std::span<int8_t>(arrayPtr, arrayLen);
+        auto retPtr = new std::span<uint8_t>(reinterpret_cast<uint8_t*>(arrayPtr), arrayLen);
         return retPtr;
     };
-    auto deleter = [=](std::span<int8_t>* ptr) -> void {
+    auto deleter = [=](std::span<uint8_t>* ptr) -> void {
         EnsureRunOnThread(threadId);
-        jenv->ReleaseByteArrayElements(jdata, ptr->data(), JNI_ABORT);
+        auto jenv = SafeGetEnv();
+        jenv->ReleaseByteArrayElements(jdata, reinterpret_cast<jbyte*>(ptr->data()), JNI_ABORT);
         delete ptr;
     };
 
-    ret = std::shared_ptr<std::span<int8_t>>(creater(), deleter);
+    ret = std::shared_ptr<std::span<uint8_t>>(creater(), deleter);
 
     return ret;
 }
@@ -192,33 +195,38 @@ std::shared_ptr<std::stringstream> CrossPLUtils::SafeCastStringBuffer(JNIEnv* je
     return ret;
 }
 
-std::shared_ptr<std::vector<int8_t>> CrossPLUtils::SafeCastByteBuffer(JNIEnv* jenv, jobject jdata)
+std::shared_ptr<std::vector<uint8_t>> CrossPLUtils::SafeCastByteBuffer(JNIEnv* jenv, jobject jdata)
 {
-    std::shared_ptr<std::vector<int8_t>> ret;
+    std::shared_ptr<std::vector<uint8_t>> ret;
     std::thread::id threadId = std::this_thread::get_id();
 
     if(jdata == nullptr) {
         return ret; // nullptr
     }
 
-    auto creater = [=]() -> std::vector<int8_t>* {
+    auto creater = [=]() -> std::vector<uint8_t>* {
         EnsureRunOnThread(threadId);
 
         jclass jclazz = jenv->GetObjectClass(jdata);
         jmethodID jmethod = jenv->GetMethodID(jclazz, "toByteArray", "()[B");
         jbyteArray jbytes = static_cast<jbyteArray>(jenv->CallObjectMethod(jdata, jmethod));
-
         auto bytes = SafeCastByteArray(jenv, jbytes);
-        auto retPtr = new std::vector<int8_t>(bytes->data(), bytes->data() + bytes->size());
+        if(bytes == nullptr) {
+            return nullptr;
+        }
 
-        return retPtr;
+        auto ret = new std::vector<uint8_t>(bytes->data(), bytes->data() + bytes->size());
+        return ret;
     };
-    auto deleter = [=](std::vector<int8_t>* ptr) -> void {
+    auto deleter = [=](std::vector<uint8_t>* ptr) -> void {
         EnsureRunOnThread(threadId);
+        if(ptr == nullptr) {
+            return;
+        }
         delete ptr;
     };
 
-    ret = std::shared_ptr<std::vector<int8_t>>(creater(), deleter);
+    ret = std::shared_ptr<std::vector<uint8_t>>(creater(), deleter);
 
     return ret;
 }
@@ -248,7 +256,7 @@ std::shared_ptr<_jstring> CrossPLUtils::SafeCastString(JNIEnv* jenv, const char*
     return ret;
 }
 
-std::shared_ptr<_jbyteArray> CrossPLUtils::SafeCastByteArray(JNIEnv* jenv, const std::span<int8_t>* data)
+std::shared_ptr<_jbyteArray> CrossPLUtils::SafeCastByteArray(JNIEnv* jenv, const std::span<uint8_t>* data)
 {
     std::shared_ptr<_jbyteArray> ret;
     std::thread::id threadId = std::this_thread::get_id();
@@ -260,7 +268,7 @@ std::shared_ptr<_jbyteArray> CrossPLUtils::SafeCastByteArray(JNIEnv* jenv, const
     auto creater = [=]() -> jbyteArray {
         EnsureRunOnThread(threadId);
         jbyteArray jdata = jenv->NewByteArray(data->size());
-        jenv->SetByteArrayRegion(jdata, 0, data->size(), data->data());
+        jenv->SetByteArrayRegion(jdata, 0, data->size(), reinterpret_cast<jbyte*>(data->data()));
         return jdata;
     };
     auto deleter = [=](jbyteArray ptr) -> void {
@@ -334,7 +342,7 @@ std::shared_ptr<_jobject> CrossPLUtils::SafeCastStringBuffer(JNIEnv* jenv, const
     return ret;
 }
 
-std::shared_ptr<_jobject> CrossPLUtils::SafeCastByteBuffer(JNIEnv* jenv, const std::vector<int8_t>* data)
+std::shared_ptr<_jobject> CrossPLUtils::SafeCastByteBuffer(JNIEnv* jenv, const std::vector<uint8_t>* data)
 {
     std::shared_ptr<_jobject> ret;
     std::thread::id threadId = std::this_thread::get_id();
@@ -378,15 +386,18 @@ int CrossPLUtils::SafeCopyStringBufferToCpp(JNIEnv* jenv, std::stringstream* cop
     return 0;
 }
 
-int CrossPLUtils::SafeCopyByteBufferToCpp(JNIEnv* jenv, std::vector<int8_t>* copyTo, jobject jdata)
+int CrossPLUtils::SafeCopyByteBufferToCpp(JNIEnv* jenv, std::vector<uint8_t>* copyTo, jobject jdata)
 {
     if(copyTo == nullptr) {
         return 0; // nullptr
     }
 
-    auto tmpPtr = SafeCastByteBuffer(jenv, jdata);
-    copyTo->swap(*tmpPtr);
+    copyTo->clear();
 
+    auto tmpPtr = SafeCastByteBuffer(jenv, jdata);
+    if(tmpPtr.get() != nullptr) {
+        copyTo->swap(*tmpPtr);
+    }
     return 0;
 }
 
@@ -412,7 +423,7 @@ int CrossPLUtils::SafeCopyStringBufferToJava(JNIEnv* jenv, jobject jcopyTo, cons
     return 0;
 }
 
-int CrossPLUtils::SafeCopyByteBufferToJava(JNIEnv* jenv, jobject jcopyTo, const std::vector<int8_t>* data)
+int CrossPLUtils::SafeCopyByteBufferToJava(JNIEnv* jenv, jobject jcopyTo, const std::vector<uint8_t>* data)
 {
     if(jcopyTo == nullptr) {
         return 0; // nullptr
@@ -427,7 +438,7 @@ int CrossPLUtils::SafeCopyByteBufferToJava(JNIEnv* jenv, jobject jcopyTo, const 
         return 0; // nullptr
     }
 
-    auto spanData = std::span<int8_t>(const_cast<int8_t*>(data->data()), data->size());
+    auto spanData = std::span<uint8_t>(const_cast<uint8_t*>(data->data()), data->size());
     auto jbytesPtr = SafeCastByteArray(jenv, &spanData);
     jmethodID jmethodWrite  = jenv->GetMethodID(jclazz, "write", "([B)V");
     jenv->CallVoidMethod(jcopyTo, jmethodWrite, jbytesPtr.get());

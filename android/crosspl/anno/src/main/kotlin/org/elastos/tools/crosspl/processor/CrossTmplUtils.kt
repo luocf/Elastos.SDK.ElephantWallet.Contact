@@ -14,6 +14,14 @@ class CrossTmplUtils {
         }
 
         fun WriteContent(file: File, content: String) {
+//            if(file.canRead()) {
+//                val oldContent = file.readText()
+//                if (oldContent == content) {
+//                    Log.w("Ignore to write " + file.absoluteFile)
+//                    return
+//                }
+//            }
+
             file.apply {
                 this.parentFile.mkdirs()
                 writeText(content)

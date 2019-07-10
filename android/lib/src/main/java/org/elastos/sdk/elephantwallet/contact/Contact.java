@@ -1,7 +1,5 @@
 package org.elastos.sdk.elephantwallet.contact;
 
-import android.util.Log;
-
 import org.elastos.tools.crosspl.CrossBase;
 import org.elastos.tools.crosspl.annotation.CrossClass;
 import org.elastos.tools.crosspl.annotation.CrossInterface;

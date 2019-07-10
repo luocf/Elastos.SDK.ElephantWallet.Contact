@@ -24,22 +24,22 @@ public:
     static jclass FindJavaClass(JNIEnv* jenv, const char* className);
 
     static std::shared_ptr<const char> SafeCastString(JNIEnv* jenv, jstring jdata);
-    static std::shared_ptr<std::span<int8_t>> SafeCastByteArray(JNIEnv* jenv, jbyteArray jdata);
+    static std::shared_ptr<std::span<uint8_t>> SafeCastByteArray(JNIEnv* jenv, jbyteArray jdata);
     static std::shared_ptr<std::function<void()>> SafeCastFunction(JNIEnv* jenv, jobject jdata);
     static std::shared_ptr<std::stringstream> SafeCastStringBuffer(JNIEnv* jenv, jobject jdata);
-    static std::shared_ptr<std::vector<int8_t>> SafeCastByteBuffer(JNIEnv* jenv, jobject jdata);
+    static std::shared_ptr<std::vector<uint8_t>> SafeCastByteBuffer(JNIEnv* jenv, jobject jdata);
 
     static std::shared_ptr<_jstring> SafeCastString(JNIEnv* jenv, const char* data);
-    static std::shared_ptr<_jbyteArray> SafeCastByteArray(JNIEnv* jenv, const std::span<int8_t>* data);
+    static std::shared_ptr<_jbyteArray> SafeCastByteArray(JNIEnv* jenv, const std::span<uint8_t>* data);
     static std::shared_ptr<_jobject> SafeCastFunction(JNIEnv* jenv, const std::function<void()>* data);
     static std::shared_ptr<_jobject> SafeCastStringBuffer(JNIEnv* jenv, const std::stringstream* data);
-    static std::shared_ptr<_jobject> SafeCastByteBuffer(JNIEnv* jenv, const std::vector<int8_t>* data);
+    static std::shared_ptr<_jobject> SafeCastByteBuffer(JNIEnv* jenv, const std::vector<uint8_t>* data);
 
     static int SafeCopyStringBufferToCpp(JNIEnv* jenv, std::stringstream* copyTo, jobject jdata);
-    static int SafeCopyByteBufferToCpp(JNIEnv* jenv, std::vector<int8_t>* copyTo, jobject jdata);
+    static int SafeCopyByteBufferToCpp(JNIEnv* jenv, std::vector<uint8_t>* copyTo, jobject jdata);
 
     static int SafeCopyStringBufferToJava(JNIEnv* jenv, jobject jcopyTo, const std::stringstream* data);
-    static int SafeCopyByteBufferToJava(JNIEnv* jenv, jobject jcopyTo, const std::vector<int8_t>* data);
+    static int SafeCopyByteBufferToJava(JNIEnv* jenv, jobject jcopyTo, const std::vector<uint8_t>* data);
 
     static int64_t AddGlobalObject(JNIEnv* jenv, jobject jobj);
     static std::shared_ptr<_jobject> SafeCastGlobalObject(JNIEnv* jenv, int64_t obj);

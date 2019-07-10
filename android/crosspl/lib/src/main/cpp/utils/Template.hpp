@@ -16,7 +16,7 @@ private:
   /*** static function and variable ***/
 
   /*** class function and variable ***/
-} // class Template
+}; // class Template
 } // namespace crosspl
 
 #endif /* _CROSSPL_TEMPLATE_HPP_ */
