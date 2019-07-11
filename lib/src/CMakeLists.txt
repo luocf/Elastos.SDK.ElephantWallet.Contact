@@ -36,13 +36,13 @@ target_link_libraries(Elastos.SDK.Contact PRIVATE
     json)
 target_link_libraries(Elastos.SDK.Contact PUBLIC
     ${pkg-Elastos.SDK.Keypair.C_STATIC_LDFLAGS}
-    ${pkg-curl_STATIC_LDFLAGS}
     ${pkg-Elastos.NET.Carrier_STATIC_LDFLAGS}
     crypto
     ssl
     common
     httpclient
-    platform)
+    platform
+    ${pkg-curl_STATIC_LDFLAGS})
 #target_link_libraries(Elastos.SDK.Contact PRIVATE
     #thirdparty)
 if("${CFG_TARGET_PLATFORM}" STREQUAL "Android")

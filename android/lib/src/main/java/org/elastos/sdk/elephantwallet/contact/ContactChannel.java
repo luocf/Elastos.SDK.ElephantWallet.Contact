@@ -2,7 +2,7 @@ package org.elastos.sdk.elephantwallet.contact;
 
 public enum ContactChannel {
     Carrier(1);
-//    ElaAddress(2),
+//    ElaChain(2),
 //    Email(3);
 
     public static ContactChannel valueOf(int id) {

@@ -46,7 +46,7 @@ int HttpClient::InitGlobal()
 /* =========================================== */
 HttpClient::HttpClient()
 	: mUrl()
-	, mConnectTimeoutMS(5000)
+	, mConnectTimeoutMS(10000)
 	, mReqHeaders()
 	, mRespStatus(-1)
 	, mRespReason()
@@ -340,10 +340,10 @@ int HttpClient::makeCurl(std::shared_ptr<void>& curlHandlePtr, std::shared_ptr<s
 	};
 	curlHeadersPtr = std::shared_ptr<struct curl_slist>(curlHeaders, curlHeadersDeleter);
 
-	curle = curl_easy_setopt(curlHandlePtr.get(), CURLOPT_SSL_VERIFYHOST, 0);
+	curle = curl_easy_setopt(curlHandlePtr.get(), CURLOPT_SSL_VERIFYHOST, 0L);
 	CHECK_ERROR(curle);
 
-    curle = curl_easy_setopt(curlHandlePtr.get(), CURLOPT_SSL_VERIFYPEER, 0);
+    curle = curl_easy_setopt(curlHandlePtr.get(), CURLOPT_SSL_VERIFYPEER, 0L);
 	CHECK_ERROR(curle);
 
 	curle = curl_easy_setopt(curlHandlePtr.get(), CURLOPT_HTTPHEADER, curlHeadersPtr.get());

@@ -35,8 +35,6 @@ abstract class ContactListener extends CrossBase {
         RequestArgs args = new RequestArgs(reqType, pubKey, data);
         byte[] ret = onRequest(args);
 
-        String aaa = new String(ret);
-
         return ret;
     }
 

@@ -1,7 +1,5 @@
 package org.elastos.sdk.elephantwallet.contact;
 
-import android.util.Log;
-
 import org.elastos.tools.crosspl.CrossBase;
 import org.elastos.tools.crosspl.annotation.CrossClass;
 import org.elastos.tools.crosspl.annotation.CrossInterface;
@@ -10,6 +8,9 @@ import org.elastos.tools.crosspl.annotation.CrossInterface;
 class ContactFactory extends CrossBase {
     @CrossInterface
     public static native void SetLogLevel(int level);
+
+    @CrossInterface
+    public static native void SetDeviceId(String devId);
 
     @CrossInterface
     public static native int SetLocalDataDir(String dir);

@@ -27,6 +27,7 @@ public:
     static int GetCurrentDevId(std::string& devId);
     static int GetCurrentDevName(std::string& devName);
 
+    static void SetCurrentDevId(const std::string& devId);
     /*** class function and variable ***/
 
 private:
@@ -42,6 +43,8 @@ private:
     /*** class function and variable ***/
     explicit PlatformAndroid() = delete;
     virtual ~PlatformAndroid() = delete;
+
+    static std::string mCurrentDevId;
 
 }; // class PlatformAndroid
 

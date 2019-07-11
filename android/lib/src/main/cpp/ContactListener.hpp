@@ -20,25 +20,25 @@ class ContactListener : public CrossBase {
 public:
     /*** type define ***/
     enum class RequestType: int {
-        PublicKey = 21,
-        EncryptData = 22,
-        DecryptData = 23,
-        DidPropAppId = 24,
-        DidAgentAuthHeader = 25,
-        SignData = 26,
+        PublicKey = 201,
+        EncryptData = 202,
+        DecryptData = 203,
+        DidPropAppId = 204,
+        DidAgentAuthHeader = 205,
+        SignData = 206,
     };
 
     enum class EventType: int {
-        StatusChanged = 11,
-        ReceivedMessage = 12,
-        SentMessage = 13,
-        FriendRequest = 14,
-        FriendStatusChanged = 15,
+        StatusChanged = 101,
+        ReceivedMessage = 102,
+        SentMessage = 103,
+        FriendRequest = 104,
+        FriendStatusChanged = 105,
     };
 
     enum class ContactChannel: int {
         Carrier = 1,
-        ElaAddress = 2,
+        ElaChain = 2,
         Email = 3,
     };
 
@@ -55,7 +55,6 @@ private:
     /*** type define ***/
 
     /*** static function and variable ***/
-    static std::recursive_mutex sContactListenerMutex;
     static ContactListener* sContactListenerInstance;
 
     /*** class function and variable ***/

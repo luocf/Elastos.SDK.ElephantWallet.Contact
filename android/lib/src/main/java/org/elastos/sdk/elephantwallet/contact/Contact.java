@@ -17,7 +17,7 @@ public final class Contact extends CrossBase {
     } // class Factory
 
     public abstract static class Listener extends ContactListener {
-    } // class Factory
+    } // class Listener
 
     public void setListener(Listener listener) {
         setListener((CrossBase)listener);

@@ -19,6 +19,9 @@ public:
 
     /*** static function and variable ***/
     static void SetLogLevel(int level);
+
+    static void SetDeviceId(const std::string& devId);
+
     static int SetLocalDataDir(const std::string& dir);
 
     /*** class function and variable ***/

@@ -4,11 +4,11 @@ import org.elastos.sdk.elephantwallet.contact.ContactChannel;
 
 public class EventArgs {
     public enum Type {
-        StatusChanged(11),
-        ReceivedMessage(12),
-        SentMessage(13),
-        FriendRequest(14),
-        FriendStatusChanged(15);
+        StatusChanged(101),
+        ReceivedMessage(102),
+        SentMessage(103),
+        FriendRequest(104),
+        FriendStatusChanged(105);
 
         public static Type valueOf(int id) {
             Type[] values = Type.values();

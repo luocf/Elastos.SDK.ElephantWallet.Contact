@@ -19,7 +19,7 @@ namespace elastos {
 /***********************************************/
 /***** static variables initialize *************/
 /***********************************************/
-
+std::string PlatformAndroid::mCurrentDevId;
 
 /***********************************************/
 /***** static function implement ***************/
@@ -51,12 +51,23 @@ std::string PlatformAndroid::GetBacktrace()
 
 int PlatformAndroid::GetCurrentDevId(std::string& devId)
 {
-    throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
+    if(mCurrentDevId.empty()) {
+        return ErrCode::DevUUIDError;
+    }
+
+    devId = mCurrentDevId;
+    return 0;
 }
 
 int PlatformAndroid::GetCurrentDevName(std::string& devName)
 {
-    throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
+    devName = "Android";
+    return 0;
+}
+
+void PlatformAndroid::SetCurrentDevId(const std::string& devId)
+{
+    mCurrentDevId = devId;
 }
 
 _Unwind_Reason_Code PlatformAndroid::UnwindCallback(struct _Unwind_Context* context, void* arg)

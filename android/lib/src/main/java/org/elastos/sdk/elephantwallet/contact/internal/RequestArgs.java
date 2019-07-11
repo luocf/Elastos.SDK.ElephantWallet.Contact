@@ -2,12 +2,12 @@ package org.elastos.sdk.elephantwallet.contact.internal;
 
 public class RequestArgs {
     public enum Type {
-        PublicKey(21),
-        EncryptData(22),
-        DecryptData(23),
-        DidPropAppId(24),
-        DidAgentAuthHeader(25),
-        SignData(26);
+        PublicKey(201),
+        EncryptData(202),
+        DecryptData(203),
+        DidPropAppId(204),
+        DidAgentAuthHeader(205),
+        SignData(206);
 
         public static Type valueOf(int id) {
             Type[] values = Type.values();

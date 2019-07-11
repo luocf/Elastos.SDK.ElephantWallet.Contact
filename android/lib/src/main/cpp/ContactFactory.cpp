@@ -8,6 +8,7 @@
 #include <ContactFactory.hpp>
 
 #include <Elastos.SDK.Contact.hpp>
+#include <Platform.hpp>
 #include "Log.hpp"
 
 /***********************************************/
@@ -23,6 +24,11 @@ void ContactFactory::SetLogLevel(int level)
     elastos::Contact::Factory::SetLogLevel(level);
 
     return;
+}
+
+void ContactFactory::SetDeviceId(const std::string& devId)
+{
+    elastos::Platform::SetCurrentDevId(devId);
 }
 
 int ContactFactory::SetLocalDataDir(const std::string& dir)
