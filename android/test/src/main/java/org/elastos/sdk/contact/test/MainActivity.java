@@ -10,7 +10,8 @@ import android.util.Log;
 import android.widget.TextView;
 
 import org.elastos.sdk.elephantwallet.contact.Contact;
-import org.elastos.sdk.elephantwallet.contact.internal.RequestArgs;
+import org.elastos.sdk.elephantwallet.contact.internal.EventArgs;
+import org.elastos.sdk.elephantwallet.contact.internal.AcquireArgs;
 import org.elastos.sdk.elephantwallet.contact.internal.Utils;
 import org.elastos.sdk.keypair.ElastosKeypair;
 
@@ -91,13 +92,13 @@ public class MainActivity extends Activity {
         }
         mContactListener = new Contact.Listener() {
             @Override
-            public byte[] onRequest(RequestArgs request) {
-                byte[] ret = processRequest(request);
+            public byte[] onAcquire(AcquireArgs request) {
+                byte[] ret = processAcquire(request);
 
                 String msg = txtCbMsg.getText().toString();
                 msg += "\n";
-                msg += "onRequest(): req=" + request + "\n";
-                msg += "onRequest(): resp=" + ret + "\n";
+                msg += "onAcquire(): req=" + request + "\n";
+                msg += "onAcquire(): resp=" + ret + "\n";
                 appendCbMessage(txtCbMsg, msg);
 
                 return ret;
@@ -105,9 +106,10 @@ public class MainActivity extends Activity {
 
             @Override
             public void onEvent(EventArgs event) {
+                processEvent(event);
+
                 String msg = txtCbMsg.getText().toString();
-                msg += "\n";
-                msg += event;
+                msg += "onEvent(): ev=" + event + "\n";
                 appendCbMessage(txtCbMsg, msg);
             }
 
@@ -163,7 +165,7 @@ public class MainActivity extends Activity {
         return "Success to delete a contact listener instance.";
     }
 
-    private byte[] processRequest(RequestArgs request) {
+    private byte[] processAcquire(AcquireArgs request) {
         byte[] response = null;
 
         switch (request.type) {
@@ -186,10 +188,29 @@ public class MainActivity extends Activity {
             case SignData:
                 response = signData(request.data);
                 break;
+            default:
+                throw new RuntimeException("Unprocessed request: " + request);
         }
 
 
         return response;
+    }
+
+    private void processEvent(EventArgs event) {
+        switch (event.type) {
+            case StatusChanged:
+                break;
+            case ReceivedMessage:
+                break;
+            case SentMessage:
+                break;
+            case FriendRequest:
+                break;
+            case FriendStatusChanged:
+                break;
+            default:
+                Log.w(TAG, "Unprocessed event: " + event);
+        }
     }
 
     private String getPublicKey() {

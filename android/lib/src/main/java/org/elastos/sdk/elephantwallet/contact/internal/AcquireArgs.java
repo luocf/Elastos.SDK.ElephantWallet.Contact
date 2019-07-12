@@ -1,6 +1,6 @@
 package org.elastos.sdk.elephantwallet.contact.internal;
 
-public class RequestArgs {
+public class AcquireArgs {
     public enum Type {
         PublicKey(201),
         EncryptData(202),
@@ -25,7 +25,7 @@ public class RequestArgs {
         private int id;
     }
 
-    public RequestArgs(int type, String pubKey, byte[] data) {
+    public AcquireArgs(int type, String pubKey, byte[] data) {
         this.type = Type.valueOf(type);
         this.publicKey = pubKey;
         this.data = data;
@@ -33,7 +33,7 @@ public class RequestArgs {
 
     @Override
     public String toString() {
-        return "RequestArgs"
+        return "AcquireArgs"
              + "[type=" + type
              + ",publicKey=" + publicKey
              + ",data=" + data

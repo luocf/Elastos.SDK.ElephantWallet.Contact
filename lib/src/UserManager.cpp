@@ -330,7 +330,12 @@ int UserManager::monitorDidChainData()
 
     auto callback = [&](int errcode, const std::string& keyPath, const std::string& result) {
         Log::I(Log::TAG, "UserManager::monitorDidChainData() ecode=%d, path=%s, result=%s", errcode, keyPath.c_str(), result.c_str());
-        
+
+        if(errcode < 0) {
+            Log::W(Log::TAG, "UserManager::monitorDidChainData() Failed to sync CarrierId. errcode=%d", errcode);
+            return;
+        }
+
         auto humanInfo = std::make_shared<HumanInfo>();
         std::vector<std::string> values;
 

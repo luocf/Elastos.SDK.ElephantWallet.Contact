@@ -65,9 +65,9 @@ std::shared_ptr<elastos::SecurityManager::SecurityListener> ContactListener::mak
         explicit SecurityListener() = default;
         virtual ~SecurityListener() = default;
 
-        std::string onRequestPublicKey() override {
+        std::string onAcquirePublicKey() override {
             Log::I(Log::TAG, "%s", __PRETTY_FUNCTION__);
-            auto ret = sContactListenerInstance->onRequest(RequestType::PublicKey, nullptr, nullptr);
+            auto ret = sContactListenerInstance->onAcquire(AcquireType::PublicKey, nullptr, nullptr);
             if(ret.get() == nullptr) {
                 return "";
             }
@@ -79,7 +79,7 @@ std::shared_ptr<elastos::SecurityManager::SecurityListener> ContactListener::mak
         std::vector<uint8_t> onEncryptData(const std::string& pubKey, const std::vector<uint8_t>& src) override {
             Log::I(Log::TAG, "%s", __PRETTY_FUNCTION__);
             const std::span<uint8_t> data(const_cast<uint8_t*>(src.data()), src.size());
-            auto ret = sContactListenerInstance->onRequest(RequestType::EncryptData, pubKey.c_str(), &data);
+            auto ret = sContactListenerInstance->onAcquire(AcquireType::EncryptData, pubKey.c_str(), &data);
             if(ret.get() == nullptr) {
                 return std::vector<uint8_t>();
             }
@@ -90,7 +90,7 @@ std::shared_ptr<elastos::SecurityManager::SecurityListener> ContactListener::mak
         std::vector<uint8_t> onDecryptData(const std::vector<uint8_t>& src) override {
             Log::I(Log::TAG, "%s", __PRETTY_FUNCTION__);
             const std::span<uint8_t> data(const_cast<uint8_t*>(src.data()), src.size());
-            auto ret = sContactListenerInstance->onRequest(RequestType::DecryptData, nullptr, &data);
+            auto ret = sContactListenerInstance->onAcquire(AcquireType::DecryptData, nullptr, &data);
             if(ret.get() == nullptr) {
                 return std::vector<uint8_t>();
             }
@@ -99,9 +99,9 @@ std::shared_ptr<elastos::SecurityManager::SecurityListener> ContactListener::mak
             return cryptoData;
         }
 
-        std::string onRequestDidPropAppId() override {
+        std::string onAcquireDidPropAppId() override {
             Log::I(Log::TAG, "%s", __PRETTY_FUNCTION__);
-            auto ret = sContactListenerInstance->onRequest(RequestType::DidPropAppId, nullptr, nullptr);
+            auto ret = sContactListenerInstance->onAcquire(AcquireType::DidPropAppId, nullptr, nullptr);
             if(ret.get() == nullptr) {
                 return "";
             }
@@ -110,9 +110,9 @@ std::shared_ptr<elastos::SecurityManager::SecurityListener> ContactListener::mak
             return appId;
         }
 
-        std::string onRequestDidAgentAuthHeader() override {
+        std::string onAcquireDidAgentAuthHeader() override {
             Log::I(Log::TAG, "%s", __PRETTY_FUNCTION__);
-            auto ret = sContactListenerInstance->onRequest(RequestType::DidAgentAuthHeader, nullptr, nullptr);
+            auto ret = sContactListenerInstance->onAcquire(AcquireType::DidAgentAuthHeader, nullptr, nullptr);
             if(ret.get() == nullptr) {
                 return "";
             }
@@ -124,7 +124,7 @@ std::shared_ptr<elastos::SecurityManager::SecurityListener> ContactListener::mak
         std::vector<uint8_t> onSignData(const std::vector<uint8_t>& originData) override {
             Log::I(Log::TAG, "%s", __PRETTY_FUNCTION__);
             const std::span<uint8_t> data(const_cast<uint8_t*>(originData.data()), originData.size());
-            auto ret = sContactListenerInstance->onRequest(RequestType::DecryptData, nullptr, &data);
+            auto ret = sContactListenerInstance->onAcquire(AcquireType::DecryptData, nullptr, &data);
             if(ret.get() == nullptr) {
                 return std::vector<uint8_t>();
             }
@@ -148,10 +148,11 @@ std::shared_ptr<elastos::MessageManager::MessageListener> ContactListener::makeM
                                      elastos::MessageManager::ChannelType channelType,
                                      elastos::UserInfo::Status status) override {
             Log::I(Log::TAG, "%s", __PRETTY_FUNCTION__);
-//            std::string humainCode;
-//            userInfo->getHumanCode(humainCode);
-//            auto ret = sContactListenerInstance->onEvent(EventType::StatusChanged, humainCode,
-//                                                         static_cast<int>(channelType), );
+            std::string humainCode;
+            userInfo->getHumanCode(humainCode);
+            std::span<uint8_t> data {reinterpret_cast<uint8_t*>(&status), 1 };
+            sContactListenerInstance->onEvent(EventType::StatusChanged, humainCode,
+                                              static_cast<ContactChannel>(channelType), &data);
         }
 
         virtual void onReceivedMessage(std::shared_ptr<elastos::HumanInfo> humanInfo,
@@ -168,24 +169,35 @@ std::shared_ptr<elastos::MessageManager::MessageListener> ContactListener::makeM
                                      elastos::MessageManager::ChannelType channelType,
                                      const std::string& summary) override {
             Log::I(Log::TAG, "%s", __PRETTY_FUNCTION__);
+            std::string humainCode;
+            friendInfo->getHumanCode(humainCode);
+            std::span<uint8_t> data {reinterpret_cast<uint8_t*>(const_cast<char*>(summary.c_str())),
+                                     summary.length() };
+            sContactListenerInstance->onEvent(EventType::FriendReuqest, humainCode,
+                                              static_cast<ContactChannel>(channelType), &data);
         }
 
         virtual void onFriendStatusChanged(std::shared_ptr<elastos::FriendInfo> friendInfo,
                                            elastos::MessageManager::ChannelType channelType,
                                            elastos::FriendInfo::Status status) override {
             Log::I(Log::TAG, "%s", __PRETTY_FUNCTION__);
+            std::string humainCode;
+            friendInfo->getHumanCode(humainCode);
+            std::span<uint8_t> data {reinterpret_cast<uint8_t*>(&status), 1 };
+            sContactListenerInstance->onEvent(EventType::StatusChanged, humainCode,
+                                              static_cast<ContactChannel>(channelType), &data);
         }
     };
 
     return std::make_shared<MessageListener>();
 }
 
-std::shared_ptr<std::span<uint8_t>> ContactListener::onRequest(RequestType type,
+std::shared_ptr<std::span<uint8_t>> ContactListener::onAcquire(AcquireType type,
                                                               const char* pubKey,
                                                               const std::span<uint8_t>* data)
 {
     int64_t platformHandle = getPlatformHandle();
-    auto ret = crosspl::proxy::ContactListener::onRequest(platformHandle,
+    auto ret = crosspl::proxy::ContactListener::onAcquire(platformHandle,
                                                           static_cast<int>(type), pubKey, data);
 
     return ret;

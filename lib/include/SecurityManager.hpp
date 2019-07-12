@@ -24,13 +24,13 @@ public:
     /*** type define ***/
     class SecurityListener {
     public:
-        virtual std::string onRequestPublicKey() = 0;
+        virtual std::string onAcquirePublicKey() = 0;
 
         virtual std::vector<uint8_t> onEncryptData(const std::string& pubKey, const std::vector<uint8_t>& src) = 0;
         virtual std::vector<uint8_t> onDecryptData(const std::vector<uint8_t>& src) = 0;
 
-        virtual std::string onRequestDidPropAppId() = 0;
-        virtual std::string onRequestDidAgentAuthHeader() = 0;
+        virtual std::string onAcquireDidPropAppId() = 0;
+        virtual std::string onAcquireDidAgentAuthHeader() = 0;
 
 
         virtual std::vector<uint8_t> onSignData(const std::vector<uint8_t>& originData) = 0;

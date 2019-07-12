@@ -85,7 +85,7 @@ int SecurityManager::getPublicKey(std::string& value)
         return ErrCode::NoSecurityListener;
     }
 
-    value = mSecurityListener->onRequestPublicKey();
+    value = mSecurityListener->onAcquirePublicKey();
     if(value.empty() == true) {
         return ErrCode::BadSecurityValue;
     }
@@ -233,7 +233,7 @@ int SecurityManager::getDidPropAppId(std::string& appId)
         return ErrCode::NoSecurityListener;
     }
 
-    appId = mSecurityListener->onRequestDidPropAppId();
+    appId = mSecurityListener->onAcquireDidPropAppId();
     if(appId.empty() == true) {
         return ErrCode::BadSecurityValue;
     }
@@ -247,7 +247,7 @@ int SecurityManager::getDidAgentAuthHeader(std::string& authHeader)
         return ErrCode::NoSecurityListener;
     }
 
-    authHeader = mSecurityListener->onRequestDidAgentAuthHeader();
+    authHeader = mSecurityListener->onAcquireDidAgentAuthHeader();
     if(authHeader.empty() == true) {
         return ErrCode::BadSecurityValue;
     }

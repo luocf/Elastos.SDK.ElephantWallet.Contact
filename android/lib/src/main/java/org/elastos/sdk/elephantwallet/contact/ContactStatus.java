@@ -1,12 +1,14 @@
 package org.elastos.sdk.elephantwallet.contact;
 
-public enum ContactChannel {
-    Carrier(1),
-    ElaChain(2),
-    Email(3);
+public enum ContactStatus {
+    Invalid(0x0),
+    WaitForAccept(0x1),
+    Offline(0x2),
+    Online(0x4),
+    Removed(0x8);
 
-    public static ContactChannel valueOf(int id) {
-        ContactChannel[] values = ContactChannel.values();
+    public static ContactStatus valueOf(int id) {
+        ContactStatus[] values = ContactStatus.values();
         for(int idx = 0; idx < values.length; idx++) {
             if(values[idx].id == id) {
                 return values[idx];
@@ -15,7 +17,7 @@ public enum ContactChannel {
         return null;
     }
 
-    private ContactChannel(int id){
+    private ContactStatus(int id){
                        this.id = id;
                                     }
     private int id;

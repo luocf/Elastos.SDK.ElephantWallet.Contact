@@ -332,7 +332,12 @@ int FriendManager::monitorDidChainData()
     }
 
     auto callback = [&](int errcode, const std::string& keyPath, const std::string& result) {
-        Log::I(Log::TAG, "UserManager::monitorDidChainData() ecode=%d, path=%s, result=%s", errcode, keyPath.c_str(), result.c_str());
+        Log::I(Log::TAG, "FriendManager::monitorDidChainData() ecode=%d, path=%s, result=%s", errcode, keyPath.c_str(), result.c_str());
+
+        if(errcode < 0) {
+            Log::W(Log::TAG, "FriendManager::monitorDidChainData() Failed to sync CarrierId. errcode=%d", errcode);
+            return;
+        }
 
         std::vector<std::string> values;
 
@@ -402,11 +407,11 @@ int FriendManager::monitorDidChainData()
 //         propMap["FriendID"] = jsonInfo.dump();
 //         ret = bcClient->uploadAllDidProps(propMap);
 //         if(ret < 0) {
-//             Log::I(Log::TAG, "UserManager::uploadFriendInfo() Failed to upload did: %s", did.c_str());
+//             Log::I(Log::TAG, "FriendManager::uploadFriendInfo() Failed to upload did: %s", did.c_str());
 //             continue;
 //         }
 
-//         Log::I(Log::TAG, "UserManager::uploadFriendInfo() Success to upload did: %s", did.c_str());
+//         Log::I(Log::TAG, "FriendManager::uploadFriendInfo() Success to upload did: %s", did.c_str());
 //     }
 
 //     return 0;

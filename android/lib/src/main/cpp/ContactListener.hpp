@@ -19,7 +19,7 @@
 class ContactListener : public CrossBase {
 public:
     /*** type define ***/
-    enum class RequestType: int {
+    enum class AcquireType: int {
         PublicKey = 201,
         EncryptData = 202,
         DecryptData = 203,
@@ -32,11 +32,11 @@ public:
         StatusChanged = 101,
         ReceivedMessage = 102,
         SentMessage = 103,
-        FriendRequest = 104,
+        FriendReuqest = 104,
         FriendStatusChanged = 105,
     };
 
-    enum class ContactChannel: int {
+    enum class ContactChannel: int { //TODO: Same as elastos::MessageManager::ChannelType, need merge to one.
         Carrier = 1,
         ElaChain = 2,
         Email = 3,
@@ -60,7 +60,7 @@ private:
     /*** class function and variable ***/
     std::shared_ptr<elastos::SecurityManager::SecurityListener> makeSecurityListener();
     std::shared_ptr<elastos::MessageManager::MessageListener> makeMessageListener();
-    std::shared_ptr<std::span<uint8_t>> onRequest(RequestType type, const char* pubKey, const std::span<uint8_t>* data);
+    std::shared_ptr<std::span<uint8_t>> onAcquire(AcquireType type, const char* pubKey, const std::span<uint8_t>* data);
     void onEvent(EventType type, const std::string& humanCode, ContactChannel channelType, const std::span<uint8_t>* data);
 
     std::shared_ptr<elastos::SecurityManager::SecurityListener> mSecurityListener;
