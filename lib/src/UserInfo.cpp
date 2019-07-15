@@ -60,17 +60,13 @@ int UserInfo::serialize(std::string& value, bool summaryOnly) const
 
     std::string humanInfo;
     int ret = HumanInfo::serialize(humanInfo, summaryOnly);
-    if(ret < 0) {
-        return ret;
-    }
+    CHECK_ERROR(ret)
     jsonInfo[JsonKey::HumanInfo] = humanInfo;
 
     if(summaryOnly == false) {
         std::string identCode;
         ret = IdentifyCode::serialize(identCode);
-        if(ret < 0) {
-            return ret;
-        }
+        CHECK_ERROR(ret)
         jsonInfo[JsonKey::IdentifyCode] = identCode;
     }
 
@@ -85,16 +81,12 @@ int UserInfo::deserialize(const std::string& value, bool summaryOnly)
 
     std::string humanInfo = jsonInfo[JsonKey::HumanInfo];
     int ret = HumanInfo::deserialize(humanInfo, summaryOnly);
-    if(ret < 0) {
-        return ret;
-    }
+    CHECK_ERROR(ret)
 
     if(summaryOnly == false) {
         std::string identCode = jsonInfo[JsonKey::IdentifyCode];
         ret = IdentifyCode::deserialize(identCode);
-        if(ret < 0) {
-            return ret;
-        }
+        CHECK_ERROR(ret)
     }
 
     return 0;
@@ -110,9 +102,7 @@ int UserInfo::addCarrierInfo(const CarrierInfo& info, const Status status)
 
     auto userMgr = SAFE_GET_PTR(mUserManager);
     ret = userMgr->saveLocalData();
-    if(ret < 0) {
-        return ret;
-    }
+    CHECK_ERROR(ret)
 
     return 0;
 }
@@ -127,9 +117,7 @@ int UserInfo::setHumanInfo(Item item, const std::string& value)
 
     auto userMgr = SAFE_GET_PTR(mUserManager);
     ret = userMgr->saveLocalData();
-    if(ret < 0) {
-        return ret;
-    }
+    CHECK_ERROR(ret)
 
     return 0;
 }
@@ -144,9 +132,7 @@ int UserInfo::mergeHumanInfo(const HumanInfo& value, const Status status)
 
     auto userMgr = SAFE_GET_PTR(mUserManager);
     ret = userMgr->saveLocalData();
-    if(ret < 0) {
-        return ret;
-    }
+    CHECK_ERROR(ret)
 
     return 0;
 }
@@ -160,9 +146,7 @@ int UserInfo::setIdentifyCode(Type type, const std::string& value)
 
     auto userMgr = SAFE_GET_PTR(mUserManager);
     ret = userMgr->saveLocalData();
-    if(ret < 0) {
-        return ret;
-    }
+    CHECK_ERROR(ret)
 
     return 0;
 }

@@ -181,15 +181,11 @@ int MessageManager::requestFriend(const std::string& friendAddr,
 
     std::string userDid;
     int ret = userInfo->getHumanInfo(HumanInfo::Item::Did, userDid);
-    if(ret < 0) {
-        return ret;
-    }
+    CHECK_ERROR(ret)
 
     std::string humanInfo;
     ret = userInfo->HumanInfo::serialize(humanInfo, true);
-    if(ret < 0) {
-        return ret;
-    }
+    CHECK_ERROR(ret)
 
     Json jsonInfo = Json::object();
     jsonInfo[JsonKey::Did] = userDid;
@@ -198,9 +194,7 @@ int MessageManager::requestFriend(const std::string& friendAddr,
 
     auto details = jsonInfo.dump();
     ret = channel->requestFriend(friendAddr, details, remoteRequest);
-    if(ret < 0) {
-        return ret;
-    }
+    CHECK_ERROR(ret)
 
     return 0;
 }
@@ -254,15 +248,11 @@ int MessageManager::sendMessage(const std::shared_ptr<HumanInfo> humanInfo,
     } else {
         std::string pubKey;
         int ret = humanInfo->getHumanInfo(HumanInfo::Item::ChainPubKey, pubKey);
-        if(ret < 0) {
-            return ret;
-        }
+        CHECK_ERROR(ret)
 
         auto sectyMgr = SAFE_GET_PTR(mSecurityManager);
         ret = sectyMgr->encryptData(pubKey, msgInfo->mPlainContent, cryptoMsgInfo->mPlainContent);
-        if(ret < 0) {
-            return ret;
-        }
+        CHECK_ERROR(ret)
     }
 
     Json jsonData = Json::object();

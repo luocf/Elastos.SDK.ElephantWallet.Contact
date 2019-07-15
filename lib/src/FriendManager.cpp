@@ -88,9 +88,7 @@ int FriendManager::loadLocalData()
     auto sectyMgr = SAFE_GET_PTR(mSecurityManager);
     std::vector<uint8_t> originData;
     int ret = sectyMgr->loadCryptoFile(dataFilePath.string(), originData);
-    if(ret < 0) {
-        return ret;
-    }
+    CHECK_ERROR(ret)
 
     std::vector<std::shared_ptr<FriendInfo>> friendList;
     std::string friendData {originData.begin(), originData.end()};
@@ -99,9 +97,7 @@ int FriendManager::loadLocalData()
         for(const auto& it: jsonFriend) {
             auto info = std::make_shared<FriendInfo>(weak_from_this());
             ret = info->deserialize(it);
-            if(ret < 0) {
-                return ret;
-            }
+            CHECK_ERROR(ret)
             friendList.push_back(info);
         }
     } catch(const std::exception& ex) {
@@ -118,9 +114,7 @@ int FriendManager::saveLocalData()
 {
     std::string friendData;
     int ret = serialize(friendData);
-    if(ret < 0) {
-        return ret;
-    }
+    CHECK_ERROR(ret)
 
     auto config = SAFE_GET_PTR(mConfig);
     auto dataFilePath = elastos::filesystem::path(config->mUserDataDir.c_str()) / DataFileName;
@@ -128,9 +122,7 @@ int FriendManager::saveLocalData()
     auto sectyMgr = SAFE_GET_PTR(mSecurityManager);
     std::vector<uint8_t> originData {friendData.begin(), friendData.end()};
     ret = sectyMgr->saveCryptoFile(dataFilePath.string(), originData);
-    if(ret < 0) {
-        return ret;
-    }
+    CHECK_ERROR(ret)
 
     Log::D(Log::TAG, "Save local data to: %s, data: %s", dataFilePath.c_str(), friendData.c_str());
 
@@ -143,9 +135,7 @@ int FriendManager::serialize(std::string& value) const
     for(const auto& it: mFriendList) {
         std::string data;
         int ret = it->serialize(data);
-        if(ret < 0) {
-            return ret;
-        }
+        CHECK_ERROR(ret)
         jsonFriend.push_back(data);
     }
 
@@ -163,9 +153,7 @@ int FriendManager::restoreFriendsInfo()
     }
 
     ret = syncDidChainData();
-    if(ret < 0) {
-        return ret;
-    }
+    CHECK_ERROR(ret)
 
     return 0;
 }
@@ -179,9 +167,7 @@ int FriendManager::tryAddFriend(const std::string& friendCode, const std::string
     }
 
     int ret = addFriend(kind, friendCode, summary, remoteRequest);
-    if(ret < 0) {
-        return ret;
-    }
+    CHECK_ERROR(ret)
 
     return 0;
 }
@@ -194,9 +180,7 @@ int FriendManager::tryRemoveFriend(const std::string& friendCode)
     }
 
     int ret = removeFriend(kind, friendCode);
-    if(ret < 0) {
-        return ret;
-    }
+    CHECK_ERROR(ret)
 
     return 0;
 }
@@ -209,9 +193,7 @@ int FriendManager::tryGetFriendInfo(const std::string& friendCode, std::shared_p
     }
 
     int ret = getFriendInfo(kind, friendCode, friendInfo);
-    if(ret < 0) {
-        return ret;
-    }
+    CHECK_ERROR(ret)
 
     return 0;
 }
@@ -284,9 +266,7 @@ int FriendManager::syncDidChainData()
     auto sectyMgr = SAFE_GET_PTR(mSecurityManager);
     std::string did;
     int ret = sectyMgr->getDid(did);
-    if(ret < 0) {
-        return ret;
-    }
+    CHECK_ERROR(ret)
 
     auto bcClient = BlkChnClient::GetInstance();
 
@@ -327,9 +307,7 @@ int FriendManager::monitorDidChainData()
 
     std::string did;
     int ret = sectyMgr->getDid(did);
-    if(ret < 0) {
-        return ret;
-    }
+    CHECK_ERROR(ret)
 
     auto callback = [&](int errcode, const std::string& keyPath, const std::string& result) {
         Log::I(Log::TAG, "FriendManager::monitorDidChainData() ecode=%d, path=%s, result=%s", errcode, keyPath.c_str(), result.c_str());
@@ -424,37 +402,27 @@ int FriendManager::acceptFriend(std::shared_ptr<FriendInfo> friendInfo)
 
     std::vector<FriendInfo::CarrierInfo> carrierInfoArray;
     int ret = friendInfo->getAllCarrierInfo(carrierInfoArray);
-    if(ret < 0) {
-        return ret;
-    }
+    CHECK_ERROR(ret)
 
     for(const auto& info: carrierInfoArray) {
         FriendInfo::Status status;
         ret = friendInfo->getCarrierStatus(info.mUsrId, status);
-        if(ret < 0) {
-            return ret;
-        }
+        CHECK_ERROR(ret)
 
         if(status != FriendInfo::Status::WaitForAccept) {
             continue;
         }
 
         ret = addFriendByCarrier(info.mUsrId, "", false);
-        if(ret < 0) {
-            return ret;
-        }
+        CHECK_ERROR(ret)
 
         ret = friendInfo->setCarrierStatus(info.mUsrId, FriendInfo::Status::Offline);
-        if(ret < 0) {
-            return ret;
-        }
+        CHECK_ERROR(ret)
     }
 
     if(oldStatus == FriendInfo::Status::WaitForAccept) {
         ret = cacheFriendToDidChain(friendInfo);
-        if(ret < 0) {
-            return ret;
-        }
+        CHECK_ERROR(ret)
     }
 
     return 0;
@@ -514,14 +482,10 @@ int FriendManager::addFriendByDid(const std::string& did, const std::string& sum
 
     std::vector<FriendInfo::CarrierInfo> carrierInfoArray;
     ret = friendInfo->getAllCarrierInfo(carrierInfoArray);
-    if(ret < 0) {
-        return ret;
-    }
+    CHECK_ERROR(ret)
     for(const auto& info: carrierInfoArray) {
         ret = addFriendByCarrier(info.mUsrAddr, summary, true);
-        if(ret < 0) {
-            return ret;
-        }
+        CHECK_ERROR(ret)
     }
 
     Log::I(Log::TAG, "FriendManager::addFriendByDid() Add friend did: %s.", did.c_str());
@@ -533,9 +497,7 @@ int FriendManager::addFriendByCarrier(const std::string& carrierAddress, const s
 {
     auto msgMgr = SAFE_GET_PTR(mMessageManager);
     int ret = msgMgr->requestFriend(carrierAddress, MessageManager::ChannelType::Carrier, summary, remoteRequest);
-    if(ret < 0) {
-        return ret;
-    }
+    CHECK_ERROR(ret)
 
     std::shared_ptr<FriendInfo> friendInfo;
     ret = tryGetFriendInfo(carrierAddress, friendInfo);
@@ -548,9 +510,7 @@ int FriendManager::addFriendByCarrier(const std::string& carrierAddress, const s
             .mDevInfo = {"", "", 0},
         };
         ret = friendInfo->addCarrierInfo(carrierInfo, FriendInfo::Status::WaitForAccept);
-        if(ret < 0) {
-            return ret;
-        }
+        CHECK_ERROR(ret)
     }
 
     return 0;
@@ -564,9 +524,7 @@ int FriendManager::addFriendByEla(const std::string& elaAddress, const std::stri
 
     auto msgMgr = SAFE_GET_PTR(mMessageManager);
     int ret = msgMgr->requestFriend(elaAddress, MessageManager::ChannelType::ElaChain, summary);
-    if(ret < 0) {
-        return ret;
-    }
+    CHECK_ERROR(ret)
 
     return 0;
 }
@@ -609,9 +567,7 @@ int FriendManager::getFriendInfoByCarrier(const std::string& carrierUsrId, std::
         auto info = mFriendList[idx];
         std::vector<FriendInfo::CarrierInfo> carrierInfoArray;
         int ret = info->getAllCarrierInfo(carrierInfoArray);
-        if(ret < 0) {
-            return ret;
-        }
+        CHECK_ERROR(ret)
 
         for(const auto& carrierInfo: carrierInfoArray) {
             if(carrierInfo.mUsrAddr == carrierUsrId

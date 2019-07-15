@@ -5,6 +5,7 @@ set(ENV{PKG_CONFIG_PATH}  "${CFG_DEPENDS_DIR}/${ANDROID_ABI}/lib/pkgconfig")
 include_directories("${CFG_DEPENDS_DIR}/${ANDROID_ABI}/include")
 
 include( "${CROSSPL_CMAKEFILE}" )
+include_directories(base/include)
 
 add_subdirectory(base/common)
 add_subdirectory(base/src)

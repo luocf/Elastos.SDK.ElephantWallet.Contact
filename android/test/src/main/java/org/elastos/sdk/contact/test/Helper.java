@@ -1,9 +1,14 @@
 package org.elastos.sdk.contact.test;
 
+import android.Manifest;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +18,7 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 
+import com.blikoon.qrcodescanner.QrCodeActivity;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.EncodeHintType;
 import com.google.zxing.MultiFormatWriter;
@@ -20,11 +26,15 @@ import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 
-import org.elastos.sdk.elephantwallet.contact.Contact;
-
 import java.util.HashMap;
 
+import static org.elastos.sdk.contact.test.MainActivity.TAG;
+
 public class Helper {
+    public interface OnScanListener {
+        public void onScanResult(String result);
+    };
+
     public static void showAddress(Context context, String did, String carrier) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         try {
@@ -42,6 +52,62 @@ public class Helper {
             dialog.dismiss();
         });
         builder.create().show();
+    }
+
+    public static void scanAddress(MainActivity activity, OnScanListener listener) {
+        mOnScanListener = listener;
+
+        int hasCameraPermission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.CAMERA);
+        if(hasCameraPermission == PackageManager.PERMISSION_GRANTED) {
+            Intent intent = new Intent(activity, QrCodeActivity.class);
+            activity.startActivityForResult(intent, REQUEST_CODE_QR_SCAN);
+        } else {
+            ActivityCompat.requestPermissions(activity,
+                    new String[]{Manifest.permission.CAMERA},
+                    1);
+        }
+    }
+
+    public static void onRequestPermissionsResult(MainActivity activity, int requestCode, String[] permissions, int[] grantResults) {
+        if (requestCode != 1) {
+            return;
+        }
+
+        for (int idx = 0; idx < permissions.length; idx++) {
+            if(permissions[idx].equals(Manifest.permission.CAMERA) == false) {
+                continue;
+            }
+
+            if (grantResults[idx] == PackageManager.PERMISSION_GRANTED) {
+                Intent intent = new Intent(activity, QrCodeActivity.class);
+                activity.startActivityForResult(intent, REQUEST_CODE_QR_SCAN);
+            }
+        }
+    }
+
+    public static void onActivityResult(MainActivity activity, int requestCode, int resultCode, Intent data) {
+        if(resultCode != Activity.RESULT_OK) {
+            Log.d(TAG,"COULD NOT GET A GOOD RESULT.");
+            if(data == null) {
+                return;
+            }
+            String result = data.getStringExtra("com.blikoon.qrcodescanner.error_decoding_image");
+            if(result == null) {
+                return;
+            }
+
+            activity.showMessage("QR Code could not be scanned.");
+        }
+
+        if(requestCode == REQUEST_CODE_QR_SCAN) {
+            if(data==null)
+                return;
+            //Getting the passed result
+            String result = data.getStringExtra("com.blikoon.qrcodescanner.got_qr_scan_relult");
+            Log.d(TAG,"Scan result:"+ result);
+
+            mOnScanListener.onScanResult(result);
+        }
     }
 
     private static View makeAddressView(Context context, String did, String carrier) {
@@ -65,7 +131,7 @@ public class Helper {
         root.addView(radioGrp);
 
         ViewGroup.MarginLayoutParams txtLayout = (ViewGroup.MarginLayoutParams) txt.getLayoutParams();
-        txtLayout.setMargins(100, 100, 100, 100);
+        txtLayout.setMargins(90, 10, 90, 20);
 
         radioGrp.setOnCheckedChangeListener((group, checkedId) -> {
             String value = (checkedId == btnCarrier.getId() ? carrier : did);
@@ -85,7 +151,7 @@ public class Helper {
         try {
             matrix = new MultiFormatWriter().encode(value, BarcodeFormat.QR_CODE, 512, 512, hintMap);
         } catch (WriterException e) {
-            Log.e(MainActivity.TAG, "Failed to MultiFormatWriter().encode()", e);
+            Log.e(TAG, "Failed to MultiFormatWriter().encode()", e);
             throw new RuntimeException("Failed to MultiFormatWriter().encode()", e);
         }
 
@@ -106,4 +172,7 @@ public class Helper {
 
         return bitmap;
     }
+
+    private static OnScanListener mOnScanListener;
+    private static final int REQUEST_CODE_QR_SCAN = 101;
 }

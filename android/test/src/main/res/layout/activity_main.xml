@@ -13,10 +13,6 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content" >
-            <Button android:id="@+id/btn_test_preset"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Test\nPreset"/>
             <Button android:id="@+id/btn_test_newcontact"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -33,6 +29,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Show\nUserInfo"/>
+            <Button android:id="@+id/btn_scan_userinfo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Scan\nUserInfo"/>
         </LinearLayout>
         <LinearLayout
             android:layout_width="match_parent"
@@ -52,7 +52,7 @@
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:scrollbars="vertical" />
-    <TextView android:id="@+id/txt_callback"
+    <TextView android:id="@+id/txt_event"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scrollbars="vertical" />

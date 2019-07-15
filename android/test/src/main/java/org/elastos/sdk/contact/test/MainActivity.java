@@ -3,13 +3,17 @@ package org.elastos.sdk.contact.test;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Process;
 import android.provider.Settings;
+import android.support.annotation.RequiresPermission;
 import android.util.Log;
 import android.widget.TextView;
+
+import com.blikoon.qrcodescanner.QrCodeActivity;
 
 import org.elastos.sdk.elephantwallet.contact.Contact;
 import org.elastos.sdk.elephantwallet.contact.internal.EventArgs;
@@ -19,6 +23,7 @@ import org.elastos.sdk.elephantwallet.contact.internal.Utils;
 import org.elastos.sdk.keypair.ElastosKeypair;
 import org.w3c.dom.Text;
 
+import java.lang.reflect.Method;
 import java.security.KeyPair;
 
 public class MainActivity extends Activity {
@@ -43,40 +48,36 @@ public class MainActivity extends Activity {
     protected void onStart() {
         super.onStart();
 
-        TextView txtMsg = findViewById(R.id.txt_message);
-        TextView txtCallbackMsg = findViewById(R.id.txt_callback);
-
-        findViewById(R.id.btn_test_preset).setOnClickListener((view) -> {
-            String message = testPreset();
-            showMessage(txtMsg, message);
-        });
         findViewById(R.id.btn_test_newcontact).setOnClickListener((view) -> {
-            String message = testNewContact(txtCallbackMsg);
-            showMessage(txtMsg, message);
+            String message = testNewContact();
+            showMessage(message);
         });
         findViewById(R.id.btn_test_start).setOnClickListener((view) -> {
             String message = testStart();
-            showMessage(txtMsg, message);
+            showMessage(message);
         });
 
         findViewById(R.id.btn_show_userinfo).setOnClickListener((view) -> {
             String message = showUserInfo();
-            showMessage(txtMsg, message);
+            showMessage(message);
         });
 
+        findViewById(R.id.btn_scan_userinfo).setOnClickListener((view) -> {
+            scanUserInfo();
+        });
 
         findViewById(R.id.btn_test_delcontact).setOnClickListener((view) -> {
             String message = testDelContact();
-            showMessage(txtMsg, message);
+            showMessage(message);
         });
         findViewById(R.id.btn_test_dellistener).setOnClickListener((view) -> {
             String message = testDelListener();
-            showMessage(txtMsg, message);
+            showMessage(message);
         });
     }
 
 
-    private String testPreset() {
+    private String testNewContact() {
         Contact.Factory.SetLogLevel(4);
 
         Contact.Factory.SetDeviceId(getDeviceId());
@@ -86,10 +87,6 @@ public class MainActivity extends Activity {
             return "Failed to call Contact.Factory.SetLocalDataDir() ret=" + ret;
         }
 
-        return "Success to preset factory.";
-    }
-
-    private String testNewContact(TextView txtCbMsg) {
         mContact = Contact.Factory.Create();
         if(mContact == null) {
             return "Failed to call Contact.Factory.Create()";
@@ -103,11 +100,9 @@ public class MainActivity extends Activity {
             public byte[] onAcquire(AcquireArgs request) {
                 byte[] ret = processAcquire(request);
 
-                String msg = txtCbMsg.getText().toString();
-                msg += "\n";
-                msg += "onAcquire(): req=" + request + "\n";
+                String msg = "onAcquire(): req=" + request + "\n";
                 msg += "onAcquire(): resp=" + ret + "\n";
-                showMessage(txtCbMsg, msg);
+                showEvent(msg);
 
                 return ret;
             }
@@ -116,18 +111,16 @@ public class MainActivity extends Activity {
             public void onEvent(EventArgs event) {
                 processEvent(event);
 
-                String msg = txtCbMsg.getText().toString();
-                msg += "onEvent(): ev=" + event + "\n";
-                showMessage(txtCbMsg, msg);
+                String msg = "onEvent(): ev=" + event + "\n";
+                showEvent(msg);
             }
 
             @Override
             public void onError(int errCode, String errStr) {
-                String msg = txtCbMsg.getText().toString();
-                msg += "\nonError";
+                String msg = "onError";
                 msg += " errCode=" + errCode;
                 msg += " errStr=" + errStr;
-                showMessage(txtCbMsg, msg);
+                showEvent(msg);
             }
         };
         mContact.setListener(mContactListener);
@@ -161,6 +154,31 @@ public class MainActivity extends Activity {
         Helper.showAddress(this, info.did, info.getCurrDevCarrierAddr());
 
         return info.toString();
+    }
+
+    private void scanUserInfo() {
+        if (mContact == null) {
+            showMessage("Contact is null.");
+            return;
+        }
+
+        Helper.scanAddress(this, result -> {
+            showMessage(result);
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle("Find Address");
+            builder.setMessage(result);
+            builder.setNegativeButton("Cancel", (dialog, which) -> {
+                dialog.dismiss();
+            });
+            builder.setPositiveButton("Add Friend", (dialog, which) -> {
+                mContact.addFriend(result, "Hello");
+            });
+            builder.create().show();
+
+        });
+
+        return;
     }
 
     private String testDelContact() {
@@ -272,12 +290,40 @@ public class MainActivity extends Activity {
         return devId;
     }
 
-    private void showMessage(TextView txtCbMsg, String msg) {
+    public void showMessage(String msg) {
         Handler handler = new Handler(Looper.getMainLooper());
         handler.post(() -> {
             Log.i(TAG, msg);
+            TextView txtMsg = findViewById(R.id.txt_message);
+            txtMsg.setText(msg);
+        });
+    }
+
+    public void showEvent(String newMsg) {
+        Handler handler = new Handler(Looper.getMainLooper());
+        handler.post(() -> {
+            TextView txtCbMsg = findViewById(R.id.txt_event);
+            String msg = txtCbMsg.getText().toString();
+            msg += "\n";
+            msg += newMsg;
+
+            Log.i(TAG, msg);
             txtCbMsg.setText(msg);
         });
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        Helper.onRequestPermissionsResult(this, requestCode, permissions, grantResults);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        Helper.onActivityResult(this, requestCode, resultCode, data);
     }
 
     String mSavedMnemonic;

@@ -65,16 +65,12 @@ int UserManager::loadLocalData()
     auto sectyMgr = SAFE_GET_PTR(mSecurityManager);
     std::vector<uint8_t> originData;
     int ret = sectyMgr->loadCryptoFile(dataFilePath.string(), originData);
-    if(ret < 0) {
-        return ret;
-    }
+    CHECK_ERROR(ret)
 
     std::string userData {originData.begin(), originData.end()};
     try {
         ret = mUserInfo->deserialize(userData);
-        if(ret < 0) {
-            return ret;
-        }
+        CHECK_ERROR(ret)
     } catch(const std::exception& ex) {
         Log::E(Log::TAG, "Failed to load local data from: %s.\nex=%s", dataFilePath.c_str(), ex.what());
         return ErrCode::JsonParseException;
@@ -88,9 +84,7 @@ int UserManager::saveLocalData()
 {
     std::string userData;
     int ret = serialize(userData);
-    if(ret < 0) {
-        return ret;
-    }
+    CHECK_ERROR(ret)
 
     auto config = SAFE_GET_PTR(mConfig);
     auto dataFilePath = elastos::filesystem::path(config->mUserDataDir.c_str()) / DataFileName;
@@ -98,9 +92,7 @@ int UserManager::saveLocalData()
     auto sectyMgr = SAFE_GET_PTR(mSecurityManager);
     std::vector<uint8_t> originData {userData.begin(), userData.end()};
     ret = sectyMgr->saveCryptoFile(dataFilePath.string(), originData);
-    if(ret < 0) {
-        return ret;
-    }
+    CHECK_ERROR(ret)
 
     Log::D(Log::TAG, "Save local data to: %s, data: %s", dataFilePath.c_str(), userData.c_str());
 
@@ -113,9 +105,7 @@ int UserManager::serialize(std::string& value) const
 
     std::string userData;
     int ret = mUserInfo->serialize(userData);
-    if(ret < 0) {
-        return ret;
-    }
+    CHECK_ERROR(ret)
 
     value = userData;
     return 0;
@@ -155,71 +145,49 @@ int UserManager::newUserInfo(bool onlyCarrierInfo)
     auto sectyMgr = SAFE_GET_PTR(mSecurityManager);
     std::string pubKey;
     int ret = sectyMgr->getPublicKey(pubKey);
-    if(ret < 0) {
-        return ret;
-    }
+    CHECK_ERROR(ret)
     mUserInfo->setHumanInfo(UserInfo::Item::ChainPubKey, pubKey);
 
     std::string currDevId;
     ret = Platform::GetCurrentDevId(currDevId);
-    if(ret < 0) {
-        return ret;
-    }
+    CHECK_ERROR(ret)
 
     std::string currDevName;
     ret = Platform::GetCurrentDevName(currDevName);
-    if(ret < 0) {
-        return ret;
-    }
+    CHECK_ERROR(ret)
 
     auto msgMgr = SAFE_GET_PTR(mMessageManager);
 
     std::weak_ptr<MessageChannelStrategy> weakChCarrier;
     ret = msgMgr->getChannel(MessageManager::ChannelType::Carrier, weakChCarrier);
-    if(ret < 0) {
-        return ret;
-    }
+    CHECK_ERROR(ret)
     auto chCarrier = SAFE_GET_PTR(weakChCarrier);
 
     std::string carrierSecKey;
     ret = chCarrier->getSecretKey(carrierSecKey);
-    if(ret < 0) {
-        return ret;
-    }
+    CHECK_ERROR(ret)
 
     ret = mUserInfo->setIdentifyCode(UserInfo::Type::CarrierSecKey, carrierSecKey);
-    if(ret < 0) {
-        return ret;
-    }
+    CHECK_ERROR(ret)
 
     std::string carrierAddr;
     ret = chCarrier->getAddress(carrierAddr);
-    if(ret < 0) {
-        return ret;
-    }
+    CHECK_ERROR(ret)
 
     HumanInfo::CarrierInfo carrierInfo{carrierAddr, "", {currDevId, currDevName, DateTime::CurrentMS()}};
     ret = mUserInfo->addCarrierInfo(carrierInfo, UserInfo::Status::Offline);
-    if(ret < 0) {
-        return ret;
-    }
+    CHECK_ERROR(ret)
 
     ret = mUserInfo->getCarrierInfoByDevId(currDevId, carrierInfo);
-    if(ret < 0) {
-        return ret;
-    }
+    CHECK_ERROR(ret)
 
     std::string carrierInfoStr;
     ret = mUserInfo->serialize(carrierInfo, carrierInfoStr);
-    if(ret < 0) {
-        return ret;
-    }
+    CHECK_ERROR(ret)
 
     std::string identifyCodeStr;
     ret = mUserInfo->IdentifyCode::serialize(identifyCodeStr, true, false);
-    if(ret < 0) {
-        return ret;
-    }
+    CHECK_ERROR(ret)
 
     auto bcClient = BlkChnClient::GetInstance();
     if (onlyCarrierInfo == false) {
@@ -229,13 +197,9 @@ int UserManager::newUserInfo(bool onlyCarrierInfo)
         }
     }
     ret = bcClient->cacheDidProp("CarrierID", carrierInfoStr);
-    if(ret < 0) {
-        return ret;
-    }
+    CHECK_ERROR(ret)
     ret = bcClient->cacheDidProp("IdentifyCode", identifyCodeStr);
-    if(ret < 0) {
-        return ret;
-    }
+    CHECK_ERROR(ret)
 
     Log::V(Log::TAG, "%s new carrier info: %s", __PRETTY_FUNCTION__, carrierInfoStr.c_str());
 
@@ -269,9 +233,7 @@ int UserManager::syncDidChainData()
     auto sectyMgr = SAFE_GET_PTR(mSecurityManager);
     std::string did;
     int ret = sectyMgr->getDid(did);
-    if(ret < 0) {
-        return ret;
-    }
+    CHECK_ERROR(ret)
 
     auto bcClient = BlkChnClient::GetInstance();
 
@@ -310,9 +272,7 @@ int UserManager::syncDidChainData()
 
     std::string pubKey;
     ret = sectyMgr->getPublicKey(pubKey);
-    if(ret < 0) {
-        return ret;
-    }
+    CHECK_ERROR(ret)
     mUserInfo->setHumanInfo(UserInfo::Item::ChainPubKey, pubKey);
 
     return 0;
@@ -324,9 +284,7 @@ int UserManager::monitorDidChainData()
 
     std::string did;
     int ret = sectyMgr->getDid(did);
-    if(ret < 0) {
-        return ret;
-    }
+    CHECK_ERROR(ret)
 
     auto callback = [&](int errcode, const std::string& keyPath, const std::string& result) {
         Log::I(Log::TAG, "UserManager::monitorDidChainData() ecode=%d, path=%s, result=%s", errcode, keyPath.c_str(), result.c_str());
@@ -390,9 +348,7 @@ int UserManager::monitorDidChainData()
 //     auto bcClient = BlkChnClient::GetInstance();
 
 //     int ret = bcClient->uploadHumanInfo(mUserInfo);
-//     if(ret < 0) {
-//         return ret;
-//     }
+//     CHECK_ERROR(ret)
 
 //     return 0;
 // }
@@ -403,9 +359,7 @@ int UserManager::setupMultiDevChannels()
 
     std::vector<HumanInfo::CarrierInfo> carrierInfoArray;
     int ret = mUserInfo->getAllCarrierInfo(carrierInfoArray);
-    if(ret < 0) {
-        return ret;
-    }
+    CHECK_ERROR(ret)
 
     for(const auto& carrierInfo: carrierInfoArray) {
         int ret = msgMgr->requestFriend(carrierInfo.mUsrAddr,

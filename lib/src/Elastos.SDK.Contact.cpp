@@ -80,9 +80,7 @@ void Contact::setListener(std::shared_ptr<SecurityManager::SecurityListener> sec
 int Contact::start()
 {
     int ret = initGlobal();
-    if(ret < 0) {
-        return ret;
-    }
+    CHECK_ERROR(ret)
 
     ret = mUserManager->restoreUserInfo();
     if(ret < 0
@@ -101,9 +99,7 @@ int Contact::start()
     }
 
     ret = mMessageManager->presetChannels(mConfig);
-    if(ret < 0) {
-        return ret;
-    }
+    CHECK_ERROR(ret)
 
     if(successLoadInfo == false || successLoadCarrier == false) {
         ret = mUserManager->newUserInfo(successLoadInfo == true);
@@ -113,19 +109,13 @@ int Contact::start()
     }
 
     ret = mFriendManager->restoreFriendsInfo();
-    if(ret < 0) {
-        return ret;
-    }
+    CHECK_ERROR(ret)
 
     ret = mMessageManager->openChannels();
-    if(ret < 0) {
-        return ret;
-    }
+    CHECK_ERROR(ret)
 
     ret = mUserManager->monitorDidChainData();
-    if(ret < 0) {
-        return ret;
-    }
+    CHECK_ERROR(ret)
 
     return 0;
 }
@@ -143,9 +133,7 @@ int Contact::syncInfoUploadToDidChain()
     }
 
     int ret = bcClient->uploadCachedDidProp();
-    if(ret < 0) {
-        return ret;
-    }
+    CHECK_ERROR(ret)
 
     return 0;
 }
@@ -209,9 +197,7 @@ int Contact::getUserDataDir(std::string& dir)
 
     std::string did;
     int ret = mSecurityManager->getDid(did);
-    if(ret < 0) {
-        return ret;
-    }
+    CHECK_ERROR(ret)
 
     auto userDataDir = elastos::filesystem::path(Factory::sLocalDataDir) / did;
     std::error_code stdErrCode;
@@ -235,24 +221,18 @@ int Contact::initGlobal()
 
     std::string userDataDir;
     ret = getUserDataDir(userDataDir);
-    if(ret < 0) {
-        return ret;
-    }
+    CHECK_ERROR(ret)
     Log::D(Log::TAG, "%s userdatadir:%s", __PRETTY_FUNCTION__, userDataDir.c_str());
 
     mConfig = std::make_shared<Config>(userDataDir);
     ret = mConfig->load();
-    if(ret < 0) {
-        return ret;
-    }
+    CHECK_ERROR(ret)
 
     mUserManager->setConfig(mConfig, mMessageManager);
     mFriendManager->setConfig(mConfig, mMessageManager);
 
     ret = BlkChnClient::InitInstance(mConfig, mSecurityManager);
-    if(ret < 0) {
-        return ret;
-    }
+    CHECK_ERROR(ret)
 
     return 0;
 }

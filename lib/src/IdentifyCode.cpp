@@ -47,9 +47,7 @@ int IdentifyCode::setIdentifyCode(Type type, const std::string& value)
     {
         std::string devId;
         int ret = Platform::GetCurrentDevId(devId);
-        if(ret < 0) {
-            return ret;
-        }
+        CHECK_ERROR(ret)
         mCarrierSecretKeyMap[devId] = value;
         break;
     }
@@ -69,9 +67,7 @@ int IdentifyCode::getIdentifyCode(Type type, std::string& value) const
     {
         std::string devId;
         int ret = Platform::GetCurrentDevId(devId);
-        if(ret < 0) {
-            return ret;
-        }
+        CHECK_ERROR(ret)
         const auto& it = mCarrierSecretKeyMap.find(devId);
         if(it == mCarrierSecretKeyMap.end()) {
             return ErrCode::NotFoundError;
@@ -142,9 +138,7 @@ int IdentifyCode::deserialize(const std::string& value)
     if(jsonInfo.find(JsonKey::CarrierSecretKeyMap) != jsonInfo.end()) {
         std::string devId;
         int ret = Platform::GetCurrentDevId(devId);
-        if(ret < 0) {
-            return ret;
-        }
+        CHECK_ERROR(ret)
 
         auto carrierSecretKeyMap = jsonInfo[JsonKey::CarrierSecretKeyMap].get<std::map<std::string, std::string>>();
         const auto& it = carrierSecretKeyMap.find(devId);

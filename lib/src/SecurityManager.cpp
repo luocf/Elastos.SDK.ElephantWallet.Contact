@@ -97,14 +97,10 @@ int SecurityManager::getElaAddress(std::string& value)
 {
     std::string pubKey;
     int ret = getPublicKey(pubKey);
-    if(ret < 0) {
-        return ret;
-    }
+    CHECK_ERROR(ret)
 
     ret = GetElaAddress(pubKey, value);
-    if(ret < 0) {
-        return ret;
-    }
+    CHECK_ERROR(ret)
 
     return 0;
 }
@@ -113,14 +109,10 @@ int SecurityManager::getDid(std::string& value)
 {
     std::string pubKey;
     int ret = getPublicKey(pubKey);
-    if(ret < 0) {
-        return ret;
-    }
+    CHECK_ERROR(ret)
 
     ret = GetDid(pubKey, value);
-    if(ret < 0) {
-        return ret;
-    }
+    CHECK_ERROR(ret)
 
     return 0;
 }
@@ -163,15 +155,11 @@ int SecurityManager::saveCryptoFile(const std::string& filePath, const std::vect
 {
     std::string pubKey;
     int ret = getPublicKey(pubKey);
-    if(ret < 0) {
-        return ret;
-    }
+    CHECK_ERROR(ret)
 
     std::vector<uint8_t> encryptedData;
     ret = encryptData(pubKey, originData, encryptedData);
-    if(ret < 0) {
-        return ret;
-    }
+    CHECK_ERROR(ret)
 
     std::ofstream cryptoFile;
 
@@ -206,9 +194,7 @@ int SecurityManager::loadCryptoFile(const std::string& filePath, std::vector<uin
     cryptoFile.close();
 
     int ret = decryptData(encryptedData, originData);
-    if(ret < 0) {
-        return ret;
-    }
+    CHECK_ERROR(ret)
 
     return 0;
 }

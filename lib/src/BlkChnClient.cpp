@@ -88,15 +88,11 @@ int BlkChnClient::downloadAllDidProps(const std::string& did, std::map<std::stri
 
     std::string propArrayStr;
     int ret = downloadFromDidChn(agentGetPropsPath, propArrayStr);
-    if(ret < 0) {
-        return ret;
-    }
+    CHECK_ERROR(ret)
 
     std::string keyPath;
     ret = getPropKeyPathPrefix(keyPath);
-    if(ret < 0) {
-        return ret;
-    }
+    CHECK_ERROR(ret)
 
     Json jsonPropArray = Json::parse(propArrayStr);
     for(const auto& it: jsonPropArray){
@@ -167,15 +163,11 @@ int BlkChnClient::uploadAllDidProps(const std::multimap<std::string, std::string
     std::vector<uint8_t> originBytes(propProtStr.begin(), propProtStr.end());
     std::vector<uint8_t> signedBytes(propProtStr.begin(), propProtStr.end());
     int ret = sectyMgr->signData(originBytes, signedBytes);
-    if(ret < 0) {
-        return ret;
-    }
+    CHECK_ERROR(ret)
 
     std::string pubKey;
     ret = sectyMgr->getPublicKey(pubKey);
-    if(ret < 0) {
-        return ret;
-    }
+    CHECK_ERROR(ret)
 
     std::string msgStr = MD5::MakeHexString(originBytes);
     std::string sigStr = MD5::MakeHexString(signedBytes);
@@ -192,9 +184,7 @@ int BlkChnClient::uploadAllDidProps(const std::multimap<std::string, std::string
     std::string agentUploadUrl = didConfigUrl + agentUploadPath;
     std::string authHeader;
     ret = sectyMgr->getDidAgentAuthHeader(authHeader);
-    if(ret < 0) {
-        return ret;
-    }
+    CHECK_ERROR(ret)
     Log::I(Log::TAG, "reqBody=%s", reqBody.c_str());
 
     HttpClient httpClient;
@@ -234,9 +224,7 @@ int BlkChnClient::downloadDidProp(const std::string& did, const std::string& key
 
     std::string keyPath;
     int ret = getPropKeyPath(key, keyPath);
-    if(ret < 0) {
-        return ret;
-    }
+    CHECK_ERROR(ret)
 
     auto agentGetProps = config->mDidChainConfig->mAgentApi.mGetDidProps;
     auto agentDidProp = config->mDidChainConfig->mAgentApi.mDidProp;
@@ -244,9 +232,7 @@ int BlkChnClient::downloadDidProp(const std::string& did, const std::string& key
 
     std::string propArrayStr;
     ret = downloadFromDidChn(agentGetPropPath, propArrayStr);
-    if(ret < 0) {
-        return ret;
-    }
+    CHECK_ERROR(ret)
 
     Json jsonPropArray = Json::parse(propArrayStr);
     for(const auto& it: jsonPropArray) {
@@ -273,15 +259,11 @@ int BlkChnClient::downloadDidPropHistory(const std::string& did, const std::stri
 
     std::string agentGetPropHistoryPath;
     int ret = getDidPropHistoryPath(did, key, agentGetPropHistoryPath);
-    if(ret < 0) {
-        return ret;
-    }
+    CHECK_ERROR(ret)
 
     std::string propArrayStr;
     ret = downloadFromDidChn(agentGetPropHistoryPath, propArrayStr);
-    if(ret < 0) {
-        return ret;
-    }
+    CHECK_ERROR(ret)
 
     Json jsonPropArray = Json::parse(propArrayStr);
     for(const auto& it: jsonPropArray) {
@@ -299,9 +281,7 @@ int BlkChnClient::getDidPropHistoryPath(const std::string& did, const std::strin
 
     std::string keyPath;
     int ret = getPropKeyPath(key, keyPath);
-    if(ret < 0) {
-        return ret;
-    }
+    CHECK_ERROR(ret)
 
     auto agentGetProps = config->mDidChainConfig->mAgentApi.mGetDidProps;
     auto agentDidPropHistory = config->mDidChainConfig->mAgentApi.mDidPropHistory;
@@ -316,26 +296,18 @@ int BlkChnClient::downloadHumanInfo(const std::string& did, std::shared_ptr<Huma
 
     std::string pubKey;
     int ret = downloadDidProp(did, NamePublicKey, pubKey);
-    if(ret < 0) {
-        return ret;
-    }
+    CHECK_ERROR(ret)
 
     std::string expectedDid;
     ret = SecurityManager::GetDid(pubKey, expectedDid);
-    if(ret < 0) {
-        return ret;
-    }
+    CHECK_ERROR(ret)
 
     ret = humanInfo->setHumanInfo(HumanInfo::Item::ChainPubKey, pubKey);
-    if(ret < 0) {
-        return ret;
-    }
+    CHECK_ERROR(ret)
 
     std::vector<std::string> propHistory;
     ret = downloadDidPropHistory(did, NameCarrierId, propHistory);
-    if(ret < 0) {
-        return ret;
-    }
+    CHECK_ERROR(ret)
 
     for(const auto& it: propHistory) {
         HumanInfo::CarrierInfo carrierInfo;
@@ -365,35 +337,25 @@ int BlkChnClient::downloadHumanInfo(const std::string& did, std::shared_ptr<Huma
 // {
 //     std::string pubKey;
 //     int ret = humanInfo->getHumanInfo(HumanInfo::Item::ChainPubKey, pubKey);
-//     if(ret < 0) {
-//         return ret;
-//     }
+//     CHECK_ERROR(ret)
 
 //     std::string devId;
 //     ret = Platform::GetCurrentDevId(devId);
-//     if(ret < 0) {
-//         return ret;
-//     }
+//     CHECK_ERROR(ret)
 
 //     HumanInfo::CarrierInfo carrierInfo;
 //     ret = humanInfo->getCarrierInfoByDevId(devId, carrierInfo);
-//     if(ret < 0) {
-//         return ret;
-//     }
+//     CHECK_ERROR(ret)
 
 //     std::string carrierInfoStr;
 //     ret = humanInfo->serialize(carrierInfo, carrierInfoStr);
-//     if(ret < 0) {
-//         return ret;
-//     }
+//     CHECK_ERROR(ret)
 
 //     std::map<std::string, std::string> propMap;
 //     propMap["PublicKey"] = pubKey;
 //     propMap["CarrierID"] = carrierInfoStr;
 //     ret = uploadAllDidProps(propMap);
-//     if(ret < 0) {
-//         return ret;
-//     }
+//     CHECK_ERROR(ret)
 
 
 //     return 0;
@@ -415,9 +377,7 @@ int BlkChnClient::uploadCachedDidProp()
 
     std::string txid;
     int ret = uploadAllDidProps(mDidPropCache, txid);
-    if(ret < 0) {
-        return ret;
-    }
+    CHECK_ERROR(ret)
     mDidPropCache.clear();
 
     // auto config = SAFE_GET_PTR(mConfig);
@@ -436,9 +396,7 @@ int BlkChnClient::uploadCachedDidProp()
     // };
 
     // ret = BlkChnClient::appendMoniter(getTxPath, confirmFunc);
-    // if(ret < 0) {
-    //     return ret;
-    // }
+    // CHECK_ERROR(ret)
 
     return 0;
 }
@@ -574,9 +532,7 @@ int BlkChnClient::getPropKeyPath(const std::string& key, std::string& keyPath)
 
     std::string keyPathPrefix;
     int ret = getPropKeyPathPrefix(keyPathPrefix);
-    if(ret < 0) {
-        return ret;
-    }
+    CHECK_ERROR(ret)
 
     keyPath = (keyPathPrefix + key);
     return 0;

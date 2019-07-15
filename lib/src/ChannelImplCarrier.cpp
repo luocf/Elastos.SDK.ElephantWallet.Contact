@@ -139,9 +139,7 @@ int ChannelImplCarrier::preset(const std::string& profile)
 
     std::string address;
     int ret = ChannelImplCarrier::getAddress(address);
-    if(ret < 0) {
-        return ret;
-    }
+    CHECK_ERROR(ret)
     Log::I(Log::TAG, "ChannelImplCarrier::preset() Success new carrier on address: %s.", address.c_str());
 
     return 0;
@@ -227,9 +225,7 @@ int ChannelImplCarrier::requestFriend(const std::string& friendCode,
     if(remoteRequest == true) {
         //std::string usrId;
         //ret = GetCarrierUsrIdByAddress(friendCode, usrId);
-        //if(ret < 0) {
-            //return ret;
-        //}
+        //CHECK_ERROR(ret)
         //bool isAdded = ela_is_friend(mCarrier.get(), usrId.c_str());
         //if(isAdded == true) {
             //ela_remove_friend(mCarrier.get(), usrId.c_str());

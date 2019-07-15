@@ -167,9 +167,7 @@ int HumanInfo::addCarrierInfo(const HumanInfo::CarrierInfo& info, const HumanInf
 
     if(correctedInfo.mUsrAddr.empty() == false) {
         int ret = ChannelImplCarrier::GetCarrierUsrIdByAddress(correctedInfo.mUsrAddr, correctedInfo.mUsrId);
-        if(ret < 0) {
-            return ret;
-        }
+        CHECK_ERROR(ret)
     }
     if(info.mUsrId.empty() == false
     && info.mUsrId != correctedInfo.mUsrId) {
@@ -282,22 +280,14 @@ int HumanInfo::setHumanInfo(Item item, const std::string& value)
     if(item == Item::ChainPubKey) {
         std::string expectedDid, expectedElaAddr;
         int ret = SecurityManager::GetDid(value, expectedDid);
-        if(ret < 0) {
-            return ret;
-        }
+        CHECK_ERROR(ret)
         ret = HumanInfo::setHumanInfo(Item::Did, expectedDid);
-        if(ret < 0) {
-            return ret;
-        }
+        CHECK_ERROR(ret)
 
         ret = SecurityManager::GetElaAddress(value, expectedElaAddr);
-        if(ret < 0) {
-            return ret;
-        }
+        CHECK_ERROR(ret)
         ret = HumanInfo::setHumanInfo(Item::ElaAddress, expectedElaAddr);
-        if(ret < 0) {
-            return ret;
-        }
+        CHECK_ERROR(ret)
     }
 
     mCommonInfoMap[item] = value;
@@ -344,9 +334,7 @@ int HumanInfo::mergeHumanInfo(const HumanInfo& value, const Status status)
     Log::D(Log::TAG, " ============ 0   %s mBoundCarrierArray:%d", __PRETTY_FUNCTION__, value.mBoundCarrierArray.size());
     for(const auto& it: value.mBoundCarrierArray) {
         int ret = addCarrierInfo(it, status);
-        if(ret < 0) {
-            return ret;
-        }
+        CHECK_ERROR(ret)
     }
 
     return 0;

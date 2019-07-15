@@ -1,6 +1,7 @@
 #ifndef _ELASOTS_SAFE_PTR_HPP_
 #define _ELASOTS_SAFE_PTR_HPP_
 
+#include "ErrCode.hpp"
 #include "Log.hpp"
 
 #define SAFE_GET_PTR(weakptr)                                                                       \
@@ -8,7 +9,7 @@
     auto ptr = weakptr.lock();                                                                      \
     if(ptr.get() == nullptr) {                                                                      \
         Log::E(Log::TAG, "Failed to get saft ptr from " #weakptr " at %s(%d)", __FILE__, __LINE__); \
-        return ErrCode::PointerReleasedError;                                                       \
+        return elastos::ErrCode::PointerReleasedError;                                                       \
     }                                                                                               \
     ptr;                                                                                            \
 })

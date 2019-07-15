@@ -33,6 +33,8 @@ public:
     int getHumanInfo(const char* humanCode, std::stringstream* info);
     int getHumanStatus(const char* humanCode);
 
+    int addFriend(const char* friendCode, const char* summary);
+
 private:
     /*** type define ***/
 

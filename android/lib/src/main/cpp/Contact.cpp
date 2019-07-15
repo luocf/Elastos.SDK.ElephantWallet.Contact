@@ -59,27 +59,34 @@ int Contact::start()
 
 int Contact::getHumanInfo(const char* humanCode, std::stringstream* info)
 {
+    if(humanCode == nullptr) {
+        return elastos::ErrCode::InvalidArgument;
+    }
+
     auto weakUserMgr = mContactImpl->getUserManager();
     auto userMgr =  SAFE_GET_PTR(weakUserMgr);                                                                      \
+    auto weakFriendMgr = mContactImpl->getFriendManager();
+    auto friendMgr =  SAFE_GET_PTR(weakFriendMgr);                                                                      \
 
     int ret = elastos::ErrCode::UnknownError;
     std::shared_ptr<elastos::HumanInfo> humanInfo;
-    if(std::string("-user-info-") == humanCode) {
+    if(std::string("-user-info-") == humanCode
+    || userMgr->contains(humanCode) == true) {
         std::shared_ptr<elastos::UserInfo> userInfo;
         ret = userMgr->getUserInfo(userInfo);
         humanInfo = userInfo;
+    } else if (friendMgr->contains(humanInfo) == true) {
+        std::shared_ptr<elastos::FriendInfo> friendInfo;
+        ret = friendMgr->tryGetFriendInfo(humanCode, friendInfo);
+        humanInfo = friendInfo;
     } else {
-        return elastos::ErrCode::UnimplementedError;
+        return elastos::ErrCode::NotFoundError;
     }
-    if(ret < 0) {
-        return ret;
-    }
+    CHECK_ERROR(ret);
 
     std::string infoStr;
-    ret = humanInfo->HumanInfo::serialize(infoStr, true);
-    if(ret < 0) {
-        return ret;
-    }
+    ret = humanInfo->serialize(infoStr, true);
+    CHECK_ERROR(ret);
 
     info->str(infoStr);
     return 0;
@@ -92,9 +99,7 @@ int Contact::getHumanStatus(const char* humanCode)
 
     std::shared_ptr<elastos::UserInfo> userInfo;
     int ret = userMgr->getUserInfo(userInfo);
-    if(ret < 0) {
-        return ret;
-    }
+    CHECK_ERROR(ret);
 
     elastos::HumanInfo::Status status;
     if(userInfo->contains(humanCode) == true) {
@@ -104,6 +109,17 @@ int Contact::getHumanStatus(const char* humanCode)
     }
 
     return static_cast<int>(status);
+}
+
+int Contact::addFriend(const char* friendCode, const char* summary)
+{
+    auto weakFriendMgr = mContactImpl->getFriendManager();
+    auto friendMgr =  SAFE_GET_PTR(weakFriendMgr);                                                                      \
+
+    int ret = friendMgr->tryAddFriend(friendCode, summary);
+    CHECK_ERROR(ret);
+
+    return 0;
 }
 
 /***********************************************/

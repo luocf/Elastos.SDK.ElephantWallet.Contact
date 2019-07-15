@@ -17,28 +17,18 @@ public final class Contact extends CrossBase {
         }
 
         public static void SetDeviceId(String devId) {
-            Factory.devId = devId;
             ContactFactory.SetDeviceId(devId);
+            UserInfo.setCurrDevId(devId);
         }
 
         private Factory() { }
-
-        static String devId;
     } // class Factory
 
     public abstract static class Listener extends ContactListener {
     } // class Listener
 
-    public static final class UserInfo extends HumanInfo {
-        public String getCurrDevCarrierAddr() {
-            for(CarrierInfo info: boundCarrierArray) {
-                if(info.devInfo.devId.equals(Factory.devId) == true) {
-                    return info.usrAddr;
-                }
-            }
-            return null;
-        }
-    } // class Factory
+    public final class UserInfo extends org.elastos.sdk.elephantwallet.contact.internal.UserInfo {
+    } // class UserInfo
 
     public synchronized void setListener(Listener listener) {
         if(mListener != null) {
@@ -88,6 +78,9 @@ public final class Contact extends CrossBase {
 
     @CrossInterface
     public native int start();
+
+    @CrossInterface
+    public native int addFriend(String friendCode, String summary);
 
     @CrossInterface
     private native void setListener(CrossBase listener);

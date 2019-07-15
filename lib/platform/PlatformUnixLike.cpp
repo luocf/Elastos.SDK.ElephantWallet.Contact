@@ -61,16 +61,15 @@ int PlatformUnixLike::GetCurrentDevId(std::string& devId)
 
 int PlatformUnixLike::GetCurrentDevName(std::string& devName)
 {
-    int ret = ErrCode::UnknownError;
-
     devName = "";
 
     std::string uuidName;
     struct utsname utsName;
-    ret = uname(&utsName);
+    int ret = uname(&utsName);
     if(ret < 0) {
-        return ErrCode::DevUUIDError;
+        ret = ErrCode::DevUUIDError;
     }
+    CHECK_ERROR(ret);
     devName = utsName.sysname;
 
     return 0;

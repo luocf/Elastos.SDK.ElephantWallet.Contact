@@ -5,9 +5,10 @@
 #include <algorithm>
 
 #include <curl/curl.h>
+#include <ErrCode.hpp>
 #include <Log.hpp>
 
-#define CHECK_ERROR(curl_code) \
+#define CHECK_CURL(curl_code) \
 	if(curl_code != CURLE_OK) { \
 		int errcode = (ErrCode::CurlBaseCode + (-curl_code)); \
 		Log::E(Log::TAG, "Failed to call %s, return %d.", __PRETTY_FUNCTION__, errcode); \
@@ -34,7 +35,7 @@ int HttpClient::InitGlobal()
 
 	CURLcode curle;
 	curle = curl_global_init(CURL_GLOBAL_ALL);
-	CHECK_ERROR(curle);
+	CHECK_CURL(curle);
 
 	//curl_global_cleanup(); // never called
     gIsGlobalInitialized = true;
@@ -116,9 +117,7 @@ int HttpClient::syncGet()
 	std::shared_ptr<struct curl_slist> curlHeadersPtr;
 
 	ret = makeCurl(curlHandlePtr, curlHeadersPtr);
-	if(ret < 0) {
-		return ret;
-	}
+	CHECK_ERROR(ret);
 
 	mRespStatus = -1;
 	mRespReason.clear();
@@ -126,10 +125,10 @@ int HttpClient::syncGet()
 	mRespBody = std::stringstream();
 
 	curle = curl_easy_perform(curlHandlePtr.get());
-	CHECK_ERROR(curle);
+	CHECK_CURL(curle);
 
 	curle = curl_easy_getinfo(curlHandlePtr.get(), CURLINFO_RESPONSE_CODE, &mRespStatus);
-	CHECK_ERROR(curle);
+	CHECK_CURL(curle);
 
 	return 0;
 }
@@ -142,9 +141,7 @@ int HttpClient::syncPost(const int8_t* body, int size)
 	std::shared_ptr<struct curl_slist> curlHeadersPtr;
 
 	ret = makeCurl(curlHandlePtr, curlHeadersPtr);
-	if(ret < 0) {
-		return ret;
-	}
+	CHECK_ERROR(ret);
 
 	mRespStatus = -1;
 	mRespReason.clear();
@@ -152,16 +149,16 @@ int HttpClient::syncPost(const int8_t* body, int size)
 	mRespBody = std::stringstream();
 
 	curle = curl_easy_setopt(curlHandlePtr.get(), CURLOPT_POSTFIELDS, body);
-	CHECK_ERROR(curle);
+	CHECK_CURL(curle);
 
 	curle = curl_easy_setopt(curlHandlePtr.get(), CURLOPT_POSTFIELDSIZE, size);
-	CHECK_ERROR(curle);
+	CHECK_CURL(curle);
 
 	curle = curl_easy_perform(curlHandlePtr.get());
-	CHECK_ERROR(curle);
+	CHECK_CURL(curle);
 
 	curle = curl_easy_getinfo(curlHandlePtr.get(), CURLINFO_RESPONSE_CODE, &mRespStatus);
-	CHECK_ERROR(curle);
+	CHECK_CURL(curle);
 
 	return 0;
 }
@@ -309,14 +306,14 @@ int HttpClient::makeCurl(std::shared_ptr<void>& curlHandlePtr, std::shared_ptr<s
 	curlHandlePtr = std::shared_ptr<CURL>(curlHandle, curlHandleDeleter);
 
 	curle = curl_easy_setopt(curlHandlePtr.get(), CURLOPT_NOSIGNAL, true);
-	CHECK_ERROR(curle);
+	CHECK_CURL(curle);
 
 	if(mUrl.empty() == true) {
 		return ErrCode::UrlNotExists;
 	}
     Log::I(Log::TAG, "HttpClient::makeCurl() url=%s", mUrl.c_str());
 	curle = curl_easy_setopt(curlHandlePtr.get(), CURLOPT_URL, mUrl.c_str());
-	CHECK_ERROR(curle);
+	CHECK_CURL(curle);
 
 	struct curl_slist* curlHeaders = nullptr;
 	bool hasAcceptEncoding = false;
@@ -341,34 +338,34 @@ int HttpClient::makeCurl(std::shared_ptr<void>& curlHandlePtr, std::shared_ptr<s
 	curlHeadersPtr = std::shared_ptr<struct curl_slist>(curlHeaders, curlHeadersDeleter);
 
 	curle = curl_easy_setopt(curlHandlePtr.get(), CURLOPT_SSL_VERIFYHOST, 0L);
-	CHECK_ERROR(curle);
+	CHECK_CURL(curle);
 
     curle = curl_easy_setopt(curlHandlePtr.get(), CURLOPT_SSL_VERIFYPEER, 0L);
-	CHECK_ERROR(curle);
+	CHECK_CURL(curle);
 
 	curle = curl_easy_setopt(curlHandlePtr.get(), CURLOPT_HTTPHEADER, curlHeadersPtr.get());
-	CHECK_ERROR(curle);
+	CHECK_CURL(curle);
 
 	curle = curl_easy_setopt(curlHandlePtr.get(), CURLOPT_CONNECTTIMEOUT_MS, mConnectTimeoutMS);
-	CHECK_ERROR(curle);
+	CHECK_CURL(curle);
 
 	curle = curl_easy_setopt(curlHandlePtr.get(), CURLOPT_HEADERFUNCTION, CurlHeaderCallback);
-	CHECK_ERROR(curle);
+	CHECK_CURL(curle);
 
 	curle = curl_easy_setopt(curlHandlePtr.get(), CURLOPT_HEADERDATA, this);
-	CHECK_ERROR(curle);
+	CHECK_CURL(curle);
 
 	curle = curl_easy_setopt(curlHandlePtr.get(), CURLOPT_WRITEFUNCTION, CurlWriteCallback);
-	CHECK_ERROR(curle);
+	CHECK_CURL(curle);
 
 	curle = curl_easy_setopt(curlHandlePtr.get(), CURLOPT_WRITEDATA, this);
-	CHECK_ERROR(curle);
+	CHECK_CURL(curle);
 
 	curle = curl_easy_setopt(curlHandlePtr.get(), CURLOPT_READFUNCTION, CurlReadCallback);
-	CHECK_ERROR(curle);
+	CHECK_CURL(curle);
 
 	curle = curl_easy_setopt(curlHandlePtr.get(), CURLOPT_READDATA, this);
-	CHECK_ERROR(curle);
+	CHECK_CURL(curle);
 
 	return 0;
 }
