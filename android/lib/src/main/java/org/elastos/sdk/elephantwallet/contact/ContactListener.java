@@ -8,6 +8,10 @@ import org.elastos.tools.crosspl.annotation.CrossInterface;
 
 @CrossClass
 abstract class ContactListener extends CrossBase {
+    public abstract byte[] onAcquire(AcquireArgs request);
+    public abstract void onEvent(EventArgs event);
+    public abstract void onError(int errCode, String errStr);
+
     public class AcquireArgs extends org.elastos.sdk.elephantwallet.contact.internal.AcquireArgs {
         private AcquireArgs(int type, String pubKey, byte[] data) {
             super(type, pubKey, data);
@@ -35,13 +39,24 @@ abstract class ContactListener extends CrossBase {
         public ContactStatus status;
     }
 
+    public class RequestEvent extends EventArgs {
+        public RequestEvent(int type, String humanCode, int channelType, byte[] data) {
+            super(type, humanCode, channelType, data);
+            summary = new String(data);
+        }
+        @Override
+        public String toString() {
+            return "StatusEvent" + "[type=" + type
+                    + ",humanCode=" + humanCode + ",channelType=" + channelType
+                    + ",summary=" + summary +"]";
+        }
+
+        public String summary;
+    }
+
     public ContactListener() {
         super(ContactListener.class.getName(), 0);
     }
-
-    public abstract byte[] onAcquire(AcquireArgs request);
-    public abstract void onEvent(EventArgs event);
-    public abstract void onError(int errCode, String errStr);
 
     @CrossInterface
     private byte[] onAcquire(int reqType, String pubKey, byte[] data) {
@@ -70,6 +85,7 @@ abstract class ContactListener extends CrossBase {
             case SentMessage:
                 break;
             case FriendRequest:
+                args = new RequestEvent(eventType, humanCode, channelType, data);
                 break;
             default:
                 throw new RuntimeException("Unimplemented type: " + type);

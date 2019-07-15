@@ -2,7 +2,16 @@ apply plugin: 'com.android.application'
 
 apply from: "$rootProject.projectDir/gradle/android.gradle"
 
+android {
+    defaultConfig {
+        minSdkVersion 19
+    }
+}
+
 dependencies {
     implementation(project(":lib"))
+
+    implementation('com.google.zxing:core:3.3.0')
+    implementation 'com.github.blikoon:QRCodeScanner:0.1.2'
 }
 

@@ -1,6 +1,8 @@
 package org.elastos.sdk.contact.test;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -12,13 +14,15 @@ import android.widget.TextView;
 import org.elastos.sdk.elephantwallet.contact.Contact;
 import org.elastos.sdk.elephantwallet.contact.internal.EventArgs;
 import org.elastos.sdk.elephantwallet.contact.internal.AcquireArgs;
+import org.elastos.sdk.elephantwallet.contact.internal.HumanInfo;
 import org.elastos.sdk.elephantwallet.contact.internal.Utils;
 import org.elastos.sdk.keypair.ElastosKeypair;
+import org.w3c.dom.Text;
 
 import java.security.KeyPair;
 
 public class MainActivity extends Activity {
-    private static final String TAG = "ContactTest";
+    public static final String TAG = "ContactTest";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,24 +48,30 @@ public class MainActivity extends Activity {
 
         findViewById(R.id.btn_test_preset).setOnClickListener((view) -> {
             String message = testPreset();
-            txtMsg.setText(message);
+            showMessage(txtMsg, message);
         });
         findViewById(R.id.btn_test_newcontact).setOnClickListener((view) -> {
             String message = testNewContact(txtCallbackMsg);
-            txtMsg.setText(message);
+            showMessage(txtMsg, message);
         });
         findViewById(R.id.btn_test_start).setOnClickListener((view) -> {
             String message = testStart();
-            txtMsg.setText(message);
+            showMessage(txtMsg, message);
         });
+
+        findViewById(R.id.btn_show_userinfo).setOnClickListener((view) -> {
+            String message = showUserInfo();
+            showMessage(txtMsg, message);
+        });
+
 
         findViewById(R.id.btn_test_delcontact).setOnClickListener((view) -> {
             String message = testDelContact();
-            txtMsg.setText(message);
+            showMessage(txtMsg, message);
         });
         findViewById(R.id.btn_test_dellistener).setOnClickListener((view) -> {
             String message = testDelListener();
-            txtMsg.setText(message);
+            showMessage(txtMsg, message);
         });
     }
 
@@ -69,8 +79,7 @@ public class MainActivity extends Activity {
     private String testPreset() {
         Contact.Factory.SetLogLevel(4);
 
-        String devId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
-        Contact.Factory.SetDeviceId(devId);
+        Contact.Factory.SetDeviceId(getDeviceId());
 
         int ret = Contact.Factory.SetLocalDataDir(this.getCacheDir().getAbsolutePath());
         if(ret < 0) {
@@ -87,7 +96,6 @@ public class MainActivity extends Activity {
         }
 
         if(mContactListener != null) {
-            mContactListener.unbind(); // to release native ref
             mContactListener = null;
         }
         mContactListener = new Contact.Listener() {
@@ -99,7 +107,7 @@ public class MainActivity extends Activity {
                 msg += "\n";
                 msg += "onAcquire(): req=" + request + "\n";
                 msg += "onAcquire(): resp=" + ret + "\n";
-                appendCbMessage(txtCbMsg, msg);
+                showMessage(txtCbMsg, msg);
 
                 return ret;
             }
@@ -110,7 +118,7 @@ public class MainActivity extends Activity {
 
                 String msg = txtCbMsg.getText().toString();
                 msg += "onEvent(): ev=" + event + "\n";
-                appendCbMessage(txtCbMsg, msg);
+                showMessage(txtCbMsg, msg);
             }
 
             @Override
@@ -119,10 +127,9 @@ public class MainActivity extends Activity {
                 msg += "\nonError";
                 msg += " errCode=" + errCode;
                 msg += " errStr=" + errStr;
-                appendCbMessage(txtCbMsg, msg);
+                showMessage(txtCbMsg, msg);
             }
         };
-        mContactListener.bind(); // MUST call listener.unbind() by manual to release it
         mContact.setListener(mContactListener);
 
         return "Success to create a contact instance.";
@@ -142,6 +149,18 @@ public class MainActivity extends Activity {
 //        }
 
         return "Success to start contact instance.";
+    }
+
+    private String showUserInfo() {
+        if (mContact == null) {
+            return "Contact is null.";
+        }
+
+        Contact.UserInfo info = mContact.getUserInfo();
+
+        Helper.showAddress(this, info.did, info.getCurrDevCarrierAddr());
+
+        return info.toString();
     }
 
     private String testDelContact() {
@@ -248,9 +267,15 @@ public class MainActivity extends Activity {
         return signedData.buf;
     }
 
-    private void appendCbMessage(TextView txtCbMsg, String msg) {
+    private String getDeviceId() {
+        String devId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
+        return devId;
+    }
+
+    private void showMessage(TextView txtCbMsg, String msg) {
         Handler handler = new Handler(Looper.getMainLooper());
         handler.post(() -> {
+            Log.i(TAG, msg);
             txtCbMsg.setText(msg);
         });
     }

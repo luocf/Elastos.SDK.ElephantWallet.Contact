@@ -14,6 +14,7 @@ public enum ContactStatus {
                 return values[idx];
             }
         }
+
         return null;
     }
 

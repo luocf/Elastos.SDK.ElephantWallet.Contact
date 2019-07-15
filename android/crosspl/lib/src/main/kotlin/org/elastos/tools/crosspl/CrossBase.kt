@@ -23,16 +23,16 @@ open class CrossBase
         }
     }
 
-    protected fun finalize() {
+    open fun finalize() {
         DestroyNativeObject(this.javaClass.name, nativeHandle)
         Log.i(Utils.TAG, "deconstruct " + toString())
     }
 
-    fun bind() {
+    open fun bind() {
         bindPlatformHandle(this)
     }
 
-    fun unbind() {
+    open fun unbind() {
         unbindPlatformHandle(this)
     }
 

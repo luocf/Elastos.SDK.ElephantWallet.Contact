@@ -11,6 +11,8 @@
 #ifndef _ELASTOS_SDK_JNI_CONTACT_HPP_
 #define _ELASTOS_SDK_JNI_CONTACT_HPP_
 
+#include <sstream>
+
 #include <ContactListener.hpp>
 #include <CrossBase.hpp>
 #include <Elastos.SDK.Contact.hpp>
@@ -28,6 +30,8 @@ public:
     void setListener(CrossBase* listener);
     int start();
 
+    int getHumanInfo(const char* humanCode, std::stringstream* info);
+    int getHumanStatus(const char* humanCode);
 
 private:
     /*** type define ***/

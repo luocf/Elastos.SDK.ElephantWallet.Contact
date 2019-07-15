@@ -21,8 +21,9 @@ android {
 dependencies {
     compileOnly(project(":crosspl:anno"))
     kapt(project(":crosspl:anno"))
-
     api(project(":crosspl:lib"))
+
+    implementation 'com.google.code.gson:gson:2.8.5'
 }
 
 //project.ext {
