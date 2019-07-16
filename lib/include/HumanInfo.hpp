@@ -42,7 +42,7 @@ public:
         struct DeviceInfo {
             std::string mDevId;
             std::string mDevName;
-            long mUpdateTime;
+            int64_t mUpdateTime;
         };
 
         std::string mUsrAddr;
@@ -77,6 +77,7 @@ public:
 
     virtual int setHumanStatus(HumanKind kind, const Status status);
     virtual int getHumanStatus(HumanKind kind, Status& status);
+    virtual int setHumanStatus(const Status from, const Status to);
     virtual Status getHumanStatus() const;
 
     virtual int serialize(std::string& value, bool summaryOnly = false) const;

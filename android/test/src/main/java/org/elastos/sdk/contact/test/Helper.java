@@ -12,8 +12,12 @@ import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
@@ -26,29 +30,70 @@ import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 
+import org.elastos.sdk.elephantwallet.contact.Contact;
+
 import java.util.HashMap;
+import java.util.List;
 
 import static org.elastos.sdk.contact.test.MainActivity.TAG;
 
 public class Helper {
     public interface OnScanListener {
-        public void onScanResult(String result);
+        void onScanResult(String result);
     };
 
-    public static void showAddress(Context context, String did, String carrier) {
+    public static void showAddress(Context context, String did, String carrier, View.OnClickListener listener) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setTitle("My Address");
         try {
-//            String address = CarrierHelper.getAddress();
-//            Log.i(Logger.TAG, "show address: " + address);
-            View root = makeAddressView(context, did, carrier);
-
-            builder.setMessage("My Address");
+            View root = makeAddressView(context, did, carrier, listener);
             builder.setView(root);
         } catch (Exception e) {
             builder.setMessage("Failed to show address." + e);
         }
 
         builder.setPositiveButton("OK", (dialog, which) -> {
+            dialog.dismiss();
+        });
+        builder.create().show();
+    }
+
+    public static void showDetails(Context context, String msg) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setTitle("Details");
+        builder.setMessage(msg);
+        builder.setPositiveButton("OK", (dialog, which) -> {
+            dialog.dismiss();
+        });
+        builder.create().show();
+    }
+
+    public static void showFriendList(Context context, List<String> friendList, AdapterView.OnItemClickListener listener) {
+        ListView listView = new ListView(context);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(context, android.R.layout.simple_list_item_1, friendList);
+        listView.setAdapter(adapter);
+        listView.setOnItemClickListener(listener);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setTitle("Friend List");
+        builder.setView(listView);
+        builder.setPositiveButton("OK", (dialog, which) -> {
+            dialog.dismiss();
+        });
+        builder.create().show();
+    }
+
+    public static void showFriendRequest(Context context, String humanCode, String summary, View.OnClickListener listener) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setTitle("Friend Request");
+        String msg = new String();
+        msg += "FriendCode:\n  " + humanCode + "\n";
+        msg += "Summary:=n  " + summary;
+        builder.setMessage(msg);
+        builder.setPositiveButton("Accept", (dialog, which) -> {
+            listener.onClick(null);
+        });
+        builder.setNegativeButton("Cannel", (dialog, which) -> {
             dialog.dismiss();
         });
         builder.create().show();
@@ -110,11 +155,12 @@ public class Helper {
         }
     }
 
-    private static View makeAddressView(Context context, String did, String carrier) {
+    private static View makeAddressView(Context context, String did, String carrier, View.OnClickListener listener) {
         ImageView image = new ImageView(context);
         TextView txt = new TextView(context);
-
         RadioGroup radioGrp = new RadioGroup(context);
+        Button btn = new Button(context);
+
         RadioButton btnDid = new RadioButton(context);
         btnDid.setId(View.generateViewId());
         btnDid.setText("Did");
@@ -129,6 +175,7 @@ public class Helper {
         root.addView(image);
         root.addView(txt);
         root.addView(radioGrp);
+        root.addView(btn);
 
         ViewGroup.MarginLayoutParams txtLayout = (ViewGroup.MarginLayoutParams) txt.getLayoutParams();
         txtLayout.setMargins(90, 10, 90, 20);
@@ -140,6 +187,9 @@ public class Helper {
             txt.setText(value);
         });
         radioGrp.check(btnDid.getId());
+
+        btn.setText("Details");
+        btn.setOnClickListener(listener);
 
         return root;
     }

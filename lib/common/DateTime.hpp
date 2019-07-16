@@ -42,7 +42,7 @@ public:
         return std::string(buf) + milliseconds_str;
     }
 
-    static long CurrentMS() {
+    static int64_t CurrentMS() {
         system_clock::time_point tp = system_clock::now();
         std::chrono::milliseconds now = std::chrono::duration_cast<std::chrono::milliseconds>(tp.time_since_epoch());
         return now.count();

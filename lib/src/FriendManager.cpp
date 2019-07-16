@@ -155,6 +155,11 @@ int FriendManager::restoreFriendsInfo()
     ret = syncDidChainData();
     CHECK_ERROR(ret)
 
+    for(auto& it: mFriendList) {
+        ret = it->setHumanStatus(HumanInfo::Status::Online, HumanInfo::Status::Offline);
+    }
+    CHECK_ERROR(ret);
+
     return 0;
 }
 
@@ -167,6 +172,18 @@ int FriendManager::tryAddFriend(const std::string& friendCode, const std::string
     }
 
     int ret = addFriend(kind, friendCode, summary, remoteRequest);
+    CHECK_ERROR(ret)
+
+    return 0;
+}
+
+int FriendManager::tryAcceptFriend(const std::string& friendCode)
+{
+    std::shared_ptr<FriendInfo> friendInfo;
+    int ret = tryGetFriendInfo(friendCode, friendInfo);
+    CHECK_ERROR(ret)
+
+    ret = acceptFriend(friendInfo);
     CHECK_ERROR(ret)
 
     return 0;

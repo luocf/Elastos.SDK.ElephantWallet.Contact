@@ -123,6 +123,17 @@ int ContactBridge::addFriend(const char* friendCode, const char* summary)
     return 0;
 }
 
+int ContactBridge::acceptFriend(const char* friendCode)
+{
+    auto weakFriendMgr = mContactImpl->getFriendManager();
+    auto friendMgr =  SAFE_GET_PTR(weakFriendMgr);                                                                      \
+
+    int ret = friendMgr->tryAcceptFriend(friendCode);
+    CHECK_ERROR(ret);
+
+    return 0;
+}
+
 int ContactBridge::getFriendList(std::stringstream* info)
 {
     auto weakFriendMgr = mContactImpl->getFriendManager();
@@ -134,14 +145,31 @@ int ContactBridge::getFriendList(std::stringstream* info)
 
     elastos::Json friendJsonArray = elastos::Json::array();
     for(const auto& it: friendList) {
-        std::string humanCode;
-        ret = it->serialize(humanCode);
+        std::shared_ptr<elastos::Json> jsonInfo;
+        ret = it->toJson(jsonInfo);
         CHECK_ERROR(ret);
 
-        friendJsonArray.push_back(humanCode);
+        friendJsonArray.push_back(*jsonInfo);
     }
 
     info->str(friendJsonArray.dump());
+    return 0;
+}
+
+
+int ContactBridge::syncInfoDownloadFromDidChain()
+{
+    int ret = mContactImpl->syncInfoDownloadFromDidChain();
+    CHECK_ERROR(ret);
+
+    return 0;
+}
+
+int ContactBridge::syncInfoUploadToDidChain()
+{
+    int ret = mContactImpl->syncInfoUploadToDidChain();
+    CHECK_ERROR(ret);
+
     return 0;
 }
 

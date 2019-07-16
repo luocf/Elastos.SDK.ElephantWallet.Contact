@@ -440,7 +440,7 @@ BlkChnClient::~BlkChnClient()
 int BlkChnClient::startMonitor()
 {
     mMonitor.mMonitorLooper = [&]() {
-        long current = DateTime::CurrentMS();
+        int64_t current = DateTime::CurrentMS();
         Log::I(Log::TAG, "current timestamp=%lld", current);
         std::map<std::string, MonitorCallback> monitorCallbackMap;
         {

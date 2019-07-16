@@ -15,6 +15,19 @@ import java.util.List;
 public class ContactBridge extends CrossBase {
     public static final String TAG = "elastos";
 
+    protected ContactBridge() {
+        super(ContactBridge.class.getName(), 0);
+    }
+
+    public void finalize() {
+        if(mListener != null) {
+            mListener.unbind();
+        }
+
+        super.finalize();
+    }
+
+
     public synchronized void setListener(Contact.Listener listener) {
         if(mListener != null) {
             mListener.unbind();
@@ -46,11 +59,7 @@ public class ContactBridge extends CrossBase {
         return userInfo;
     }
 
-    public Contact.FriendInfo getFriendInfo(String friendCode) {
-        return null;
-    }
-
-    public List<String> listFriendInfo() {
+    public List<Contact.FriendInfo> listFriendInfo() {
         assert(mListener != null);
 
         StringBuffer json = new StringBuffer();
@@ -60,7 +69,7 @@ public class ContactBridge extends CrossBase {
             return null;
         }
 
-        List<String> list = new Gson().fromJson(json.toString(), List.class);
+        List<Contact.FriendInfo> list = new Gson().fromJson(json.toString(), List.class);
 
         return list;
     }
@@ -81,6 +90,15 @@ public class ContactBridge extends CrossBase {
     public native int addFriend(String friendCode, String summary);
 
     @CrossInterface
+    public native int acceptFriend(String friendCode);
+
+    @CrossInterface
+    public native int syncInfoDownloadFromDidChain();
+
+    @CrossInterface
+    public native int syncInfoUploadToDidChain();
+
+    @CrossInterface
     private native void setListener(CrossBase listener);
 
     @CrossInterface
@@ -91,18 +109,6 @@ public class ContactBridge extends CrossBase {
 
     @CrossInterface
     private native int getHumanStatus(String humanCode);
-
-    protected ContactBridge() {
-        super(ContactBridge.class.getName(), 0);
-    }
-
-    public void finalize() {
-        if(mListener != null) {
-            mListener.unbind();
-        }
-
-        super.finalize();
-    }
 
     private CrossBase mListener;
 

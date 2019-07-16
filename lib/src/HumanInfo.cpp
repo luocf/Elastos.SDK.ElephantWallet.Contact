@@ -369,17 +369,34 @@ int HumanInfo::getHumanStatus(HumanInfo::HumanKind kind, HumanInfo::Status& stat
     return 0;
 }
 
+int HumanInfo::setHumanStatus(const Status from, const Status to)
+{
+    for(auto& it: mStatusMap) {
+        if(it.second == from) {
+            it.second = to;
+        }
+    }
+
+    for(auto& it: mBoundCarrierStatus) {
+        if(it == from) {
+            it = to;
+        }
+    }
+
+    return 0;
+}
+
 HumanInfo::Status HumanInfo::getHumanStatus() const
 {
     Status status = Status::Invalid;
 
-    for(const auto it: mStatusMap) {
+    for(const auto& it: mStatusMap) {
         if(static_cast<int>(status) < static_cast<int>(it.second)) {
             status = it.second;
         }
     }
 
-    for(const auto it: mBoundCarrierStatus) {
+    for(const auto& it: mBoundCarrierStatus) {
         if(static_cast<int>(status) < static_cast<int>(it)) {
             status = it;
         }
@@ -422,7 +439,8 @@ NLOHMANN_JSON_SERIALIZE_ENUM(
         {HumanInfo::Status::Invalid, "Invalid"},
         {HumanInfo::Status::WaitForAccept, "WaitForAccept"},
         {HumanInfo::Status::Offline, "Offline"},
-        {HumanInfo::Status::Online, "Offline"},  // Online alse save as OffLine
+        {HumanInfo::Status::Online, "Online"},
+        {HumanInfo::Status::Removed, "Removed"},
     }
 );
 
@@ -474,6 +492,7 @@ int HumanInfo::deserialize(const std::string& value, bool summaryOnly)
 
     mCommonInfoMap = jsonInfo[JsonKey::CommonInfoMap].get<std::map<Item, std::string>>();
     mBoundCarrierArray = jsonInfo[JsonKey::BoundCarrierArray].get<std::vector<CarrierInfo>>();
+
     if(summaryOnly == false) {
         mBoundCarrierStatus = jsonInfo[JsonKey::BoundCarrierStatus].get<std::vector<Status>>();
         mStatusMap = jsonInfo[JsonKey::StatusMap].get<std::map<HumanKind, Status>>();

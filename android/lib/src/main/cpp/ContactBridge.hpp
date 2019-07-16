@@ -34,7 +34,11 @@ public:
     int getHumanStatus(const char* humanCode);
 
     int addFriend(const char* friendCode, const char* summary);
+    int acceptFriend(const char* friendCode);
     int getFriendList(std::stringstream* info);
+
+    int syncInfoDownloadFromDidChain();
+    int syncInfoUploadToDidChain();
 
 private:
     /*** type define ***/

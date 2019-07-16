@@ -10,7 +10,9 @@ import android.os.Looper;
 import android.os.Process;
 import android.provider.Settings;
 import android.support.annotation.RequiresPermission;
+import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
+import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
@@ -19,6 +21,7 @@ import android.widget.TextView;
 import com.blikoon.qrcodescanner.QrCodeActivity;
 
 import org.elastos.sdk.elephantwallet.contact.Contact;
+import org.elastos.sdk.elephantwallet.contact.internal.ContactListener;
 import org.elastos.sdk.elephantwallet.contact.internal.EventArgs;
 import org.elastos.sdk.elephantwallet.contact.internal.AcquireArgs;
 import org.elastos.sdk.elephantwallet.contact.internal.HumanInfo;
@@ -28,6 +31,7 @@ import org.w3c.dom.Text;
 
 import java.lang.reflect.Method;
 import java.security.KeyPair;
+import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends Activity {
@@ -37,8 +41,20 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        TextView txtMsg = findViewById(R.id.txt_message);
+        txtMsg.setMovementMethod(ScrollingMovementMethod.getInstance());
+        TextView txtCbMsg = findViewById(R.id.txt_event);
+        txtCbMsg.setMovementMethod(ScrollingMovementMethod.getInstance());
 
-        mSavedMnemonic = "bachelor sail glove swing despair lawsuit exhibit travel slot practice latin glass";
+        String devId = getDeviceId();
+        if(devId.startsWith("fa65a")) {
+            mSavedMnemonic = ElastosKeypair.generateMnemonic(KeypairLanguage, KeypairWords);
+            mSavedMnemonic = "bachelor sail glove swing despair lawsuit exhibit travel slot practice latin glass";
+        } else {
+            mSavedMnemonic = "bachelor sail glove swing despair lawsuit exhibit travel slot practice latin glass";
+        }
+        Log.i(TAG, "Device ID:" + devId);
+        Log.i(TAG, "Mnemonic:" + mSavedMnemonic);
     }
 
     @Override
@@ -60,25 +76,28 @@ public class MainActivity extends Activity {
             String message = testStart();
             showMessage(message);
         });
+        findViewById(R.id.btn_test_delcontact).setOnClickListener((view) -> {
+            String message = testDelContact();
+            showMessage(message);
+        });
 
         findViewById(R.id.btn_show_userinfo).setOnClickListener((view) -> {
             String message = showUserInfo();
             showMessage(message);
         });
-        findViewById(R.id.btn_scan_userinfo).setOnClickListener((view) -> {
-            scanUserInfo();
-        });
         findViewById(R.id.btn_list_friendinfo).setOnClickListener((view) -> {
             listFriendInfo();
         });
+        findViewById(R.id.btn_scan_userinfo).setOnClickListener((view) -> {
+            scanUserInfo();
+        });
 
-
-        findViewById(R.id.btn_test_delcontact).setOnClickListener((view) -> {
-            String message = testDelContact();
+        findViewById(R.id.btn_test_syncupload).setOnClickListener((view) -> {
+            String message = testSyncUpload();
             showMessage(message);
         });
-        findViewById(R.id.btn_test_dellistener).setOnClickListener((view) -> {
-            String message = testDelListener();
+        findViewById(R.id.btn_test_syncdownload).setOnClickListener((view) -> {
+            String message = testSyncDownload();
             showMessage(message);
         });
     }
@@ -151,6 +170,16 @@ public class MainActivity extends Activity {
         return "Success to start contact instance.";
     }
 
+    private String testDelContact() {
+        if(mContact == null) {
+            return "Contact is null.";
+        }
+
+        mContact = null;
+        System.gc(); // to test memory release
+        return "Success to delete a contact instance.";
+    }
+
     private String showUserInfo() {
         if (mContact == null) {
             return "Contact is null.";
@@ -158,7 +187,9 @@ public class MainActivity extends Activity {
 
         Contact.UserInfo info = mContact.getUserInfo();
 
-        Helper.showAddress(this, info.did, info.getCurrDevCarrierAddr());
+        Helper.showAddress(this, info.did, info.getCurrDevCarrierAddr(), v -> {
+            Helper.showDetails(MainActivity.this, info.toJson());
+        });
 
         return info.toString();
     }
@@ -196,49 +227,46 @@ public class MainActivity extends Activity {
             return "Contact is null.";
         }
 
-        List<String> friendList = mContact.listFriendInfo();
+        List<Contact.FriendInfo> friendList = mContact.listFriendInfo();
         if(friendList == null) {
             return "Failed to list friend info.";
         }
+        List<String> friendCodeList = new ArrayList<String>();
+        for(Contact.FriendInfo it: friendList) {
+            friendCodeList.add(it.humanCode);
+        }
 
-        ListView listView = new ListView(this);
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, friendList);
-        listView.setAdapter(adapter);
-        listView.setOnItemClickListener((parent, view, position, id) -> {
-            String friendCode = friendList.get(position);
-            Contact.FriendInfo friendInfo = mContact.getFriendInfo(friendCode);
+        Helper.showFriendList(this, friendCodeList, (parent, view, position, id) -> {
+            Contact.FriendInfo info = friendList.get(position);
+            Helper.showDetails(MainActivity.this, info.toJson());
         });
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage("Friend List");
-        builder.setView(listView);
-        builder.setPositiveButton("OK", (dialog, which) -> {
-            dialog.dismiss();
-        });
-        builder.create().show();
-
         return "Success to list friend info.";
     }
 
-    private String testDelContact() {
+    private String testSyncUpload() {
         if(mContact == null) {
             return "Contact is null.";
         }
 
-        mContact = null;
-        System.gc(); // to test memory release
-        return "Success to delete a contact instance.";
+        int ret = mContact.syncInfoUploadToDidChain();
+        if(ret < 0) {
+            return "Failed to call syncInfoUploadToDidChain() ret=" + ret;
+        }
+
+        return "Success to syncInfoUploadToDidChain.";
     }
 
-    private String testDelListener() {
-        if(mContactListener == null) {
+    private String testSyncDownload() {
+        if(mContact == null) {
             return "Contact is null.";
         }
 
-        mContactListener.unbind(); // to release native ref
-        mContactListener = null;
-        System.gc(); // to test memory release
-        return "Success to delete a contact listener instance.";
+        int ret = mContact.syncInfoDownloadFromDidChain();
+        if(ret < 0) {
+            return "Failed to call syncInfoDownloadToDidChain() ret=" + ret;
+        }
+
+        return "Success to syncInfoDownloadToDidChain.";
     }
 
     private byte[] processAcquire(AcquireArgs request) {
@@ -281,6 +309,10 @@ public class MainActivity extends Activity {
             case SentMessage:
                 break;
             case FriendRequest:
+                ContactListener.RequestEvent requestEvent = (ContactListener.RequestEvent) event;
+                Helper.showFriendRequest(this, requestEvent.humanCode, requestEvent.summary, v -> {
+                    mContact.acceptFriend(requestEvent.humanCode);
+                });
                 break;
             case FriendStatusChanged:
                 break;

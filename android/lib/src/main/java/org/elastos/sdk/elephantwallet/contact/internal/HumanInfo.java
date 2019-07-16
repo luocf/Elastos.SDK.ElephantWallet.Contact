@@ -74,9 +74,8 @@ public class HumanInfo {
         return 0;
     }
 
-    @Override
-    public String toString() {
-        Gson gson = new Gson();
+    public String toJson() {
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
         String val = gson.toJson(this);
         return val;
     }

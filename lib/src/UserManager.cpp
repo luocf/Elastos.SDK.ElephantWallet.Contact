@@ -133,6 +133,9 @@ int UserManager::restoreUserInfo()
         return ret;
     }
 
+    ret = mUserInfo->setHumanStatus(HumanInfo::Status::Online, HumanInfo::Status::Offline);
+    CHECK_ERROR(ret);
+
     return 0;
 }
 
