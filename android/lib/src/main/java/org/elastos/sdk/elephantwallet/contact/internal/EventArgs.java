@@ -1,7 +1,5 @@
 package org.elastos.sdk.elephantwallet.contact.internal;
 
-import org.elastos.sdk.elephantwallet.contact.ContactChannel;
-
 public class EventArgs {
     public enum Type {
         StatusChanged(101),

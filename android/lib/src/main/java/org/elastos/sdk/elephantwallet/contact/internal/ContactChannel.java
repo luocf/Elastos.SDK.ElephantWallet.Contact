@@ -1,4 +1,4 @@
-package org.elastos.sdk.elephantwallet.contact;
+package org.elastos.sdk.elephantwallet.contact.internal;
 
 public enum ContactChannel {
     Carrier(1),

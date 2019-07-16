@@ -35,6 +35,7 @@ public:
 
     virtual int serialize(std::string& value, bool summaryOnly = false) const override;
     virtual int deserialize(const std::string& value, bool summaryOnly = false) override;
+    virtual int toJson(std::shared_ptr<Json>& value) const override;
 
     virtual int addCarrierInfo(const CarrierInfo& info, const Status status) override;
     virtual int setHumanInfo(Item item, const std::string& value) override;

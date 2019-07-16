@@ -5,10 +5,11 @@
 //  Copyright © 2016 mengxk. All rights reserved.
 //
 
-#include <Contact.hpp>
+#include <ContactBridge.hpp>
 #include <SafePtr.hpp>
 
 #include "Log.hpp"
+#include "Json.hpp"
 
 /***********************************************/
 /***** static variables initialize *************/
@@ -22,19 +23,19 @@
 /***********************************************/
 /***** class public function implement  ********/
 /***********************************************/
-Contact::Contact()
+ContactBridge::ContactBridge()
         : mContactImpl()
 {
     Log::I(Log::TAG, "%s", __PRETTY_FUNCTION__);
 
     mContactImpl = elastos::Contact::Factory::Create();
 }
-Contact::~Contact()
+ContactBridge::~ContactBridge()
 {
     Log::I(Log::TAG, "%s", __PRETTY_FUNCTION__);
 }
 
-void Contact::setListener(CrossBase* listener)
+void ContactBridge::setListener(CrossBase* listener)
 {
     Log::I(Log::TAG, "%s", __PRETTY_FUNCTION__);
 
@@ -48,7 +49,7 @@ void Contact::setListener(CrossBase* listener)
     return;
 }
 
-int Contact::start()
+int ContactBridge::start()
 {
     Log::I(Log::TAG, "%s", __PRETTY_FUNCTION__);
 
@@ -57,7 +58,7 @@ int Contact::start()
     return ret;
 }
 
-int Contact::getHumanInfo(const char* humanCode, std::stringstream* info)
+int ContactBridge::getHumanInfo(const char* humanCode, std::stringstream* info)
 {
     if(humanCode == nullptr) {
         return elastos::ErrCode::InvalidArgument;
@@ -92,7 +93,7 @@ int Contact::getHumanInfo(const char* humanCode, std::stringstream* info)
     return 0;
 }
 
-int Contact::getHumanStatus(const char* humanCode)
+int ContactBridge::getHumanStatus(const char* humanCode)
 {
     auto weakUserMgr = mContactImpl->getUserManager();
     auto userMgr =  SAFE_GET_PTR(weakUserMgr);                                                                      \
@@ -111,7 +112,7 @@ int Contact::getHumanStatus(const char* humanCode)
     return static_cast<int>(status);
 }
 
-int Contact::addFriend(const char* friendCode, const char* summary)
+int ContactBridge::addFriend(const char* friendCode, const char* summary)
 {
     auto weakFriendMgr = mContactImpl->getFriendManager();
     auto friendMgr =  SAFE_GET_PTR(weakFriendMgr);                                                                      \
@@ -119,6 +120,28 @@ int Contact::addFriend(const char* friendCode, const char* summary)
     int ret = friendMgr->tryAddFriend(friendCode, summary);
     CHECK_ERROR(ret);
 
+    return 0;
+}
+
+int ContactBridge::getFriendList(std::stringstream* info)
+{
+    auto weakFriendMgr = mContactImpl->getFriendManager();
+    auto friendMgr =  SAFE_GET_PTR(weakFriendMgr);                                                                      \
+
+    std::vector<std::shared_ptr<elastos::FriendInfo>> friendList;
+    int ret = friendMgr->getFriendInfoList(friendList);
+    CHECK_ERROR(ret);
+
+    elastos::Json friendJsonArray = elastos::Json::array();
+    for(const auto& it: friendList) {
+        std::string humanCode;
+        ret = it->serialize(humanCode);
+        CHECK_ERROR(ret);
+
+        friendJsonArray.push_back(humanCode);
+    }
+
+    info->str(friendJsonArray.dump());
     return 0;
 }
 

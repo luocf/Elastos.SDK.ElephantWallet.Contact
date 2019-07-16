@@ -153,6 +153,17 @@ int IdentifyCode::deserialize(const std::string& value)
     return 0;
 }
 
+int IdentifyCode::toJson(std::shared_ptr<Json>& value) const
+{
+    auto jsonInfo = std::make_shared<Json>(Json::object());
+
+    (*jsonInfo)[JsonKey::CarrierSecretKeyMap] = mCarrierSecretKeyMap;
+    (*jsonInfo)[JsonKey::IdCodeMap] = mIdCodeMap;
+    value = jsonInfo;
+
+    return 0;
+}
+
 /***********************************************/
 /***** class protected function implement  *****/
 /***********************************************/

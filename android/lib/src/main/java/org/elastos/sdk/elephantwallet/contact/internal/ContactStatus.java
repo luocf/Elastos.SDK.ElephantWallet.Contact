@@ -1,4 +1,4 @@
-package org.elastos.sdk.elephantwallet.contact;
+package org.elastos.sdk.elephantwallet.contact.internal;
 
 public enum ContactStatus {
     Invalid(0x0),

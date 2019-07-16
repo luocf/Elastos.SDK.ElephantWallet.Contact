@@ -95,6 +95,22 @@ int FriendInfo::deserialize(const std::string& value, bool summaryOnly)
 
 }
 
+int FriendInfo::toJson(std::shared_ptr<Json>& value) const
+{
+    auto jsonInfo = std::make_shared<Json>(Json::object());
+
+    std::shared_ptr<Json> jsonClip;
+    int ret = HumanInfo::toJson(jsonClip);
+    CHECK_ERROR(ret)
+    (*jsonInfo)[JsonKey::HumanInfo] = *jsonClip;
+
+    (*jsonInfo)[JsonKey::Alias] = mAlias;
+
+    value = jsonInfo;
+
+    return 0;
+}
+
 int FriendInfo::addCarrierInfo(const CarrierInfo& info, const Status status)
 {
     int ret = HumanInfo::addCarrierInfo(info, status);

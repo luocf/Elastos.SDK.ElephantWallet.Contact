@@ -6,6 +6,10 @@
 
 namespace elastos {
 
+//class Json: public nlohmann::json {
+//
+//};
+
 using Json = nlohmann::json;
 
 } // namespace elastos

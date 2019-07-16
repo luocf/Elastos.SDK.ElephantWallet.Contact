@@ -2,8 +2,6 @@ package org.elastos.sdk.elephantwallet.contact.internal;
 
 import com.google.gson.Gson;
 
-import org.elastos.sdk.elephantwallet.contact.ContactStatus;
-
 import java.util.Map;
 
 public class UserInfo extends HumanInfo {
@@ -22,8 +20,7 @@ public class UserInfo extends HumanInfo {
 
     @Override
     public int deserialize(String value, ContactStatus status) {
-        Gson gson = new Gson();
-        Map<String, String> info = gson.fromJson(value, Map.class);
+        Map<String, String> info = new Gson().fromJson(value, Map.class);
 
         int ret = super.deserialize(info.get("HumanInfo"), status);
         if(ret < 0) {

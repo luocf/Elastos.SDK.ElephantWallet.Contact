@@ -7,6 +7,7 @@
 #include <vector>
 
 #include <ErrCode.hpp>
+#include <Json.hpp>
 
 namespace elastos {
 
@@ -76,10 +77,11 @@ public:
 
     virtual int setHumanStatus(HumanKind kind, const Status status);
     virtual int getHumanStatus(HumanKind kind, Status& status);
-    virtual Status getHumanStatus();
+    virtual Status getHumanStatus() const;
 
     virtual int serialize(std::string& value, bool summaryOnly = false) const;
     virtual int deserialize(const std::string& value, bool summaryOnly = false);
+    virtual int toJson(std::shared_ptr<Json>& value) const;
 protected:
     /*** type define ***/
 

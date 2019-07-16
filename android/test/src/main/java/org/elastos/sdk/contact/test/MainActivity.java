@@ -11,6 +11,9 @@ import android.os.Process;
 import android.provider.Settings;
 import android.support.annotation.RequiresPermission;
 import android.util.Log;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.blikoon.qrcodescanner.QrCodeActivity;
@@ -25,6 +28,7 @@ import org.w3c.dom.Text;
 
 import java.lang.reflect.Method;
 import java.security.KeyPair;
+import java.util.List;
 
 public class MainActivity extends Activity {
     public static final String TAG = "ContactTest";
@@ -61,10 +65,13 @@ public class MainActivity extends Activity {
             String message = showUserInfo();
             showMessage(message);
         });
-
         findViewById(R.id.btn_scan_userinfo).setOnClickListener((view) -> {
             scanUserInfo();
         });
+        findViewById(R.id.btn_list_friendinfo).setOnClickListener((view) -> {
+            listFriendInfo();
+        });
+
 
         findViewById(R.id.btn_test_delcontact).setOnClickListener((view) -> {
             String message = testDelContact();
@@ -172,13 +179,45 @@ public class MainActivity extends Activity {
                 dialog.dismiss();
             });
             builder.setPositiveButton("Add Friend", (dialog, which) -> {
-                mContact.addFriend(result, "Hello");
+                int ret = mContact.addFriend(result, "Hello");
+                if(ret < 0) {
+                    showMessage("Failed to add friend. ret=" + ret);
+                }
             });
             builder.create().show();
 
         });
 
         return;
+    }
+
+    private String listFriendInfo() {
+        if(mContact == null) {
+            return "Contact is null.";
+        }
+
+        List<String> friendList = mContact.listFriendInfo();
+        if(friendList == null) {
+            return "Failed to list friend info.";
+        }
+
+        ListView listView = new ListView(this);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, friendList);
+        listView.setAdapter(adapter);
+        listView.setOnItemClickListener((parent, view, position, id) -> {
+            String friendCode = friendList.get(position);
+            Contact.FriendInfo friendInfo = mContact.getFriendInfo(friendCode);
+        });
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage("Friend List");
+        builder.setView(listView);
+        builder.setPositiveButton("OK", (dialog, which) -> {
+            dialog.dismiss();
+        });
+        builder.create().show();
+
+        return "Success to list friend info.";
     }
 
     private String testDelContact() {

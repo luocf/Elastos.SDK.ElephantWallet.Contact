@@ -24,6 +24,8 @@ struct JsonKey {
     static constexpr const char* BoundCarrierStatus = "BoundCarrierStatus";
     static constexpr const char* CommonInfoMap = "CommonInfoMap";
     static constexpr const char* StatusMap = "StatusMap";
+    static constexpr const char* Status = "Status";
+    static constexpr const char* HumanCode = "HumanCode";
 };
 
 
@@ -365,7 +367,7 @@ int HumanInfo::getHumanStatus(HumanInfo::HumanKind kind, HumanInfo::Status& stat
     return 0;
 }
 
-HumanInfo::Status HumanInfo::getHumanStatus()
+HumanInfo::Status HumanInfo::getHumanStatus() const
 {
     Status status = Status::Invalid;
 
@@ -474,6 +476,23 @@ int HumanInfo::deserialize(const std::string& value, bool summaryOnly)
         mBoundCarrierStatus = jsonInfo[JsonKey::BoundCarrierStatus].get<std::vector<Status>>();
         mStatusMap = jsonInfo[JsonKey::StatusMap].get<std::map<HumanKind, Status>>();
     }
+
+    return 0;
+}
+
+int HumanInfo::toJson(std::shared_ptr<Json>& value) const
+{
+    std::string humanCode;
+    int ret = getHumanCode(humanCode);
+    CHECK_ERROR(ret);
+
+    auto jsonInfo = std::make_shared<Json>(Json::object());
+    (*jsonInfo)[JsonKey::CommonInfoMap] = mCommonInfoMap;
+    (*jsonInfo)[JsonKey::BoundCarrierArray] = mBoundCarrierArray;
+    (*jsonInfo)[JsonKey::Status] = getHumanStatus();
+    (*jsonInfo)[JsonKey::HumanCode] = humanCode;
+
+    value = jsonInfo;
 
     return 0;
 }

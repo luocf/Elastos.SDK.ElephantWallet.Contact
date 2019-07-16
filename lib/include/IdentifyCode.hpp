@@ -4,7 +4,8 @@
 #include <map>
 #include <string>
 
-#include "ErrCode.hpp"
+#include <ErrCode.hpp>
+#include <Json.hpp>
 
 namespace elastos {
 
@@ -31,6 +32,7 @@ public:
                           bool withCarrierSecKey = true,
                           bool withIdCode = true) const;
     virtual int deserialize(const std::string& value);
+    virtual int toJson(std::shared_ptr<Json>& value) const;
     // virtual int print(std::string value);
 
     virtual int mergeIdentifyCode(const IdentifyCode& value);

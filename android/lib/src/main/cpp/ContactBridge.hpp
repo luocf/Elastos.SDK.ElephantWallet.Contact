@@ -8,8 +8,8 @@
  * @copyright	(c) 2012 xxx All rights reserved.
  **/
 
-#ifndef _ELASTOS_SDK_JNI_CONTACT_HPP_
-#define _ELASTOS_SDK_JNI_CONTACT_HPP_
+#ifndef _ELASTOS_SDK_JNI_CONTACT_BRIDGE_HPP_
+#define _ELASTOS_SDK_JNI_CONTACT_BRIDGE_HPP_
 
 #include <sstream>
 
@@ -17,15 +17,15 @@
 #include <CrossBase.hpp>
 #include <Elastos.SDK.Contact.hpp>
 
-class Contact {
+class ContactBridge {
 public:
     /*** type define ***/
 
     /*** static function and variable ***/
 
     /*** class function and variable ***/
-    explicit Contact();
-    virtual ~Contact();
+    explicit ContactBridge();
+    virtual ~ContactBridge();
 
     void setListener(CrossBase* listener);
     int start();
@@ -34,6 +34,7 @@ public:
     int getHumanStatus(const char* humanCode);
 
     int addFriend(const char* friendCode, const char* summary);
+    int getFriendList(std::stringstream* info);
 
 private:
     /*** type define ***/
@@ -46,4 +47,4 @@ private:
 
 }; // class Contact
 
-#endif /* _ELASTOS_SDK_JNI_CONTACT_HPP_ */
+#endif /* _ELASTOS_SDK_JNI_CONTACT_BRIDGE_HPP_ */

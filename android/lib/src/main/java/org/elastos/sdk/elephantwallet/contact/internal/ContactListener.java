@@ -1,13 +1,14 @@
-package org.elastos.sdk.elephantwallet.contact;
+package org.elastos.sdk.elephantwallet.contact.internal;
 
 import android.util.Log;
 
+import org.elastos.sdk.elephantwallet.contact.Contact;
 import org.elastos.tools.crosspl.CrossBase;
 import org.elastos.tools.crosspl.annotation.CrossClass;
 import org.elastos.tools.crosspl.annotation.CrossInterface;
 
 @CrossClass
-abstract class ContactListener extends CrossBase {
+public abstract class ContactListener extends CrossBase {
     public abstract byte[] onAcquire(AcquireArgs request);
     public abstract void onEvent(EventArgs event);
     public abstract void onError(int errCode, String errStr);

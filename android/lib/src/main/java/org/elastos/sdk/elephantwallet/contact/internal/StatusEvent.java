@@ -1,7 +1,5 @@
 package org.elastos.sdk.elephantwallet.contact.internal;
 
-import org.elastos.sdk.elephantwallet.contact.ContactStatus;
-
 public class StatusEvent extends EventArgs {
     public StatusEvent(int type, String humanCode, int channelType, byte[] data) {
         super(type, humanCode, channelType, data);
