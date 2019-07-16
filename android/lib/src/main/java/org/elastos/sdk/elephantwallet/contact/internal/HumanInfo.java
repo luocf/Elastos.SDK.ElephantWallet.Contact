@@ -1,5 +1,7 @@
 package org.elastos.sdk.elephantwallet.contact.internal;
 
+import android.support.annotation.CallSuper;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.SerializedName;
@@ -32,7 +34,14 @@ public class HumanInfo {
         public String toString() { return Utils.ToString(this); }
     }
 
+    @SerializedName(BoundCarrierArray)
+    public List<CarrierInfo> boundCarrierArray;
+    @SerializedName(CommonInfoMap)
+    private HashMap<Integer, String> commonInfoMap;
+    @SerializedName(Status)
     public ContactStatus status;
+    @SerializedName(HumanCode)
+    public String humanCode;
 
     public String chainPubKey;
     public String did;
@@ -41,24 +50,26 @@ public class HumanInfo {
     public String avatar;
     public String gender;
     public String description;
-    @SerializedName(BoundCarrierArray)
-    public List<CarrierInfo> boundCarrierArray;
 
-    public int deserialize(String value, ContactStatus status) {
-        Gson gson = new Gson();
+    @CallSuper
+    public int fromJson(String value) {
+        HumanJson info = new Gson().fromJson(value, HumanJson.class);
+        if(info.humanInfo == null) {
+            return -1;
+        }
 
-        HumanInfo info = gson.fromJson(value, HumanInfo.class);
-        info.chainPubKey = info.commonInfoMap.get(Item.ChainPubKey.id());
-        this.did = info.commonInfoMap.get(Item.Did.id());
-        this.elaAddress = info.commonInfoMap.get(Item.ElaAddress.id());
-        this.nickname = info.commonInfoMap.get(Item.Nickname.id());
-        this.avatar = info.commonInfoMap.get(Item.Avatar.id());
-        this.gender = info.commonInfoMap.get(Item.Gender.id());
-        this.description = info.commonInfoMap.get(Item.Description.id());
         this.commonInfoMap = null;
-        this.boundCarrierArray = info.boundCarrierArray;
+        this.boundCarrierArray = info.humanInfo.boundCarrierArray;
+        this.status = info.humanInfo.status;
+        this.humanCode = info.humanInfo.humanCode;
 
-        this.status = status;
+        this.chainPubKey = info.humanInfo.commonInfoMap.get(Item.ChainPubKey.id());
+        this.did = info.humanInfo.commonInfoMap.get(Item.Did.id());
+        this.elaAddress = info.humanInfo.commonInfoMap.get(Item.ElaAddress.id());
+        this.nickname = info.humanInfo.commonInfoMap.get(Item.Nickname.id());
+        this.avatar = info.humanInfo.commonInfoMap.get(Item.Avatar.id());
+        this.gender = info.humanInfo.commonInfoMap.get(Item.Gender.id());
+        this.description = info.humanInfo.commonInfoMap.get(Item.Description.id());
 
         return 0;
     }
@@ -98,9 +109,13 @@ public class HumanInfo {
         private int id;
     }
 
-    @SerializedName(CommonInfoMap)
-    private HashMap<Integer, String> commonInfoMap;
+    private class HumanJson {
+        @SerializedName("HumanInfo")
+        HumanInfo humanInfo;
+    }
 
     private static final String BoundCarrierArray = "BoundCarrierArray";
     private static final String CommonInfoMap = "CommonInfoMap";
+    private static final String Status = "Status";
+    private static final String HumanCode = "HumanCode";
 } // class Factory

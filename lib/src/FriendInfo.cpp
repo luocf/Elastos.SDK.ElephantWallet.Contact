@@ -97,16 +97,14 @@ int FriendInfo::deserialize(const std::string& value, bool summaryOnly)
 
 int FriendInfo::toJson(std::shared_ptr<Json>& value) const
 {
-    auto jsonInfo = std::make_shared<Json>(Json::object());
+    if(value.get() == nullptr) {
+        return ErrCode::InvalidArgument;
+    }
 
-    std::shared_ptr<Json> jsonClip;
-    int ret = HumanInfo::toJson(jsonClip);
+    int ret = HumanInfo::toJson(value);
     CHECK_ERROR(ret)
-    (*jsonInfo)[JsonKey::HumanInfo] = *jsonClip;
 
-    (*jsonInfo)[JsonKey::Alias] = mAlias;
-
-    value = jsonInfo;
+    (*value)[JsonKey::Alias] = mAlias;
 
     return 0;
 }

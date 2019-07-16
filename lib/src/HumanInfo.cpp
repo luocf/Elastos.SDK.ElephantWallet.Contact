@@ -20,6 +20,8 @@ namespace elastos {
 /***** static variables initialize *************/
 /***********************************************/
 struct JsonKey {
+    static constexpr const char* HumanInfo = "HumanInfo";
+
     static constexpr const char* BoundCarrierArray = "BoundCarrierArray";
     static constexpr const char* BoundCarrierStatus = "BoundCarrierStatus";
     static constexpr const char* CommonInfoMap = "CommonInfoMap";
@@ -482,17 +484,21 @@ int HumanInfo::deserialize(const std::string& value, bool summaryOnly)
 
 int HumanInfo::toJson(std::shared_ptr<Json>& value) const
 {
+    if(value.get() == nullptr) {
+        return ErrCode::InvalidArgument;
+    }
+
     std::string humanCode;
     int ret = getHumanCode(humanCode);
     CHECK_ERROR(ret);
 
-    auto jsonInfo = std::make_shared<Json>(Json::object());
-    (*jsonInfo)[JsonKey::CommonInfoMap] = mCommonInfoMap;
-    (*jsonInfo)[JsonKey::BoundCarrierArray] = mBoundCarrierArray;
-    (*jsonInfo)[JsonKey::Status] = getHumanStatus();
-    (*jsonInfo)[JsonKey::HumanCode] = humanCode;
+    Json jsonInfo;
+    jsonInfo[JsonKey::CommonInfoMap] = mCommonInfoMap;
+    jsonInfo[JsonKey::BoundCarrierArray] = mBoundCarrierArray;
+    jsonInfo[JsonKey::Status] = getHumanStatus();
+    jsonInfo[JsonKey::HumanCode] = humanCode;
 
-    value = jsonInfo;
+    (*value)[JsonKey::HumanInfo] = jsonInfo;
 
     return 0;
 }

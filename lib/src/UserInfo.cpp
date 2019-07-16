@@ -95,18 +95,15 @@ int UserInfo::deserialize(const std::string& value, bool summaryOnly)
 
 int UserInfo::toJson(std::shared_ptr<Json>& value) const
 {
-    auto jsonInfo = std::make_shared<Json>(Json::object());
+    if(value.get() == nullptr) {
+        return ErrCode::InvalidArgument;
+    }
 
-    std::shared_ptr<Json> jsonClip;
-    int ret = HumanInfo::toJson(jsonClip);
+    int ret = HumanInfo::toJson(value);
     CHECK_ERROR(ret)
-    (*jsonInfo)[JsonKey::HumanInfo] = *jsonClip;
 
-    ret = IdentifyCode::toJson(jsonClip);
+    ret = IdentifyCode::toJson(value);
     CHECK_ERROR(ret)
-    (*jsonInfo)[JsonKey::IdentifyCode] = *jsonClip;
-
-    value = jsonInfo;
 
     return 0;
 }

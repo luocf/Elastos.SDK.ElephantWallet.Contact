@@ -19,10 +19,8 @@ public class UserInfo extends HumanInfo {
     }
 
     @Override
-    public int deserialize(String value, ContactStatus status) {
-        Map<String, String> info = new Gson().fromJson(value, Map.class);
-
-        int ret = super.deserialize(info.get("HumanInfo"), status);
+    public int fromJson(String value) {
+        int ret = super.fromJson(value);
         if(ret < 0) {
             return ret;
         }

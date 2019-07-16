@@ -85,11 +85,11 @@ int ContactBridge::getHumanInfo(const char* humanCode, std::stringstream* info)
     }
     CHECK_ERROR(ret);
 
-    std::string infoStr;
-    ret = humanInfo->serialize(infoStr, true);
+    auto jsonInfo = std::make_shared<elastos::Json>();
+    ret = humanInfo->toJson(jsonInfo);
     CHECK_ERROR(ret);
 
-    info->str(infoStr);
+    info->str(jsonInfo->dump());
     return 0;
 }
 

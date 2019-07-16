@@ -17,6 +17,8 @@ namespace elastos {
 /***** static variables initialize *************/
 /***********************************************/
 struct JsonKey {
+    static constexpr const char* IdentifyCode = "IdentifyCode";
+
     static constexpr const char* CarrierSecretKeyMap = "CarrierSecretKeyMap";
     static constexpr const char* IdCodeMap = "IdCodeMap";
 };
@@ -155,11 +157,15 @@ int IdentifyCode::deserialize(const std::string& value)
 
 int IdentifyCode::toJson(std::shared_ptr<Json>& value) const
 {
-    auto jsonInfo = std::make_shared<Json>(Json::object());
+    if(value.get() == nullptr) {
+        return ErrCode::InvalidArgument;
+    }
 
-    (*jsonInfo)[JsonKey::CarrierSecretKeyMap] = mCarrierSecretKeyMap;
-    (*jsonInfo)[JsonKey::IdCodeMap] = mIdCodeMap;
-    value = jsonInfo;
+    Json jsonInfo;
+    jsonInfo[JsonKey::CarrierSecretKeyMap] = mCarrierSecretKeyMap;
+    jsonInfo[JsonKey::IdCodeMap] = mIdCodeMap;
+
+    (*value)[JsonKey::IdentifyCode] = jsonInfo;
 
     return 0;
 }

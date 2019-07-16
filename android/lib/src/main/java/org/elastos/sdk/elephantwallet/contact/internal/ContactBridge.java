@@ -37,13 +37,11 @@ public class ContactBridge extends CrossBase {
 
         Contact.UserInfo userInfo = new Contact.UserInfo();
 
-        ret  = userInfo.deserialize(json.toString(), ContactStatus.Invalid);
+        ret  = userInfo.fromJson(json.toString());
         if(ret < 0) {
             Log.w(TAG, "Failed to deserialize user info. ret=" + ret);
             return null;
         }
-
-        userInfo.status = getStatus(userInfo.did);
 
         return userInfo;
     }

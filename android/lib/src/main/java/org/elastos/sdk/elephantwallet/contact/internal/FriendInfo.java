@@ -6,11 +6,8 @@ import java.util.Map;
 
 public class FriendInfo extends HumanInfo {
     @Override
-    public int deserialize(String value, ContactStatus status) {
-        Gson gson = new Gson();
-        Map<String, String> info = gson.fromJson(value, Map.class);
-
-        int ret = super.deserialize(info.get("HumanInfo"), status);
+    public int fromJson(String value) {
+        int ret = super.fromJson(value);
         if(ret < 0) {
             return ret;
         }
