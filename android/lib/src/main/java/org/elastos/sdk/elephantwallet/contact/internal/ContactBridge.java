@@ -3,12 +3,14 @@ package org.elastos.sdk.elephantwallet.contact.internal;
 import android.util.Log;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import org.elastos.sdk.elephantwallet.contact.Contact;
 import org.elastos.tools.crosspl.CrossBase;
 import org.elastos.tools.crosspl.annotation.CrossClass;
 import org.elastos.tools.crosspl.annotation.CrossInterface;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @CrossClass
@@ -41,16 +43,18 @@ public class ContactBridge extends CrossBase {
     public Contact.UserInfo getUserInfo() {
         assert(mListener != null);
 
-        StringBuffer json = new StringBuffer();
-        int ret = getHumanInfo("-user-info-", json);
+        StringBuffer sbInfo = new StringBuffer();
+        int ret = getHumanInfo("-user-info-", sbInfo);
         if(ret < 0) {
             Log.w(TAG, "Failed to get user info. ret=" + ret);
             return null;
         }
 
+
         Contact.UserInfo userInfo = new Contact.UserInfo();
 
-        ret  = userInfo.fromJson(json.toString());
+        Contact.UserInfo.UserJson json = new Gson().fromJson(sbInfo.toString(), Contact.UserInfo.UserJson.class);
+        ret  = userInfo.fromJson(json);
         if(ret < 0) {
             Log.w(TAG, "Failed to deserialize user info. ret=" + ret);
             return null;
@@ -69,7 +73,20 @@ public class ContactBridge extends CrossBase {
             return null;
         }
 
-        List<Contact.FriendInfo> list = new Gson().fromJson(json.toString(), List.class);
+        TypeToken<List<Contact.FriendInfo.FriendJson>> friendInfoListType = new TypeToken<List<Contact.FriendInfo.FriendJson>>(){};
+        List<Contact.FriendInfo.FriendJson> listJson = new Gson().fromJson(json.toString(), friendInfoListType.getType());
+
+        List<Contact.FriendInfo> list = new ArrayList<>();
+        for(Contact.FriendInfo.FriendJson it: listJson) {
+            Contact.FriendInfo friendInfo = new Contact.FriendInfo();
+            ret  = friendInfo.fromJson(it);
+            if(ret < 0) {
+                Log.w(TAG, "Failed to deserialize friend info. ret=" + ret);
+                return null;
+            }
+
+            list.add(friendInfo);
+        }
 
         return list;
     }

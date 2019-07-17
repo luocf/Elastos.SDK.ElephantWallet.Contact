@@ -31,21 +31,25 @@ void CrossPLUtils::SetJavaVM(JavaVM* jvm)
     sJVM = jvm;
 }
 
-std::unique_ptr<JNIEnv, std::function<void(JNIEnv*)>> CrossPLUtils::SafeGetEnv()
+std::shared_ptr<JNIEnv> CrossPLUtils::SafeGetEnv()
 {
-    std::unique_ptr<JNIEnv, std::function<void(JNIEnv*)>> ret;
+    std::shared_ptr<JNIEnv> ret;
     bool needDetach = false;
     std::thread::id threadId = std::this_thread::get_id();
 
-    JNIEnv* jenv;
-    jint jret = sJVM->GetEnv((void **) &jenv, JNI_VERSION_1_6);
-    if (jret != JNI_OK) {
-        jret = sJVM->AttachCurrentThread(&jenv, nullptr);
+    auto creater = [&]() -> JNIEnv* {
+        JNIEnv *jenv;
+        jint jret = sJVM->GetEnv((void **) &jenv, JNI_VERSION_1_6);
         if (jret != JNI_OK) {
-            throw std::runtime_error("CrossPL: Failed to get jni env, AttachCurrentThread return error");
+            jret = sJVM->AttachCurrentThread(&jenv, nullptr);
+            if (jret != JNI_OK) {
+                throw std::runtime_error(
+                        "CrossPL: Failed to get jni env, AttachCurrentThread return error");
+            }
+            needDetach = true;
         }
-        needDetach = true;
-    }
+        return jenv;
+    };
 
     auto deleter = [=](JNIEnv* jenv) -> void {
         EnsureRunOnThread(threadId);
@@ -54,7 +58,7 @@ std::unique_ptr<JNIEnv, std::function<void(JNIEnv*)>> CrossPLUtils::SafeGetEnv()
         }
     };
 
-    ret = std::unique_ptr<JNIEnv, std::function<void(JNIEnv*)>>(jenv, deleter);
+    ret = std::shared_ptr<JNIEnv>(creater(), deleter);
 
     return ret;
 }
@@ -144,18 +148,17 @@ std::shared_ptr<std::span<uint8_t>> CrossPLUtils::SafeCastByteArray(JNIEnv* jenv
         return ret; // nullptr
     }
 
+    auto jenvLocal = SafeGetEnv();
     auto creater = [=]() -> std::span<uint8_t>* {
         EnsureRunOnThread(threadId);
-        auto jenv = SafeGetEnv();
-        jbyte* arrayPtr = jenv->GetByteArrayElements(jdata, nullptr);
-        jsize arrayLen = jenv->GetArrayLength(jdata);
+        jbyte* arrayPtr = jenvLocal->GetByteArrayElements(jdata, nullptr);
+        jsize arrayLen = jenvLocal->GetArrayLength(jdata);
         auto retPtr = new std::span<uint8_t>(reinterpret_cast<uint8_t*>(arrayPtr), arrayLen);
         return retPtr;
     };
     auto deleter = [=](std::span<uint8_t>* ptr) -> void {
         EnsureRunOnThread(threadId);
-        auto jenv = SafeGetEnv();
-        jenv->ReleaseByteArrayElements(jdata, reinterpret_cast<jbyte*>(ptr->data()), JNI_ABORT);
+        jenvLocal->ReleaseByteArrayElements(jdata, reinterpret_cast<jbyte*>(ptr->data()), JNI_ABORT);
         delete ptr;
     };
 

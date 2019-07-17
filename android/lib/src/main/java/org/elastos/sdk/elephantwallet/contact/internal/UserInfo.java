@@ -1,10 +1,9 @@
 package org.elastos.sdk.elephantwallet.contact.internal;
 
-import com.google.gson.Gson;
-
-import java.util.Map;
-
 public class UserInfo extends HumanInfo {
+    public class UserJson extends HumanJson {
+    }
+
     public static void setCurrDevId(String devId) {
         mCurrDevId = devId;
     }
@@ -19,8 +18,12 @@ public class UserInfo extends HumanInfo {
     }
 
     @Override
-    public int fromJson(String value) {
-        int ret = super.fromJson(value);
+    public int fromJson(HumanJson info) {
+        if(info instanceof UserJson == false) {
+            return -1;
+        }
+
+        int ret = super.fromJson(info);
         if(ret < 0) {
             return ret;
         }

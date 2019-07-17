@@ -136,6 +136,10 @@ int HumanInfo::getHumanCode(std::string& humanCode) const
     if (carrierSize > 0) {
         const auto& carrierInfo = mBoundCarrierArray[0];
         humanCode = carrierInfo.mUsrAddr;
+        if (humanCode.empty() == true) {
+            humanCode = carrierInfo.mUsrId;
+        }
+
         if (humanCode.empty() == false) {
             return 0;
         }

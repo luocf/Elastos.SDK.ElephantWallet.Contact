@@ -50,7 +50,7 @@ int Contact::Factory::SetLocalDataDir(const std::string& dir)
     }
 
     sLocalDataDir = dir;
-    Log::D(Log::TAG, "set local data dir: %d", sLocalDataDir.c_str());
+    Log::D(Log::TAG, "set local data dir: %s", sLocalDataDir.c_str());
 
     return 0;
 }

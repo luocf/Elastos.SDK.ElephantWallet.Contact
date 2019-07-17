@@ -20,7 +20,7 @@ public:
 
     /*** static function and variable ***/
     static void SetJavaVM(JavaVM* jvm);
-    static std::unique_ptr<JNIEnv, std::function<void(JNIEnv*)>> SafeGetEnv();
+    static std::shared_ptr<JNIEnv> SafeGetEnv();
     static jclass FindJavaClass(JNIEnv* jenv, const char* className);
 
     static std::shared_ptr<const char> SafeCastString(JNIEnv* jenv, jstring jdata);

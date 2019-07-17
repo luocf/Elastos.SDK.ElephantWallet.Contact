@@ -26,6 +26,6 @@ public final class Contact extends ContactBridge {
     public static final class UserInfo extends org.elastos.sdk.elephantwallet.contact.internal.UserInfo {
     } // class UserInfo
 
-    public final class FriendInfo extends org.elastos.sdk.elephantwallet.contact.internal.FriendInfo {
+    public static final class FriendInfo extends org.elastos.sdk.elephantwallet.contact.internal.FriendInfo {
     } // class FriendInfo
 }

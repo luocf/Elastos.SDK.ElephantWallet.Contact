@@ -67,13 +67,17 @@ std::shared_ptr<elastos::SecurityManager::SecurityListener> ContactListener::mak
 
         std::string onAcquirePublicKey() override {
             Log::I(Log::TAG, "%s", __PRETTY_FUNCTION__);
+            if(mCachedPublicKey.empty() == false) {
+                return mCachedPublicKey;
+            }
+
             auto ret = sContactListenerInstance->onAcquire(AcquireType::PublicKey, nullptr, nullptr);
             if(ret.get() == nullptr) {
                 return "";
             }
 
-            std::string pubKey(reinterpret_cast<char*>(ret->data()));
-            return pubKey;
+            mCachedPublicKey = std::string(reinterpret_cast<char*>(ret->data()), ret->size());
+            return mCachedPublicKey;
         }
 
         std::vector<uint8_t> onEncryptData(const std::string& pubKey, const std::vector<uint8_t>& src) override {
@@ -101,13 +105,17 @@ std::shared_ptr<elastos::SecurityManager::SecurityListener> ContactListener::mak
 
         std::string onAcquireDidPropAppId() override {
             Log::I(Log::TAG, "%s", __PRETTY_FUNCTION__);
+            if(mCachedDidPropAppId.empty() == false) {
+                return mCachedDidPropAppId;
+            }
+
             auto ret = sContactListenerInstance->onAcquire(AcquireType::DidPropAppId, nullptr, nullptr);
             if(ret.get() == nullptr) {
                 return "";
             }
 
-            std::string appId(reinterpret_cast<char*>(ret->data()));
-            return appId;
+            mCachedDidPropAppId = std::string(reinterpret_cast<char*>(ret->data()), ret->size());
+            return mCachedDidPropAppId;
         }
 
         std::string onAcquireDidAgentAuthHeader() override {
@@ -117,7 +125,7 @@ std::shared_ptr<elastos::SecurityManager::SecurityListener> ContactListener::mak
                 return "";
             }
 
-            std::string authHeader(reinterpret_cast<char*>(ret->data()));
+            std::string authHeader(reinterpret_cast<char*>(ret->data()), ret->size());
             return authHeader;
         }
 
@@ -132,6 +140,10 @@ std::shared_ptr<elastos::SecurityManager::SecurityListener> ContactListener::mak
             std::vector<uint8_t> unsignedData(ret->data(), ret->data() + ret->size());
             return unsignedData;
         }
+
+    private:
+        std::string mCachedPublicKey;
+        std::string mCachedDidPropAppId;
     };
 
     return std::make_shared<SecurityListener>();

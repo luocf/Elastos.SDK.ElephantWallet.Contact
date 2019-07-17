@@ -8,6 +8,8 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.view.View;
@@ -42,11 +44,11 @@ public class Helper {
         void onScanResult(String result);
     };
 
-    public static void showAddress(Context context, String did, String carrier, View.OnClickListener listener) {
+    public static void showAddress(Context context, String[] humanCode, String presentDevId, View.OnClickListener listener) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle("My Address");
         try {
-            View root = makeAddressView(context, did, carrier, listener);
+            View root = makeAddressView(context, humanCode, presentDevId, listener);
             builder.setView(root);
         } catch (Exception e) {
             builder.setMessage("Failed to show address." + e);
@@ -55,7 +57,10 @@ public class Helper {
         builder.setPositiveButton("OK", (dialog, which) -> {
             dialog.dismiss();
         });
-        builder.create().show();
+
+        new Handler(Looper.getMainLooper()).post(() -> {
+            builder.create().show();
+        });
     }
 
     public static void showDetails(Context context, String msg) {
@@ -65,7 +70,10 @@ public class Helper {
         builder.setPositiveButton("OK", (dialog, which) -> {
             dialog.dismiss();
         });
-        builder.create().show();
+
+        new Handler(Looper.getMainLooper()).post(() -> {
+            builder.create().show();
+        });
     }
 
     public static void showFriendList(Context context, List<String> friendList, AdapterView.OnItemClickListener listener) {
@@ -80,15 +88,18 @@ public class Helper {
         builder.setPositiveButton("OK", (dialog, which) -> {
             dialog.dismiss();
         });
-        builder.create().show();
+
+        new Handler(Looper.getMainLooper()).post(() -> {
+            builder.create().show();
+        });
     }
 
     public static void showFriendRequest(Context context, String humanCode, String summary, View.OnClickListener listener) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle("Friend Request");
         String msg = new String();
-        msg += "FriendCode:\n  " + humanCode + "\n";
-        msg += "Summary:=n  " + summary;
+        msg += "FriendCode:\n  " + humanCode + "\n\n";
+        msg += "Summary:\n  " + summary;
         builder.setMessage(msg);
         builder.setPositiveButton("Accept", (dialog, which) -> {
             listener.onClick(null);
@@ -96,7 +107,10 @@ public class Helper {
         builder.setNegativeButton("Cannel", (dialog, which) -> {
             dialog.dismiss();
         });
-        builder.create().show();
+
+        new Handler(Looper.getMainLooper()).post(() -> {
+            builder.create().show();
+        });
     }
 
     public static void scanAddress(MainActivity activity, OnScanListener listener) {
@@ -155,9 +169,10 @@ public class Helper {
         }
     }
 
-    private static View makeAddressView(Context context, String did, String carrier, View.OnClickListener listener) {
+    private static View makeAddressView(Context context, String[] humanCode, String presentDevId, View.OnClickListener listener) {
+        TextView txtDevId = new TextView(context);
         ImageView image = new ImageView(context);
-        TextView txt = new TextView(context);
+        TextView txtCode = new TextView(context);
         RadioGroup radioGrp = new RadioGroup(context);
         Button btn = new Button(context);
 
@@ -172,19 +187,23 @@ public class Helper {
 
         LinearLayout root = new LinearLayout(context);
         root.setOrientation(LinearLayout.VERTICAL);
+        if(presentDevId != null) {
+            root.addView(txtDevId);
+            txtDevId.setText("Present DevId: " + presentDevId);
+        }
         root.addView(image);
-        root.addView(txt);
+        root.addView(txtCode);
         root.addView(radioGrp);
         root.addView(btn);
 
-        ViewGroup.MarginLayoutParams txtLayout = (ViewGroup.MarginLayoutParams) txt.getLayoutParams();
+        ViewGroup.MarginLayoutParams txtLayout = (ViewGroup.MarginLayoutParams) txtCode.getLayoutParams();
         txtLayout.setMargins(90, 10, 90, 20);
 
         radioGrp.setOnCheckedChangeListener((group, checkedId) -> {
-            String value = (checkedId == btnCarrier.getId() ? carrier : did);
+            String value = (checkedId == btnCarrier.getId() ? humanCode[1] : humanCode[0]);
             Bitmap bitmap = makeQRCode(value);
             image.setImageBitmap(bitmap);
-            txt.setText(value);
+            txtCode.setText(value);
         });
         radioGrp.check(btnDid.getId());
 

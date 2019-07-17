@@ -2,35 +2,22 @@ package org.elastos.sdk.contact.test;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Process;
 import android.provider.Settings;
-import android.support.annotation.RequiresPermission;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
 import android.widget.TextView;
-
-import com.blikoon.qrcodescanner.QrCodeActivity;
 
 import org.elastos.sdk.elephantwallet.contact.Contact;
 import org.elastos.sdk.elephantwallet.contact.internal.ContactListener;
 import org.elastos.sdk.elephantwallet.contact.internal.EventArgs;
 import org.elastos.sdk.elephantwallet.contact.internal.AcquireArgs;
-import org.elastos.sdk.elephantwallet.contact.internal.HumanInfo;
 import org.elastos.sdk.elephantwallet.contact.internal.Utils;
 import org.elastos.sdk.keypair.ElastosKeypair;
-import org.w3c.dom.Text;
-
-import java.lang.reflect.Method;
-import java.security.KeyPair;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,11 +34,12 @@ public class MainActivity extends Activity {
         txtCbMsg.setMovementMethod(ScrollingMovementMethod.getInstance());
 
         String devId = getDeviceId();
-        if(devId.startsWith("fa65a")) {
-            mSavedMnemonic = ElastosKeypair.generateMnemonic(KeypairLanguage, KeypairWords);
-            mSavedMnemonic = "bachelor sail glove swing despair lawsuit exhibit travel slot practice latin glass";
+        if(devId.startsWith("7134d")) {
+//            mSavedMnemonic = ElastosKeypair.generateMnemonic(KeypairLanguage, KeypairWords);
+            mSavedMnemonic = mUploadedMnemonic1;
         } else {
-            mSavedMnemonic = "bachelor sail glove swing despair lawsuit exhibit travel slot practice latin glass";
+            mSavedMnemonic = ElastosKeypair.generateMnemonic(KeypairLanguage, KeypairWords);
+//            mSavedMnemonic = mUploadedMnemonic2;
         }
         Log.i(TAG, "Device ID:" + devId);
         Log.i(TAG, "Mnemonic:" + mSavedMnemonic);
@@ -100,6 +88,13 @@ public class MainActivity extends Activity {
             String message = testSyncDownload();
             showMessage(message);
         });
+
+
+        findViewById(R.id.btn_clear_event).setOnClickListener((view) -> {
+            TextView txtCbMsg = findViewById(R.id.txt_event);
+            txtCbMsg.setText("");
+        });
+
     }
 
 
@@ -187,7 +182,10 @@ public class MainActivity extends Activity {
 
         Contact.UserInfo info = mContact.getUserInfo();
 
-        Helper.showAddress(this, info.did, info.getCurrDevCarrierAddr(), v -> {
+        String[] humanCode = {
+                info.did, info.getCurrDevCarrierAddr()
+        };
+        Helper.showAddress(this, humanCode, getDeviceId(), v -> {
             Helper.showDetails(MainActivity.this, info.toJson());
         });
 
@@ -373,12 +371,12 @@ public class MainActivity extends Activity {
     public void showEvent(String newMsg) {
         Handler handler = new Handler(Looper.getMainLooper());
         handler.post(() -> {
+            Log.i(TAG, newMsg);
+
             TextView txtCbMsg = findViewById(R.id.txt_event);
             String msg = txtCbMsg.getText().toString();
             msg += "\n";
             msg += newMsg;
-
-            Log.i(TAG, msg);
             txtCbMsg.setText(msg);
         });
     }
@@ -405,4 +403,7 @@ public class MainActivity extends Activity {
 
     private static final String KeypairLanguage = "english";
     private static final String KeypairWords = "";
+
+    private static final String mUploadedMnemonic1 = "ceiling detail diet cotton shed false under riot leaf wait escape busy";
+    private static final String mUploadedMnemonic2 = "grit immune viable world merge inner picnic young twelve inject rather spoil";
 }

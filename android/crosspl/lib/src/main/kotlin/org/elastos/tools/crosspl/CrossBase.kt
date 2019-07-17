@@ -15,6 +15,7 @@ open class CrossBase
 
     init {
         if(nativeHandle == 0L) {
+            Log.d(Utils.TAG, "CrossBase CreateNativeObject() className=$className")
             nativeHandle = CreateNativeObject(className)
         }
         Log.i(Utils.TAG, "construct " + toString())
@@ -51,7 +52,9 @@ open class CrossBase
 //    private var nativeHandle: Long = 0
     private companion object {
         init {
+            Log.d(Utils.TAG, "Loading libcrosspl.so ...")
             System.loadLibrary("crosspl")
+            Log.d(Utils.TAG, "Loaded libcrosspl.so ...")
         }
 
         @CrossInterface

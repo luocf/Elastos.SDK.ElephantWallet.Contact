@@ -145,7 +145,7 @@ int ContactBridge::getFriendList(std::stringstream* info)
 
     elastos::Json friendJsonArray = elastos::Json::array();
     for(const auto& it: friendList) {
-        std::shared_ptr<elastos::Json> jsonInfo;
+        auto jsonInfo = std::make_shared<elastos::Json>();
         ret = it->toJson(jsonInfo);
         CHECK_ERROR(ret);
 

@@ -10,6 +10,11 @@ import java.util.HashMap;
 import java.util.List;
 
 public class HumanInfo {
+    public class HumanJson {
+        @SerializedName("HumanInfo")
+        HumanInfo humanInfo;
+    }
+
     public class CarrierInfo {
         public class DeviceInfo {
             @SerializedName("DevId")
@@ -51,13 +56,20 @@ public class HumanInfo {
     public String gender;
     public String description;
 
-    @CallSuper
-    public int fromJson(String value) {
-        HumanJson info = new Gson().fromJson(value, HumanJson.class);
-        if(info.humanInfo == null) {
-            return -1;
-        }
+//    @CallSuper
+//    public int fromJson(String value) {
+//        HumanJson info = new Gson().fromJson(value, HumanJson.class);
+//        if (info.humanInfo == null) {
+//            return -1;
+//        }
+//
+//        int ret = fromJson(info);
+//
+//        return ret;
+//    }
 
+    @CallSuper
+    public int fromJson(HumanJson info) {
         this.commonInfoMap = null;
         this.boundCarrierArray = info.humanInfo.boundCarrierArray;
         this.status = info.humanInfo.status;
@@ -106,11 +118,6 @@ public class HumanInfo {
             this.id = id;
         }
         private int id;
-    }
-
-    private class HumanJson {
-        @SerializedName("HumanInfo")
-        HumanInfo humanInfo;
     }
 
     private static final String BoundCarrierArray = "BoundCarrierArray";
