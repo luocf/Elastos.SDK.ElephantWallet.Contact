@@ -18,6 +18,10 @@ public enum ContactStatus {
         return null;
     }
 
+    int id(){
+        return this.id;
+    }
+
     private ContactStatus(int id){
                        this.id = id;
                                     }

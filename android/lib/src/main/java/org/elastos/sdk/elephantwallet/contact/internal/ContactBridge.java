@@ -91,6 +91,21 @@ public class ContactBridge extends CrossBase {
         return list;
     }
 
+    public List<String> listFriendCode() {
+        List<String> friendCodeList = new ArrayList<String>();
+
+        List<Contact.FriendInfo> friendList = listFriendInfo();
+        if(friendList == null) {
+            return friendCodeList;
+        }
+
+        for(Contact.FriendInfo it: friendList) {
+            friendCodeList.add(it.humanCode);
+        }
+
+        return friendCodeList;
+    }
+
     public ContactStatus getStatus(String humanCode) {
         int ret = getHumanStatus(humanCode);
         if(ret < 0) {
@@ -98,6 +113,18 @@ public class ContactBridge extends CrossBase {
         }
 
         return ContactStatus.valueOf(ret);
+    }
+
+    public int sendMessage(String friendCode, ContactChannel channelType, byte[] message) {
+        int ret = sendMessage(friendCode, channelType.id(), message);
+
+        return ret;
+    }
+
+    public int sendTextMessage(String friendCode, ContactChannel channelType, String message) {
+        int ret = sendMessage(friendCode, channelType, message.getBytes());
+
+        return ret;
     }
 
     @CrossInterface
@@ -126,6 +153,9 @@ public class ContactBridge extends CrossBase {
 
     @CrossInterface
     private native int getHumanStatus(String humanCode);
+
+    @CrossInterface
+    private native int sendMessage(String friendCode, int channelType, byte[] message);
 
     private CrossBase mListener;
 

@@ -32,15 +32,19 @@
             <Button android:id="@+id/btn_show_userinfo"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="UserInfo"/>
+                android:text="UsrInfo"/>
             <Button android:id="@+id/btn_list_friendinfo"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="FriendInfo"/>
+                android:text="FndInfo"/>
             <Button android:id="@+id/btn_scan_userinfo"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Scan"/>
+            <Button android:id="@+id/btn_send_message"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="SendMsg"/>
         </LinearLayout>
         <LinearLayout
             android:layout_width="match_parent"

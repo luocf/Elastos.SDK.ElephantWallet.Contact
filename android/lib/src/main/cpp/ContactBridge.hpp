@@ -37,6 +37,8 @@ public:
     int acceptFriend(const char* friendCode);
     int getFriendList(std::stringstream* info);
 
+    int sendMessage(const char* friendCode, int chType, const std::span<uint8_t>* data);
+
     int syncInfoDownloadFromDidChain();
     int syncInfoUploadToDidChain();
 

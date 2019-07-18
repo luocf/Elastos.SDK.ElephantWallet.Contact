@@ -198,7 +198,7 @@ int HumanInfo::addCarrierInfo(const HumanInfo::CarrierInfo& info, const HumanInf
         //if(existsInfo.mDevInfo.mDevId == correctedInfo.mDevInfo.mDevId
         //&& existsInfo.mUsrAddr == correctedInfo.mUsrAddr) { // not changed
             //return 0;
-        if(existsInfo.mDevInfo.mDevId == correctedInfo.mDevInfo.mDevId) { // found same dev
+        if(existsInfo.mUsrId == correctedInfo.mUsrId) { // found same dev
             if(existsInfo.mDevInfo.mUpdateTime >= correctedInfo.mDevInfo.mUpdateTime) { // not changed
                 return ErrCode::IgnoreMergeOldInfo;
             } else { // update info
@@ -319,7 +319,17 @@ int HumanInfo::getHumanInfo(Item item, std::string& value) const
 
 int HumanInfo::mergeHumanInfo(const HumanInfo& value, const Status status)
 {
-    auto it = value.mCommonInfoMap.find(Item::Did);
+    auto it = value.mCommonInfoMap.find(Item::ChainPubKey);
+    if(it != value.mCommonInfoMap.end() && it->second.empty() == false) {
+        if(this->mCommonInfoMap[Item::ChainPubKey].empty() == false
+           && this->mCommonInfoMap[Item::ChainPubKey] != it->second) {
+            return ErrCode::MergeInfoFailed;
+        }
+
+        this->mCommonInfoMap[Item::ChainPubKey] = it->second;
+    }
+
+    it = value.mCommonInfoMap.find(Item::Did);
     if(it != value.mCommonInfoMap.end() && it->second.empty() == false) {
         if(this->mCommonInfoMap[Item::Did].empty() == false
         && this->mCommonInfoMap[Item::Did] != it->second) {

@@ -63,6 +63,7 @@ int Config::loadDefaultValues()
     mCarrierConfig->mHiveNodes.push_back({ "18.219.53.133", "9094" });
 
     mElaChainConfig = std::make_unique<ElaChainConfig>();
+    mElaChainConfig->mUrl = "https://api-wallet-ela.elastos.org/api/1";
     mElaChainConfig->mUrl = "https://api-wallet-ela-testnet.elastos.org/api/1";
     mElaChainConfig->mApi.mGetBalance = "/balance/"; //{address}
     mElaChainConfig->mApi.mCreateTx = "/createTx";
@@ -73,7 +74,8 @@ int Config::loadDefaultValues()
     mElaChainConfig->mApi.mGetHistory = "/history/"; //{address}
 
     mDidChainConfig = std::make_unique<DidChainConfig>();
-    mDidChainConfig->mUrl = "https://api-wallet-did-testnet.elastos.org/api/1";
+    mDidChainConfig->mUrl = "https://api-wallet-did.elastos.org/api/1";
+//    mDidChainConfig->mUrl = "https://api-wallet-did-testnet.elastos.org/api/1";
     mDidChainConfig->mApi = mElaChainConfig->mApi;
     mDidChainConfig->mAgentApi.mGetDidProps = "/didexplorer/did/"; //{did}
     mDidChainConfig->mAgentApi.mUploadDidProps = "/blockagent/upchain/data";

@@ -11,9 +11,12 @@ import android.provider.Settings;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.elastos.sdk.elephantwallet.contact.Contact;
+import org.elastos.sdk.elephantwallet.contact.internal.ContactChannel;
 import org.elastos.sdk.elephantwallet.contact.internal.ContactListener;
+import org.elastos.sdk.elephantwallet.contact.internal.ContactStatus;
 import org.elastos.sdk.elephantwallet.contact.internal.EventArgs;
 import org.elastos.sdk.elephantwallet.contact.internal.AcquireArgs;
 import org.elastos.sdk.elephantwallet.contact.internal.Utils;
@@ -78,6 +81,10 @@ public class MainActivity extends Activity {
         });
         findViewById(R.id.btn_scan_userinfo).setOnClickListener((view) -> {
             scanUserInfo();
+        });
+        findViewById(R.id.btn_send_message).setOnClickListener((view) -> {
+            String message = sendMessage();
+            showMessage(message);
         });
 
         findViewById(R.id.btn_test_syncupload).setOnClickListener((view) -> {
@@ -151,7 +158,7 @@ public class MainActivity extends Activity {
 
     private String testStart() {
         if(mContact == null) {
-            return "Contact is null.";
+            return ErrorPrefix + "Contact is null.";
         }
 
 //        mThread = new Thread(() -> {
@@ -167,7 +174,7 @@ public class MainActivity extends Activity {
 
     private String testDelContact() {
         if(mContact == null) {
-            return "Contact is null.";
+            return ErrorPrefix + "Contact is null.";
         }
 
         mContact = null;
@@ -177,7 +184,7 @@ public class MainActivity extends Activity {
 
     private String showUserInfo() {
         if (mContact == null) {
-            return "Contact is null.";
+            return ErrorPrefix + "Contact is null.";
         }
 
         Contact.UserInfo info = mContact.getUserInfo();
@@ -185,7 +192,7 @@ public class MainActivity extends Activity {
         String[] humanCode = {
                 info.did, info.getCurrDevCarrierAddr()
         };
-        Helper.showAddress(this, humanCode, getDeviceId(), v -> {
+        Helper.showAddress(this, humanCode, getDeviceId(), (result) -> {
             Helper.showDetails(MainActivity.this, info.toJson());
         });
 
@@ -194,27 +201,25 @@ public class MainActivity extends Activity {
 
     private void scanUserInfo() {
         if (mContact == null) {
-            showMessage("Contact is null.");
+            showMessage(ErrorPrefix + "Contact is null.");
+            return;
+        }
+
+        Contact.UserInfo info = mContact.getUserInfo();
+        if (mContact.getStatus(info.humanCode) != ContactStatus.Online) {
+            showMessage(ErrorPrefix + "Contact is not online.");
             return;
         }
 
         Helper.scanAddress(this, result -> {
             showMessage(result);
 
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setTitle("Find Address");
-            builder.setMessage(result);
-            builder.setNegativeButton("Cancel", (dialog, which) -> {
-                dialog.dismiss();
-            });
-            builder.setPositiveButton("Add Friend", (dialog, which) -> {
+            Helper.showAddFriend(this, result, (friendCode) -> {
                 int ret = mContact.addFriend(result, "Hello");
                 if(ret < 0) {
-                    showMessage("Failed to add friend. ret=" + ret);
+                    showMessage(ErrorPrefix + "Failed to add friend. ret=" + ret);
                 }
             });
-            builder.create().show();
-
         });
 
         return;
@@ -222,33 +227,57 @@ public class MainActivity extends Activity {
 
     private String listFriendInfo() {
         if(mContact == null) {
-            return "Contact is null.";
+            return ErrorPrefix + "Contact is null.";
         }
 
         List<Contact.FriendInfo> friendList = mContact.listFriendInfo();
         if(friendList == null) {
-            return "Failed to list friend info.";
+            return ErrorPrefix + "Failed to list friend info.";
         }
-        List<String> friendCodeList = new ArrayList<String>();
-        for(Contact.FriendInfo it: friendList) {
-            friendCodeList.add(it.humanCode);
-        }
+        List<String> friendCodeList = mContact.listFriendCode();
 
-        Helper.showFriendList(this, friendCodeList, (parent, view, position, id) -> {
-            Contact.FriendInfo info = friendList.get(position);
-            Helper.showDetails(MainActivity.this, info.toJson());
+        Helper.showFriendList(this, friendCodeList, (friendCode) -> {
+            Contact.FriendInfo friendInfo = null;
+            for(Contact.FriendInfo info: friendList) {
+                if(info.humanCode.equals(friendCode) == true) {
+                    friendInfo = info;
+                    break;
+                }
+            }
+            Helper.showDetails(MainActivity.this, friendInfo.toJson());
         });
         return "Success to list friend info.";
     }
 
+    private String sendMessage() {
+        if (mContact == null) {
+            return ErrorPrefix + "Contact is null.";
+        }
+        Contact.UserInfo info = mContact.getUserInfo();
+        if (info.status != ContactStatus.Online) {
+            return ErrorPrefix + "Contact is not online.";
+        }
+
+        List<String> friendCodeList = mContact.listFriendCode();
+        Helper.showFriendList(this, friendCodeList, (friendCode) -> {
+            Helper.showSendMessage(this, friendCode, (message) -> {
+                int ret = mContact.sendTextMessage(friendCode, ContactChannel.Carrier, message);
+                if(ret < 0) {
+                    showMessage(ErrorPrefix + "Failed to send message to " + friendCode);
+                }
+            });
+        });
+        return "Success to send message.";
+    }
+
     private String testSyncUpload() {
         if(mContact == null) {
-            return "Contact is null.";
+            return ErrorPrefix + "Contact is null.";
         }
 
         int ret = mContact.syncInfoUploadToDidChain();
         if(ret < 0) {
-            return "Failed to call syncInfoUploadToDidChain() ret=" + ret;
+            return ErrorPrefix + "Failed to call syncInfoUploadToDidChain() ret=" + ret;
         }
 
         return "Success to syncInfoUploadToDidChain.";
@@ -256,12 +285,12 @@ public class MainActivity extends Activity {
 
     private String testSyncDownload() {
         if(mContact == null) {
-            return "Contact is null.";
+            return ErrorPrefix + "Contact is null.";
         }
 
         int ret = mContact.syncInfoDownloadFromDidChain();
         if(ret < 0) {
-            return "Failed to call syncInfoDownloadToDidChain() ret=" + ret;
+            return ErrorPrefix + "Failed to call syncInfoDownloadToDidChain() ret=" + ret;
         }
 
         return "Success to syncInfoDownloadToDidChain.";
@@ -365,6 +394,14 @@ public class MainActivity extends Activity {
             Log.i(TAG, msg);
             TextView txtMsg = findViewById(R.id.txt_message);
             txtMsg.setText(msg);
+
+            if(msg.startsWith(ErrorPrefix)) {
+                if(mToast != null) {
+                    mToast.cancel();
+                }
+                mToast = Toast.makeText(this, msg, Toast.LENGTH_LONG);
+                mToast.show();
+            }
         });
     }
 
@@ -400,6 +437,9 @@ public class MainActivity extends Activity {
     Contact.Listener mContactListener;
 
     Thread mThread;
+    Toast mToast;
+
+    private static final String ErrorPrefix = "Error: ";
 
     private static final String KeypairLanguage = "english";
     private static final String KeypairWords = "";

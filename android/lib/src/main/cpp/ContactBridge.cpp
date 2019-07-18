@@ -156,6 +156,23 @@ int ContactBridge::getFriendList(std::stringstream* info)
     return 0;
 }
 
+int ContactBridge::sendMessage(const char* friendCode, int chType, const std::span<uint8_t>* data)
+{
+//    auto weakFriendMgr = mContactImpl->getFriendManager();
+//    auto friendMgr =  SAFE_GET_PTR(weakFriendMgr);                                                                      \
+//    auto weakMsgMgr = mContactImpl->getMessageManager();
+//    auto msgMgr =  SAFE_GET_PTR(weakMsgMgr);                                                                      \
+//
+//    std::shared_ptr<elastos::FriendInfo> friendInfo;
+//    int ret = friendMgr->tryGetFriendInfo(friendCode, friendInfo);
+//    CHECK_ERROR(ret);
+//
+//    std::vector<uint8_t> cryptoData(ret->data(), ret->data() + ret->size());
+//    ret = msgMgr->sendMessage(friendInfo, chType, )
+//
+//    sContactListenerInstance->onEvent(EventType::StatusChanged, humainCode,
+//                                      static_cast<ContactChannel>(channelType), &data);
+}
 
 int ContactBridge::syncInfoDownloadFromDidChain()
 {

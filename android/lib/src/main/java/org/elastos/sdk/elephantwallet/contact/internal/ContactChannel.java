@@ -15,6 +15,10 @@ public enum ContactChannel {
         return null;
     }
 
+    int id(){
+        return this.id;
+    }
+
     private ContactChannel(int id){
                        this.id = id;
                                     }

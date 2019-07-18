@@ -17,6 +17,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -32,19 +33,17 @@ import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 
-import org.elastos.sdk.elephantwallet.contact.Contact;
-
 import java.util.HashMap;
 import java.util.List;
 
 import static org.elastos.sdk.contact.test.MainActivity.TAG;
 
 public class Helper {
-    public interface OnScanListener {
-        void onScanResult(String result);
+    public interface OnListener {
+        void onResult(String result);
     };
 
-    public static void showAddress(Context context, String[] humanCode, String presentDevId, View.OnClickListener listener) {
+    public static void showAddress(Context context, String[] humanCode, String presentDevId, OnListener listener) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle("My Address");
         try {
@@ -76,11 +75,13 @@ public class Helper {
         });
     }
 
-    public static void showFriendList(Context context, List<String> friendList, AdapterView.OnItemClickListener listener) {
+    public static void showFriendList(Context context, List<String> friendList, OnListener listener) {
         ListView listView = new ListView(context);
         ArrayAdapter<String> adapter = new ArrayAdapter<>(context, android.R.layout.simple_list_item_1, friendList);
         listView.setAdapter(adapter);
-        listView.setOnItemClickListener(listener);
+        listView.setOnItemClickListener((parent, view, position, id) -> {
+            listener.onResult(((TextView)view).getText().toString());
+        });
 
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle("Friend List");
@@ -94,7 +95,26 @@ public class Helper {
         });
     }
 
-    public static void showFriendRequest(Context context, String humanCode, String summary, View.OnClickListener listener) {
+    public static void showAddFriend(Context context, String friendCode, OnListener listener) {
+        EditText edit = new EditText(context);
+        View root = makeEditView(context, friendCode, edit);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setTitle("Find Address");
+        builder.setView(root);
+        builder.setNegativeButton("Cancel", (dialog, which) -> {
+            dialog.dismiss();
+        });
+        builder.setPositiveButton("Add Friend", (dialog, which) -> {
+            listener.onResult(edit.getText().toString());
+        });
+
+        new Handler(Looper.getMainLooper()).post(() -> {
+            builder.create().show();
+        });
+    }
+
+    public static void showFriendRequest(Context context, String humanCode, String summary, OnListener listener) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle("Friend Request");
         String msg = new String();
@@ -102,7 +122,7 @@ public class Helper {
         msg += "Summary:\n  " + summary;
         builder.setMessage(msg);
         builder.setPositiveButton("Accept", (dialog, which) -> {
-            listener.onClick(null);
+            listener.onResult(null);
         });
         builder.setNegativeButton("Cannel", (dialog, which) -> {
             dialog.dismiss();
@@ -113,7 +133,26 @@ public class Helper {
         });
     }
 
-    public static void scanAddress(MainActivity activity, OnScanListener listener) {
+    public static void showSendMessage(Context context, String friendCode, OnListener listener) {
+        EditText edit = new EditText(context);
+        View root = makeEditView(context, friendCode, edit);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setTitle("Send Message");
+        builder.setView(root);
+        builder.setNegativeButton("Cancel", (dialog, which) -> {
+            dialog.dismiss();
+        });
+        builder.setPositiveButton("Send", (dialog, which) -> {
+            listener.onResult(edit.getText().toString());
+        });
+
+        new Handler(Looper.getMainLooper()).post(() -> {
+            builder.create().show();
+        });
+    }
+
+    public static void scanAddress(MainActivity activity, OnListener listener) {
         mOnScanListener = listener;
 
         int hasCameraPermission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.CAMERA);
@@ -165,11 +204,12 @@ public class Helper {
             String result = data.getStringExtra("com.blikoon.qrcodescanner.got_qr_scan_relult");
             Log.d(TAG,"Scan result:"+ result);
 
-            mOnScanListener.onScanResult(result);
+            mOnScanListener.onResult(result);
+            mOnScanListener = null;
         }
     }
 
-    private static View makeAddressView(Context context, String[] humanCode, String presentDevId, View.OnClickListener listener) {
+    private static View makeAddressView(Context context, String[] humanCode, String presentDevId, OnListener listener) {
         TextView txtDevId = new TextView(context);
         ImageView image = new ImageView(context);
         TextView txtCode = new TextView(context);
@@ -208,7 +248,26 @@ public class Helper {
         radioGrp.check(btnDid.getId());
 
         btn.setText("Details");
-        btn.setOnClickListener(listener);
+        btn.setOnClickListener((v) -> {
+            listener.onResult(null);
+        });
+
+        return root;
+    }
+
+    private static View makeEditView(Context context, String friendCode, EditText edit) {
+        TextView txtCode = new TextView(context);
+        TextView txtMsg = new TextView(context);
+
+        LinearLayout root = new LinearLayout(context);
+        root.setOrientation(LinearLayout.VERTICAL);
+        root.addView(txtCode);
+        root.addView(txtMsg);
+        root.addView(edit);
+
+        txtCode.setText("FriendCode: \n  " + friendCode);
+        txtMsg.setText("Message:");
+        edit.setText("Hello");
 
         return root;
     }
@@ -242,6 +301,6 @@ public class Helper {
         return bitmap;
     }
 
-    private static OnScanListener mOnScanListener;
+    private static OnListener mOnScanListener;
     private static final int REQUEST_CODE_QR_SCAN = 101;
 }
