@@ -15,13 +15,11 @@ import android.widget.Toast;
 
 import org.elastos.sdk.elephantwallet.contact.Contact;
 import org.elastos.sdk.elephantwallet.contact.internal.ContactChannel;
-import org.elastos.sdk.elephantwallet.contact.internal.ContactListener;
 import org.elastos.sdk.elephantwallet.contact.internal.ContactStatus;
 import org.elastos.sdk.elephantwallet.contact.internal.EventArgs;
 import org.elastos.sdk.elephantwallet.contact.internal.AcquireArgs;
 import org.elastos.sdk.elephantwallet.contact.internal.Utils;
 import org.elastos.sdk.keypair.ElastosKeypair;
-import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends Activity {
@@ -37,7 +35,7 @@ public class MainActivity extends Activity {
         txtCbMsg.setMovementMethod(ScrollingMovementMethod.getInstance());
 
         String devId = getDeviceId();
-        if(devId.startsWith("7134d")) {
+        if(devId.startsWith("fa65a")) {
 //            mSavedMnemonic = ElastosKeypair.generateMnemonic(KeypairLanguage, KeypairWords);
             mSavedMnemonic = mUploadedMnemonic1;
         } else {
@@ -144,6 +142,19 @@ public class MainActivity extends Activity {
             }
 
             @Override
+            public void onReceivedMessage(String humanCode, int channelType, Contact.Message message) {
+                Object data = message.data;
+                if(message.type == Contact.Message.Type.MsgText) {
+                    data = new String(message.data);
+                }
+
+                String msg = "onRcvdMsg(): data=" + data + "\n";
+                msg += "onRcvdMsg(): type=" + message.type + "\n";
+                msg += "onRcvdMsg(): crypto=" + message.cryptoAlgorithm + "\n";
+                showEvent(msg);
+            }
+
+            @Override
             public void onError(int errCode, String errStr) {
                 String msg = "onError";
                 msg += " errCode=" + errCode;
@@ -214,8 +225,8 @@ public class MainActivity extends Activity {
         Helper.scanAddress(this, result -> {
             showMessage(result);
 
-            Helper.showAddFriend(this, result, (friendCode) -> {
-                int ret = mContact.addFriend(result, "Hello");
+            Helper.showAddFriend(this, result, (summary) -> {
+                int ret = mContact.addFriend(result, summary);
                 if(ret < 0) {
                     showMessage(ErrorPrefix + "Failed to add friend. ret=" + ret);
                 }
@@ -261,7 +272,9 @@ public class MainActivity extends Activity {
         List<String> friendCodeList = mContact.listFriendCode();
         Helper.showFriendList(this, friendCodeList, (friendCode) -> {
             Helper.showSendMessage(this, friendCode, (message) -> {
-                int ret = mContact.sendTextMessage(friendCode, ContactChannel.Carrier, message);
+                Contact.Message msgInfo = mContact.makeTextMessage(message, null);
+
+                int ret = mContact.sendMessage(friendCode, ContactChannel.Carrier, msgInfo);
                 if(ret < 0) {
                     showMessage(ErrorPrefix + "Failed to send message to " + friendCode);
                 }
@@ -336,7 +349,7 @@ public class MainActivity extends Activity {
             case SentMessage:
                 break;
             case FriendRequest:
-                ContactListener.RequestEvent requestEvent = (ContactListener.RequestEvent) event;
+                Contact.Listener.RequestEvent requestEvent = (Contact.Listener.RequestEvent) event;
                 Helper.showFriendRequest(this, requestEvent.humanCode, requestEvent.summary, v -> {
                     mContact.acceptFriend(requestEvent.humanCode);
                 });

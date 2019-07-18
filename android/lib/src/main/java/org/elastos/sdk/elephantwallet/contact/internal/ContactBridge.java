@@ -115,14 +115,28 @@ public class ContactBridge extends CrossBase {
         return ContactStatus.valueOf(ret);
     }
 
-    public int sendMessage(String friendCode, ContactChannel channelType, byte[] message) {
-        int ret = sendMessage(friendCode, channelType.id(), message);
-
-        return ret;
+    public Contact.Message makeMessage(int type, byte[] data, String cryptoAlgorithm) {
+        Contact.Message msg = new Contact.Message(ContactMessage.Type.valueOf(type), data, cryptoAlgorithm);
+        return msg;
     }
 
-    public int sendTextMessage(String friendCode, ContactChannel channelType, String message) {
-        int ret = sendMessage(friendCode, channelType, message.getBytes());
+    public Contact.Message makeTextMessage(String data, String cryptoAlgorithm) {
+        Contact.Message msg = new Contact.Message(ContactMessage.Type.MsgText, data.getBytes(), cryptoAlgorithm);
+        return msg;
+    }
+
+
+    public int sendMessage(String friendCode, ContactChannel channelType, Contact.Message message) {
+        if(message == null) {
+            return -1;
+        }
+
+        int ret = message.syncMessageToNative();
+        if(ret < 0) {
+            return ret;
+        }
+
+        ret = sendMessage(friendCode, channelType.id(), message);
 
         return ret;
     }
@@ -155,7 +169,7 @@ public class ContactBridge extends CrossBase {
     private native int getHumanStatus(String humanCode);
 
     @CrossInterface
-    private native int sendMessage(String friendCode, int channelType, byte[] message);
+    private native int sendMessage(String friendCode, int channelType, CrossBase message);
 
     private CrossBase mListener;
 

@@ -109,6 +109,13 @@ public:
     /*** static function and variable ***/
     static std::shared_ptr<MessageInfo> MakeEmptyMessage();
 
+    static std::shared_ptr<MessageInfo> MakeMessage(MessageType type,
+                                                    const std::vector<uint8_t>& plainContent,
+                                                    const std::string& cryptoAlgorithm = "");
+    static std::shared_ptr<MessageInfo> MakeTextMessage(const std::string& plainContent,
+                                                        const std::string& cryptoAlgorithm = "");
+
+
     /*** class function and variable ***/
     explicit MessageManager(std::weak_ptr<SecurityManager> sectyMgr,
                             std::weak_ptr<UserManager> userMgr,
@@ -126,12 +133,6 @@ public:
                               const std::string& summary,
                               bool remoteRequest = true);
 
-    virtual std::shared_ptr<MessageInfo> makeMessage(MessageType type,
-                                                     const std::vector<uint8_t>& plainContent,
-                                                     const std::string& cryptoAlgorithm = "") const;
-    virtual std::shared_ptr<MessageInfo> makeTextMessage(const std::string& plainContent,
-                                                         const std::string& cryptoAlgorithm = "") const;
-
     virtual int sendMessage(const std::shared_ptr<HumanInfo> humanInfo,
                             ChannelType chType,
                             const std::shared_ptr<MessageInfo> msgInfo);
@@ -140,11 +141,11 @@ private:
     /*** type define ***/
 
     /*** static function and variable ***/
+    static std::shared_ptr<MessageInfo> MakeMessage(std::shared_ptr<MessageInfo> from, bool ignoreContent = true);
 
     /*** class function and variable ***/
     template <class T>
     int getChannel(ChannelType chType, std::weak_ptr<T>& channel);
-    std::shared_ptr<MessageInfo> makeMessage(std::shared_ptr<MessageInfo> from, bool ignoreContent = true);
     int sendDescMessage(const std::shared_ptr<HumanInfo> humanInfo, ChannelType chType);
 
     std::weak_ptr<SecurityManager> mSecurityManager;

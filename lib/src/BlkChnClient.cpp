@@ -35,10 +35,10 @@ int BlkChnClient::InitInstance(std::weak_ptr<Config> config, std::weak_ptr<Secur
     HttpClient::InitGlobal();
     gBlkChnClient = std::make_shared<Impl>(config, sectyMgr);
 
-    int ret = gBlkChnClient->startMonitor();
-    if (ret < 0) {
-        return 0;
-    }
+//    int ret = gBlkChnClient->startMonitor();
+//    if (ret < 0) {
+//        return 0;
+//    }
 
     return 0;
 }

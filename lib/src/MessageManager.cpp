@@ -199,9 +199,9 @@ int MessageManager::requestFriend(const std::string& friendAddr,
     return 0;
 }
 
-std::shared_ptr<MessageManager::MessageInfo> MessageManager::makeMessage(MessageType type,
+std::shared_ptr<MessageManager::MessageInfo> MessageManager::MakeMessage(MessageType type,
                                                                          const std::vector<uint8_t>& plainContent,
-                                                                         const std::string& cryptoAlgorithm) const
+                                                                         const std::string& cryptoAlgorithm)
 {
     struct Impl: MessageManager::MessageInfo {
         Impl(MessageType type,
@@ -216,11 +216,11 @@ std::shared_ptr<MessageManager::MessageInfo> MessageManager::makeMessage(Message
     return msgInfo;
 }
 
-std::shared_ptr<MessageManager::MessageInfo> MessageManager::makeTextMessage(const std::string& plainContent,
-                                                                             const std::string& cryptoAlgorithm) const
+std::shared_ptr<MessageManager::MessageInfo> MessageManager::MakeTextMessage(const std::string& plainContent,
+                                                                             const std::string& cryptoAlgorithm)
 {
     std::vector<uint8_t> plainContentBytes(plainContent.begin(), plainContent.end());
-    return makeMessage(MessageType::MsgText, plainContentBytes, cryptoAlgorithm);
+    return MakeMessage(MessageType::MsgText, plainContentBytes, cryptoAlgorithm);
 }
 
 int MessageManager::sendMessage(const std::shared_ptr<HumanInfo> humanInfo,
@@ -241,7 +241,7 @@ int MessageManager::sendMessage(const std::shared_ptr<HumanInfo> humanInfo,
         //return ErrCode::InvalidArgument;
     //}
 
-    auto cryptoMsgInfo = makeMessage(msgInfo);
+    auto cryptoMsgInfo = MakeMessage(msgInfo);
     if(msgInfo->mCryptoAlgorithm.empty() == true
     || msgInfo->mCryptoAlgorithm == "plain") {
         cryptoMsgInfo->mPlainContent = msgInfo->mPlainContent;
@@ -411,7 +411,7 @@ void MessageManager::MessageListener::onReceivedMessage(const std::string& frien
     //auto jsonData = Json::from_cbor(msgContent);
     std::shared_ptr<MessageInfo> cryptoMsgInfo = jsonData[JsonKey::MessageData];
 
-    auto msgInfo = msgMgr->makeMessage(cryptoMsgInfo);
+    auto msgInfo = MessageManager::MakeMessage(cryptoMsgInfo);
     if(cryptoMsgInfo->mCryptoAlgorithm.empty() == true
     || cryptoMsgInfo->mCryptoAlgorithm == "plain") {
         msgInfo->mPlainContent = cryptoMsgInfo->mPlainContent;
@@ -476,7 +476,7 @@ void MessageManager::MessageListener::onReceivedMessage(const std::string& frien
                 //return;
             //}
             //std::vector<uint8_t> humanDescBytes(humanDesc.begin(), humanDesc.end());
-            //auto msgInfo = msgMgr->makeMessage(MessageType::AckSyncDesc, humanDescBytes);
+            //auto msgInfo = msgMgr->MakeMessage(MessageType::AckSyncDesc, humanDescBytes);
             //ret = msgMgr->sendMessage(humanInfo, humanChType, msgInfo);
             //if(ret < 0) {
                 //Log::E(Log::TAG, "Failed to send sync desc message.");
@@ -675,7 +675,7 @@ void MessageManager::MessageListener::onFriendStatusChanged(const std::string& f
     return;
 }
 
-std::shared_ptr<MessageManager::MessageInfo> MessageManager::makeMessage(std::shared_ptr<MessageManager::MessageInfo> from,
+std::shared_ptr<MessageManager::MessageInfo> MessageManager::MakeMessage(std::shared_ptr<MessageManager::MessageInfo> from,
                                                                          bool ignoreContent)
 {
     struct Impl: MessageManager::MessageInfo {
@@ -708,7 +708,7 @@ int MessageManager::sendDescMessage(const std::shared_ptr<HumanInfo> humanInfo, 
         return ret;
     }
     std::vector<uint8_t> humanDescBytes(humanDesc.begin(), humanDesc.end());
-    auto msgInfo = makeMessage(MessageType::CtrlSyncDesc, humanDescBytes);
+    auto msgInfo = MakeMessage(MessageType::CtrlSyncDesc, humanDescBytes);
     ret = sendMessage(humanInfo, chType, msgInfo);
     if(ret < 0) {
         Log::E(Log::TAG, "Failed to send sync desc message. ret=%d", ret);

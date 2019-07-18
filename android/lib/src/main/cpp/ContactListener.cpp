@@ -160,10 +160,10 @@ std::shared_ptr<elastos::MessageManager::MessageListener> ContactListener::makeM
                                      elastos::MessageManager::ChannelType channelType,
                                      elastos::UserInfo::Status status) override {
             Log::I(Log::TAG, "%s", __PRETTY_FUNCTION__);
-            std::string humainCode;
-            userInfo->getHumanCode(humainCode);
+            std::string humanCode;
+            userInfo->getHumanCode(humanCode);
             std::span<uint8_t> data {reinterpret_cast<uint8_t*>(&status), 1 };
-            sContactListenerInstance->onEvent(EventType::StatusChanged, humainCode,
+            sContactListenerInstance->onEvent(EventType::StatusChanged, humanCode,
                                               static_cast<ContactChannel>(channelType), &data);
         }
 
@@ -171,6 +171,9 @@ std::shared_ptr<elastos::MessageManager::MessageListener> ContactListener::makeM
                                        elastos::MessageManager::ChannelType channelType,
                                        const std::shared_ptr<elastos::MessageManager::MessageInfo> msgInfo) override {
             Log::I(Log::TAG, "%s", __PRETTY_FUNCTION__);
+            std::string humanCode;
+            humanInfo->getHumanCode(humanCode);
+            sContactListenerInstance->onReceivedMessage(humanCode, static_cast<ContactChannel>(channelType), msgInfo);
         }
 
         virtual void onSentMessage(int msgIndex, int errCode) override {
@@ -181,11 +184,11 @@ std::shared_ptr<elastos::MessageManager::MessageListener> ContactListener::makeM
                                      elastos::MessageManager::ChannelType channelType,
                                      const std::string& summary) override {
             Log::I(Log::TAG, "%s", __PRETTY_FUNCTION__);
-            std::string humainCode;
-            friendInfo->getHumanCode(humainCode);
+            std::string humanCode;
+            friendInfo->getHumanCode(humanCode);
             std::span<uint8_t> data {reinterpret_cast<uint8_t*>(const_cast<char*>(summary.c_str())),
                                      summary.length() };
-            sContactListenerInstance->onEvent(EventType::FriendReuqest, humainCode,
+            sContactListenerInstance->onEvent(EventType::FriendReuqest, humanCode,
                                               static_cast<ContactChannel>(channelType), &data);
         }
 
@@ -193,10 +196,10 @@ std::shared_ptr<elastos::MessageManager::MessageListener> ContactListener::makeM
                                            elastos::MessageManager::ChannelType channelType,
                                            elastos::FriendInfo::Status status) override {
             Log::I(Log::TAG, "%s", __PRETTY_FUNCTION__);
-            std::string humainCode;
-            friendInfo->getHumanCode(humainCode);
+            std::string humanCode;
+            friendInfo->getHumanCode(humanCode);
             std::span<uint8_t> data {reinterpret_cast<uint8_t*>(&status), 1 };
-            sContactListenerInstance->onEvent(EventType::StatusChanged, humainCode,
+            sContactListenerInstance->onEvent(EventType::StatusChanged, humanCode,
                                               static_cast<ContactChannel>(channelType), &data);
         }
     };
@@ -223,5 +226,20 @@ void ContactListener::onEvent(EventType type,
     int64_t platformHandle = getPlatformHandle();
     crosspl::proxy::ContactListener::onEvent(platformHandle,
                                              static_cast<int>(type), humanCode.c_str(), static_cast<int>(channelType), data);
+    return;
+}
+
+void ContactListener::onReceivedMessage(const std::string& humanCode, ContactChannel channelType,
+                                        std::shared_ptr<elastos::MessageManager::MessageInfo> msgInfo)
+{
+    std::span<uint8_t> data(msgInfo->mPlainContent.data(), msgInfo->mPlainContent.size());
+
+    int64_t platformHandle = getPlatformHandle();
+    crosspl::proxy::ContactListener::onReceivedMessage(platformHandle,
+                                                       humanCode.c_str(), static_cast<int>(channelType),
+                                                       static_cast<int>(msgInfo->mType),
+                                                       &data,
+                                                       msgInfo->mCryptoAlgorithm.c_str(),
+                                                       msgInfo->mTimeStamp);
     return;
 }

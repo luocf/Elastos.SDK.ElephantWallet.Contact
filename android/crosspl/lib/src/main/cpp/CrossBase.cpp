@@ -10,6 +10,7 @@
 #include <android/log.h>
 #include <CrossPLFactory.hpp>
 #include <list>
+#include <string>
 
 /***********************************************/
 /***** static variables initialize *************/
@@ -58,7 +59,8 @@ int64_t CrossBase::CreateNativeObject(const char* javaClassName)
     }
 
     // need return before here.
-    throw std::runtime_error("CrossPL: Failed to create cpp object.");
+    auto ex = std::string("CrossPL: Failed to create cpp object.") + javaClassName;
+    throw std::runtime_error(ex);
 }
 
 void CrossBase::DestroyNativeObject(const char* javaClassName, int64_t nativeHandle)
@@ -73,7 +75,8 @@ void CrossBase::DestroyNativeObject(const char* javaClassName, int64_t nativeHan
     }
 
     // need return before here.
-    throw std::runtime_error("CrossPL: Failed to destroy cpp object.");
+    auto ex = std::string("CrossPL: Failed to destroy cpp object.") + javaClassName;
+    throw std::runtime_error(ex);
 }
 
 int64_t CrossBase::CreatePlatformObject(const char* cppClassName, int64_t nativeHandle)
@@ -88,7 +91,8 @@ int64_t CrossBase::CreatePlatformObject(const char* cppClassName, int64_t native
     }
 
     // need return before here.
-    throw std::runtime_error("CrossPL: Failed to create java object.");
+    auto ex = std::string("CrossPL: Failed to create java object.") + cppClassName;
+    throw std::runtime_error(ex);
 }
 
 void CrossBase::DestroyPlatformObject(const char* cppClassName, int64_t platformHandle)
@@ -103,7 +107,8 @@ void CrossBase::DestroyPlatformObject(const char* cppClassName, int64_t platform
     }
 
     // need return before here.
-    throw std::runtime_error("CrossPL: Failed to destroy java object.");
+    auto ex = std::string("CrossPL: Failed to destroy java object.") + cppClassName;
+    throw std::runtime_error(ex);
 }
 
 /***********************************************/

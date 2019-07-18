@@ -28,4 +28,10 @@ public final class Contact extends ContactBridge {
 
     public static final class FriendInfo extends org.elastos.sdk.elephantwallet.contact.internal.FriendInfo {
     } // class FriendInfo
+
+    public static final class Message extends org.elastos.sdk.elephantwallet.contact.internal.ContactMessage {
+        public Message(Type type, byte[] data, String cryptoAlgorithm) {
+            super(type, data, cryptoAlgorithm);
+        }
+    } // class Message
 }

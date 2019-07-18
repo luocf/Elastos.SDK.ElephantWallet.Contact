@@ -10,6 +10,7 @@
 
 #include "Log.hpp"
 #include "Json.hpp"
+#include "ContactMessage.hpp"
 
 /***********************************************/
 /***** static variables initialize *************/
@@ -156,22 +157,26 @@ int ContactBridge::getFriendList(std::stringstream* info)
     return 0;
 }
 
-int ContactBridge::sendMessage(const char* friendCode, int chType, const std::span<uint8_t>* data)
+int ContactBridge::sendMessage(const char* friendCode, int chType, CrossBase* message)
 {
-//    auto weakFriendMgr = mContactImpl->getFriendManager();
-//    auto friendMgr =  SAFE_GET_PTR(weakFriendMgr);                                                                      \
-//    auto weakMsgMgr = mContactImpl->getMessageManager();
-//    auto msgMgr =  SAFE_GET_PTR(weakMsgMgr);                                                                      \
-//
-//    std::shared_ptr<elastos::FriendInfo> friendInfo;
-//    int ret = friendMgr->tryGetFriendInfo(friendCode, friendInfo);
-//    CHECK_ERROR(ret);
-//
-//    std::vector<uint8_t> cryptoData(ret->data(), ret->data() + ret->size());
-//    ret = msgMgr->sendMessage(friendInfo, chType, )
-//
-//    sContactListenerInstance->onEvent(EventType::StatusChanged, humainCode,
-//                                      static_cast<ContactChannel>(channelType), &data);
+    auto msgInfo = dynamic_cast<ContactMessage*>(message);
+    if(msgInfo == nullptr) {
+        return elastos::ErrCode::InvalidArgument;
+    }
+
+    auto weakFriendMgr = mContactImpl->getFriendManager();
+    auto friendMgr =  SAFE_GET_PTR(weakFriendMgr);                                                                      \
+    auto weakMsgMgr = mContactImpl->getMessageManager();
+    auto msgMgr =  SAFE_GET_PTR(weakMsgMgr);                                                                      \
+
+    std::shared_ptr<elastos::FriendInfo> friendInfo;
+    int ret = friendMgr->tryGetFriendInfo(friendCode, friendInfo);
+    CHECK_ERROR(ret);
+
+    ret = msgMgr->sendMessage(friendInfo, static_cast<elastos::MessageManager::ChannelType>(chType), msgInfo->mMessageInfo);
+    CHECK_ERROR(ret);
+
+    return ret;
 }
 
 int ContactBridge::syncInfoDownloadFromDidChain()

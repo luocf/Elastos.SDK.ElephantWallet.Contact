@@ -14,7 +14,6 @@ import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -53,7 +52,7 @@ public class Helper {
             builder.setMessage("Failed to show address." + e);
         }
 
-        builder.setPositiveButton("OK", (dialog, which) -> {
+        builder.setNegativeButton("Cancel", (dialog, which) -> {
             dialog.dismiss();
         });
 
@@ -66,7 +65,7 @@ public class Helper {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle("Details");
         builder.setMessage(msg);
-        builder.setPositiveButton("OK", (dialog, which) -> {
+        builder.setNegativeButton("Cancel", (dialog, which) -> {
             dialog.dismiss();
         });
 
@@ -86,7 +85,7 @@ public class Helper {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle("Friend List");
         builder.setView(listView);
-        builder.setPositiveButton("OK", (dialog, which) -> {
+        builder.setNegativeButton("Cancel", (dialog, which) -> {
             dialog.dismiss();
         });
 

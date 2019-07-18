@@ -11,6 +11,7 @@ import org.elastos.tools.crosspl.annotation.CrossInterface;
 public abstract class ContactListener extends CrossBase {
     public abstract byte[] onAcquire(AcquireArgs request);
     public abstract void onEvent(EventArgs event);
+    public abstract void onReceivedMessage(String humanCode, int channelType, Contact.Message message);
     public abstract void onError(int errCode, String errStr);
 
     public class AcquireArgs extends org.elastos.sdk.elephantwallet.contact.internal.AcquireArgs {
@@ -93,6 +94,17 @@ public abstract class ContactListener extends CrossBase {
         }
 
         onEvent(args);
+        return;
+    }
+
+    @CrossInterface
+    private void onReceivedMessage(String humanCode, int channelType,
+                                   int type, byte[] data, String cryptoAlgorithm, long timestamp) {
+        Contact.Message message = new Contact.Message(ContactMessage.Type.valueOf(type),
+                                                      data, cryptoAlgorithm);
+        message.timestamp = timestamp;
+
+        onReceivedMessage(humanCode, channelType, message);
         return;
     }
 
