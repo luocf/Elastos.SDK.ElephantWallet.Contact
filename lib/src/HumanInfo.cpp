@@ -185,10 +185,10 @@ int HumanInfo::addCarrierInfo(const HumanInfo::CarrierInfo& info, const HumanInf
     for(auto idx = 0; idx < mBoundCarrierArray.size(); idx++) {
         auto& existsInfo = mBoundCarrierArray[idx];
 
-        if(existsInfo.mDevInfo.mDevId.empty() == false
-        && existsInfo.mDevInfo.mDevId != correctedInfo.mDevInfo.mDevId) { // not changed
-            continue;
-        }
+//        if(existsInfo.mDevInfo.mDevId.empty() == false
+//        && existsInfo.mDevInfo.mDevId != correctedInfo.mDevInfo.mDevId) { // not changed
+//            continue;
+//        }
 
         //if(existsInfo.mUsrId != correctedInfo.mUsrId) {
             //continue;

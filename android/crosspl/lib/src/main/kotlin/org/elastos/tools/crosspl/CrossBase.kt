@@ -9,7 +9,7 @@ import kotlin.reflect.full.primaryConstructor
 @CrossClass
 open class CrossBase
     protected constructor(
-            className: String,
+            val className: String,
             var nativeHandle: Long = 0)
 {
 
@@ -25,7 +25,7 @@ open class CrossBase
     }
 
     open fun finalize() {
-        DestroyNativeObject(this.javaClass.name, nativeHandle)
+        DestroyNativeObject(className, nativeHandle)
         Log.i(Utils.TAG, "deconstruct " + toString())
     }
 

@@ -147,13 +147,22 @@ int FriendManager::serialize(std::string& value) const
 int FriendManager::restoreFriendsInfo()
 {
     int ret = loadLocalData();
-    if(ret < 0
-    && ret != ErrCode::FileNotExistsError) {
+    if(ret == 0) {
+        Log::I(Log::TAG, "FriendManager::restoreFriendsInfo() Success to recover friend from local.");
+    } else if(ret == ErrCode::FileNotExistsError) {
+        Log::I(Log::TAG, "FriendManager::restoreFriendsInfo() Local friend info not exists.");
+        ret = syncDidChainData();
+        if(ret == 0) {
+            Log::I(Log::TAG, "FriendManager::restoreFriendsInfo() Success to recover friend from did chain.");
+        } else if(ret == ErrCode::BlkChnEmptyPropError) {
+            Log::I(Log::TAG, "FriendManager::restoreFriendsInfo() Can't find friend info from local or did chain.");
+            ret = ErrCode::EmptyInfoError;
+        }
+    }
+    if(ret < 0) {
+        Log::W(Log::TAG, "FriendManager::restoreFriendsInfo() Failed to restore friend, ret=%d", ret);
         return ret;
     }
-
-    ret = syncDidChainData();
-    CHECK_ERROR(ret)
 
     for(auto& it: mFriendList) {
         ret = it->setHumanStatus(HumanInfo::Status::Online, HumanInfo::Status::Offline);
