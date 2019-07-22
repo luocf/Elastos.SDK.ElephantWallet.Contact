@@ -132,13 +132,13 @@ std::shared_ptr<elastos::SecurityManager::SecurityListener> ContactListener::mak
         std::vector<uint8_t> onSignData(const std::vector<uint8_t>& originData) override {
             Log::I(Log::TAG, "%s", __PRETTY_FUNCTION__);
             const std::span<uint8_t> data(const_cast<uint8_t*>(originData.data()), originData.size());
-            auto ret = sContactListenerInstance->onAcquire(AcquireType::DecryptData, nullptr, &data);
+            auto ret = sContactListenerInstance->onAcquire(AcquireType::SignData, nullptr, &data);
             if(ret.get() == nullptr) {
                 return std::vector<uint8_t>();
             }
 
-            std::vector<uint8_t> unsignedData(ret->data(), ret->data() + ret->size());
-            return unsignedData;
+            std::vector<uint8_t> signedData(ret->data(), ret->data() + ret->size());
+            return signedData;
         }
 
     private:

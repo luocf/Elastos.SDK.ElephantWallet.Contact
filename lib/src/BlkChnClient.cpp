@@ -161,7 +161,7 @@ int BlkChnClient::uploadAllDidProps(const std::multimap<std::string, std::string
     auto propProtStr = jsonPropProt.dump();
     Log::I(Log::TAG, "BlkChnClient::uploadAllDidProps() propProt: %s", propProtStr.c_str());
     std::vector<uint8_t> originBytes(propProtStr.begin(), propProtStr.end());
-    std::vector<uint8_t> signedBytes(propProtStr.begin(), propProtStr.end());
+    std::vector<uint8_t> signedBytes;
     int ret = sectyMgr->signData(originBytes, signedBytes);
     CHECK_ERROR(ret)
 

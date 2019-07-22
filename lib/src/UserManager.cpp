@@ -117,19 +117,19 @@ int UserManager::restoreUserInfo()
 
     int ret = loadLocalData();
     if(ret == 0) {
-        Log::I(Log::TAG, "UserManager::makeUser() Success to recover user from local.");
+        Log::I(Log::TAG, "UserManager::restoreUserInfo() Success to recover user from local.");
     } else if(ret == ErrCode::FileNotExistsError) {
-        Log::I(Log::TAG, "UserManager::makeUser() Local user info not exists.");
+        Log::I(Log::TAG, "UserManager::restoreUserInfo() Local user info not exists.");
         ret = syncDidChainData();
         if(ret == 0) {
-            Log::I(Log::TAG, "UserManager::makeUser() Success to recover user from did chain.");
+            Log::I(Log::TAG, "UserManager::restoreUserInfo() Success to recover user from did chain.");
         } else if(ret == ErrCode::BlkChnEmptyPropError) {
-            Log::I(Log::TAG, "UserManager::makeUser() Can't find user info from local or did chain.");
+            Log::I(Log::TAG, "UserManager::restoreUserInfo() Can't find user info from local or did chain.");
             ret = ErrCode::EmptyInfoError;
         }
     }
     if(ret < 0) {
-        Log::W(Log::TAG, "UserManager::makeUser() Failed to restore user, ret=%d", ret);
+        Log::W(Log::TAG, "UserManager::restoreUserInfo() Failed to restore user, ret=%d", ret);
         return ret;
     }
 

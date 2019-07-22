@@ -369,6 +369,14 @@ public class MainActivity extends Activity {
         return pubKey;
     }
 
+    private String getPrivateKey() {
+        ElastosKeypair.Data seedData = new ElastosKeypair.Data();
+        int seedSize = ElastosKeypair.getSeedFromMnemonic(seedData, mSavedMnemonic,
+                KeypairLanguage, KeypairWords, "");
+        String privKey = ElastosKeypair.getSinglePrivateKey(seedData, seedSize);
+        return privKey;
+    }
+
     private byte[] getAgentAuthHeader() {
         String appid = "org.elastos.debug.didplugin";
         String appkey = "b2gvzUM79yLhCbbGNWCuhSsGdqYhA7sS";
@@ -381,14 +389,14 @@ public class MainActivity extends Activity {
     }
 
     private byte[] signData(byte[] data) {
-        String pubKey = getPublicKey();
+        String privKey = getPrivateKey();
 
         ElastosKeypair.Data originData = new ElastosKeypair.Data();
         originData.buf = data;
 
         ElastosKeypair.Data signedData = new ElastosKeypair.Data();
 
-        int signedSize = ElastosKeypair.sign(pubKey, originData, originData.buf.length, signedData);
+        int signedSize = ElastosKeypair.sign(privKey, originData, originData.buf.length, signedData);
         if(signedSize <= 0) {
             return null;
         }
