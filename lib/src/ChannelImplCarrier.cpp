@@ -89,6 +89,7 @@ int ChannelImplCarrier::preset(const std::string& profile)
 
     carrierOpts.udp_enabled = config->mCarrierConfig->mEnableUdp;
     carrierOpts.persistent_location = config->mUserDataDir.c_str();
+    Log::W(Log::TAG, "========= Recover carrier by secret key: %s", profile.c_str());
     if(profile.empty() == false) {
         carrierOpts.secret_key = profile.c_str();
     }

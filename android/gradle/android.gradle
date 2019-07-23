@@ -21,10 +21,11 @@ android {
     buildTypes {
         release {
             minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt')
-            if(file('proguard-rules.pro').exists() == true) {
-                consumerProguardFiles 'proguard-rules.pro' // 传递proguard到最终app
-            }
+            useProguard false
+//            proguardFiles getDefaultProguardFile('proguard-android.txt')
+//            if(file('proguard-rules.pro').exists() == true) {
+//                consumerProguardFiles 'proguard-rules.pro' // 传递proguard到最终app
+//            }
         }
         debug {
             jniDebuggable true

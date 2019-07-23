@@ -42,6 +42,29 @@ public class Helper {
         void onResult(String result);
     };
 
+    public static void showImportMnemonic(Context context, OnListener listener) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setTitle("Import Mnemonic");
+        try {
+            EditText root = new EditText(context);
+            root.setLines(8);
+            builder.setView(root);
+
+            builder.setPositiveButton("Import", (dialog, which) -> {
+                listener.onResult(root.getText().toString());
+            });
+            builder.setNegativeButton("Cancel", (dialog, which) -> {
+                dialog.dismiss();
+            });
+        } catch (Exception e) {
+            builder.setMessage("Failed to show address." + e);
+        }
+
+        new Handler(Looper.getMainLooper()).post(() -> {
+            builder.create().show();
+        });
+    }
+
     public static void showAddress(Context context, String[] humanCode, String presentDevId, OnListener listener) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle("My Address");
@@ -244,7 +267,7 @@ public class Helper {
             image.setImageBitmap(bitmap);
             txtCode.setText(value);
         });
-        radioGrp.check(btnDid.getId());
+        radioGrp.check(btnCarrier.getId());
 
         btn.setText("Details");
         btn.setOnClickListener((v) -> {

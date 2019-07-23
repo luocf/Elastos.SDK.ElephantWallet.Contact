@@ -1,0 +1,47 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.elastos.carrier.myapplication.MainActivity">
+
+    <item android:id="@+id/get_started"
+        android:title="Get Started" />
+    <item android:enabled="false"
+        android:title="Log" />
+    <item android:id="@+id/clear_event"
+        android:title="   `- Clear Event" />
+
+    <item android:enabled="false"
+        android:title="Mnemonic" />
+    <item android:id="@+id/new_mnemonic"
+        android:title="   |- New And Save Mnemonic" />
+    <item android:id="@+id/import_mnemonic"
+        android:title="   `- Import Mnemonic" />
+
+
+    <item android:enabled="false"
+        android:title="Contact" />
+    <item android:id="@+id/new_contact"
+        android:title="   |- New Contact" />
+    <item android:id="@+id/start_contact"
+        android:title="   |- Start Contact" />
+    <item android:id="@+id/del_contact"
+        android:title="   `- Del Contact" />
+
+    <item android:enabled="false"
+        android:title="User" />
+    <item android:id="@+id/user_info"
+        android:title="   |- User Info" />
+    <item android:id="@+id/sync_upload"
+        android:title="   |- Sync Upload" />
+    <item android:id="@+id/sync_download"
+        android:title="   `- Sync Download" />
+
+    <item android:enabled="false"
+        android:title="Friend" />
+    <item android:id="@+id/friend_info"
+        android:title="   |- Friend Info" />
+    <item android:id="@+id/add_friend"
+        android:title="   |- Add Friend" />
+    <item android:id="@+id/send_message"
+        android:title="   `- Send Message" />
+
+</menu>

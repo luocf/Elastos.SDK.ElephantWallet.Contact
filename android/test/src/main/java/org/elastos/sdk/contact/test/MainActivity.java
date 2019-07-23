@@ -1,15 +1,24 @@
 package org.elastos.sdk.contact.test;
 
 import android.app.Activity;
+import android.app.AlarmManager;
 import android.app.AlertDialog;
+import android.app.PendingIntent;
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Process;
+import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -20,6 +29,8 @@ import org.elastos.sdk.elephantwallet.contact.internal.EventArgs;
 import org.elastos.sdk.elephantwallet.contact.internal.AcquireArgs;
 import org.elastos.sdk.elephantwallet.contact.internal.Utils;
 import org.elastos.sdk.keypair.ElastosKeypair;
+
+import java.nio.charset.Charset;
 import java.util.List;
 
 public class MainActivity extends Activity {
@@ -29,21 +40,33 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        TextView txtMsg = findViewById(R.id.txt_message);
-        txtMsg.setMovementMethod(ScrollingMovementMethod.getInstance());
+
         TextView txtCbMsg = findViewById(R.id.txt_event);
         txtCbMsg.setMovementMethod(ScrollingMovementMethod.getInstance());
+        TextView txtMsg = findViewById(R.id.txt_message);
+        txtMsg.setMovementMethod(ScrollingMovementMethod.getInstance());
+        txtMsg.setOnLongClickListener((v) -> {
+            setClip(((TextView)v).getText().toString());
+            return true;
+        });
 
         String devId = getDeviceId();
-        if(devId.startsWith("fa65a")) {
-//            mSavedMnemonic = ElastosKeypair.generateMnemonic(KeypairLanguage, KeypairWords);
-            mSavedMnemonic = mUploadedMnemonic1;
-        } else {
-            mSavedMnemonic = ElastosKeypair.generateMnemonic(KeypairLanguage, KeypairWords);
-//            mSavedMnemonic = mUploadedMnemonic2;
-        }
         Log.i(TAG, "Device ID:" + devId);
-        Log.i(TAG, "Mnemonic:" + mSavedMnemonic);
+
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+        mSavedMnemonic = pref.getString(SavedMnemonicKey, null);
+        if(mSavedMnemonic == null) {
+            mSavedMnemonic = ElastosKeypair.generateMnemonic(KeypairLanguage, KeypairWords);
+            newAndSaveMnemonic(mSavedMnemonic);
+
+//            if (devId.startsWith("7134d")) {
+//                mSavedMnemonic = UploadedMnemonic1;
+//            } else if (devId.startsWith("fa65a")) {
+//                mSavedMnemonic = UploadedMnemonic2;
+//            }
+        }
+
+        showMessage("Mnemonic:\n" + mSavedMnemonic);
     }
 
     @Override
@@ -54,54 +77,160 @@ public class MainActivity extends Activity {
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        String message = "";
+
+        int id = item.getItemId();
+        switch (id) {
+            case R.id.get_started:
+                getStarted();
+                break;
+
+            case R.id.clear_event: {
+                clearEvent();
+                break;
+            }
+
+            case R.id.new_mnemonic:
+                message = newAndSaveMnemonic(null);
+                break;
+//            case R.id.save_mnemonic: {
+//                saveMnemonic(mSavedMnemonic);
+//                message = ("Success to save mnemonic:\n" + mSavedMnemonic);
+//                break;
+//            }
+            case R.id.import_mnemonic:
+                message = importMnemonic();
+                break;
+
+            case R.id.new_contact:
+                message = testNewContact();
+                break;
+            case R.id.start_contact:
+                message = testStart();
+                break;
+            case R.id.del_contact:
+                message = testDelContact();
+                break;
+
+            case R.id.user_info:
+                message = showUserInfo();
+                break;
+            case R.id.sync_upload:
+                message = testSyncUpload();
+                break;
+            case R.id.sync_download:
+                message = testSyncDownload();
+                break;
+
+            case R.id.friend_info:
+                message = listFriendInfo();
+                break;
+            case R.id.add_friend:
+                message = scanUserInfo();
+                break;
+            case R.id.send_message:
+                message = sendMessage();
+                break;
+        }
+        showMessage(message);
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
     protected void onStart() {
         super.onStart();
 
-        findViewById(R.id.btn_test_newcontact).setOnClickListener((view) -> {
-            String message = testNewContact();
-            showMessage(message);
-        });
-        findViewById(R.id.btn_test_start).setOnClickListener((view) -> {
-            String message = testStart();
-            showMessage(message);
-        });
-        findViewById(R.id.btn_test_delcontact).setOnClickListener((view) -> {
-            String message = testDelContact();
-            showMessage(message);
-        });
 
-        findViewById(R.id.btn_show_userinfo).setOnClickListener((view) -> {
-            String message = showUserInfo();
-            showMessage(message);
-        });
-        findViewById(R.id.btn_list_friendinfo).setOnClickListener((view) -> {
-            listFriendInfo();
-        });
-        findViewById(R.id.btn_scan_userinfo).setOnClickListener((view) -> {
-            scanUserInfo();
-        });
-        findViewById(R.id.btn_send_message).setOnClickListener((view) -> {
-            String message = sendMessage();
-            showMessage(message);
-        });
-
-        findViewById(R.id.btn_test_syncupload).setOnClickListener((view) -> {
-            String message = testSyncUpload();
-            showMessage(message);
-        });
-        findViewById(R.id.btn_test_syncdownload).setOnClickListener((view) -> {
-            String message = testSyncDownload();
-            showMessage(message);
-        });
-
-
-        findViewById(R.id.btn_clear_event).setOnClickListener((view) -> {
-            TextView txtCbMsg = findViewById(R.id.txt_event);
-            txtCbMsg.setText("");
-        });
+//        findViewById(R.id.btn_test_newcontact).setOnClickListener((view) -> {
+//            String message = testNewContact();
+//            showMessage(message);
+//        });
+//        findViewById(R.id.btn_test_start).setOnClickListener((view) -> {
+//            String message = testStart();
+//            showMessage(message);
+//        });
+//        findViewById(R.id.btn_test_delcontact).setOnClickListener((view) -> {
+//            String message = testDelContact();
+//            showMessage(message);
+//        });
+//
+//        findViewById(R.id.btn_show_userinfo).setOnClickListener((view) -> {
+//            String message = showUserInfo();
+//            showMessage(message);
+//        });
+//        findViewById(R.id.btn_list_friendinfo).setOnClickListener((view) -> {
+//            String message = listFriendInfo();
+//            showMessage(message);
+//        });
+//        findViewById(R.id.btn_scan_userinfo).setOnClickListener((view) -> {
+//            String message = scanUserInfo();
+//            showMessage(message);
+//        });
+//        findViewById(R.id.btn_send_message).setOnClickListener((view) -> {
+//            String message = sendMessage();
+//            showMessage(message);
+//        });
+//
+//        findViewById(R.id.btn_test_syncupload).setOnClickListener((view) -> {
+//            String message = testSyncUpload();
+//            showMessage(message);
+//        });
+//        findViewById(R.id.btn_test_syncdownload).setOnClickListener((view) -> {
+//            String message = testSyncDownload();
+//            showMessage(message);
+//        });
+//
+//
+//        findViewById(R.id.btn_clear_event).setOnClickListener((view) -> {
+//            TextView txtCbMsg = findViewById(R.id.txt_event);
+//            txtCbMsg.setText("");
+//        });
 
     }
 
+    private void clearEvent() {
+        TextView txtCbMsg = findViewById(R.id.txt_event);
+        txtCbMsg.setText("");
+    }
+
+    private void getStarted() {
+        String help = "";
+        help += "Step1: [New Contact]\n";
+        help += "Step2: [Start Contact]\n";
+        help += "Step3: [User Info] can show you info\n";
+        help += "Step4: After online, [Add friend] can add friend\n";
+        help += "Step5: After friend online, [Send Message] can send message\n";
+
+        clearEvent();
+        showEvent(help);
+    }
+
+    private String importMnemonic() {
+        Helper.showImportMnemonic(this, (result) -> {
+            if(isEnglishWords(result) == false) {
+                showMessage(ErrorPrefix + "Only english mnemonic is supported.");
+                return;
+            }
+            String privKey = getPrivateKey();
+            if(privKey == null || privKey.isEmpty()) {
+                showMessage(ErrorPrefix + "Bad mnemonic.");
+                return;
+            }
+
+            String message = newAndSaveMnemonic(result);
+            showMessage(message);
+        });
+
+        return "Success to show import mnemonic dialog.";
+    }
 
     private String testNewContact() {
         Contact.Factory.SetLogLevel(4);
@@ -210,16 +339,14 @@ public class MainActivity extends Activity {
         return info.toString();
     }
 
-    private void scanUserInfo() {
+    private String scanUserInfo() {
         if (mContact == null) {
-            showMessage(ErrorPrefix + "Contact is null.");
-            return;
+            return (ErrorPrefix + "Contact is null.");
         }
 
         Contact.UserInfo info = mContact.getUserInfo();
         if (mContact.getStatus(info.humanCode) != ContactStatus.Online) {
-            showMessage(ErrorPrefix + "Contact is not online.");
-            return;
+            return (ErrorPrefix + "Contact is not online.");
         }
 
         Helper.scanAddress(this, result -> {
@@ -233,7 +360,7 @@ public class MainActivity extends Activity {
             });
         });
 
-        return;
+        return "";
     }
 
     private String listFriendInfo() {
@@ -273,6 +400,12 @@ public class MainActivity extends Activity {
         Helper.showFriendList(this, friendCodeList, (friendCode) -> {
             Helper.showSendMessage(this, friendCode, (message) -> {
                 Contact.Message msgInfo = mContact.makeTextMessage(message, null);
+
+                ContactStatus status = mContact.getStatus(friendCode);
+                if(status != ContactStatus.Online) {
+                    showMessage(ErrorPrefix + "Friend is not online.");
+                    return;
+                }
 
                 int ret = mContact.sendMessage(friendCode, ContactChannel.Carrier, msgInfo);
                 if(ret < 0) {
@@ -417,11 +550,7 @@ public class MainActivity extends Activity {
             txtMsg.setText(msg);
 
             if(msg.startsWith(ErrorPrefix)) {
-                if(mToast != null) {
-                    mToast.cancel();
-                }
-                mToast = Toast.makeText(this, msg, Toast.LENGTH_LONG);
-                mToast.show();
+                showToast(msg);
             }
         });
     }
@@ -439,6 +568,58 @@ public class MainActivity extends Activity {
         });
     }
 
+    public void showToast(String msg) {
+        Handler handler = new Handler(Looper.getMainLooper());
+        handler.post(() -> {
+            if(mToast != null) {
+                mToast.cancel();
+            }
+            mToast = Toast.makeText(this, msg, Toast.LENGTH_LONG);
+            mToast.show();
+        });
+    }
+
+    private void setClip(String data) {
+        ClipboardManager cManager = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+        ClipData cData = ClipData.newPlainText("text", data);
+        cManager.setPrimaryClip(cData);
+        showToast("Copied.");
+    }
+
+    private String newAndSaveMnemonic(final String newMnemonic) {
+        mSavedMnemonic = newMnemonic;
+        if(mSavedMnemonic == null) {
+            mSavedMnemonic = ElastosKeypair.generateMnemonic(KeypairLanguage, KeypairWords);
+        }
+
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences.Editor editor = pref.edit();
+        editor.putString(SavedMnemonicKey, mSavedMnemonic).commit();
+        if(mContact == null) { // noneed to restart
+            return ("Success to save mnemonic:\n" + mSavedMnemonic);
+        }
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage("New mnemonic can only be valid after restart,\ndo you want restart app?");
+        builder.setPositiveButton("Restart", (dialog, which) -> {
+            // restart
+            Intent mStartActivity = new Intent(this, MainActivity.class);
+            int mPendingIntentId = 123456;
+            PendingIntent mPendingIntent = PendingIntent.getActivity(this, mPendingIntentId, mStartActivity, PendingIntent.FLAG_CANCEL_CURRENT);
+            AlarmManager mgr = (AlarmManager)this.getSystemService(Context.ALARM_SERVICE);
+            mgr.set(AlarmManager.RTC, System.currentTimeMillis() + 100, mPendingIntent);
+            Process.killProcess(Process.myPid());
+        });
+        builder.setNegativeButton("Cancel", (dialog, which) -> {
+            dialog.dismiss();
+        });
+        new Handler(Looper.getMainLooper()).post(() -> {
+            builder.create().show();
+        });
+
+        return ("Cancel to save mnemonic:\n" + newMnemonic);
+    }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -453,6 +634,11 @@ public class MainActivity extends Activity {
         Helper.onActivityResult(this, requestCode, resultCode, data);
     }
 
+    private boolean isEnglishWords(String words) {
+        boolean isEnglish = Charset.forName("US-ASCII").newEncoder().canEncode(words);
+        return isEnglish;
+    }
+
     String mSavedMnemonic;
     Contact mContact;
     Contact.Listener mContactListener;
@@ -465,6 +651,9 @@ public class MainActivity extends Activity {
     private static final String KeypairLanguage = "english";
     private static final String KeypairWords = "";
 
-    private static final String mUploadedMnemonic1 = "ceiling detail diet cotton shed false under riot leaf wait escape busy";
-    private static final String mUploadedMnemonic2 = "grit immune viable world merge inner picnic young twelve inject rather spoil";
+    private static final String SavedMnemonicKey = "mnemonic";
+
+
+    private static final String UploadedMnemonic1 = "ceiling detail diet cotton shed false under riot leaf wait escape busy";
+    private static final String UploadedMnemonic2 = "grit immune viable world merge inner picnic young twelve inject rather spoil";
 }

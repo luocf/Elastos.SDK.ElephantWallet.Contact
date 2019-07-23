@@ -151,13 +151,14 @@ int FriendManager::restoreFriendsInfo()
         Log::I(Log::TAG, "FriendManager::restoreFriendsInfo() Success to recover friend from local.");
     } else if(ret == ErrCode::FileNotExistsError) {
         Log::I(Log::TAG, "FriendManager::restoreFriendsInfo() Local friend info not exists.");
-        ret = syncDidChainData();
-        if(ret == 0) {
-            Log::I(Log::TAG, "FriendManager::restoreFriendsInfo() Success to recover friend from did chain.");
-        } else if(ret == ErrCode::BlkChnEmptyPropError) {
-            Log::I(Log::TAG, "FriendManager::restoreFriendsInfo() Can't find friend info from local or did chain.");
-            ret = ErrCode::EmptyInfoError;
-        }
+//        ret = syncDidChainData();
+//        if(ret == 0) {
+//            Log::I(Log::TAG, "FriendManager::restoreFriendsInfo() Success to recover friend from did chain.");
+//        } else if(ret == ErrCode::BlkChnEmptyPropError) {
+//            Log::I(Log::TAG, "FriendManager::restoreFriendsInfo() Can't find friend info from local or did chain.");
+//            ret = ErrCode::EmptyInfoError;
+//        }
+        ret = 0;
     }
     if(ret < 0) {
         Log::W(Log::TAG, "FriendManager::restoreFriendsInfo() Failed to restore friend, ret=%d", ret);
