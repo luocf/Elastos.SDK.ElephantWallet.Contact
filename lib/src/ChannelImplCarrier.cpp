@@ -224,18 +224,19 @@ int ChannelImplCarrier::requestFriend(const std::string& friendCode,
 
     int ret = ErrCode::UnknownError;
     if(remoteRequest == true) {
-        //std::string usrId;
-        //ret = GetCarrierUsrIdByAddress(friendCode, usrId);
-        //CHECK_ERROR(ret)
-        //bool isAdded = ela_is_friend(mCarrier.get(), usrId.c_str());
-        //if(isAdded == true) {
-            //ela_remove_friend(mCarrier.get(), usrId.c_str());
-        //}
+        std::string usrId;
+        ret = GetCarrierUsrIdByAddress(friendCode, usrId);
+        CHECK_ERROR(ret)
+        bool isAdded = ela_is_friend(mCarrier.get(), usrId.c_str());
+        if(isAdded == true) {
+            ela_remove_friend(mCarrier.get(), usrId.c_str());
+        }
 
         const char* hello = (summary.empty() ? " " : summary.c_str());
-        Log::I(Log::TAG, "ChannelImplCarrier::requestFriend() summary=%s", hello);
+        Log::I(Log::TAG, "ChannelImplCarrier::requestFriend() friendCode=%s summary=%s", friendCode.c_str(), hello);
         ret = ela_add_friend(mCarrier.get(), friendCode.c_str(), hello);
     } else {
+        Log::I(Log::TAG, "ChannelImplCarrier::requestFriend() friendCode=%s", friendCode.c_str());
         ret = ela_accept_friend(mCarrier.get(), friendCode.c_str());
     }
     if(ret != 0) {
@@ -310,7 +311,7 @@ void ChannelImplCarrier::OnCarrierConnection(ElaCarrier *carrier,
     channel->mChannelStatus = ( status == ElaConnectionStatus_Connected
                               ? ChannelListener::ChannelStatus::Online
                               : ChannelListener::ChannelStatus::Offline);
-    Log::D(Log::TAG, "OnCarrierConnection status: %d", channel->mChannelStatus);
+    Log::D(Log::TAG, "ChannelImplCarrier::OnCarrierConnection status: %d", channel->mChannelStatus);
     if(channel->mChannelListener.get() != nullptr) {
         channel->mChannelListener->onStatusChanged(carrierUsrId, channel->mChannelType, channel->mChannelStatus);
     }
@@ -320,7 +321,7 @@ void ChannelImplCarrier::OnCarrierFriendRequest(ElaCarrier *carrier, const char 
                                                 const ElaUserInfo *info,
                                                 const char *hello, void *context)
 {
-    Log::D(Log::TAG, "OnCarrierFriendRequest from: %s", friendid);
+    Log::D(Log::TAG, "ChannelImplCarrier::OnCarrierFriendRequest from: %s", friendid);
     auto channel = reinterpret_cast<ChannelImplCarrier*>(context);
 
     if(channel->mChannelListener.get() != nullptr) {
@@ -331,7 +332,7 @@ void ChannelImplCarrier::OnCarrierFriendRequest(ElaCarrier *carrier, const char 
 void ChannelImplCarrier::OnCarrierFriendConnection(ElaCarrier *carrier,const char *friendid,
                                                    ElaConnectionStatus status, void *context)
 {
-    Log::D(Log::TAG, "OnCarrierFriendConnection from: %s %d", friendid, status);
+    Log::D(Log::TAG, "ChannelImplCarrier::OnCarrierFriendConnection from: %s %d", friendid, status);
     auto channel = reinterpret_cast<ChannelImplCarrier*>(context);
 
     if(channel->mChannelListener.get() != nullptr) {
@@ -345,7 +346,7 @@ void ChannelImplCarrier::OnCarrierFriendConnection(ElaCarrier *carrier,const cha
 void ChannelImplCarrier::OnCarrierFriendMessage(ElaCarrier *carrier, const char *from,
                                                 const void *msg, size_t len, void *context)
 {
-    Log::D(Log::TAG, "OnCarrierFriendMessage from: %s len=%d", from, len);
+    Log::D(Log::TAG, "ChannelImplCarrier::OnCarrierFriendMessage from: %s len=%d", from, len);
 
     auto channel = reinterpret_cast<ChannelImplCarrier*>(context);
     if(channel->mChannelListener.get() == nullptr) {
@@ -367,7 +368,7 @@ void ChannelImplCarrier::OnCarrierFriendMessage(ElaCarrier *carrier, const char 
     if(isPkgData == true) {
         dataOffset = PkgMagicSize;
         dataComplete = (data[PkgMagicDataIdx] == data[PkgMagicDataCnt] - 1 ? true : false);
-        Log::D(Log::TAG, "OnCarrierFriendMessage PkgMagicData Idx/Cnt=%d/%d", data[PkgMagicDataIdx], data[PkgMagicDataCnt]);
+        Log::D(Log::TAG, "ChannelImplCarrier::OnCarrierFriendMessage PkgMagicData Idx/Cnt=%d/%d", data[PkgMagicDataIdx], data[PkgMagicDataCnt]);
     }
 
     auto& dataCache = channel->mRecvDataCache[from];

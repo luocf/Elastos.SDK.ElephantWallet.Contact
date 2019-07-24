@@ -42,7 +42,7 @@ int main(int argc, char **argv)
         gSavedMnemonic = "bachelor sail glove swing despair lawsuit exhibit travel slot practice latin glass";
         nickname = "Me";
     } else {
-        gSavedMnemonic = "nature blouse motor thunder job sadness olympic feel client perfect uphold link";
+        gSavedMnemonic = "grit immune viable world merge inner picnic young twelve inject rather spoil";
     }
 
     Log::I(Log::TAG, "Start Contact Test.");
@@ -191,7 +191,7 @@ std::shared_ptr<elastos::SecurityManager::SecurityListener> getSecurityListener(
         };
         virtual ~SecurityListener() = default;
 
-        std::string onRequestPublicKey() override {
+        std::string onAcquirePublicKey() override {
             auto pubKey = getPublicKey();
             //std::cout << __PRETTY_FUNCTION__ << " pubKey:" << pubKey << std::endl;
             return pubKey;
@@ -208,17 +208,17 @@ std::shared_ptr<elastos::SecurityManager::SecurityListener> getSecurityListener(
             return src;
         }
 
-        std::string onRequestDidPropAppId() override {
+        std::string onAcquireDidPropAppId() override {
             return "DC92DEC59082610D1D4698F42965381EBBC4EF7DBDA08E4B3894D530608A64AAA65BB82A170FBE16F04B2AF7B25D88350F86F58A7C1F55CC29993B4C4C29E405";
         }
 
-        std::string onRequestDidAgentAuthHeader() override {
+        std::string onAcquireDidAgentAuthHeader() override {
             std::string appid = "org.elastos.debug.didplugin";
             std::string appkey = "b2gvzUM79yLhCbbGNWCuhSsGdqYhA7sS";
             std::string timestamp = std::to_string(elastos::DateTime::CurrentMS());
             std::string auth = elastos::MD5::Get(appkey + timestamp);
             std::string headerValue = "id=" + appid + ";time=" + timestamp + ";auth=" + auth;
-            Log::I(Log::TAG, "onRequestDidAgentAuthHeader() headerValue=%s", headerValue.c_str());
+            Log::I(Log::TAG, "onAcquireDidAgentAuthHeader() headerValue=%s", headerValue.c_str());
 
             return headerValue;
         }
@@ -255,10 +255,10 @@ std::shared_ptr<elastos::UserManager::UserListener> getUserListener()
         explicit UserListener() = default;
         virtual ~UserListener() = default;
 
-        virtual int onSigninDevicesOverflow(const std::weak_ptr<elastos::HumanInfo> userInfo, int capacity) override {
-            std::cout << __PRETTY_FUNCTION__ << std::endl;
-            return 0;
-        };
+        //virtual int onSigninDevicesOverflow(const std::weak_ptr<elastos::HumanInfo> userInfo, int capacity) override {
+            //std::cout << __PRETTY_FUNCTION__ << std::endl;
+            //return 0;
+        //};
     };
 
     return std::make_shared<UserListener>();
@@ -271,14 +271,14 @@ std::shared_ptr<elastos::FriendManager::FriendListener> getFriendListener()
         explicit FriendListener() = default;
         virtual ~FriendListener() = default;
 
-        virtual int onFriendRequest(elastos::FriendInfo friendInfo, std::string message) override {
-            std::cout << __PRETTY_FUNCTION__ << " message:" << message << std::endl;
-            return 0;
-        };
+        //virtual int onFriendRequest(elastos::FriendInfo friendInfo, std::string message) override {
+            //std::cout << __PRETTY_FUNCTION__ << " message:" << message << std::endl;
+            //return 0;
+        //};
 
-        virtual void onStatusChanged(elastos::FriendInfo friendInfo, uint64_t status) override {
-            std::cout << __PRETTY_FUNCTION__ << std::endl;
-        };
+        //virtual void onStatusChanged(elastos::FriendInfo friendInfo, uint64_t status) override {
+            //std::cout << __PRETTY_FUNCTION__ << std::endl;
+        //};
     };
 
     return std::make_shared<FriendListener>();

@@ -57,13 +57,14 @@ public class MainActivity extends Activity {
         mSavedMnemonic = pref.getString(SavedMnemonicKey, null);
         if(mSavedMnemonic == null) {
             mSavedMnemonic = ElastosKeypair.generateMnemonic(KeypairLanguage, KeypairWords);
-            newAndSaveMnemonic(mSavedMnemonic);
-
 //            if (devId.startsWith("7134d")) {
 //                mSavedMnemonic = UploadedMnemonic1;
-//            } else if (devId.startsWith("fa65a")) {
-//                mSavedMnemonic = UploadedMnemonic2;
 //            }
+            if (devId.startsWith("fa65a")) {
+                mSavedMnemonic = UploadedMnemonic2;
+            }
+
+            newAndSaveMnemonic(mSavedMnemonic);
         }
 
         showMessage("Mnemonic:\n" + mSavedMnemonic);
@@ -144,58 +145,6 @@ public class MainActivity extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-
-
-//        findViewById(R.id.btn_test_newcontact).setOnClickListener((view) -> {
-//            String message = testNewContact();
-//            showMessage(message);
-//        });
-//        findViewById(R.id.btn_test_start).setOnClickListener((view) -> {
-//            String message = testStart();
-//            showMessage(message);
-//        });
-//        findViewById(R.id.btn_test_delcontact).setOnClickListener((view) -> {
-//            String message = testDelContact();
-//            showMessage(message);
-//        });
-//
-//        findViewById(R.id.btn_show_userinfo).setOnClickListener((view) -> {
-//            String message = showUserInfo();
-//            showMessage(message);
-//        });
-//        findViewById(R.id.btn_list_friendinfo).setOnClickListener((view) -> {
-//            String message = listFriendInfo();
-//            showMessage(message);
-//        });
-//        findViewById(R.id.btn_scan_userinfo).setOnClickListener((view) -> {
-//            String message = scanUserInfo();
-//            showMessage(message);
-//        });
-//        findViewById(R.id.btn_send_message).setOnClickListener((view) -> {
-//            String message = sendMessage();
-//            showMessage(message);
-//        });
-//
-//        findViewById(R.id.btn_test_syncupload).setOnClickListener((view) -> {
-//            String message = testSyncUpload();
-//            showMessage(message);
-//        });
-//        findViewById(R.id.btn_test_syncdownload).setOnClickListener((view) -> {
-//            String message = testSyncDownload();
-//            showMessage(message);
-//        });
-//
-//
-//        findViewById(R.id.btn_clear_event).setOnClickListener((view) -> {
-//            TextView txtCbMsg = findViewById(R.id.txt_event);
-//            txtCbMsg.setText("");
-//        });
-
-    }
-
     private void clearEvent() {
         TextView txtCbMsg = findViewById(R.id.txt_event);
         txtCbMsg.setText("");
@@ -233,7 +182,7 @@ public class MainActivity extends Activity {
     }
 
     private String testNewContact() {
-        Contact.Factory.SetLogLevel(4);
+        Contact.Factory.SetLogLevel(7);
 
         Contact.Factory.SetDeviceId(getDeviceId());
 

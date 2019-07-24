@@ -128,6 +128,24 @@ int MessageManager::presetChannels(std::weak_ptr<Config> config)
             hasFailed = true;
             Log::W(Log::TAG, "Failed to preset channel %d", channel.first);
         }
+
+        if(channel.first == ChannelType::Carrier) {
+            std::string validSecKey;
+            ret = channel.second->getSecretKey(validSecKey);
+            if(ret < 0) {
+                hasFailed = true;
+                Log::W(Log::TAG, "Failed to get carrier secret key.");
+            }
+
+            std::string carrierSecKey;
+            int ret = userInfo->getIdentifyCode(UserInfo::Type::CarrierSecKey, carrierSecKey);
+            if (ret == 0) {
+                if(validSecKey != carrierSecKey) {
+                    hasFailed = true;
+                    Log::W(Log::TAG, "Failed to check current dev carrier secret key.");
+                }
+            }
+        }
     }
     if(hasFailed) {
         return ErrCode::ChannelFailedPresetAll;

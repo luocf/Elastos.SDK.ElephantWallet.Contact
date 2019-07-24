@@ -116,7 +116,7 @@ std::shared_ptr<elastos::SecurityManager::SecurityListener> getSecurityListener(
         explicit SecurityListener() = default;
         virtual ~SecurityListener() = default;
 
-        std::string onRequestPublicKey() override {
+        std::string onAcquirePublicKey() override {
             auto pubKey = getPublicKey();
             //std::cout << __PRETTY_FUNCTION__ << " pubKey:" << pubKey << std::endl;
             return pubKey;
@@ -133,17 +133,17 @@ std::shared_ptr<elastos::SecurityManager::SecurityListener> getSecurityListener(
             return dest;
         }
 
-        std::string onRequestDidPropAppId() override {
+        std::string onAcquireDidPropAppId() override {
             return "DC92DEC59082610D1D4698F42965381EBBC4EF7DBDA08E4B3894D530608A64AAA65BB82A170FBE16F04B2AF7B25D88350F86F58A7C1F55CC29993B4C4C29E405";
         }
 
-        std::string onRequestDidAgentAuthHeader() override {
+        std::string onAcquireDidAgentAuthHeader() override {
             std::string appid = "org.elastos.debug.didplugin";
             std::string appkey = "b2gvzUM79yLhCbbGNWCuhSsGdqYhA7sS";
             std::string timestamp = std::to_string(elastos::DateTime::CurrentMS());
             std::string auth = elastos::MD5::Get(appkey + timestamp);
             std::string headerValue = "id=" + appid + ";time=" + timestamp + ";auth=" + auth;
-            Log::I(Log::TAG, "onRequestDidAgentAuthHeader() headerValue=%s", headerValue.c_str());
+            Log::I(Log::TAG, "onAcquireDidAgentAuthHeader() headerValue=%s", headerValue.c_str());
 
             return headerValue;
         }

@@ -191,7 +191,8 @@ inline int Log::convPrio(const char head)
       ret = ANDROID_LOG_INFO;
       break;
     case 'D':
-      ret = ANDROID_LOG_DEBUG;
+//      ret = ANDROID_LOG_DEBUG;
+      ret = ANDROID_LOG_INFO; // debug not print for same mobile
       break;
     case 'V':
       ret = ANDROID_LOG_VERBOSE;

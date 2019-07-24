@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.12)
 
 include(../config/cmake/CMakeLists.txt)
+include_directories("${CMAKE_INSTALL_PREFIX}/include")
 
 project(Elastos.SDK.Contact)
 add_subdirectory(common)

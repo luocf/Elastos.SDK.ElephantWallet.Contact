@@ -265,7 +265,7 @@ public class Helper {
             String value = (checkedId == btnCarrier.getId() ? humanCode[1] : humanCode[0]);
             Bitmap bitmap = makeQRCode(value);
             image.setImageBitmap(bitmap);
-            txtCode.setText(value);
+            txtCode.setText("["+value+"]");
         });
         radioGrp.check(btnCarrier.getId());
 

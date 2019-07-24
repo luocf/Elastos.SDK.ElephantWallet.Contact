@@ -234,7 +234,7 @@ int ContactTestCmd::SendMessage(std::shared_ptr<elastos::Contact> contact,
     }
 
     int chType = std::stoi(channelType);
-    auto msgInfo = msgMgr->makeTextMessage(msg);
+    auto msgInfo = elastos::MessageManager::MakeTextMessage(msg);
 
     ret = msgMgr->sendMessage(friendInfo, static_cast<elastos::MessageManager::ChannelType>(chType), msgInfo);
     if(ret < 0) {
