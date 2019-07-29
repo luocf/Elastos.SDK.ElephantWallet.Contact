@@ -292,6 +292,7 @@ int MessageManager::monitorDidChainCarrierID(const std::string& did)
             humanInfo = friendInfo;
         } else {
             Log::E(Log::TAG, "MessageManager::monitorDidChainCarrierID() Failed to process CarrierId for did: %s", did.c_str());
+            CHECK_ERROR_NO_RETVAL(ErrCode::InvalidFriendCode);
             return;
         }
 

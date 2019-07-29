@@ -9,10 +9,12 @@ import org.elastos.tools.crosspl.annotation.CrossInterface;
 
 @CrossClass
 public abstract class ContactListener extends CrossBase {
+    @CrossInterface
+    public abstract void onError(int errCode, String errStr, String ext);
+
     public abstract byte[] onAcquire(AcquireArgs request);
     public abstract void onEvent(EventArgs event);
     public abstract void onReceivedMessage(String humanCode, int channelType, Contact.Message message);
-    public abstract void onError(int errCode, String errStr);
 
     public class AcquireArgs extends org.elastos.sdk.elephantwallet.contact.internal.AcquireArgs {
         private AcquireArgs(int type, String pubKey, byte[] data) {

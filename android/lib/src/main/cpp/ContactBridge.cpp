@@ -43,6 +43,10 @@ void ContactBridge::setListener(CrossBase* listener)
     mListener = dynamic_cast<ContactListener*>(listener);
 //    mListener->onCallback(0, nullptr);
 
+    auto errorListener = std::bind(&ContactListener::onError, mListener,
+                                   std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
+    elastos::ErrCode::SetErrorListener(errorListener);
+
     auto sectyListener = mListener->getSecurityListener();
     auto msgListener = mListener->getMessageListener();
     mContactImpl->setListener(sectyListener, nullptr, nullptr, msgListener);

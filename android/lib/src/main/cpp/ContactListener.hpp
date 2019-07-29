@@ -48,6 +48,7 @@ public:
     explicit ContactListener();
     virtual ~ContactListener();
 
+    void onError(int errCode, const std::string& errStr, const std::string& ext);
     std::shared_ptr<elastos::SecurityManager::SecurityListener> getSecurityListener();
     std::shared_ptr<elastos::MessageManager::MessageListener> getMessageListener();
 

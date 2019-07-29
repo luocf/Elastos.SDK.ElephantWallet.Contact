@@ -5,7 +5,6 @@
 #include <algorithm>
 
 #include <curl/curl.h>
-#include <ErrCode.hpp>
 #include <Log.hpp>
 
 #define CHECK_CURL(curl_code) \
@@ -117,7 +116,9 @@ int HttpClient::syncGet()
 	std::shared_ptr<struct curl_slist> curlHeadersPtr;
 
 	ret = makeCurl(curlHandlePtr, curlHeadersPtr);
-	CHECK_ERROR(ret);
+	if(ret < 0) {
+		return ret;
+	}
 
 	mRespStatus = -1;
 	mRespReason.clear();
@@ -141,7 +142,9 @@ int HttpClient::syncPost(const int8_t* body, int size)
 	std::shared_ptr<struct curl_slist> curlHeadersPtr;
 
 	ret = makeCurl(curlHandlePtr, curlHeadersPtr);
-	CHECK_ERROR(ret);
+	if(ret < 0) {
+		return ret;
+	}
 
 	mRespStatus = -1;
 	mRespReason.clear();

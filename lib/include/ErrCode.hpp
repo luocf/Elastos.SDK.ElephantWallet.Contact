@@ -11,7 +11,15 @@ public:
 #define CHECK_ERROR(ret) \
 	if(ret < 0) { \
 		Log::E(Log::TAG, "Failed to call %s in line %d, return %d.", __PRETTY_FUNCTION__, __LINE__, ret); \
+		elastos::ErrCode::SetError(ret, std::string(__PRETTY_FUNCTION__) + "() :" + std::to_string(__LINE__)); \
 		return ret; \
+	}
+
+#define CHECK_ERROR_NO_RETVAL(ret) \
+	if(ret < 0) { \
+		Log::E(Log::TAG, "Failed to call %s in line %d, return %d.", __PRETTY_FUNCTION__, __LINE__, ret); \
+		elastos::ErrCode::SetError(ret, std::string(__PRETTY_FUNCTION__) + "() :" + std::to_string(__LINE__)); \
+		return; \
 	}
 
     /*** static function and variable ***/
@@ -30,6 +38,7 @@ public:
     constexpr static const int MergeInfoFailed = -13;
     constexpr static const int IgnoreMergeOldInfo = -14;
     constexpr static const int EmptyInfoError = -15;
+	constexpr static const int InvalidFriendCode = -16;
 
     constexpr static const int InvalidLocalDataDir = -50;
     constexpr static const int NoSecurityListener = -51;
@@ -58,6 +67,8 @@ public:
 
     constexpr static const int StdSystemErrorIndex = -1000;
 
+	static void SetErrorListener(std::function<void(int, const std::string&, const std::string&)> listener);
+	static void SetError(int errCode, const std::string& ext);
     static std::string ToString(int errCode);
 
     /*** class function and variable ***/
@@ -66,6 +77,7 @@ private:
     /*** type define ***/
 
     /*** static function and variable ***/
+	static std::function<void(int, const std::string&, const std::string&)> sErrorListener;
 
     /*** class function and variable ***/
     explicit ErrCode() = delete;

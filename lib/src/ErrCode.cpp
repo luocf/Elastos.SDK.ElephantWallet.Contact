@@ -14,11 +14,30 @@ namespace elastos {
 /***********************************************/
 /***** static variables initialize *************/
 /***********************************************/
+std::function<void(int, const std::string&, const std::string&)> ErrCode::sErrorListener;
 
 
 /***********************************************/
 /***** static function implement ***************/
 /***********************************************/
+void ErrCode::SetErrorListener(std::function<void(int, const std::string&, const std::string&)> listener)
+{
+    sErrorListener = listener;
+}
+
+void ErrCode::SetError(int errCode, const std::string& ext)
+{
+    if(errCode >= 0) {
+        return;
+    }
+    if(!sErrorListener) {
+        return;
+    }
+
+    auto errStr = ToString(errCode);
+    sErrorListener(errCode, errStr, ext);
+}
+
 std::string ErrCode::ToString(int errCode)
 {
     std::string errMsg;
@@ -36,6 +55,9 @@ std::string ErrCode::ToString(int errCode)
     case NetworkException:
         errMsg = "NetworkException";
         break;
+    case FileNotExistsError:
+        errMsg = "FileNotExistsError";
+        break;
     case InvalidLocalDataDir:
         errMsg = "InvalidLocalDataDir";
         break;
@@ -50,13 +72,13 @@ std::string ErrCode::ToString(int errCode)
         break;
     }
 
-    if(errCode < StdSystemErrorIndex) {
+    if(errCode < StdSystemErrorIndex) { // is std error
         int stdErrVal = StdSystemErrorIndex - errCode;
         auto stdErrCode = std::error_code(stdErrVal, std::generic_category());
         errMsg = stdErrCode.message();
     }
 
-    return errMsg;
+    return std::move(errMsg);
 }
 
 /***********************************************/

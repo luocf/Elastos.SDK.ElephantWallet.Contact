@@ -233,11 +233,10 @@ public class MainActivity extends Activity {
             }
 
             @Override
-            public void onError(int errCode, String errStr) {
-                String msg = "onError";
-                msg += " errCode=" + errCode;
-                msg += " errStr=" + errStr;
-                showEvent(msg);
+            public void onError(int errCode, String errStr, String ext) {
+                String msg = errCode + ": " + errStr;
+                msg = "\n" + ext;
+                showError(msg);
             }
         };
         mContact.setListener(mContactListener);
@@ -514,6 +513,16 @@ public class MainActivity extends Activity {
             msg += "\n";
             msg += newMsg;
             txtCbMsg.setText(msg);
+        });
+    }
+
+    public void showError(String newErr) {
+        Handler handler = new Handler(Looper.getMainLooper());
+        handler.post(() -> {
+            Log.e(TAG, newErr);
+
+            TextView txtCbMsg = findViewById(R.id.txt_error);
+            txtCbMsg.setText(newErr);
         });
     }
 

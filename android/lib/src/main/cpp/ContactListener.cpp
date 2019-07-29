@@ -41,6 +41,14 @@ ContactListener::~ContactListener()
     }
 }
 
+void ContactListener::onError(int errCode, const std::string& errStr, const std::string& ext)
+{
+    int64_t platformHandle = getPlatformHandle();
+    crosspl::proxy::ContactListener::onError(platformHandle,
+                                             errCode, errStr.c_str(), ext.c_str());
+    return;
+}
+
 std::shared_ptr<elastos::SecurityManager::SecurityListener> ContactListener::getSecurityListener()
 {
     return mSecurityListener;
