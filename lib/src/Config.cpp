@@ -75,7 +75,7 @@ int Config::loadDefaultValues()
 
     mDidChainConfig = std::make_unique<DidChainConfig>();
     mDidChainConfig->mUrl = "https://api-wallet-did.elastos.org/api/1";
-//    mDidChainConfig->mUrl = "https://api-wallet-did-testnet.elastos.org/api/1";
+    mDidChainConfig->mUrl = "https://api-wallet-did-testnet.elastos.org/api/1";
     mDidChainConfig->mApi = mElaChainConfig->mApi;
     mDidChainConfig->mAgentApi.mGetDidProps = "/didexplorer/did/"; //{did}
     mDidChainConfig->mAgentApi.mUploadDidProps = "/blockagent/upchain/data";

@@ -83,30 +83,13 @@ int Contact::start()
     CHECK_ERROR(ret)
 
     ret = mUserManager->restoreUserInfo();
-    if(ret < 0
-    && ret != ErrCode::EmptyInfoError) {
-        return ret;
-    }
-    bool successLoadInfo = (ret != ErrCode::EmptyInfoError);
-    bool successLoadCarrier = false;
-
-    std::shared_ptr<UserInfo> userInfo;
-    mUserManager->getUserInfo(userInfo);
-    std::string carrierSecKey;
-    ret = userInfo->getIdentifyCode(UserInfo::Type::CarrierSecKey, carrierSecKey);
-    if (ret == 0) {
-        successLoadCarrier = true;
-    }
+    CHECK_ERROR(ret)
 
     ret = mMessageManager->presetChannels(mConfig);
     CHECK_ERROR(ret)
 
-    if(successLoadInfo == false || successLoadCarrier == false) {
-        ret = mUserManager->newUserInfo(successLoadInfo == true);
-        if (ret < 0) {
-            return ret;
-        }
-    }
+    ret = mUserManager->ensureUserCarrierInfo();
+    CHECK_ERROR(ret)
 
     ret = mFriendManager->restoreFriendsInfo();
     CHECK_ERROR(ret)
@@ -114,7 +97,7 @@ int Contact::start()
     ret = mMessageManager->openChannels();
     CHECK_ERROR(ret)
 
-    ret = mUserManager->monitorDidChainData();
+    ret = monitorDidChainData();
     CHECK_ERROR(ret)
 
     return 0;
@@ -232,6 +215,18 @@ int Contact::initGlobal()
     mFriendManager->setConfig(mConfig, mMessageManager);
 
     ret = BlkChnClient::InitInstance(mConfig, mSecurityManager);
+    CHECK_ERROR(ret)
+
+    return 0;
+}
+
+int Contact::monitorDidChainData()
+{
+    std::string did;
+    int ret = mSecurityManager->getDid(did);
+    CHECK_ERROR(ret)
+
+    ret = mMessageManager->monitorDidChainCarrierID(did);
     CHECK_ERROR(ret)
 
     return 0;

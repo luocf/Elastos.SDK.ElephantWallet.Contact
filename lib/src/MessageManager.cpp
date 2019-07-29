@@ -13,6 +13,7 @@
 #include <Log.hpp>
 #include <Random.hpp>
 #include <SafePtr.hpp>
+#include "BlkChnClient.hpp"
 
 namespace elastos {
 
@@ -113,15 +114,15 @@ int MessageManager::presetChannels(std::weak_ptr<Config> config)
 
     for(const auto& channel: mMessageChannelMap) {
         std::string profile;
-        if(channel.first == ChannelType::Carrier) {
-            std::string carrierSecKey;
-            int ret = userInfo->getIdentifyCode(UserInfo::Type::CarrierSecKey, carrierSecKey);
-            if (ret == 0) {
-                profile = carrierSecKey;
-            } else {
-                Log::W(Log::TAG, "Failed to get current dev carrier secret key.");
-            }
-        }
+        // if(channel.first == ChannelType::Carrier) {
+        //     std::string carrierSecKey;
+        //     int ret = userInfo->getIdentifyCode(UserInfo::Type::CarrierSecKey, carrierSecKey);
+        //     if (ret == 0) {
+        //         profile = carrierSecKey;
+        //     } else {
+        //         Log::W(Log::TAG, "Failed to get current dev carrier secret key.");
+        //     }
+        // }
 
         int ret = channel.second->preset(profile); // TODO add carrier secretkey
         if(ret < 0) {
@@ -129,23 +130,23 @@ int MessageManager::presetChannels(std::weak_ptr<Config> config)
             Log::W(Log::TAG, "Failed to preset channel %d", channel.first);
         }
 
-        if(channel.first == ChannelType::Carrier) {
-            std::string validSecKey;
-            ret = channel.second->getSecretKey(validSecKey);
-            if(ret < 0) {
-                hasFailed = true;
-                Log::W(Log::TAG, "Failed to get carrier secret key.");
-            }
+        // if(channel.first == ChannelType::Carrier) {
+        //     std::string validSecKey;
+        //     ret = channel.second->getSecretKey(validSecKey);
+        //     if(ret < 0) {
+        //         hasFailed = true;
+        //         Log::W(Log::TAG, "Failed to get carrier secret key.");
+        //     }
 
-            std::string carrierSecKey;
-            int ret = userInfo->getIdentifyCode(UserInfo::Type::CarrierSecKey, carrierSecKey);
-            if (ret == 0) {
-                if(validSecKey != carrierSecKey) {
-                    hasFailed = true;
-                    Log::W(Log::TAG, "Failed to check current dev carrier secret key.");
-                }
-            }
-        }
+        //     std::string carrierSecKey;
+        //     int ret = userInfo->getIdentifyCode(UserInfo::Type::CarrierSecKey, carrierSecKey);
+        //     if (ret == 0) {
+        //         if(validSecKey != carrierSecKey) {
+        //             hasFailed = true;
+        //             Log::W(Log::TAG, "Failed to check current dev carrier secret key.");
+        //         }
+        //     }
+        // }
     }
     if(hasFailed) {
         return ErrCode::ChannelFailedPresetAll;
@@ -180,7 +181,8 @@ int MessageManager::closehannels()
 int MessageManager::requestFriend(const std::string& friendAddr,
                                   ChannelType humanChType,
                                   const std::string& summary,
-                                  bool remoteRequest)
+                                  bool remoteRequest,
+                                  bool forceRequest)
 {
     Log::W(Log::TAG, ">>>>>>>>>>>>> requestFriend code:%s, details=%s", friendAddr.c_str(), summary.c_str());
     auto it = mMessageChannelMap.find(humanChType);
@@ -211,8 +213,141 @@ int MessageManager::requestFriend(const std::string& friendAddr,
     //jsonInfo[JsonKey::HumanInfo] = humanInfo;
 
     auto details = jsonInfo.dump();
-    ret = channel->requestFriend(friendAddr, details, remoteRequest);
+    ret = channel->requestFriend(friendAddr, details, remoteRequest, forceRequest);
     CHECK_ERROR(ret)
+
+    return 0;
+}
+
+int MessageManager::updateFriend(const std::string& did)
+{
+    auto userMgr = SAFE_GET_PTR(mUserManager);
+    auto friendMgr = SAFE_GET_PTR(mFriendManager);
+
+    std::shared_ptr<HumanInfo> humanInfo;
+    if (userMgr->contains(did)) {
+        std::shared_ptr<elastos::UserInfo> userInfo;
+        std::ignore = userMgr->getUserInfo(userInfo);
+        humanInfo = userInfo;
+    } else if (friendMgr->contains(did)) {
+        std::shared_ptr<FriendInfo> friendInfo;
+        std::ignore  = friendMgr->tryGetFriendInfo(did, friendInfo);
+        humanInfo = friendInfo;
+    } else {
+        Log::E(Log::TAG, "MessageManager::requestFriendByDid() Failed for did: %s", did.c_str());
+        return ErrCode::InvalidArgument;
+    }
+
+    std::vector<HumanInfo::CarrierInfo> carrierInfoArray;
+    int ret = humanInfo->getAllCarrierInfo(carrierInfoArray);
+    CHECK_ERROR(ret)
+
+    int lastRet = 0;
+    for(const auto& carrierInfo: carrierInfoArray) {
+        bool forceRequest = false;
+        HumanInfo::Status status;
+        std::ignore = humanInfo->getCarrierStatus(carrierInfo.mUsrId, status);
+        if(status == HumanInfo::Status::WaitForAccept) {
+            forceRequest = true;
+        }
+
+        int ret = requestFriend(carrierInfo.mUsrAddr,
+                                MessageManager::ChannelType::Carrier,
+                                "", true, forceRequest);
+        Log::I(Log::TAG, "MessageManager::requestFriendByDid() add %s", carrierInfo.mUsrAddr.c_str());
+        if(ret < 0
+           && ret != ErrCode::ChannelFailedFriendSelf
+           && ret != ErrCode::ChannelFailedFriendExists) {
+            Log::W(Log::TAG, "MessageManager::requestFriendByDid() Failed to add %s ret=%d", carrierInfo.mUsrAddr.c_str(), ret);
+            lastRet = ret;
+        }
+    }
+
+    return lastRet;
+}
+
+int MessageManager::monitorDidChainCarrierID(const std::string& did)
+{
+    auto callback = [=](int errcode,
+                        const std::string& keyPath,
+                        const std::string& result) {
+        Log::D(Log::TAG, "MessageManager::monitorDidChainCarrierID() ecode=%d, path=%s, result=%s", errcode, keyPath.c_str(), result.c_str());
+
+        if(errcode < 0) {
+            Log::W(Log::TAG, "MessageManager::monitorDidChainCarrierID() Failed to sync CarrierId. errcode=%d", errcode);
+            return;
+        }
+
+        auto userMgr = SAFE_GET_PTR_NO_RETVAL(mUserManager);
+        auto friendMgr = SAFE_GET_PTR_NO_RETVAL(mFriendManager);
+
+        std::shared_ptr<HumanInfo> humanInfo;
+        if (userMgr->contains(did)) {
+            std::shared_ptr<elastos::UserInfo> userInfo;
+            std::ignore = userMgr->getUserInfo(userInfo);
+            humanInfo = userInfo;
+        } else if (friendMgr->contains(did)) {
+            std::shared_ptr<FriendInfo> friendInfo;
+            std::ignore  = friendMgr->tryGetFriendInfo(did, friendInfo);
+            humanInfo = friendInfo;
+        } else {
+            Log::E(Log::TAG, "MessageManager::monitorDidChainCarrierID() Failed to process CarrierId for did: %s", did.c_str());
+            return;
+        }
+
+        std::vector<std::string> values;
+        Json jsonPropArray = Json::parse(result);
+        for (const auto& it : jsonPropArray) {
+            values.push_back(it["value"]);
+        }
+
+        bool carrierInfoChanged = false;
+        for(const auto& it: values) {
+            HumanInfo::CarrierInfo carrierInfo;
+            int ret = HumanInfo::deserialize(it, carrierInfo);
+            if(ret < 0) {
+                Log::W(Log::TAG, "MessageManager::monitorDidChainCarrierID() Failed to sync CarrierId: %s", it.c_str());
+                continue; // ignore error
+            }
+
+            ret = humanInfo->addCarrierInfo(carrierInfo, HumanInfo::Status::WaitForAccept);
+            if(ret < 0) {
+                if(ret == ErrCode::IgnoreMergeOldInfo) {
+                    Log::W(Log::TAG, "MessageManager::monitorDidChainCarrierID() Ignore to sync CarrierId: %s", it.c_str());
+                } else {
+                    Log::E(Log::TAG, "MessageManager::monitorDidChainCarrierID() Failed to sync carrier info. CarrierId: %s", it.c_str());
+                }
+                continue; // ignore error
+            } else {
+                carrierInfoChanged = true;
+            }
+        }
+
+        if(carrierInfoChanged == false) {
+            Log::D(Log::TAG, "MessageManager::monitorDidChainCarrierID() did %s, CarrierId not changed.", did.c_str());
+            return;
+        }
+
+        int ret = updateFriend(did);
+        if(ret < 0) {
+            Log::E(Log::TAG, "Failed to accept other dev. ret=%d", ret);
+            return;
+        }
+    };
+
+    auto bcClient = BlkChnClient::GetInstance();
+
+    std::string keyPath;
+    int ret = bcClient->getDidPropHistoryPath(did, "CarrierID", keyPath);
+    if (ret < 0) {
+        return ret;
+    }
+
+    Log::I(Log::TAG, "MessageManager::monitorDidChainCarrierID() keyPath=%s", keyPath.c_str());
+    ret = bcClient->appendMoniter(keyPath, callback);
+    if (ret < 0) {
+        return ret;
+    }
 
     return 0;
 }

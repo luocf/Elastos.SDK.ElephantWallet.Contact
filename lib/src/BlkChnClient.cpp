@@ -21,24 +21,23 @@ std::shared_ptr<BlkChnClient> BlkChnClient::gBlkChnClient {};
 /* =========================================== */
 /* === static function implement ============= */
 /* =========================================== */
-int BlkChnClient::InitInstance(std::weak_ptr<Config> config, std::weak_ptr<SecurityManager> sectyMgr)
-{
-    if(gBlkChnClient.get() != nullptr) {
+int BlkChnClient::InitInstance(std::weak_ptr<Config> config,
+                               std::weak_ptr<SecurityManager> sectyMgr) {
+    if (gBlkChnClient.get() != nullptr) {
         return 0;
     }
 
-    struct Impl: BlkChnClient {
-        Impl(std::weak_ptr<Config> config, std::weak_ptr<SecurityManager> sectyMgr) : BlkChnClient(config, sectyMgr) {
-        }
+    struct Impl : BlkChnClient {
+        Impl(std::weak_ptr<Config> config,
+             std::weak_ptr<SecurityManager> sectyMgr)
+            : BlkChnClient(config, sectyMgr) {}
     };
 
     HttpClient::InitGlobal();
     gBlkChnClient = std::make_shared<Impl>(config, sectyMgr);
 
-//    int ret = gBlkChnClient->startMonitor();
-//    if (ret < 0) {
-//        return 0;
-//    }
+    int ret = gBlkChnClient->startMonitor();
+    CHECK_ERROR(ret)
 
     return 0;
 }
@@ -320,7 +319,7 @@ int BlkChnClient::downloadHumanInfo(const std::string& did, std::shared_ptr<Huma
         ret = humanInfo->addCarrierInfo(carrierInfo, HumanInfo::Status::Offline);
         if(ret < 0) {
             if(ret == ErrCode::IgnoreMergeOldInfo) {
-                Log::I(Log::TAG, "BlkChnClient::downloadHumanInfo() Ignore to sync CarrierId: %s", it.c_str());
+                Log::W(Log::TAG, "BlkChnClient::downloadHumanInfo() Ignore to sync CarrierId: %s", it.c_str());
             } else {
                 Log::W(Log::TAG, "BlkChnClient::downloadHumanInfo() Failed to sync carrier info. CarrierId: %s", it.c_str());
             }
@@ -441,7 +440,7 @@ int BlkChnClient::startMonitor()
 {
     mMonitor.mMonitorLooper = [&]() {
         int64_t current = DateTime::CurrentMS();
-        Log::I(Log::TAG, "current timestamp=%lld", current);
+        Log::I(Log::TAG, "%s current timestamp=%lld", __PRETTY_FUNCTION__, current);
         std::map<std::string, MonitorCallback> monitorCallbackMap;
         {
             std::lock_guard<std::recursive_mutex> lock(mMutex);
@@ -457,7 +456,7 @@ int BlkChnClient::startMonitor()
             callback(ret, keyPath, result);
         }
 
-        int ret = mMonitor.mMonitorThread.sleepMS(mMonitor.mMonitorPendingMS);
+        int ret = mMonitor.mMonitorThread.sleepMS(mMonitor.MonitorPendingMS);
         mMonitor.mMonitorThread.post(mMonitor.mMonitorLooper);
     };
 

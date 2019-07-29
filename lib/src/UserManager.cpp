@@ -119,18 +119,14 @@ int UserManager::restoreUserInfo()
     if(ret == 0) {
         Log::I(Log::TAG, "UserManager::restoreUserInfo() Success to recover user from local.");
     } else if(ret == ErrCode::FileNotExistsError) {
-        Log::I(Log::TAG, "UserManager::restoreUserInfo() Local user info not exists.");
-        ret = syncDidChainData();
-        if(ret == 0) {
-            Log::I(Log::TAG, "UserManager::restoreUserInfo() Success to recover user from did chain.");
-        } else if(ret == ErrCode::BlkChnEmptyPropError) {
-            Log::I(Log::TAG, "UserManager::restoreUserInfo() Can't find user info from local or did chain.");
-            ret = ErrCode::EmptyInfoError;
-        }
-    }
-    if(ret < 0) {
-        Log::W(Log::TAG, "UserManager::restoreUserInfo() Failed to restore user, ret=%d", ret);
-        return ret;
+        auto sectyMgr = SAFE_GET_PTR(mSecurityManager);
+        std::string pubKey;
+        int ret = sectyMgr->getPublicKey(pubKey);
+        CHECK_ERROR(ret)
+        ret = mUserInfo->setHumanInfo(UserInfo::Item::ChainPubKey, pubKey);
+        CHECK_ERROR(ret)
+
+        Log::I(Log::TAG, "UserManager::restoreUserInfo() Success to create user.");
     }
 
     ret = mUserInfo->setHumanStatus(HumanInfo::Status::Online, HumanInfo::Status::Offline);
@@ -139,69 +135,46 @@ int UserManager::restoreUserInfo()
     return 0;
 }
 
-int UserManager::newUserInfo(bool onlyCarrierInfo)
+int UserManager::ensureUserCarrierInfo()
 {
     Log::V(Log::TAG, "%s", __PRETTY_FUNCTION__);
 
-    // mUserInfo = std::make_shared<UserInfo>(weak_from_this());
-
-    auto sectyMgr = SAFE_GET_PTR(mSecurityManager);
-    std::string pubKey;
-    int ret = sectyMgr->getPublicKey(pubKey);
+    auto msgMgr = SAFE_GET_PTR(mMessageManager);
+    std::weak_ptr<MessageChannelStrategy> weakChCarrier;
+    int ret = msgMgr->getChannel(MessageManager::ChannelType::Carrier, weakChCarrier);
     CHECK_ERROR(ret)
-    mUserInfo->setHumanInfo(UserInfo::Item::ChainPubKey, pubKey);
+    auto chCarrier = SAFE_GET_PTR(weakChCarrier);
+    std::string carrierAddr;
+    ret = chCarrier->getAddress(carrierAddr);
+    CHECK_ERROR(ret)
 
     std::string currDevId;
     ret = Platform::GetCurrentDevId(currDevId);
     CHECK_ERROR(ret)
 
+    UserInfo::CarrierInfo info;
+    ret = mUserInfo->getCarrierInfoByDevId(currDevId, info);
+    if(ret == 0 && info.mUsrAddr == carrierAddr) {
+        return 0;
+    }
+
     std::string currDevName;
     ret = Platform::GetCurrentDevName(currDevName);
-    CHECK_ERROR(ret)
-
-    auto msgMgr = SAFE_GET_PTR(mMessageManager);
-
-    std::weak_ptr<MessageChannelStrategy> weakChCarrier;
-    ret = msgMgr->getChannel(MessageManager::ChannelType::Carrier, weakChCarrier);
-    CHECK_ERROR(ret)
-    auto chCarrier = SAFE_GET_PTR(weakChCarrier);
-
-    std::string carrierSecKey;
-    ret = chCarrier->getSecretKey(carrierSecKey);
-    CHECK_ERROR(ret)
-
-    ret = mUserInfo->setIdentifyCode(UserInfo::Type::CarrierSecKey, carrierSecKey);
-    CHECK_ERROR(ret)
-
-    std::string carrierAddr;
-    ret = chCarrier->getAddress(carrierAddr);
     CHECK_ERROR(ret)
 
     HumanInfo::CarrierInfo carrierInfo{carrierAddr, "", {currDevId, currDevName, DateTime::CurrentMS()}};
     ret = mUserInfo->addCarrierInfo(carrierInfo, UserInfo::Status::Offline);
     CHECK_ERROR(ret)
 
-    ret = mUserInfo->getCarrierInfoByDevId(currDevId, carrierInfo);
-    CHECK_ERROR(ret)
-
     std::string carrierInfoStr;
-    ret = mUserInfo->serialize(carrierInfo, carrierInfoStr);
-    CHECK_ERROR(ret)
-
-    std::string identifyCodeStr;
-    ret = mUserInfo->IdentifyCode::serialize(identifyCodeStr, true, false);
+    ret = HumanInfo::serialize(carrierInfo, carrierInfoStr);
     CHECK_ERROR(ret)
 
     auto bcClient = BlkChnClient::GetInstance();
-    if (onlyCarrierInfo == false) {
-        ret = bcClient->cacheDidProp("PublicKey", pubKey);
-        if (ret < 0) {
-            return ret;
-        }
-    }
-    ret = bcClient->cacheDidProp("CarrierID", carrierInfoStr);
+    std::string pubKey;
+    ret = bcClient->cacheDidProp("PublicKey", pubKey);
     CHECK_ERROR(ret)
-    ret = bcClient->cacheDidProp("IdentifyCode", identifyCodeStr);
+    ret = bcClient->cacheDidProp("CarrierID", carrierInfoStr);
     CHECK_ERROR(ret)
 
     Log::V(Log::TAG, "%s new carrier info: %s", __PRETTY_FUNCTION__, carrierInfoStr.c_str());
@@ -283,65 +256,65 @@ int UserManager::syncDidChainData()
 
 int UserManager::monitorDidChainData()
 {
-    auto sectyMgr = SAFE_GET_PTR(mSecurityManager);
+    // auto sectyMgr = SAFE_GET_PTR(mSecurityManager);
 
-    std::string did;
-    int ret = sectyMgr->getDid(did);
-    CHECK_ERROR(ret)
+    // std::string did;
+    // int ret = sectyMgr->getDid(did);
+    // CHECK_ERROR(ret)
 
-    auto callback = [&](int errcode, const std::string& keyPath, const std::string& result) {
-        Log::I(Log::TAG, "UserManager::monitorDidChainData() ecode=%d, path=%s, result=%s", errcode, keyPath.c_str(), result.c_str());
+    // auto callback = [&](int errcode, const std::string& keyPath, const std::string& result) {
+    //     Log::I(Log::TAG, "UserManager::monitorDidChainData() ecode=%d, path=%s, result=%s", errcode, keyPath.c_str(), result.c_str());
 
-        if(errcode < 0) {
-            Log::W(Log::TAG, "UserManager::monitorDidChainData() Failed to sync CarrierId. errcode=%d", errcode);
-            return;
-        }
+    //     if(errcode < 0) {
+    //         Log::W(Log::TAG, "UserManager::monitorDidChainData() Failed to sync CarrierId. errcode=%d", errcode);
+    //         return;
+    //     }
 
-        auto humanInfo = std::make_shared<HumanInfo>();
-        std::vector<std::string> values;
+    //     auto humanInfo = std::make_shared<HumanInfo>();
+    //     std::vector<std::string> values;
 
-        Json jsonPropArray = Json::parse(result);
-        for (const auto& it : jsonPropArray) {
-            values.push_back(it["value"]);
-        }
+    //     Json jsonPropArray = Json::parse(result);
+    //     for (const auto& it : jsonPropArray) {
+    //         values.push_back(it["value"]);
+    //     }
 
-        for(const auto& it: values) {
-            HumanInfo::CarrierInfo carrierInfo;
-            ret = humanInfo->deserialize(it, carrierInfo);
-            if(ret < 0) {
-                Log::W(Log::TAG, "UserManager::monitorDidChainData() Failed to sync CarrierId: %s", it.c_str());
-                continue; // ignore error
-            }
+    //     for(const auto& it: values) {
+    //         HumanInfo::CarrierInfo carrierInfo;
+    //         ret = humanInfo->deserialize(it, carrierInfo);
+    //         if(ret < 0) {
+    //             Log::W(Log::TAG, "UserManager::monitorDidChainData() Failed to sync CarrierId: %s", it.c_str());
+    //             continue; // ignore error
+    //         }
 
-            ret = humanInfo->addCarrierInfo(carrierInfo, HumanInfo::Status::Offline);
-            if(ret < 0) {
-                if(ret == ErrCode::IgnoreMergeOldInfo) {
-                    Log::I(Log::TAG, "UserManager::monitorDidChainData() Ignore to sync CarrierId: %s", it.c_str());
-                } else {
-                    Log::W(Log::TAG, "UserManager::monitorDidChainData() Failed to sync carrier info. CarrierId: %s", it.c_str());
-                }
-                continue; // ignore error
-            }
+    //         ret = humanInfo->addCarrierInfo(carrierInfo, HumanInfo::Status::Offline);
+    //         if(ret < 0) {
+    //             if(ret == ErrCode::IgnoreMergeOldInfo) {
+    //                 Log::I(Log::TAG, "UserManager::monitorDidChainData() Ignore to sync CarrierId: %s", it.c_str());
+    //             } else {
+    //                 Log::W(Log::TAG, "UserManager::monitorDidChainData() Failed to sync carrier info. CarrierId: %s", it.c_str());
+    //             }
+    //             continue; // ignore error
+    //         }
 
-            Log::I(Log::TAG, "BlkChnClient::downloadHumanInfo() Success to sync CarrierId: %s", it.c_str());
-        }
+    //         Log::I(Log::TAG, "BlkChnClient::downloadHumanInfo() Success to sync CarrierId: %s", it.c_str());
+    //     }
 
-        ret = mUserInfo->mergeHumanInfo(*humanInfo, HumanInfo::Status::Offline);
-    };
+    //     ret = mUserInfo->mergeHumanInfo(*humanInfo, HumanInfo::Status::Offline);
+    // };
 
-    auto bcClient = BlkChnClient::GetInstance();
+    // auto bcClient = BlkChnClient::GetInstance();
 
-    std::string keyPath;
-    ret = bcClient->getDidPropHistoryPath(did, "CarrierID", keyPath);
-    if (ret < 0) {
-        return ret;
-    }
+    // std::string keyPath;
+    // ret = bcClient->getDidPropHistoryPath(did, "CarrierID", keyPath);
+    // if (ret < 0) {
+    //     return ret;
+    // }
 
-    Log::I(Log::TAG, "UserManager::monitorDidChainData() keyPath=%s", keyPath.c_str());
-    ret = bcClient->appendMoniter(keyPath, callback);
-    if (ret < 0) {
-        return ret;
-    }
+    // Log::I(Log::TAG, "UserManager::monitorDidChainData() keyPath=%s", keyPath.c_str());
+    // ret = bcClient->appendMoniter(keyPath, callback);
+    // if (ret < 0) {
+    //     return ret;
+    // }
 
     return 0;
 }

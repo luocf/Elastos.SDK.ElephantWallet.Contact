@@ -330,62 +330,62 @@ int FriendManager::syncDidChainData()
 
 int FriendManager::monitorDidChainData()
 {
-    auto sectyMgr = SAFE_GET_PTR(mSecurityManager);
+    // auto sectyMgr = SAFE_GET_PTR(mSecurityManager);
 
-    std::string did;
-    int ret = sectyMgr->getDid(did);
-    CHECK_ERROR(ret)
+    // std::string did;
+    // int ret = sectyMgr->getDid(did);
+    // CHECK_ERROR(ret)
 
-    auto callback = [&](int errcode, const std::string& keyPath, const std::string& result) {
-        Log::I(Log::TAG, "FriendManager::monitorDidChainData() ecode=%d, path=%s, result=%s", errcode, keyPath.c_str(), result.c_str());
+    // auto callback = [&](int errcode, const std::string& keyPath, const std::string& result) {
+    //     Log::I(Log::TAG, "FriendManager::monitorDidChainData() ecode=%d, path=%s, result=%s", errcode, keyPath.c_str(), result.c_str());
 
-        if(errcode < 0) {
-            Log::W(Log::TAG, "FriendManager::monitorDidChainData() Failed to sync CarrierId. errcode=%d", errcode);
-            return;
-        }
+    //     if(errcode < 0) {
+    //         Log::W(Log::TAG, "FriendManager::monitorDidChainData() Failed to sync CarrierId. errcode=%d", errcode);
+    //         return;
+    //     }
 
-        std::vector<std::string> values;
+    //     std::vector<std::string> values;
 
-        Json jsonPropArray = Json::parse(result);
-        for(const auto& it: jsonPropArray) {
-            values.push_back(it["value"]);
-        }
+    //     Json jsonPropArray = Json::parse(result);
+    //     for(const auto& it: jsonPropArray) {
+    //         values.push_back(it["value"]);
+    //     }
 
-        std::vector<std::string> friendCodeArray;
-        for(const auto& it: values) {
-            Json jsonInfo = Json::parse(it);
-            std::string friendCode = jsonInfo["FriendCode"];
-            int status = jsonInfo["Status"];
-            long updateTime = jsonInfo["UpdateTime"];
+    //     std::vector<std::string> friendCodeArray;
+    //     for(const auto& it: values) {
+    //         Json jsonInfo = Json::parse(it);
+    //         std::string friendCode = jsonInfo["FriendCode"];
+    //         int status = jsonInfo["Status"];
+    //         long updateTime = jsonInfo["UpdateTime"];
 
-            // TODO remove friend filt
-            friendCodeArray.push_back(friendCode);
-        }
+    //         // TODO remove friend filt
+    //         friendCodeArray.push_back(friendCode);
+    //     }
 
-        for(const auto& it: friendCodeArray) {
-            int ret = tryAddFriend(it, "", false);
-            if(ret < 0) {
-                Log::W(Log::TAG, "FriendManager::syncFriendInfo() Failed to add friend code: %s.", did.c_str());
-                continue;
-            }
+    //     for(const auto& it: friendCodeArray) {
+    //         int ret = tryAddFriend(it, "", false);
+    //         if(ret < 0) {
+    //             Log::W(Log::TAG, "FriendManager::syncFriendInfo() Failed to add friend code: %s.", did.c_str());
+    //             continue;
+    //         }
 
-            Log::I(Log::TAG, "FriendManager::syncFriendInfo() Add friend did: %s.", did.c_str());
-        }
-    };
+    //         Log::I(Log::TAG, "FriendManager::syncFriendInfo() Add friend did: %s.", did.c_str());
+    //     }
+    // };
 
-    auto bcClient = BlkChnClient::GetInstance();
+    // auto bcClient = BlkChnClient::GetInstance();
 
-    std::string keyPath;
-    ret = bcClient->getDidPropHistoryPath(did, "FriendID", keyPath);
-    if (ret < 0) {
-        return ret;
-    }
+    // std::string keyPath;
+    // ret = bcClient->getDidPropHistoryPath(did, "FriendID", keyPath);
+    // if (ret < 0) {
+    //     return ret;
+    // }
 
-    Log::I(Log::TAG, "FriendManager::monitorDidChainData() keyPath=%s", keyPath.c_str());
-    ret = bcClient->appendMoniter(keyPath, callback);
-    if (ret < 0) {
-        return ret;
-    }
+    // Log::I(Log::TAG, "FriendManager::monitorDidChainData() keyPath=%s", keyPath.c_str());
+    // ret = bcClient->appendMoniter(keyPath, callback);
+    // if (ret < 0) {
+    //     return ret;
+    // }
 
     return 0;
 }

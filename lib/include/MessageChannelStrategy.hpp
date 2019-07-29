@@ -57,14 +57,14 @@ public:
     virtual int open() = 0;
     virtual int close() = 0;
 
-    virtual int getSecretKey(std::string& secKey) = 0;
     virtual int getAddress(std::string& address) = 0;
 
     virtual bool isReady() = 0;
 
     virtual int requestFriend(const std::string& friendAddr,
                               const std::string& summary,
-                              bool remoteRequest = true) = 0;
+                              bool remoteRequest = true,
+                              bool forceRequest = false) = 0;
 
     virtual int sendMessage(const std::string& friendCode,
                             std::vector<uint8_t> msgContent) = 0;

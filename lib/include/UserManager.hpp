@@ -48,7 +48,7 @@ public:
     int serialize(std::string& value) const;
 
     int restoreUserInfo();
-    int newUserInfo(bool onlyCarrierInfo);
+    int ensureUserCarrierInfo();
     int getUserInfo(std::shared_ptr<UserInfo>& userInfo);
 
     int syncDidChainData();

@@ -195,16 +195,19 @@ int HumanInfo::addCarrierInfo(const HumanInfo::CarrierInfo& info, const HumanInf
         //}
 
         // found info by usrId
-        //if(existsInfo.mDevInfo.mDevId == correctedInfo.mDevInfo.mDevId
-        //&& existsInfo.mUsrAddr == correctedInfo.mUsrAddr) { // not changed
-            //return 0;
-        if(existsInfo.mUsrId == correctedInfo.mUsrId) { // found same dev
+        if(existsInfo.mDevInfo.mDevId == correctedInfo.mDevInfo.mDevId) {
             if(existsInfo.mDevInfo.mUpdateTime >= correctedInfo.mDevInfo.mUpdateTime) { // not changed
+                Log::D(Log::TAG, " HumanInfo::addCarrierInfo() IgnoreMergeOldInfo: exists=%s input=%s",
+                                 existsInfo.mDevInfo.mDevId.c_str(), correctedInfo.mDevInfo.mDevId.c_str());
                 return ErrCode::IgnoreMergeOldInfo;
             } else { // update info
                 existsInfo = correctedInfo;
                 return idx;
             }
+        } else if(existsInfo.mDevInfo.mDevId == "Unknown"
+        && existsInfo.mUsrId == correctedInfo.mUsrId) { // found same dev
+            existsInfo = correctedInfo;
+            return idx;
         }
     }
 
@@ -352,6 +355,10 @@ int HumanInfo::mergeHumanInfo(const HumanInfo& value, const Status status)
     Log::D(Log::TAG, " ============ 0   %s mBoundCarrierArray:%d", __PRETTY_FUNCTION__, value.mBoundCarrierArray.size());
     for(const auto& it: value.mBoundCarrierArray) {
         int ret = addCarrierInfo(it, status);
+        if(ret == ErrCode::IgnoreMergeOldInfo) {
+            Log::W(Log::TAG, "Contact::monitorDidChainCarrierID() Ignore to sync CarrierId: %s", it.mUsrId.c_str());
+            continue;
+        }
         CHECK_ERROR(ret)
     }
 
@@ -458,14 +465,14 @@ NLOHMANN_JSON_SERIALIZE_ENUM(
     }
 );
 
-int HumanInfo::serialize(const CarrierInfo& info, std::string& value) const
+int HumanInfo::serialize(const CarrierInfo& info, std::string& value)
 {
     Json jsonInfo= Json(info);
     value = jsonInfo.dump();
     return 0;
 }
 
-int HumanInfo::deserialize(const std::string& value, CarrierInfo& info) const
+int HumanInfo::deserialize(const std::string& value, CarrierInfo& info)
 {
     Json jsonInfo= Json::parse(value);
     info = jsonInfo.get<CarrierInfo>();

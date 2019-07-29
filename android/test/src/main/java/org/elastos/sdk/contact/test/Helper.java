@@ -259,13 +259,18 @@ public class Helper {
         root.addView(btn);
 
         ViewGroup.MarginLayoutParams txtLayout = (ViewGroup.MarginLayoutParams) txtCode.getLayoutParams();
-        txtLayout.setMargins(90, 10, 90, 20);
+        txtLayout.setMargins(30, 10, 30, 20);
 
         radioGrp.setOnCheckedChangeListener((group, checkedId) -> {
-            String value = (checkedId == btnCarrier.getId() ? humanCode[1] : humanCode[0]);
+            String value = humanCode[0];
+            String showed = value;
+            if(checkedId == btnCarrier.getId()) {
+                value = humanCode[1];
+                showed = value + "\n----------------\n" + humanCode[2];
+            }
             Bitmap bitmap = makeQRCode(value);
             image.setImageBitmap(bitmap);
-            txtCode.setText("["+value+"]");
+            txtCode.setText(showed);
         });
         radioGrp.check(btnCarrier.getId());
 

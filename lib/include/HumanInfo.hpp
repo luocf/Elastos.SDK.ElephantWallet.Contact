@@ -68,8 +68,8 @@ public:
     virtual int getAllCarrierInfo(std::vector<CarrierInfo>& infoArray) const;
     virtual int setCarrierStatus(const std::string& usrId, const Status status);
     virtual int getCarrierStatus(const std::string& usrId, Status& status) const;
-    virtual int serialize(const CarrierInfo& info, std::string& value) const;
-    virtual int deserialize(const std::string& value, CarrierInfo& info) const;
+    static int serialize(const CarrierInfo& info, std::string& value);
+    static int deserialize(const std::string& value, CarrierInfo& info);
 
     virtual int setHumanInfo(Item item, const std::string& value);
     virtual int getHumanInfo(Item item, std::string& value) const;

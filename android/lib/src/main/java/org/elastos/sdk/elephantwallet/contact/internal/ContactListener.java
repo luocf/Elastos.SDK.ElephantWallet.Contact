@@ -72,7 +72,6 @@ public abstract class ContactListener extends CrossBase {
 
     @CrossInterface
     private void onEvent(int eventType, String humanCode, int channelType, byte[] data) {
-        Log.i(Contact.TAG, "ContactListener.onEvent()");
 
         EventArgs args = null;
 
@@ -93,6 +92,7 @@ public abstract class ContactListener extends CrossBase {
                 throw new RuntimeException("Unimplemented type: " + type);
         }
 
+        Log.i(Contact.TAG, "ContactListener.onEvent() args=" + args);
         onEvent(args);
         return;
     }

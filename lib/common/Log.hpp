@@ -45,6 +45,7 @@ private:
   static std::recursive_mutex m_mutex;
 //  static const std::chrono::steady_clock::time_point m_baseTime;
 
+  static inline const char* convColor(const char head);
 #if defined(__ANDROID__)
   static inline int convPrio(const char head);
 #endif

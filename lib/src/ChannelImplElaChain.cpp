@@ -48,11 +48,6 @@ int ChannelImplElaChain::close()
     throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
 }
 
-int ChannelImplElaChain::getSecretKey(std::string& secKey)
-{
-    throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
-}
-
 int ChannelImplElaChain::getAddress(std::string& address)
 {
     throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
@@ -65,7 +60,8 @@ bool ChannelImplElaChain::isReady()
 
 int ChannelImplElaChain::requestFriend(const std::string& friendAddr,
                                        const std::string& summary,
-                                       bool remoteRequest)
+                                       bool remoteRequest,
+                                       bool forceRequest)
 {
     throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
 }

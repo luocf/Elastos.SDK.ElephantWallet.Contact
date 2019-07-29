@@ -42,17 +42,17 @@ UserInfo::~UserInfo()
 {
 }
 
-int UserInfo::serialize(const CarrierInfo& info, std::string& value) const
-{
-    int ret = HumanInfo::serialize(info, value);
-    return ret;
-}
+// int UserInfo::serialize(const CarrierInfo& info, std::string& value) const
+// {
+//     int ret = HumanInfo::serialize(info, value);
+//     return ret;
+// }
 
-int UserInfo::deserialize(const std::string& value, CarrierInfo& info) const
-{
-    int ret = HumanInfo::deserialize(value, info);
-    return ret;
-}
+// int UserInfo::deserialize(const std::string& value, CarrierInfo& info) const
+// {
+//     int ret = HumanInfo::deserialize(value, info);
+//     return ret;
+// }
 
 int UserInfo::serialize(std::string& value, bool summaryOnly) const
 {
@@ -111,7 +111,7 @@ int UserInfo::toJson(std::shared_ptr<Json>& value) const
 int UserInfo::addCarrierInfo(const CarrierInfo& info, const Status status)
 {
     int ret = HumanInfo::addCarrierInfo(info, status);
-    if(ret <= 0) { // error or not changed
+    if(ret < 0) { // error or not changed
         return ret;
     }
 

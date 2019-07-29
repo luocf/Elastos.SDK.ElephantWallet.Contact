@@ -39,14 +39,14 @@ public:
     virtual int open() override;
     virtual int close() override;
 
-    virtual int getSecretKey(std::string& secKey) override;
     virtual int getAddress(std::string& address) override;
 
     virtual bool isReady() override;
 
     virtual int requestFriend(const std::string& friendAddr,
                               const std::string& summary,
-                              bool remoteRequest = true) override;
+                              bool remoteRequest = true,
+                              bool forceRequest = false) override;
 
     virtual int sendMessage(const std::string& friendCode,
                             std::vector<uint8_t> msgContent) override;

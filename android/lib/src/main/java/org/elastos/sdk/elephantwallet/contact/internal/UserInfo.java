@@ -17,6 +17,15 @@ public class UserInfo extends HumanInfo {
         return null;
     }
 
+    public String getCurrDevCarrierId() {
+        for(CarrierInfo info: boundCarrierArray) {
+            if(info.devInfo.devId.equals(mCurrDevId) == true) {
+                return info.usrId;
+            }
+        }
+        return null;
+    }
+
     @Override
     public int fromJson(HumanJson info) {
         if(info instanceof UserJson == false) {

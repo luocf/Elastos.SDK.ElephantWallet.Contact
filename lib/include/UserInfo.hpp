@@ -30,8 +30,8 @@ public:
     explicit UserInfo(std::weak_ptr<UserManager> userMgr);
     virtual ~UserInfo();
 
-    virtual int serialize(const CarrierInfo& info, std::string& value) const override;
-    virtual int deserialize(const std::string& value, CarrierInfo& info) const override;
+    // virtual int serialize(const CarrierInfo& info, std::string& value) const override;
+    // virtual int deserialize(const std::string& value, CarrierInfo& info) const override;
 
     virtual int serialize(std::string& value, bool summaryOnly = false) const override;
     virtual int deserialize(const std::string& value, bool summaryOnly = false) override;

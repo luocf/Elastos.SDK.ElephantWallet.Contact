@@ -79,7 +79,7 @@ private:
 
     class Monitor {
     public:
-        constexpr static uint32_t mMonitorPendingMS = 10000;
+        constexpr static uint32_t MonitorPendingMS = 5000;
 
         ThreadPool mMonitorThread;
         std::map<std::string, MonitorCallback> mMonitorCallbackMap;

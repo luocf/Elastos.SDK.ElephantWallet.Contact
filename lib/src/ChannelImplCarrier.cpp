@@ -89,10 +89,10 @@ int ChannelImplCarrier::preset(const std::string& profile)
 
     carrierOpts.udp_enabled = config->mCarrierConfig->mEnableUdp;
     carrierOpts.persistent_location = config->mUserDataDir.c_str();
-    Log::W(Log::TAG, "========= Recover carrier by secret key: %s", profile.c_str());
-    if(profile.empty() == false) {
-        carrierOpts.secret_key = profile.c_str();
-    }
+//    Log::W(Log::TAG, "========= Recover carrier by secret key: %s", profile.c_str());
+//    if(profile.empty() == false) {
+//        carrierOpts.secret_key = profile.c_str();
+//    }
 
     // set BootstrapNode
     size_t carrierNodeSize = config->mCarrierConfig->mBootstrapNodes.size();
@@ -138,8 +138,18 @@ int ChannelImplCarrier::preset(const std::string& profile)
         return ErrCode::ChannelFailedCarrier;
     }
 
+    int ret = ela_set_self_nospam(mCarrier.get(), 0);
+    if(ret != 0) {
+        int err = ela_get_error();
+        char strerr_buf[512] = {0};
+        ela_get_strerror(err, strerr_buf, sizeof(strerr_buf));
+        Log::E(Log::TAG, "Failed to set carrier nospam! ret=%s(0x%x)", strerr_buf, err);
+        return ErrCode::ChannelFailedCarrier;
+    }
+
+
     std::string address;
-    int ret = ChannelImplCarrier::getAddress(address);
+    ret = ChannelImplCarrier::getAddress(address);
     CHECK_ERROR(ret)
     Log::I(Log::TAG, "ChannelImplCarrier::preset() Success new carrier on address: %s.", address.c_str());
 
@@ -167,22 +177,6 @@ int ChannelImplCarrier::close()
     return 0;
 }
 
-int ChannelImplCarrier::getSecretKey(std::string& secKey)
-{
-    char key[ELA_MAX_SECRET_KEY_LEN + 1] = {0};
-    auto ret = ela_get_secret_key(mCarrier.get(), key, sizeof(key));
-    if(ret == nullptr) {
-        int err = ela_get_error();
-        char strerr_buf[512] = {0};
-        ela_get_strerror(err, strerr_buf, sizeof(strerr_buf));
-        Log::E(Log::TAG, "Failed to get address! ret=%s(0x%x)", strerr_buf, err);
-        return ErrCode::ChannelFailedCarrier;
-    }
-
-    secKey = key;
-    return 0;
-}
-
 int ChannelImplCarrier::getAddress(std::string& address)
 {
     char addr[ELA_MAX_ADDRESS_LEN + 1] = {0};
@@ -206,7 +200,8 @@ bool ChannelImplCarrier::isReady()
 
 int ChannelImplCarrier::requestFriend(const std::string& friendCode,
                                       const std::string& summary,
-                                      bool remoteRequest)
+                                      bool remoteRequest,
+                                      bool forceRequest)
 {
     std::function<bool(const char*)> validCheckFun = (remoteRequest ? ela_address_is_valid : ela_id_is_valid);
     bool valid = validCheckFun(friendCode.c_str());
@@ -227,12 +222,17 @@ int ChannelImplCarrier::requestFriend(const std::string& friendCode,
         std::string usrId;
         ret = GetCarrierUsrIdByAddress(friendCode, usrId);
         CHECK_ERROR(ret)
+
+        const char* hello = (summary.empty() ? " " : summary.c_str());
         bool isAdded = ela_is_friend(mCarrier.get(), usrId.c_str());
         if(isAdded == true) {
+            if(forceRequest == false) {
+                Log::I(Log::TAG, "ChannelImplCarrier::requestFriend() Friend is already exists. friendCode=%s summary=%s", friendCode.c_str(), hello);
+                return ErrCode::ChannelFailedFriendExists;
+            }
             ela_remove_friend(mCarrier.get(), usrId.c_str());
         }
 
-        const char* hello = (summary.empty() ? " " : summary.c_str());
         Log::I(Log::TAG, "ChannelImplCarrier::requestFriend() friendCode=%s summary=%s", friendCode.c_str(), hello);
         ret = ela_add_friend(mCarrier.get(), friendCode.c_str(), hello);
     } else {
@@ -332,7 +332,7 @@ void ChannelImplCarrier::OnCarrierFriendRequest(ElaCarrier *carrier, const char 
 void ChannelImplCarrier::OnCarrierFriendConnection(ElaCarrier *carrier,const char *friendid,
                                                    ElaConnectionStatus status, void *context)
 {
-    Log::D(Log::TAG, "ChannelImplCarrier::OnCarrierFriendConnection from: %s %d", friendid, status);
+    Log::D(Log::TAG, "=-=-=-=-= ChannelImplCarrier::OnCarrierFriendConnection from: %s %d", friendid, status);
     auto channel = reinterpret_cast<ChannelImplCarrier*>(context);
 
     if(channel->mChannelListener.get() != nullptr) {

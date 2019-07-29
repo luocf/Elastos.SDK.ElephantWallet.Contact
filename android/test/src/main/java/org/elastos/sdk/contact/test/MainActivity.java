@@ -279,7 +279,7 @@ public class MainActivity extends Activity {
         Contact.UserInfo info = mContact.getUserInfo();
 
         String[] humanCode = {
-                info.did, info.getCurrDevCarrierAddr()
+                info.did, info.getCurrDevCarrierAddr(), info.getCurrDevCarrierId()
         };
         Helper.showAddress(this, humanCode, getDeviceId(), (result) -> {
             Helper.showDetails(MainActivity.this, info.toJson());
@@ -604,5 +604,5 @@ public class MainActivity extends Activity {
 
 
     private static final String UploadedMnemonic1 = "ceiling detail diet cotton shed false under riot leaf wait escape busy";
-    private static final String UploadedMnemonic2 = "grit immune viable world merge inner picnic young twelve inject rather spoil";
+    private static final String UploadedMnemonic2 = "symbol bus smooth purpose spy situate sunset gallery bottom amount material tomato";
 }

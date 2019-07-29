@@ -131,7 +131,12 @@ public:
     virtual int requestFriend(const std::string& friendAddr,
                               ChannelType chType,
                               const std::string& summary,
-                              bool remoteRequest = true);
+                              bool remoteRequest = true,
+                              bool forceRequest = false);
+
+    virtual int updateFriend(const std::string& did);
+
+    virtual int monitorDidChainCarrierID(const std::string& did);
 
     virtual int sendMessage(const std::shared_ptr<HumanInfo> humanInfo,
                             ChannelType chType,
