@@ -214,6 +214,10 @@ int MessageManager::requestFriend(const std::string& friendAddr,
 
     auto details = jsonInfo.dump();
     ret = channel->requestFriend(friendAddr, details, remoteRequest, forceRequest);
+    if(ret == ErrCode::ChannelFailedFriendSelf
+    || ret == ErrCode::ChannelFailedFriendExists) { // ignore to set error
+        return ret;
+    }
     CHECK_ERROR(ret)
 
     return 0;
@@ -254,7 +258,7 @@ int MessageManager::updateFriend(const std::string& did)
         int ret = requestFriend(carrierInfo.mUsrAddr,
                                 MessageManager::ChannelType::Carrier,
                                 "", true, forceRequest);
-        Log::I(Log::TAG, "MessageManager::requestFriendByDid() add %s", carrierInfo.mUsrAddr.c_str());
+        Log::I(Log::TAG, "MessageManager::requestFriendByDid() add carrier address %s", carrierInfo.mUsrAddr.c_str());
         if(ret < 0
            && ret != ErrCode::ChannelFailedFriendSelf
            && ret != ErrCode::ChannelFailedFriendExists) {
@@ -324,14 +328,14 @@ int MessageManager::monitorDidChainCarrierID(const std::string& did)
             }
         }
 
-        if(carrierInfoChanged == false) {
-            Log::D(Log::TAG, "MessageManager::monitorDidChainCarrierID() did %s, CarrierId not changed.", did.c_str());
-            return;
-        }
-
+//        if(carrierInfoChanged == false) {
+//            Log::D(Log::TAG, "MessageManager::monitorDidChainCarrierID() did %s, CarrierId not changed.", did.c_str());
+//            return;
+//        }
+//
         int ret = updateFriend(did);
         if(ret < 0) {
-            Log::E(Log::TAG, "Failed to accept other dev. ret=%d", ret);
+            Log::E(Log::TAG, "MessageManager::monitorDidChainCarrierID() Failed to update friend. ret=%d", ret);
             return;
         }
     };

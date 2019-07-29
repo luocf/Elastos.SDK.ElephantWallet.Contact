@@ -195,7 +195,8 @@ int HumanInfo::addCarrierInfo(const HumanInfo::CarrierInfo& info, const HumanInf
         //}
 
         // found info by usrId
-        if(existsInfo.mDevInfo.mDevId == correctedInfo.mDevInfo.mDevId) {
+        if(existsInfo.mDevInfo.mDevId != "Unknown"
+        && existsInfo.mDevInfo.mDevId == correctedInfo.mDevInfo.mDevId) {
             if(existsInfo.mDevInfo.mUpdateTime >= correctedInfo.mDevInfo.mUpdateTime) { // not changed
                 Log::D(Log::TAG, " HumanInfo::addCarrierInfo() IgnoreMergeOldInfo: exists=%s input=%s",
                                  existsInfo.mDevInfo.mDevId.c_str(), correctedInfo.mDevInfo.mDevId.c_str());

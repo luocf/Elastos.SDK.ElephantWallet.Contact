@@ -11,14 +11,14 @@ public:
 #define CHECK_ERROR(ret) \
 	if(ret < 0) { \
 		Log::E(Log::TAG, "Failed to call %s in line %d, return %d.", __PRETTY_FUNCTION__, __LINE__, ret); \
-		elastos::ErrCode::SetError(ret, std::string(__PRETTY_FUNCTION__) + "() :" + std::to_string(__LINE__)); \
+		elastos::ErrCode::SetError(ret, std::string(__PRETTY_FUNCTION__) + " line:" + std::to_string(__LINE__)); \
 		return ret; \
 	}
 
 #define CHECK_ERROR_NO_RETVAL(ret) \
 	if(ret < 0) { \
 		Log::E(Log::TAG, "Failed to call %s in line %d, return %d.", __PRETTY_FUNCTION__, __LINE__, ret); \
-		elastos::ErrCode::SetError(ret, std::string(__PRETTY_FUNCTION__) + "() :" + std::to_string(__LINE__)); \
+		elastos::ErrCode::SetError(ret, std::string(__PRETTY_FUNCTION__) + " line:" + std::to_string(__LINE__)); \
 		return; \
 	}
 

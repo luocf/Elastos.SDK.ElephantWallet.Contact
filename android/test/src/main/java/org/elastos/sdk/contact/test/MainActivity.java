@@ -41,6 +41,8 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        TextView txtError = findViewById(R.id.txt_error);
+        txtError.setMovementMethod(ScrollingMovementMethod.getInstance());
         TextView txtCbMsg = findViewById(R.id.txt_event);
         txtCbMsg.setMovementMethod(ScrollingMovementMethod.getInstance());
         TextView txtMsg = findViewById(R.id.txt_message);
@@ -235,7 +237,7 @@ public class MainActivity extends Activity {
             @Override
             public void onError(int errCode, String errStr, String ext) {
                 String msg = errCode + ": " + errStr;
-                msg = "\n" + ext;
+                msg += "\n" + ext;
                 showError(msg);
             }
         };
