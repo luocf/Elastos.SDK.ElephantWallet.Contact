@@ -478,14 +478,17 @@ int FriendManager::addFriendByDid(const std::string& did, const std::string& sum
         return ret;
     }
 
-    auto friendInfo = std::make_shared<FriendInfo>(weak_from_this());
+    std::shared_ptr<FriendInfo> friendInfo;
+    ret = tryGetFriendInfo(did, friendInfo);
+    if(ret < 0) {
+        friendInfo = std::make_shared<FriendInfo>(weak_from_this());
+        mFriendList.push_back(friendInfo);
+    }
     ret = friendInfo->mergeHumanInfo(*humanInfo, HumanInfo::Status::WaitForAccept);
     if(ret < 0) {
         Log::W(Log::TAG, "FriendManager::addFriendByDid() Failed to merge friend did: %s.", did.c_str());
         return ret;
     }
-
-    mFriendList.push_back(friendInfo);
 
     std::vector<FriendInfo::CarrierInfo> carrierInfoArray;
     ret = friendInfo->getAllCarrierInfo(carrierInfoArray);

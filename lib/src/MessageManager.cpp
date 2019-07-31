@@ -636,11 +636,8 @@ void MessageManager::MessageListener::onFriendRequest(const std::string& friendC
         Json jsonInfo= Json::parse(details);
         friendDid = jsonInfo[JsonKey::Did];
         summary = jsonInfo[JsonKey::Summary];
-        //int ret = humanInfo.HumanInfo::deserialize(jsonInfo[JsonKey::HumanInfo], true);
-        //if(ret < 0) {
-            //friendDid = "";
-            //summary = details;
-        //}
+
+        std::ignore = humanInfo.setHumanInfo(HumanInfo::Item::Did, friendDid);
     } catch(const std::exception& ex) {
         friendDid = "";
         summary = details;
