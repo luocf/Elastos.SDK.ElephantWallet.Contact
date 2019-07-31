@@ -615,5 +615,5 @@ public class MainActivity extends Activity {
 
 
     private static final String UploadedMnemonic1 = "ceiling detail diet cotton shed false under riot leaf wait escape busy";
-    private static final String UploadedMnemonic2 = "symbol bus smooth purpose spy situate sunset gallery bottom amount material tomato";
+    private static final String UploadedMnemonic2 = "museum girl useless quarter cage turtle stomach law govern muscle kiwi crack";
 }

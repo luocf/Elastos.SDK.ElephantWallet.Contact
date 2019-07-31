@@ -9,7 +9,7 @@
 
 #include "ChannelImplCarrier.hpp"
 #include <ctime>
-#include <Json.hpp>
+#include <JsonDefine.hpp>
 #include <DateTime.hpp>
 #include <Log.hpp>
 #include <SecurityManager.hpp>
@@ -19,17 +19,6 @@ namespace elastos {
 /***********************************************/
 /***** static variables initialize *************/
 /***********************************************/
-struct JsonKey {
-    static constexpr const char* HumanInfo = "HumanInfo";
-
-    static constexpr const char* BoundCarrierArray = "BoundCarrierArray";
-    static constexpr const char* BoundCarrierStatus = "BoundCarrierStatus";
-    static constexpr const char* CommonInfoMap = "CommonInfoMap";
-    static constexpr const char* StatusMap = "StatusMap";
-    static constexpr const char* Status = "Status";
-    static constexpr const char* HumanCode = "HumanCode";
-};
-
 
 /***********************************************/
 /***** static function implement ***************/
@@ -251,33 +240,37 @@ int HumanInfo::getAllCarrierInfo(std::vector<HumanInfo::CarrierInfo>& infoArray)
 
 int HumanInfo::setCarrierStatus(const std::string& usrId, const Status status)
 {
-    int idx;
-    for(idx = 0; idx < mBoundCarrierArray.size(); idx++) {
+    int found = -1;
+    for(int idx = 0; idx < mBoundCarrierArray.size(); idx++) {
         if(mBoundCarrierArray[idx].mUsrId == usrId) {
+            found = idx;
             break;
         }
     }
-    if(idx >= mBoundCarrierArray.size()) {
+    if(found < 0) {
         return ErrCode::NotFoundError;
     }
 
-    mBoundCarrierStatus[idx] = status;
+    mBoundCarrierStatus[found] = status;
     return 0;
 }
 
 int HumanInfo::getCarrierStatus(const std::string& usrId, Status& status) const
 {
-    int idx;
-    for(idx = 0; idx < mBoundCarrierArray.size(); idx++) {
+    status = Status::Invalid;
+
+    int found = -1;
+    for(int idx = 0; idx < mBoundCarrierArray.size(); idx++) {
         if(mBoundCarrierArray[idx].mUsrId == usrId) {
+            found = idx;
             break;
         }
     }
-    if(idx >= mBoundCarrierArray.size()) {
+    if(found < 0) {
         return ErrCode::NotFoundError;
     }
 
-    status = mBoundCarrierStatus[idx];
+    status = mBoundCarrierStatus[found];
     return 0;
 }
 
@@ -357,7 +350,7 @@ int HumanInfo::mergeHumanInfo(const HumanInfo& value, const Status status)
     for(const auto& it: value.mBoundCarrierArray) {
         int ret = addCarrierInfo(it, status);
         if(ret == ErrCode::IgnoreMergeOldInfo) {
-            Log::W(Log::TAG, "Contact::monitorDidChainCarrierID() Ignore to sync CarrierId: %s", it.mUsrId.c_str());
+            Log::W(Log::TAG, "HumanInfo::mergeHumanInfo() Ignore to sync CarrierId: %s", it.mUsrId.c_str());
             continue;
         }
         CHECK_ERROR(ret)
@@ -426,45 +419,6 @@ HumanInfo::Status HumanInfo::getHumanStatus() const
 
     return status;
 }
-
-inline void to_json(Json& j, const HumanInfo::CarrierInfo::DeviceInfo& info) {
-    j = Json {
-        {"DevId", info.mDevId},
-        {"DevName", info.mDevName},
-        {"UpdateTime", info.mUpdateTime},
-    };
-}
-
-inline void from_json(const Json& j, HumanInfo::CarrierInfo::DeviceInfo& info) {
-    info.mDevId = j["DevId"];
-    info.mDevName = j["DevName"];
-    info.mUpdateTime = j["UpdateTime"];
-}
-
-inline void to_json(Json& j, const HumanInfo::CarrierInfo& info) {
-    j = Json {
-        {"CarrierAddr", info.mUsrAddr},
-        {"CarrierId", info.mUsrId},
-        {"DeviceInfo", info.mDevInfo},
-    };
-}
-
-inline void from_json(const Json& j, HumanInfo::CarrierInfo& info) {
-    info.mUsrAddr = j["CarrierAddr"];
-    info.mUsrId = j["CarrierId"];
-    info.mDevInfo = j["DeviceInfo"];
-}
-
-NLOHMANN_JSON_SERIALIZE_ENUM(
-    HumanInfo::Status,
-    {
-        {HumanInfo::Status::Invalid, "Invalid"},
-        {HumanInfo::Status::WaitForAccept, "WaitForAccept"},
-        {HumanInfo::Status::Offline, "Offline"},
-        {HumanInfo::Status::Online, "Online"},
-        {HumanInfo::Status::Removed, "Removed"},
-    }
-);
 
 int HumanInfo::serialize(const CarrierInfo& info, std::string& value)
 {

@@ -36,9 +36,6 @@ int BlkChnClient::InitInstance(std::weak_ptr<Config> config,
     HttpClient::InitGlobal();
     gBlkChnClient = std::make_shared<Impl>(config, sectyMgr);
 
-    int ret = gBlkChnClient->startMonitor();
-    CHECK_ERROR(ret)
-
     return 0;
 }
 

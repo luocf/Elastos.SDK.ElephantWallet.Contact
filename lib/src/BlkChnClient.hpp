@@ -41,12 +41,16 @@ public:
     int getDidPropHistoryPath(const std::string& did, const std::string& key, std::string& path);
     int downloadDidPropHistory(const std::string& did, const std::string& key, std::vector<std::string>& values);
 
+    int downloadFromDidChn(const std::string& path, std::string& result);
+
     int downloadHumanInfo(const std::string& did, std::shared_ptr<HumanInfo>& humanInfo);
     // int uploadHumanInfo(const std::shared_ptr<HumanInfo>& humanInfo);
 
     int cacheDidProp(const std::string& key, const std::string& value);
     int uploadCachedDidProp();
     int printCachedDidProp(std::string& output);
+
+    int startMonitor();
 
 protected:
     /*** type define ***/
@@ -79,7 +83,7 @@ private:
 
     class Monitor {
     public:
-        constexpr static uint32_t MonitorPendingMS = 5000;
+        constexpr static uint32_t MonitorPendingMS = 30000;
 
         ThreadPool mMonitorThread;
         std::map<std::string, MonitorCallback> mMonitorCallbackMap;
@@ -93,9 +97,7 @@ private:
     /*** class function and variable ***/
     explicit BlkChnClient(std::weak_ptr<Config> config, std::weak_ptr<SecurityManager> sectyMgr);
     virtual ~BlkChnClient();
-    int startMonitor();
 
-    int downloadFromDidChn(const std::string& path, std::string& result);
     int uploadAllDidProps(const std::multimap<std::string, std::string>& propMap, std::string& txid);
 
     int getPropKeyPathPrefix(std::string& keyPathPrefix);

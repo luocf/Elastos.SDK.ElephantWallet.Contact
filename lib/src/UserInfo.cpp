@@ -9,7 +9,7 @@
 #include <UserManager.hpp>
 
 #include <Log.hpp>
-#include <Json.hpp>
+#include <JsonDefine.hpp>
 #include <Platform.hpp>
 #include <SafePtr.hpp>
 
@@ -18,11 +18,6 @@ namespace elastos {
 /***********************************************/
 /***** static variables initialize *************/
 /***********************************************/
-struct JsonKey {
-    static constexpr const char* HumanInfo = "HumanInfo";
-    static constexpr const char* IdentifyCode = "IdentifyCode";
-};
-
 
 /***********************************************/
 /***** static function implement ***************/

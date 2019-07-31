@@ -51,8 +51,9 @@ public:
     int ensureUserCarrierInfo();
     int getUserInfo(std::shared_ptr<UserInfo>& userInfo);
 
-    int syncDidChainData();
+    int syncDownloadDidChainData();
     int monitorDidChainData();
+    int monitorDidChainIdentifyCode();
     // int uploadUserInfo();
 
     int setupMultiDevChannels();
@@ -65,6 +66,7 @@ private:
 
     /*** class function and variable ***/
     int syncHistoryInfo();
+    int mergeIdentifyCodeFromJsonArray(const std::string& jsonArray);
 
     std::weak_ptr<SecurityManager> mSecurityManager;
     std::weak_ptr<MessageManager> mMessageManager;

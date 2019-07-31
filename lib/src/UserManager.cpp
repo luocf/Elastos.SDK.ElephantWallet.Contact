@@ -172,6 +172,8 @@ int UserManager::ensureUserCarrierInfo()
 
     auto bcClient = BlkChnClient::GetInstance();
     std::string pubKey;
+    ret = mUserInfo->getHumanInfo(HumanInfo::Item::ChainPubKey, pubKey);
+    CHECK_ERROR(ret)
     ret = bcClient->cacheDidProp("PublicKey", pubKey);
     CHECK_ERROR(ret)
     ret = bcClient->cacheDidProp("CarrierID", carrierInfoStr);
@@ -204,8 +206,38 @@ bool UserManager::contains(const std::shared_ptr<HumanInfo>& userInfo)
     return mUserInfo->contains(userInfo);
 }
 
-int UserManager::syncDidChainData()
+int UserManager::monitorDidChainData()
 {
+    auto sectyMgr = SAFE_GET_PTR(mSecurityManager);
+    auto msgMgr = SAFE_GET_PTR(mMessageManager);
+
+    std::string did;
+    int ret = sectyMgr->getDid(did);
+    CHECK_ERROR(ret)
+
+    ret = msgMgr->monitorDidChainCarrierID(did);
+    CHECK_ERROR(ret)
+
+    ret = monitorDidChainIdentifyCode();
+    CHECK_ERROR(ret)
+
+    return 0;
+}
+
+int UserManager::monitorDidChainIdentifyCode()
+{
+    auto callback = [=](int errcode,
+                        const std::string& keyPath,
+                        const std::string& result) {
+        Log::D(Log::TAG, "UserManager::monitorDidChainIdentifyCode() ecode=%d, path=%s, result=%s", errcode, keyPath.c_str(), result.c_str());
+        CHECK_ERROR_NO_RETVAL(errcode);
+
+        int ret = mergeIdentifyCodeFromJsonArray(result);
+        CHECK_ERROR_NO_RETVAL(ret);
+
+        return;
+    };
+
     auto sectyMgr = SAFE_GET_PTR(mSecurityManager);
     std::string did;
     int ret = sectyMgr->getDid(did);
@@ -213,108 +245,13 @@ int UserManager::syncDidChainData()
 
     auto bcClient = BlkChnClient::GetInstance();
 
-    std::vector<std::string> identifyCodeArray;
-    ret = bcClient->downloadDidPropHistory(did, "IdentifyCode", identifyCodeArray);
-    if(ret < 0) {
-        Log::W(Log::TAG, "UserManager::syncDidChainData() Failed to download IdentifyCode.");
-    }
-    for(const auto& it: identifyCodeArray) {
-        IdentifyCode identifyCode;
-        ret = identifyCode.deserialize(it);
-        if (ret < 0) {
-            Log::W(Log::TAG, "UserManager::syncDidChainData() Failed to deserialize IdentifyCode: %s.", it.c_str());
-            continue;
-        }
-
-        ret = mUserInfo->mergeIdentifyCode(identifyCode);
-        if (ret < 0) {
-            Log::W(Log::TAG, "UserManager::syncDidChainData() Failed to merge IdentifyCode: %s.", it.c_str());
-            continue;
-        }
-    }
-
-    auto humanInfo = std::make_shared<HumanInfo>();
-    ret = bcClient->downloadHumanInfo(did, humanInfo);
-    if(ret < 0) {
-        Log::W(Log::TAG, "UserManager::syncDidChainData() Failed to download HumanInfo.");
-        return ret;
-    }
-    Log::W(Log::TAG, "UserManager::syncDidChainData() Failed to download HumanInfo.");
-    ret = mUserInfo->mergeHumanInfo(*humanInfo, HumanInfo::Status::Offline);
-    if(ret < 0) {
-        Log::W(Log::TAG, "UserManager::syncDidChainData() Failed to merge HumanInfo.");
-        return ret;
-    }
-
-    std::string pubKey;
-    ret = sectyMgr->getPublicKey(pubKey);
+    std::string keyPath;
+    ret = bcClient->getDidPropHistoryPath(did, "IdentifyCode", keyPath);
     CHECK_ERROR(ret)
-    mUserInfo->setHumanInfo(UserInfo::Item::ChainPubKey, pubKey);
 
-    return 0;
-}
-
-int UserManager::monitorDidChainData()
-{
-    // auto sectyMgr = SAFE_GET_PTR(mSecurityManager);
-
-    // std::string did;
-    // int ret = sectyMgr->getDid(did);
-    // CHECK_ERROR(ret)
-
-    // auto callback = [&](int errcode, const std::string& keyPath, const std::string& result) {
-    //     Log::I(Log::TAG, "UserManager::monitorDidChainData() ecode=%d, path=%s, result=%s", errcode, keyPath.c_str(), result.c_str());
-
-    //     if(errcode < 0) {
-    //         Log::W(Log::TAG, "UserManager::monitorDidChainData() Failed to sync CarrierId. errcode=%d", errcode);
-    //         return;
-    //     }
-
-    //     auto humanInfo = std::make_shared<HumanInfo>();
-    //     std::vector<std::string> values;
-
-    //     Json jsonPropArray = Json::parse(result);
-    //     for (const auto& it : jsonPropArray) {
-    //         values.push_back(it["value"]);
-    //     }
-
-    //     for(const auto& it: values) {
-    //         HumanInfo::CarrierInfo carrierInfo;
-    //         ret = humanInfo->deserialize(it, carrierInfo);
-    //         if(ret < 0) {
-    //             Log::W(Log::TAG, "UserManager::monitorDidChainData() Failed to sync CarrierId: %s", it.c_str());
-    //             continue; // ignore error
-    //         }
-
-    //         ret = humanInfo->addCarrierInfo(carrierInfo, HumanInfo::Status::Offline);
-    //         if(ret < 0) {
-    //             if(ret == ErrCode::IgnoreMergeOldInfo) {
-    //                 Log::I(Log::TAG, "UserManager::monitorDidChainData() Ignore to sync CarrierId: %s", it.c_str());
-    //             } else {
-    //                 Log::W(Log::TAG, "UserManager::monitorDidChainData() Failed to sync carrier info. CarrierId: %s", it.c_str());
-    //             }
-    //             continue; // ignore error
-    //         }
-
-    //         Log::I(Log::TAG, "BlkChnClient::downloadHumanInfo() Success to sync CarrierId: %s", it.c_str());
-    //     }
-
-    //     ret = mUserInfo->mergeHumanInfo(*humanInfo, HumanInfo::Status::Offline);
-    // };
-
-    // auto bcClient = BlkChnClient::GetInstance();
-
-    // std::string keyPath;
-    // ret = bcClient->getDidPropHistoryPath(did, "CarrierID", keyPath);
-    // if (ret < 0) {
-    //     return ret;
-    // }
-
-    // Log::I(Log::TAG, "UserManager::monitorDidChainData() keyPath=%s", keyPath.c_str());
-    // ret = bcClient->appendMoniter(keyPath, callback);
-    // if (ret < 0) {
-    //     return ret;
-    // }
+    Log::I(Log::TAG, "UserManager::monitorDidChainIdentifyCode() keyPath=%s", keyPath.c_str());
+    ret = bcClient->appendMoniter(keyPath, callback);
+    CHECK_ERROR(ret)
 
     return 0;
 }
@@ -352,6 +289,32 @@ int UserManager::setupMultiDevChannels()
     return 0;
 }
 
+int UserManager::syncDownloadDidChainData()
+{
+    auto sectyMgr = SAFE_GET_PTR(mSecurityManager);
+    std::string did;
+    int ret = sectyMgr->getDid(did);
+    CHECK_ERROR(ret)
+
+    auto bcClient = BlkChnClient::GetInstance();
+
+    std::string keyPath;
+    ret = bcClient->getDidPropHistoryPath(did, "IdentifyCode", keyPath);
+    if (ret < 0) {
+        return ret;
+    }
+
+    std::string result;
+    ret = bcClient->downloadFromDidChn(keyPath, result);
+    CHECK_ERROR(ret);
+
+    ret = mergeIdentifyCodeFromJsonArray(result);
+    CHECK_ERROR(ret);
+
+    return 0;
+}
+
+
 /***********************************************/
 /***** class protected function implement  *****/
 /***********************************************/
@@ -360,5 +323,30 @@ int UserManager::setupMultiDevChannels()
 /***********************************************/
 /***** class private function implement  *******/
 /***********************************************/
+int UserManager::mergeIdentifyCodeFromJsonArray(const std::string& jsonArray)
+{
+    std::vector<std::string> values;
+    Json jsonPropArray = Json::parse(jsonArray);
+    for (const auto& it : jsonPropArray) {
+        values.push_back(it["value"]);
+    }
+
+    for(const auto& it: values) {
+        IdentifyCode identifyCode;
+        int ret = identifyCode.deserialize(it);
+        if (ret < 0) {
+            Log::W(Log::TAG, "UserManager::mergeFriendInfoFromJsonArray() Failed to deserialize IdentifyCode: %s.", it.c_str());
+            continue;
+        }
+
+        ret = mUserInfo->mergeIdentifyCode(identifyCode);
+        if (ret < 0) {
+            Log::W(Log::TAG, "UserManager::mergeFriendInfoFromJsonArray() Failed to merge IdentifyCode: %s.", it.c_str());
+            continue;
+        }
+    }
+
+    return 0;
+}
 
 } // namespace elastos

@@ -97,7 +97,14 @@ int Contact::start()
     ret = mMessageManager->openChannels();
     CHECK_ERROR(ret)
 
-    ret = monitorDidChainData();
+    ret = mUserManager->monitorDidChainData();
+    CHECK_ERROR(ret)
+
+    ret = mFriendManager->monitorDidChainData();
+    CHECK_ERROR(ret)
+
+    auto bcClient = BlkChnClient::GetInstance();
+    ret = bcClient->startMonitor();
     CHECK_ERROR(ret)
 
     return 0;
@@ -105,7 +112,13 @@ int Contact::start()
 
 int Contact::syncInfoDownloadFromDidChain()
 {
-    throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
+    int ret = mUserManager->syncDownloadDidChainData();
+    CHECK_ERROR(ret)
+
+    ret = mFriendManager->syncDownloadDidChainData();
+    CHECK_ERROR(ret)
+
+    return 0;
 }
 
 int Contact::syncInfoUploadToDidChain()

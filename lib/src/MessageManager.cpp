@@ -9,7 +9,7 @@
 
 #include <ChannelImplCarrier.hpp>
 #include <ChannelImplElaChain.hpp>
-#include <Json.hpp>
+#include <JsonDefine.hpp>
 #include <Log.hpp>
 #include <Random.hpp>
 #include <SafePtr.hpp>
@@ -20,43 +20,10 @@ namespace elastos {
 /***********************************************/
 /***** static variables initialize *************/
 /***********************************************/
-struct JsonKey {
-    static constexpr const char* Did = "Did";
-    static constexpr const char* Summary = "Summary";
-    static constexpr const char* HumanInfo = "HumanInfo";
-
-    static constexpr const char* MessageData = "MessageData";
-};
-
 
 /***********************************************/
 /***** static function implement ***************/
 /***********************************************/
-NLOHMANN_JSON_SERIALIZE_ENUM(MessageManager::MessageType, {
-    { MessageManager::MessageType::MsgText, "MsgText" },
-    { MessageManager::MessageType::MsgAudio, "MsgAudio" },
-    { MessageManager::MessageType::MsgTransfer, "MsgTransfer" },
-
-    { MessageManager::MessageType::CtrlSyncDesc, "CtrlSyncDesc" },
-});
-
-inline void to_json(Json& j, const std::shared_ptr<MessageManager::MessageInfo>& info) {
-    j = Json {
-        {"Type", info->mType},
-        {"PlainContent", info->mPlainContent},
-        {"CryptoAlgorithm", info->mCryptoAlgorithm},
-        {"TimeStamp", info->mTimeStamp},
-    };
-}
-
-inline void from_json(const Json& j, std::shared_ptr<MessageManager::MessageInfo>& info) {
-    info = MessageManager::MakeEmptyMessage();
-    info->mType = j["Type"];
-    info->mPlainContent = j["PlainContent"].get<std::vector<uint8_t>>();
-    info->mCryptoAlgorithm = j["CryptoAlgorithm"];
-    info->mTimeStamp = j["TimeStamp"];
-}
-
 std::shared_ptr<MessageManager::MessageInfo> MessageManager::MakeEmptyMessage()
 {
     struct Impl: MessageManager::MessageInfo {
@@ -238,7 +205,7 @@ int MessageManager::updateFriend(const std::string& did)
         std::ignore  = friendMgr->tryGetFriendInfo(did, friendInfo);
         humanInfo = friendInfo;
     } else {
-        Log::E(Log::TAG, "MessageManager::requestFriendByDid() Failed for did: %s", did.c_str());
+        Log::E(Log::TAG, "MessageManager::updateFriend() Failed for did: %s", did.c_str());
         return ErrCode::InvalidArgument;
     }
 
@@ -247,7 +214,10 @@ int MessageManager::updateFriend(const std::string& did)
     CHECK_ERROR(ret)
 
     int lastRet = 0;
+    Log::I(Log::TAG, "MessageManager::updateFriend() =================== %d",
+           carrierInfoArray.size());
     for(const auto& carrierInfo: carrierInfoArray) {
+    Log::I(Log::TAG, "MessageManager::updateFriend() ===================");
         bool forceRequest = false;
         HumanInfo::Status status;
         std::ignore = humanInfo->getCarrierStatus(carrierInfo.mUsrId, status);
@@ -258,11 +228,11 @@ int MessageManager::updateFriend(const std::string& did)
         int ret = requestFriend(carrierInfo.mUsrAddr,
                                 MessageManager::ChannelType::Carrier,
                                 "", true, forceRequest);
-        Log::I(Log::TAG, "MessageManager::requestFriendByDid() add carrier address %s", carrierInfo.mUsrAddr.c_str());
+        Log::I(Log::TAG, "MessageManager::updateFriend() add carrier address %s", carrierInfo.mUsrAddr.c_str());
         if(ret < 0
            && ret != ErrCode::ChannelFailedFriendSelf
            && ret != ErrCode::ChannelFailedFriendExists) {
-            Log::W(Log::TAG, "MessageManager::requestFriendByDid() Failed to add %s ret=%d", carrierInfo.mUsrAddr.c_str(), ret);
+            Log::W(Log::TAG, "MessageManager::updateFriend() Failed to add %s ret=%d", carrierInfo.mUsrAddr.c_str(), ret);
             lastRet = ret;
         }
     }
@@ -276,11 +246,7 @@ int MessageManager::monitorDidChainCarrierID(const std::string& did)
                         const std::string& keyPath,
                         const std::string& result) {
         Log::D(Log::TAG, "MessageManager::monitorDidChainCarrierID() ecode=%d, path=%s, result=%s", errcode, keyPath.c_str(), result.c_str());
-
-        if(errcode < 0) {
-            Log::W(Log::TAG, "MessageManager::monitorDidChainCarrierID() Failed to sync CarrierId. errcode=%d", errcode);
-            return;
-        }
+        CHECK_ERROR_NO_RETVAL(errcode);
 
         auto userMgr = SAFE_GET_PTR_NO_RETVAL(mUserManager);
         auto friendMgr = SAFE_GET_PTR_NO_RETVAL(mFriendManager);
@@ -318,7 +284,7 @@ int MessageManager::monitorDidChainCarrierID(const std::string& did)
             ret = humanInfo->addCarrierInfo(carrierInfo, HumanInfo::Status::WaitForAccept);
             if(ret < 0) {
                 if(ret == ErrCode::IgnoreMergeOldInfo) {
-                    Log::W(Log::TAG, "MessageManager::monitorDidChainCarrierID() Ignore to sync CarrierId: %s", it.c_str());
+                    Log::V(Log::TAG, "MessageManager::monitorDidChainCarrierID() Ignore to sync CarrierId: %s", it.c_str());
                 } else {
                     Log::E(Log::TAG, "MessageManager::monitorDidChainCarrierID() Failed to sync carrier info. CarrierId: %s", it.c_str());
                 }

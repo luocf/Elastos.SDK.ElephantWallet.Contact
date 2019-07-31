@@ -7,7 +7,7 @@
 
 #include <IdentifyCode.hpp>
 
-#include <Json.hpp>
+#include <JsonDefine.hpp>
 #include <Log.hpp>
 #include <Platform.hpp>
 
@@ -16,13 +16,6 @@ namespace elastos {
 /***********************************************/
 /***** static variables initialize *************/
 /***********************************************/
-struct JsonKey {
-    static constexpr const char* IdentifyCode = "IdentifyCode";
-
-    static constexpr const char* CarrierSecretKeyMap = "CarrierSecretKeyMap";
-    static constexpr const char* IdCodeMap = "IdCodeMap";
-};
-
 
 /***********************************************/
 /***** static function implement ***************/

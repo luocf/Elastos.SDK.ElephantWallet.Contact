@@ -69,8 +69,9 @@ public:
 
     virtual std::vector<FriendInfo> filterFriends(std::string regex);
 
-    int syncDidChainData();
+    int syncDownloadDidChainData();
     int monitorDidChainData();
+    int monitorDidChainFriendID();
     // int uploadFriendInfo();
 
     int cacheFriendToDidChain(std::shared_ptr<FriendInfo> friendInfo);
@@ -90,6 +91,8 @@ private:
     virtual int getFriendInfoByDid(const std::string& did, std::shared_ptr<FriendInfo>& friendInfo);
     virtual int getFriendInfoByCarrier(const std::string& carrierUsrId, std::shared_ptr<FriendInfo>& friendInfo);
     virtual int getFriendInfoByEla(const std::string& elaAddress, std::shared_ptr<FriendInfo>& friendInfo);
+
+    virtual int mergeFriendInfoFromJsonArray(const std::string& jsonArray);
 
     std::weak_ptr<SecurityManager> mSecurityManager;
     std::weak_ptr<MessageManager> mMessageManager;

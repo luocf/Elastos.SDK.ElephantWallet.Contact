@@ -7,7 +7,7 @@
 
 #include <FriendInfo.hpp>
 #include <FriendManager.hpp>
-#include <Json.hpp>
+#include <JsonDefine.hpp>
 #include <SafePtr.hpp>
 
 namespace elastos {
@@ -15,11 +15,6 @@ namespace elastos {
 /***********************************************/
 /***** static variables initialize *************/
 /***********************************************/
-struct JsonKey {
-    static constexpr const char* HumanInfo = "HumanInfo";
-    static constexpr const char* Alias = "Alias";
-};
-
 
 /***********************************************/
 /***** static function implement ***************/

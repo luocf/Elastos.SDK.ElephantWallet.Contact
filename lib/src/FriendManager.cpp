@@ -13,7 +13,7 @@
 #include <DateTime.hpp>
 #include <Elastos.Wallet.Utility.h>
 #include <Log.hpp>
-#include <Json.hpp>
+#include <JsonDefine.hpp>
 #include <MessageManager.hpp>
 #include <SafePtr.hpp>
 
@@ -88,7 +88,9 @@ int FriendManager::loadLocalData()
     auto sectyMgr = SAFE_GET_PTR(mSecurityManager);
     std::vector<uint8_t> originData;
     int ret = sectyMgr->loadCryptoFile(dataFilePath.string(), originData);
-    CHECK_ERROR(ret)
+    if(ret < 0) {
+        return 0;
+    }
 
     std::vector<std::shared_ptr<FriendInfo>> friendList;
     std::string friendData {originData.begin(), originData.end()};
@@ -288,7 +290,7 @@ std::vector<FriendInfo> FriendManager::filterFriends(std::string regex)
     throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
 }
 
-int FriendManager::syncDidChainData()
+int FriendManager::syncDownloadDidChainData()
 {
     auto sectyMgr = SAFE_GET_PTR(mSecurityManager);
     std::string did;
@@ -297,98 +299,76 @@ int FriendManager::syncDidChainData()
 
     auto bcClient = BlkChnClient::GetInstance();
 
-    std::vector<std::string> propHistory;
-    ret = bcClient->downloadDidPropHistory(did, "FriendID", propHistory);
-    if(ret < 0
-    && ret != ErrCode::BlkChnEmptyPropError) {
+    std::string keyPath;
+    ret = bcClient->getDidPropHistoryPath(did, "FriendID", keyPath);
+    if (ret < 0) {
         return ret;
     }
 
-    std::vector<std::string> friendCodeArray;
-    for(const auto& it: propHistory) {
-        Json jsonInfo = Json::parse(it);
-        std::string friendCode = jsonInfo["FriendCode"];
-        int status = jsonInfo["Status"];
-        long updateTime = jsonInfo["UpdateTime"];
+    std::string result;
+    ret = bcClient->downloadFromDidChn(keyPath, result);
+    CHECK_ERROR(ret);
 
-        // TODO remove friend filt
-        friendCodeArray.push_back(friendCode);
-    }
-
-    for(const auto& it: friendCodeArray) {
-        int ret = tryAddFriend(it, "", false);
-        if(ret < 0) {
-            Log::W(Log::TAG, "FriendManager::syncFriendInfo() Failed to add friend code: %s.", did.c_str());
-            continue;
-        }
-
-        Log::I(Log::TAG, "FriendManager::syncFriendInfo() Add friend did: %s.", did.c_str());
-    }
+    ret = mergeFriendInfoFromJsonArray(result);
+    CHECK_ERROR(ret);
 
     return 0;
 }
 
 int FriendManager::monitorDidChainData()
 {
-    // auto sectyMgr = SAFE_GET_PTR(mSecurityManager);
+    auto sectyMgr = SAFE_GET_PTR(mSecurityManager);
+    auto msgMgr = SAFE_GET_PTR(mMessageManager);
 
-    // std::string did;
-    // int ret = sectyMgr->getDid(did);
-    // CHECK_ERROR(ret)
+    for(auto& it: mFriendList) {
+        std::string did;
+        int ret = it->getHumanInfo(HumanInfo::Item::Did, did);
+        if(ret < 0) {
+            continue;
+        }
 
-    // auto callback = [&](int errcode, const std::string& keyPath, const std::string& result) {
-    //     Log::I(Log::TAG, "FriendManager::monitorDidChainData() ecode=%d, path=%s, result=%s", errcode, keyPath.c_str(), result.c_str());
+        ret = msgMgr->monitorDidChainCarrierID(did);
+        CHECK_ERROR(ret)
+    }
 
-    //     if(errcode < 0) {
-    //         Log::W(Log::TAG, "FriendManager::monitorDidChainData() Failed to sync CarrierId. errcode=%d", errcode);
-    //         return;
-    //     }
-
-    //     std::vector<std::string> values;
-
-    //     Json jsonPropArray = Json::parse(result);
-    //     for(const auto& it: jsonPropArray) {
-    //         values.push_back(it["value"]);
-    //     }
-
-    //     std::vector<std::string> friendCodeArray;
-    //     for(const auto& it: values) {
-    //         Json jsonInfo = Json::parse(it);
-    //         std::string friendCode = jsonInfo["FriendCode"];
-    //         int status = jsonInfo["Status"];
-    //         long updateTime = jsonInfo["UpdateTime"];
-
-    //         // TODO remove friend filt
-    //         friendCodeArray.push_back(friendCode);
-    //     }
-
-    //     for(const auto& it: friendCodeArray) {
-    //         int ret = tryAddFriend(it, "", false);
-    //         if(ret < 0) {
-    //             Log::W(Log::TAG, "FriendManager::syncFriendInfo() Failed to add friend code: %s.", did.c_str());
-    //             continue;
-    //         }
-
-    //         Log::I(Log::TAG, "FriendManager::syncFriendInfo() Add friend did: %s.", did.c_str());
-    //     }
-    // };
-
-    // auto bcClient = BlkChnClient::GetInstance();
-
-    // std::string keyPath;
-    // ret = bcClient->getDidPropHistoryPath(did, "FriendID", keyPath);
-    // if (ret < 0) {
-    //     return ret;
-    // }
-
-    // Log::I(Log::TAG, "FriendManager::monitorDidChainData() keyPath=%s", keyPath.c_str());
-    // ret = bcClient->appendMoniter(keyPath, callback);
-    // if (ret < 0) {
-    //     return ret;
-    // }
+    int ret = monitorDidChainFriendID();
+    CHECK_ERROR(ret)
 
     return 0;
 }
+
+int FriendManager::monitorDidChainFriendID()
+{
+    auto callback = [=](int errcode,
+                        const std::string& keyPath,
+                        const std::string& result) {
+        Log::D(Log::TAG, "FriendManager::monitorDidChainFriendID() ecode=%d, path=%s, result=%s", errcode, keyPath.c_str(), result.c_str());
+        CHECK_ERROR_NO_RETVAL(errcode);
+
+        int ret = mergeFriendInfoFromJsonArray(result);
+        CHECK_ERROR_NO_RETVAL(ret);
+
+        return;
+    };
+
+    auto sectyMgr = SAFE_GET_PTR(mSecurityManager);
+    std::string did;
+    int ret = sectyMgr->getDid(did);
+    CHECK_ERROR(ret)
+
+    auto bcClient = BlkChnClient::GetInstance();
+
+    std::string keyPath;
+    ret = bcClient->getDidPropHistoryPath(did, "FriendID", keyPath);
+    CHECK_ERROR(ret)
+
+    Log::I(Log::TAG, "FriendManager::monitorDidChainFriendID() keyPath=%s", keyPath.c_str());
+    ret = bcClient->appendMoniter(keyPath, callback);
+    CHECK_ERROR(ret)
+
+    return 0;
+}
+
 
 // int FriendManager::uploadFriendInfo()
 // {
@@ -465,7 +445,7 @@ int FriendManager::cacheFriendToDidChain(std::shared_ptr<FriendInfo> friendInfo)
 
     Json jsonInfo = Json::object();
     jsonInfo["FriendCode"] = humanCode;
-    jsonInfo["Status"] = "Normal";
+    jsonInfo["Status"] = friendInfo->getHumanStatus();
     jsonInfo["UpdateTime"] = DateTime::CurrentMS();
 
     std::string friendID = jsonInfo.dump();
@@ -613,6 +593,39 @@ int FriendManager::getFriendInfoByEla(const std::string& elaAddress, std::shared
     throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
 }
 
+int FriendManager::mergeFriendInfoFromJsonArray(const std::string& jsonArray)
+{
+    std::vector<std::string> values;
+    Json jsonPropArray = Json::parse(jsonArray);
+    for (const auto& it : jsonPropArray) {
+        values.push_back(it["value"]);
+    }
+
+    std::vector<std::string> friendCodeArray;
+    for(const auto& it: values) {
+        Json jsonInfo = Json::parse(it);
+        std::string friendCode = jsonInfo["FriendCode"];
+        HumanInfo::Status status = jsonInfo["Status"];
+        long updateTime = jsonInfo["UpdateTime"];
+
+        if(status == HumanInfo::Status::Removed) {
+            continue;
+        }
+        friendCodeArray.push_back(friendCode);
+    }
+
+    for(const auto& it: friendCodeArray) {
+        int ret = tryAddFriend(it, "", false);
+        if(ret < 0) {
+            Log::W(Log::TAG, "FriendManager::mergeFriendInfoFromJsonArray() Failed to add friend code: %s.", it.c_str());
+            continue;
+        }
+
+        Log::I(Log::TAG, "FriendManager::mergeFriendInfoFromJsonArray() Add friend did: %s.", it.c_str());
+    }
+
+    return 0;
+}
 
 
 } // namespace elastos
