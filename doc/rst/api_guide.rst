@@ -1,59 +1,37 @@
-Getting started with the wallet SDK
+Getting started with the contact SDK
 ########################################
 
 .. toctree::
   :maxdepth: 4
-
-.. constants:
-
-Constants
----------
-
-.. c:macro:: EXTERNAL_CHAIN
-
-  Indicate the external chain.
-
-.. c:macro:: INTERNAL_CHAIN
-
-  Indicate the internal chain.
-
-.. c:macro:: COIN_TYPE_ELA
-
-  Indicate the coin ELA.
 
 .. api:
 
 APIs
 ---------
 
-IdentityManager
+Contact.Factory
 ================
 
-.. cpp:class:: IdentityManager
+.. java:class:: Contact.Factory
 
-static class, the entrance of SDK.
+static class, the contact factory of SDK.
 
-ImportFromFile
+SetLogLevel
 ~~~~~~~~~~~~~~~~~~~
 
-.. cpp:function:: static int ImportFromFile(const std::string& filePath, std::shared_ptr<Identity>* identity)
+.. java:function:: static void SetLogLevel(int level)
 
-  import from file.
-
-  **Return**
-    result of this function, 0 is succeded, < 0 is failed.
+  set sdk log level.
 
   **Parameter**
-    :[in] filePath: local path of the file.
-    :[out] identity: shared ptr of identity.
+    :[in] level: log level, same as android.util.Log.
 
-.. warning:: this function is not impelemented yet.
 
 
 ExportToFile
 ~~~~~~~~~~~~~~~~~~~
 
-.. cpp:function:: static void ExportToFile(const std::shared_ptr<Identity>& identity, const std::string& filePath)
+.. java:function:: static void ExportToFile(const std::shared_ptr<Identity>& identity, const std::string& filePath)
 
   Export identity info to file.
 
@@ -67,7 +45,7 @@ ExportToFile
 GetMnemonic
 ~~~~~~~~~~~~~~~~~~~
 
-.. cpp:function:: static std::string GetMnemonic(const std::string& language, const std::string& words)
+.. java:function:: static std::string GetMnemonic(const std::string& language, const std::string& words)
 
   generate mnemonic.
 
@@ -82,7 +60,7 @@ GetMnemonic
 GetSeed
 ~~~~~~~~~~~~~~~~~~~
 
-.. cpp:function:: static std::string GetSeed(const std::string& mnemonic, const std::string& language, const std::string& words, const std::string& mnemonicPassword)
+.. java:function:: static std::string GetSeed(const std::string& mnemonic, const std::string& language, const std::string& words, const std::string& mnemonicPassword)
 
   Get seed from mnemonic.
 
@@ -99,7 +77,7 @@ GetSeed
 CreateIdentity
 ~~~~~~~~~~~~~~~~~~~
 
-.. cpp:function:: static int CreateIdentity(const std::string& localPath, std::shared_ptr<Identity>* identity)
+.. java:function:: static int CreateIdentity(const std::string& localPath, std::shared_ptr<Identity>* identity)
 
   Create identity object.
 
@@ -114,14 +92,14 @@ CreateIdentity
 Identity
 ================
 
-.. cpp:class:: Identity
+.. java:class:: Identity
 
   Create wallet, DidManager. Identity is used to manage wallet and did from the same seed.
 
 CreateSingleAddressWallet
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. cpp:function:: int CreateSingleAddressWallet(const std::string& seed, const std::shared_ptr<BlockChainNode>& node, std::shared_ptr<HDWallet>* wallet)
+.. java:function:: int CreateSingleAddressWallet(const std::string& seed, const std::shared_ptr<BlockChainNode>& node, std::shared_ptr<HDWallet>* wallet)
 
   Create single address wallet.
 
@@ -137,7 +115,7 @@ CreateSingleAddressWallet
 CreateWallet
 ~~~~~~~~~~~~~~~~~~~
 
-.. cpp:function:: int CreateWallet(const std::string& seed, int coinType, const std::shared_ptr<BlockChainNode>& node, std::shared_ptr<HDWallet>* wallet)
+.. java:function:: int CreateWallet(const std::string& seed, int coinType, const std::shared_ptr<BlockChainNode>& node, std::shared_ptr<HDWallet>* wallet)
 
   Create HD wallet.
 
@@ -154,7 +132,7 @@ CreateWallet
 CreateDidManager
 ~~~~~~~~~~~~~~~~~~~
 
-.. cpp:function:: int CreateDidManager(const std::string& seed, std::shared_ptr<DidManager>* manager)
+.. java:function:: int CreateDidManager(const std::string& seed, std::shared_ptr<DidManager>* manager)
 
   Create DidManager.
 
@@ -169,7 +147,7 @@ CreateDidManager
 HDWallet
 ================
 
-.. cpp:class:: HDWallet
+.. java:class:: HDWallet
 
   Manage private key, address, create and send transaction, recover wallet.
 
@@ -177,7 +155,7 @@ HDWallet
 GetCoinType
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-.. cpp:function:: int GetCoinType()
+.. java:function:: int GetCoinType()
 
   Get coin type of the wallet.
 
@@ -188,7 +166,7 @@ GetCoinType
 SendTransaction
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-.. cpp:function:: int SendTransaction(const std::vector<Transaction>& transactions, const std::string& memo, const std::string& seed, std::string& txid, const std::string& chain = "")
+.. java:function:: int SendTransaction(const std::vector<Transaction>& transactions, const std::string& memo, const std::string& seed, std::string& txid, const std::string& chain = "")
 
   Send transaction.
 
@@ -206,7 +184,7 @@ SendTransaction
 GetAddress
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-.. cpp:function:: std::string GetAddress(int chain, int index)
+.. java:function:: std::string GetAddress(int chain, int index)
 
   Get address of wallet.
 
@@ -223,7 +201,7 @@ GetAddress
 GetPublicKey
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-.. cpp:function:: std::string GetPublicKey(int chain, int index)
+.. java:function:: std::string GetPublicKey(int chain, int index)
 
   Get public key.
 
@@ -240,7 +218,7 @@ GetPublicKey
 GetBalance
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. cpp:function:: long GetBalance(const std::string& address)
+.. java:function:: long GetBalance(const std::string& address)
 
   Get balance of the address.
 
@@ -254,7 +232,7 @@ GetBalance
 GetBalance
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. cpp:function:: long GetBalance()
+.. java:function:: long GetBalance()
 
   Get balance of the wallet.
 
@@ -265,7 +243,7 @@ GetBalance
 SyncHistory
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. cpp:function:: int SyncHistory()
+.. java:function:: int SyncHistory()
 
   Synchronize history of the wallet from block chain node.
 
@@ -278,7 +256,7 @@ SyncHistory
 GetHistoryCount
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. cpp:function:: int GetHistoryCount(const std::string& address)
+.. java:function:: int GetHistoryCount(const std::string& address)
 
   Get history count of the address from local storage.
 
@@ -292,7 +270,7 @@ GetHistoryCount
 GetHistory
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. cpp:function:: int GetHistory(const std::string& address, int pageSize, int page, bool ascending, std::string& histories)
+.. java:function:: int GetHistory(const std::string& address, int pageSize, int page, bool ascending, std::string& histories)
 
   Get history of the address from local storage.
 
@@ -310,7 +288,7 @@ GetHistory
 GetUsedAddresses
 ~~~~~~~~~~~~~~~~~~~
 
-.. cpp:function:: std::vector<std::string> GetUsedAddresses()
+.. java:function:: std::vector<std::string> GetUsedAddresses()
 
   Get used addresses.
 
@@ -321,7 +299,7 @@ GetUsedAddresses
 GetUnUsedAddresses
 ~~~~~~~~~~~~~~~~~~~
 
-.. cpp:function:: std::vector<std::string> GetUnUsedAddresses(unsigned int count)
+.. java:function:: std::vector<std::string> GetUnUsedAddresses(unsigned int count)
 
   Get unused addresses.
 
@@ -335,7 +313,7 @@ GetUnUsedAddresses
 Recover
 ~~~~~~~~~~~~~~~~~~~
 
-.. cpp:function:: int Recover()
+.. java:function:: int Recover()
 
   Recover the wallet.
 
@@ -348,7 +326,7 @@ Recover
 DidManager
 ================
 
-.. cpp:class:: DidManager
+.. java:class:: DidManager
 
   Create Did, recover Did.
 
@@ -356,7 +334,7 @@ DidManager
 CreateDid
 ~~~~~~~~~~~~~~~~~~~~~
 
-.. cpp:function:: int CreateDid(int index, std::shared_ptr<Did>* did)
+.. java:function:: int CreateDid(int index, std::shared_ptr<Did>* did)
 
   Create Did Object.
 
@@ -384,7 +362,7 @@ Recover
 Did
 ================
 
-.. cpp:class:: Did
+.. java:class:: Did
 
   Set/Get/Sign did info.
 
@@ -392,7 +370,7 @@ Did
 GetId
 ~~~~~~~~~~~~~~~~~~~~~
 
-.. cpp:function:: std::string GetId()
+.. java:function:: std::string GetId()
 
   Get the did, start with i.
 
@@ -403,7 +381,7 @@ GetId
 SignInfo
 ~~~~~~~~~~~~~~~~~~~~~
 
-.. cpp:function:: std::string SignInfo(const std::string& seed, const std::string& json)
+.. java:function:: std::string SignInfo(const std::string& seed, const std::string& json)
 
   Sign did info.
 
@@ -418,7 +396,7 @@ SignInfo
 SetInfo
 ~~~~~~~~~~~~~~~~~~~~~
 
-.. cpp:function:: std::string SetInfo(const std::string& seed, const std::string& json, const std::shared_ptr<HDWallet>& wallet)
+.. java:function:: std::string SetInfo(const std::string& seed, const std::string& json, const std::shared_ptr<HDWallet>& wallet)
 
   Set did info to id chain.
 
@@ -434,7 +412,7 @@ SetInfo
 SyncInfo
 ~~~~~~~~~~~~~~~~~~~~~
 
-.. cpp:function:: int SyncInfo()
+.. java:function:: int SyncInfo()
 
   Synchronize did info from did service.
 
@@ -445,7 +423,7 @@ SyncInfo
 GetInfo
 ~~~~~~~~~~~~~~~~~~~~~
 
-.. cpp:function:: std::string GetInfo(const std::string& key)
+.. java:function:: std::string GetInfo(const std::string& key)
 
   Get info of the key.
 
@@ -459,7 +437,7 @@ GetInfo
 BlockChainNode
 ================
 
-.. cpp:class:: BlockChainNode
+.. java:class:: BlockChainNode
 
   Block chain node, manage url and certificate path.
 
@@ -467,7 +445,7 @@ BlockChainNode
 BlockChainNode
 ~~~~~~~~~~~~~~~~~~~~~
 
-.. cpp:function:: BlockChainNode(const std::string& url)
+.. java:function:: BlockChainNode(const std::string& url)
 
   Constructor of the class.
 
@@ -478,7 +456,7 @@ BlockChainNode
 SetUrl
 ~~~~~~~~~~~~~~~~~~~~~
 
-.. cpp:function:: void SetUrl(const std::string& url)
+.. java:function:: void SetUrl(const std::string& url)
 
   Set ulr of the node.
 
@@ -489,7 +467,7 @@ SetUrl
 GetUrl
 ~~~~~~~~~~~~~~~~~~~~~
 
-.. cpp:function:: std::string GetUrl()
+.. java:function:: std::string GetUrl()
 
   Get url of the node.
 
@@ -500,7 +478,7 @@ GetUrl
 SetCertificate
 ~~~~~~~~~~~~~~~~~~~~~
 
-.. cpp:function:: void SetCertificate(const std::string& cert)
+.. java:function:: void SetCertificate(const std::string& cert)
 
   Set cert file of the node.
 
@@ -513,7 +491,7 @@ SetCertificate
 Transaction
 ================
 
-.. cpp:class:: Transaction
+.. java:class:: Transaction
 
   Transaction Object.
 
@@ -521,7 +499,7 @@ Transaction
 Transaction
 ~~~~~~~~~~~~~~~~~~~~~
 
-.. cpp:function:: Transaction(const std::string& address, long amount, int coinType = COIN_TYPE_ELA)
+.. java:function:: Transaction(const std::string& address, long amount, int coinType = COIN_TYPE_ELA)
 
   Constructor of the class.
 
@@ -534,7 +512,7 @@ Transaction
 SetAddress
 ~~~~~~~~~~~~~~~~~~~~~
 
-.. cpp:function:: void SetAddress(const std::string& address, int coinType)
+.. java:function:: void SetAddress(const std::string& address, int coinType)
 
   Set address of the transaction.
 
@@ -546,7 +524,7 @@ SetAddress
 SetAmount
 ~~~~~~~~~~~~~~~~~~~~~
 
-.. cpp:function:: void SetAmount(long amount)
+.. java:function:: void SetAmount(long amount)
 
   Set amount of the transaction.
 
@@ -557,7 +535,7 @@ SetAmount
 GetCoinType
 ~~~~~~~~~~~~~~~~~~~~~
 
-.. cpp:function:: int GetCoinType()
+.. java:function:: int GetCoinType()
 
   Get coin type of the transaction.
 
@@ -568,7 +546,7 @@ GetCoinType
 GetAddress
 ~~~~~~~~~~~~~~~~~~~~~
 
-.. cpp:function:: std::string GetAddress()
+.. java:function:: std::string GetAddress()
 
   Get address of the transaction.
 
@@ -579,7 +557,7 @@ GetAddress
 GetAmount
 ~~~~~~~~~~~~~~~~~~~~~
 
-.. cpp:function:: long GetAmount()
+.. java:function:: long GetAmount()
 
   Get amount of the transaction.
 
