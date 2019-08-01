@@ -42,7 +42,7 @@ SetLocalDataDir
 Create
 ~~~~~~~~~~~~~~~~~~~
 
-.. cpp:function:: static Contact Create() {
+.. cpp:function:: static Contact Create()
 
   Create a contact instance.
 

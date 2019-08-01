@@ -35,8 +35,8 @@ Contents
    :maxdepth: 2
 
    api_guide.rst
-   api_contact_factory.rst
    api_contact.rst
+   api_contact_factory.rst
    api_contact_listener.rst
    api_contact_userinfo.rst
 

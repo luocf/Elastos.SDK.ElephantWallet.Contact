@@ -3,14 +3,7 @@ Contact
 
 .. cpp:class:: Contact
 
-  The contact class of SDK.
-
-Contact
-~~~~~~~~~~~~~~~~~~~
-
-.. cpp:function:: Contact()
-
-  Constructor of the class.
+  The contact class of SDK, create instance by Contact.Factory.Create().
 
 setListener
 ~~~~~~~~~~~~~~~~~~~
