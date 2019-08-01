@@ -12,14 +12,14 @@ APIs
 Contact.Factory
 ================
 
-.. java:class:: Contact.Factory
+.. cpp:class:: Contact.Factory
 
 static class, the contact factory of SDK.
 
 SetLogLevel
 ~~~~~~~~~~~~~~~~~~~
 
-.. java:function:: static void SetLogLevel(int level)
+.. cpp:function:: static void SetLogLevel(int level)
 
   Set sdk log level.
 
@@ -29,7 +29,7 @@ SetLogLevel
 SetDeviceId
 ~~~~~~~~~~~~~~~~~~~
 
-.. java:function:: static void SetDeviceId(String devId)
+.. cpp:function:: static void SetDeviceId(String devId)
 
   Set device id.
 
@@ -39,7 +39,7 @@ SetDeviceId
 SetLocalDataDir
 ~~~~~~~~~~~~~~~~~~~
 
-.. java:function:: static int SetLocalDataDir(String dir)
+.. cpp:function:: static int SetLocalDataDir(String dir)
 
   Set local dir where contact data saved.
 
@@ -53,7 +53,7 @@ SetLocalDataDir
 Create
 ~~~~~~~~~~~~~~~~~~~
 
-.. java:function:: static Contact Create() {
+.. cpp:function:: static Contact Create() {
 
   Create a contact instance.
 
