@@ -64,3 +64,49 @@ Contact.Listener
   Constructor of the class.
 
 
+Contact.Listener.AcquireArgs
+================
+
+.. cpp:class:: Contact.Listener.AcquireArgs
+
+  The contact acquire argument class of SDK.
+
+type
+~~~~~~~~~~~~~~~~~~~
+
+.. cpp:member:: Type type
+
+  Acquire type.
+
+publicKey
+~~~~~~~~~~~~~~~~~~~
+
+.. cpp:member:: String publicKey
+
+  Acquire publicKey, null when it's not used.
+
+data
+~~~~~~~~~~~~~~~~~~~
+
+.. cpp:member:: byte[] data
+
+  Acquire data, null when it's not used.
+
+Contact.Listener.AcquireArgs.Type
+================
+
+.. cpp:enum:: Contact.Listener.AcquireArgs.Type
+
+  Acquire type.
+  .. cpp:enumerator:: PublicKey = 201
+
+  .. cpp:enumerator:: EncryptData = 202
+
+  .. cpp:enumerator:: DecryptData = 203
+
+  .. cpp:enumerator:: DidPropAppId = 204
+
+  .. cpp:enumerator:: DidAgentAuthHeader = 205
+
+  .. cpp:enumerator:: SignData = 206
+
