@@ -115,8 +115,8 @@ public class ContactBridge extends CrossBase {
         return ContactStatus.valueOf(ret);
     }
 
-    public Contact.Message makeMessage(int type, byte[] data, String cryptoAlgorithm) {
-        Contact.Message msg = new Contact.Message(ContactMessage.Type.valueOf(type), data, cryptoAlgorithm);
+    public Contact.Message makeMessage(ContactMessage.Type type, byte[] data, String cryptoAlgorithm) {
+        Contact.Message msg = new Contact.Message(type, data, cryptoAlgorithm);
         return msg;
     }
 
