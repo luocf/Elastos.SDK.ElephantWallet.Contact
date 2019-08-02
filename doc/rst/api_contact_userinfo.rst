@@ -42,3 +42,77 @@ HumanInfo
 
   The contact base class for user and friend info of SDK.
 
+
+status
+~~~~~~~~~~~~~~~~~~~
+
+.. cpp:member:: ContactStatus status
+
+  Online status.
+
+
+humanCode
+~~~~~~~~~~~~~~~~~~~
+
+.. cpp:member:: String humanCode
+
+  Human key code.
+
+
+chainPubKey
+~~~~~~~~~~~~~~~~~~~
+
+.. cpp:member:: String chainPubKey
+
+  Human public key.
+
+
+did
+~~~~~~~~~~~~~~~~~~~
+
+.. cpp:member:: String did
+
+  Human did.
+
+
+elaAddress
+~~~~~~~~~~~~~~~~~~~
+
+.. cpp:member:: String elaAddress
+
+  Human ela address.
+
+
+nickname
+~~~~~~~~~~~~~~~~~~~
+
+.. cpp:member:: String nickname
+
+  Human nickname, NOT implementation.
+
+
+avatar
+~~~~~~~~~~~~~~~~~~~
+
+.. cpp:member:: String avatar
+
+  Human avatar, NOT implementation.
+
+
+gender
+~~~~~~~~~~~~~~~~~~~
+
+.. cpp:member:: String gender
+
+  Human gender, NOT implementation.
+
+
+description
+~~~~~~~~~~~~~~~~~~~
+
+.. cpp:member:: String description
+
+  Human description, NOT implementation.
+
+
+

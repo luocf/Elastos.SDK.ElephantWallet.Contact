@@ -98,6 +98,7 @@ Contact.Listener.AcquireArgs.Type
 .. cpp:enum:: Contact.Listener.AcquireArgs.Type
 
   Acquire type.
+
   .. cpp:enumerator:: PublicKey = 201
 
   .. cpp:enumerator:: EncryptData = 202

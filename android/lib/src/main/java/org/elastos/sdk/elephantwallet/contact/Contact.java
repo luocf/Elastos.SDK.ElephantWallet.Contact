@@ -34,4 +34,7 @@ public final class Contact extends ContactBridge {
             super(type, data, cryptoAlgorithm);
         }
     } // class Message
+
+    private Contact() {
+    }
 }
