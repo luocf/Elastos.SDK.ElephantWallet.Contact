@@ -230,10 +230,10 @@ int UserManager::monitorDidChainIdentifyCode()
                         const std::string& keyPath,
                         const std::string& result) {
         Log::D(Log::TAG, "UserManager::monitorDidChainIdentifyCode() ecode=%d, path=%s, result=%s", errcode, keyPath.c_str(), result.c_str());
-        CHECK_ERROR_NO_RETVAL(errcode);
+        CHECK_RETVAL(errcode);
 
         int ret = mergeIdentifyCodeFromJsonArray(result);
-        CHECK_ERROR_NO_RETVAL(ret);
+        CHECK_RETVAL(ret);
 
         return;
     };

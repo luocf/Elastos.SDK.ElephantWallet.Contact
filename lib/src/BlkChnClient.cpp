@@ -2,6 +2,7 @@
 
 #include <iomanip>
 
+#include <CompatibleFileSystem.hpp>
 #include <DateTime.hpp>
 #include <ErrCode.hpp>
 #include <HttpClient.hpp>
@@ -35,6 +36,13 @@ int BlkChnClient::InitInstance(std::weak_ptr<Config> config,
 
     HttpClient::InitGlobal();
     gBlkChnClient = std::make_shared<Impl>(config, sectyMgr);
+
+    int ret = gBlkChnClient->loadLocalData();
+    if(ret == ErrCode::FileNotExistsError) {
+        Log::D(Log::TAG, "BlkChnClient::InitInstance() Local data file is not exists.");
+        return 0;
+    }
+    CHECK_ERROR(ret);
 
     return 0;
 }
@@ -117,7 +125,7 @@ int BlkChnClient::downloadAllDidProps(const std::string& did, std::map<std::stri
 //     return 0;
 // }
 
-int BlkChnClient::uploadAllDidProps(const std::multimap<std::string, std::string>& propMap, std::string& txid)
+int BlkChnClient::uploadAllDidProps(const std::vector<std::pair<std::string, std::string>>& propMap, std::string& txid)
 {
     if(propMap.empty() == true) {
         return ErrCode::InvalidArgument;
@@ -362,7 +370,11 @@ int BlkChnClient::cacheDidProp(const std::string& key, const std::string& value)
     Log::I(Log::TAG, "BlkChnClient::cacheDidProp() key=%s, value=%s", key.c_str(), value.c_str());
 
     std::lock_guard<std::recursive_mutex> lock(mMutex);
-    mDidPropCache.insert({key, value});
+    mDidPropCache.push_back({key, value});
+    int size = mDidPropCache.size();
+
+    int ret = saveLocalData();
+    CHECK_ERROR(ret);
 
     return 0;
 }
@@ -375,6 +387,9 @@ int BlkChnClient::uploadCachedDidProp()
     int ret = uploadAllDidProps(mDidPropCache, txid);
     CHECK_ERROR(ret)
     mDidPropCache.clear();
+
+    ret = saveLocalData();
+    CHECK_ERROR(ret);
 
     // auto config = SAFE_GET_PTR(mConfig);
     // std::string getTxPath = config->mDidChainConfig->mApi.mGetTx + txid;
@@ -534,5 +549,52 @@ int BlkChnClient::getPropKeyPath(const std::string& key, std::string& keyPath)
     return 0;
 }
 
+int BlkChnClient::loadLocalData()
+{
+    auto config = SAFE_GET_PTR(mConfig);
+    auto dataFilePath = elastos::filesystem::path(config->mUserDataDir.c_str()) / DataFileName;
+
+    auto sectyMgr = SAFE_GET_PTR(mSecurityManager);
+    std::vector<uint8_t> originData;
+    int ret = sectyMgr->loadCryptoFile(dataFilePath.string(), originData);
+    CHECK_ERROR(ret)
+
+    std::string cacheData {originData.begin(), originData.end()};
+    try {
+        Json jsonCache = Json::parse(cacheData);
+        mDidPropCache = jsonCache.get<std::vector<std::pair<std::string, std::string>>>();
+    } catch(const std::exception& ex) {
+        Log::E(Log::TAG, "Failed to load local data from: %s.\nex=%s", dataFilePath.c_str(), ex.what());
+        return ErrCode::JsonParseException;
+    }
+
+    Log::I(Log::TAG, "Success to load local data from: %s.", dataFilePath.c_str());
+    return 0;
+}
+
+int BlkChnClient::saveLocalData()
+{
+    auto config = SAFE_GET_PTR(mConfig);
+    auto dataFilePath = elastos::filesystem::path(config->mUserDataDir.c_str()) / DataFileName;
+
+    std::string cacheData;
+    try {
+        int size = mDidPropCache.size();
+        Json jsonCache = mDidPropCache;
+        cacheData = jsonCache.dump();
+    } catch(const std::exception& ex) {
+        Log::E(Log::TAG, "Failed to save local data to: %s.\nex=%s", dataFilePath.c_str(), ex.what());
+        return ErrCode::JsonParseException;
+    }
+
+    auto sectyMgr = SAFE_GET_PTR(mSecurityManager);
+    std::vector<uint8_t> originData {cacheData.begin(), cacheData.end()};
+    int ret = sectyMgr->saveCryptoFile(dataFilePath.string(), originData);
+    CHECK_ERROR(ret)
+
+    Log::D(Log::TAG, "Save local data to: %s, data: %s", dataFilePath.c_str(), cacheData.c_str());
+
+    return 0;
+}
 
 } // namespace elastos

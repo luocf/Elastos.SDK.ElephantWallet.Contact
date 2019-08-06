@@ -93,15 +93,19 @@ private:
 
     /*** static function and variable ***/
     static std::shared_ptr<BlkChnClient> gBlkChnClient;
+    static constexpr const char* DataFileName = "cacheddata.dat";
 
     /*** class function and variable ***/
     explicit BlkChnClient(std::weak_ptr<Config> config, std::weak_ptr<SecurityManager> sectyMgr);
     virtual ~BlkChnClient();
 
-    int uploadAllDidProps(const std::multimap<std::string, std::string>& propMap, std::string& txid);
+    int uploadAllDidProps(const std::vector<std::pair<std::string, std::string>>& propMap, std::string& txid);
 
     int getPropKeyPathPrefix(std::string& keyPathPrefix);
     int getPropKeyPath(const std::string& key, std::string& keyPath);
+
+    int loadLocalData();
+    int saveLocalData();
 
     std::weak_ptr<Config> mConfig;
     std::weak_ptr<SecurityManager> mSecurityManager;
@@ -109,7 +113,7 @@ private:
 
     std::recursive_mutex mMutex;
     std::string mPropKeyPathPrefix;
-    std::multimap<std::string, std::string> mDidPropCache;
+    std::vector<std::pair<std::string, std::string>> mDidPropCache;
     Monitor mMonitor;
 };
 

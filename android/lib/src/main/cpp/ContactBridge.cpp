@@ -128,6 +128,17 @@ int ContactBridge::addFriend(const char* friendCode, const char* summary)
     return 0;
 }
 
+int ContactBridge::removeFriend(const char* friendCode)
+{
+    auto weakFriendMgr = mContactImpl->getFriendManager();
+    auto friendMgr =  SAFE_GET_PTR(weakFriendMgr);                                                                      \
+
+    int ret = friendMgr->tryRemoveFriend(friendCode);
+    CHECK_ERROR(ret);
+
+    return 0;
+}
+
 int ContactBridge::acceptFriend(const char* friendCode)
 {
     auto weakFriendMgr = mContactImpl->getFriendManager();

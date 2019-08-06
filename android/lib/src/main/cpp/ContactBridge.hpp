@@ -34,6 +34,7 @@ public:
     int getHumanStatus(const char* humanCode);
 
     int addFriend(const char* friendCode, const char* summary);
+    int removeFriend(const char* friendCode);
     int acceptFriend(const char* friendCode);
     int getFriendList(std::stringstream* info);
 

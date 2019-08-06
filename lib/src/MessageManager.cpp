@@ -246,7 +246,7 @@ int MessageManager::monitorDidChainCarrierID(const std::string& did)
                         const std::string& keyPath,
                         const std::string& result) {
         Log::D(Log::TAG, "MessageManager::monitorDidChainCarrierID() ecode=%d, path=%s, result=%s", errcode, keyPath.c_str(), result.c_str());
-        CHECK_ERROR_NO_RETVAL(errcode);
+        CHECK_RETVAL(errcode);
 
         auto userMgr = SAFE_GET_PTR_NO_RETVAL(mUserManager);
         auto friendMgr = SAFE_GET_PTR_NO_RETVAL(mFriendManager);
@@ -262,7 +262,7 @@ int MessageManager::monitorDidChainCarrierID(const std::string& did)
             humanInfo = friendInfo;
         } else {
             Log::E(Log::TAG, "MessageManager::monitorDidChainCarrierID() Failed to process CarrierId for did: %s", did.c_str());
-            CHECK_ERROR_NO_RETVAL(ErrCode::InvalidFriendCode);
+            CHECK_RETVAL(ErrCode::InvalidFriendCode);
             return;
         }
 

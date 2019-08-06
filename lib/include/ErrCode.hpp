@@ -11,16 +11,27 @@ public:
 #define CHECK_ERROR(ret) \
 	if(ret < 0) { \
 		Log::E(Log::TAG, "Failed to call %s in line %d, return %d.", __PRETTY_FUNCTION__, __LINE__, ret); \
-		elastos::ErrCode::SetError(ret, std::string(__PRETTY_FUNCTION__) + " line:" + std::to_string(__LINE__)); \
 		return ret; \
 	}
 
-#define CHECK_ERROR_NO_RETVAL(ret) \
+#define CHECK_RETVAL(ret) \
 	if(ret < 0) { \
 		Log::E(Log::TAG, "Failed to call %s in line %d, return %d.", __PRETTY_FUNCTION__, __LINE__, ret); \
 		elastos::ErrCode::SetError(ret, std::string(__PRETTY_FUNCTION__) + " line:" + std::to_string(__LINE__)); \
 		return; \
 	}
+
+#define CHECK_AND_NOTIFY_ERROR(ret) \
+	if(ret < 0) { \
+		elastos::ErrCode::SetError(ret, std::string(__PRETTY_FUNCTION__) + " line:" + std::to_string(__LINE__)); \
+	} \
+    CHECK_ERROR(ret) \
+
+#define CHECK_AND_NOTIFY_RETVAL(ret) \
+	if(ret < 0) { \
+		elastos::ErrCode::SetError(ret, std::string(__PRETTY_FUNCTION__) + " line:" + std::to_string(__LINE__)); \
+	} \
+    CHECK_RETVAL(ret) \
 
     /*** static function and variable ***/
     constexpr static const int UnknownError = -1;

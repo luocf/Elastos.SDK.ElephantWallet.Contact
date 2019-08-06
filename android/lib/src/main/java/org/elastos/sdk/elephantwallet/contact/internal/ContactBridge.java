@@ -148,6 +148,9 @@ public class ContactBridge extends CrossBase {
     public native int addFriend(String friendCode, String summary);
 
     @CrossInterface
+    public native int removeFriend(String friendCode);
+
+    @CrossInterface
     public native int acceptFriend(String friendCode);
 
     @CrossInterface
