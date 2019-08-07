@@ -162,7 +162,10 @@ int UserManager::ensureUserCarrierInfo()
     ret = Platform::GetCurrentDevName(currDevName);
     CHECK_ERROR(ret)
 
-    HumanInfo::CarrierInfo carrierInfo{carrierAddr, "", {currDevId, currDevName, DateTime::CurrentMS()}};
+    HumanInfo::CarrierInfo carrierInfo;
+    carrierInfo.mUsrAddr = carrierAddr;
+    carrierInfo.mDevInfo = {currDevId, currDevName};
+    carrierInfo.mUpdateTime = DateTime::CurrentMS();
     ret = mUserInfo->addCarrierInfo(carrierInfo, UserInfo::Status::Offline);
     CHECK_ERROR(ret)
 

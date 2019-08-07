@@ -514,11 +514,8 @@ int FriendManager::addFriendByCarrier(const std::string& carrierAddress, const s
     if(ret < 0) { // not found
         friendInfo = std::make_shared<FriendInfo>(weak_from_this());
         mFriendList.push_back(friendInfo);
-        FriendInfo::CarrierInfo carrierInfo = {
-            .mUsrAddr = carrierAddress,
-            .mUsrId = "",
-            .mDevInfo = {"", "", 0},
-        };
+        FriendInfo::CarrierInfo carrierInfo;
+        carrierInfo.mUsrAddr = carrierAddress,
         ret = friendInfo->addCarrierInfo(carrierInfo, FriendInfo::Status::WaitForAccept);
         CHECK_ERROR(ret)
     }

@@ -42,12 +42,14 @@ public:
         struct DeviceInfo {
             std::string mDevId;
             std::string mDevName;
-            int64_t mUpdateTime;
         };
 
         std::string mUsrAddr;
         std::string mUsrId;
         DeviceInfo mDevInfo;
+        int64_t mUpdateTime;
+
+        CarrierInfo() : mUpdateTime(0) {}
     };
 
     /*** static function and variable ***/
@@ -94,6 +96,7 @@ protected:
     std::vector<Status> mBoundCarrierStatus;
     std::map<Item, std::string> mCommonInfoMap;
     std::map<HumanKind, Status> mStatusMap;
+    long mUpdateTime;
 
 }; // class HumanInfo
 

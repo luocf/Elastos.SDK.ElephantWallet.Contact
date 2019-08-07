@@ -16,7 +16,6 @@ public:
         PhoneNumber = 1,
         EmailAddress,
         WechatId,
-        CarrierSecKey,
     };
 
     /*** static function and variable ***/
@@ -28,9 +27,7 @@ public:
     virtual int setIdentifyCode(Type type, const std::string& value);
     virtual int getIdentifyCode(Type type, std::string& value) const;
 
-    virtual int serialize(std::string& value,
-                          bool withCarrierSecKey = true,
-                          bool withIdCode = true) const;
+    virtual int serialize(std::string& value) const;
     virtual int deserialize(const std::string& value);
     virtual int toJson(std::shared_ptr<Json>& value) const;
     // virtual int print(std::string value);
@@ -42,7 +39,6 @@ private:
     /*** static function and variable ***/
 
     /*** class function and variable ***/
-    std::map<std::string, std::string> mCarrierSecretKeyMap; // DevUUID: CarrierKey
     std::map<Type, std::string> mIdCodeMap;
     long mUpdateTime;
 }; // class IdentifyCode

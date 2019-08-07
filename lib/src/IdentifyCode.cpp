@@ -25,8 +25,7 @@ namespace elastos {
 /***** class public function implement  ********/
 /***********************************************/
 IdentifyCode::IdentifyCode()
-    : mCarrierSecretKeyMap()
-    , mIdCodeMap()
+    : mIdCodeMap()
     , mUpdateTime()
 {
 }
@@ -37,47 +36,18 @@ IdentifyCode::~IdentifyCode()
 
 int IdentifyCode::setIdentifyCode(Type type, const std::string& value)
 {
-    switch(type) {
-    case Type::CarrierSecKey:
-    {
-        std::string devId;
-        int ret = Platform::GetCurrentDevId(devId);
-        CHECK_ERROR(ret)
-        mCarrierSecretKeyMap[devId] = value;
-        break;
-    }
-    default:
-        mIdCodeMap[type] = value;
-        break;
-    }
+    mIdCodeMap[type] = value;
 
     return 0;
 }
 
 int IdentifyCode::getIdentifyCode(Type type, std::string& value) const
 {
-
-    switch(type) {
-    case Type::CarrierSecKey:
-    {
-        std::string devId;
-        int ret = Platform::GetCurrentDevId(devId);
-        CHECK_ERROR(ret)
-        const auto& it = mCarrierSecretKeyMap.find(devId);
-        if(it == mCarrierSecretKeyMap.end()) {
-            return ErrCode::NotFoundError;
-        }
-        value = it->second;
-        break;
+    const auto& it = mIdCodeMap.find(type);
+    if(it == mIdCodeMap.end()) {
+        return ErrCode::NotFoundError;
     }
-    default:
-        const auto& it = mIdCodeMap.find(type);
-        if(it == mIdCodeMap.end()) {
-            return ErrCode::NotFoundError;
-        }
-        value = it->second;
-        break;
-    }
+    value = it->second;
 
     return 0;
 }
@@ -91,30 +61,14 @@ int IdentifyCode::mergeIdentifyCode(const IdentifyCode& value)
         }
     }
 
-    std::string carrierSecKey;
-    int ret = value.getIdentifyCode(Type::CarrierSecKey, carrierSecKey);
-    if(ret == 0) {
-        ret = setIdentifyCode(Type::CarrierSecKey, carrierSecKey);
-        if(ret < 0) {
-            Log::W(Log::TAG, "IdentifyCode::mergeIdentifyCode() Failed to merge carrier secret key.");
-        }
-    }
-    
     return 0;
 }
 
-int IdentifyCode::serialize(std::string& value,
-                            bool withCarrierSecKey,
-                            bool withIdCode) const
+int IdentifyCode::serialize(std::string& value) const
 {
     Json jsonInfo = Json::object();
 
-    if(withCarrierSecKey == true) {
-        jsonInfo[JsonKey::CarrierSecretKeyMap] = mCarrierSecretKeyMap;
-    }
-    if(withIdCode == true) {
-        jsonInfo[JsonKey::IdCodeMap] = mIdCodeMap;
-    }
+    jsonInfo[JsonKey::IdCodeMap] = mIdCodeMap;
 
     value = jsonInfo.dump();
 
@@ -130,17 +84,6 @@ int IdentifyCode::deserialize(const std::string& value)
         return ErrCode::JsonParseException;
     }
 
-    if(jsonInfo.find(JsonKey::CarrierSecretKeyMap) != jsonInfo.end()) {
-        std::string devId;
-        int ret = Platform::GetCurrentDevId(devId);
-        CHECK_ERROR(ret)
-
-        auto carrierSecretKeyMap = jsonInfo[JsonKey::CarrierSecretKeyMap].get<std::map<std::string, std::string>>();
-        const auto& it = carrierSecretKeyMap.find(devId);
-        if(it != carrierSecretKeyMap.end()) {
-            mCarrierSecretKeyMap[devId] = it->second;
-        }
-    }
     if(jsonInfo.find(JsonKey::IdCodeMap) != jsonInfo.end()) {
         mIdCodeMap = jsonInfo[JsonKey::IdCodeMap].get<std::map<Type, std::string>>();
     }
@@ -155,7 +98,6 @@ int IdentifyCode::toJson(std::shared_ptr<Json>& value) const
     }
 
     Json jsonInfo;
-    jsonInfo[JsonKey::CarrierSecretKeyMap] = mCarrierSecretKeyMap;
     jsonInfo[JsonKey::IdCodeMap] = mIdCodeMap;
 
     (*value)[JsonKey::IdentifyCode] = jsonInfo;

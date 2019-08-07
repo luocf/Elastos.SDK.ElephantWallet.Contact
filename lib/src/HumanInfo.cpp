@@ -48,6 +48,7 @@ HumanInfo::HumanInfo()
     , mBoundCarrierStatus()
     , mCommonInfoMap()
     , mStatusMap()
+    , mUpdateTime()
 {
 }
 
@@ -186,7 +187,7 @@ int HumanInfo::addCarrierInfo(const HumanInfo::CarrierInfo& info, const HumanInf
         // found info by usrId
         if(existsInfo.mDevInfo.mDevId != "Unknown"
         && existsInfo.mDevInfo.mDevId == correctedInfo.mDevInfo.mDevId) {
-            if(existsInfo.mDevInfo.mUpdateTime >= correctedInfo.mDevInfo.mUpdateTime) { // not changed
+            if(existsInfo.mUpdateTime >= correctedInfo.mUpdateTime) { // not changed
                 Log::D(Log::TAG, " HumanInfo::addCarrierInfo() IgnoreMergeOldInfo: exists=%s input=%s",
                                  existsInfo.mDevInfo.mDevId.c_str(), correctedInfo.mDevInfo.mDevId.c_str());
                 return ErrCode::IgnoreMergeOldInfo;
@@ -226,7 +227,7 @@ int HumanInfo::delCarrierInfo(const std::string& carrierCode)
 
 int HumanInfo::getCarrierInfoByUsrId(const std::string& usrId, HumanInfo::CarrierInfo& info) const
 {
-    info = {"", "", {"", "", 0}};
+    info = CarrierInfo();
     for(auto idx = 0; idx < mBoundCarrierArray.size(); idx++) {
         if(mBoundCarrierArray[idx].mUsrId == usrId) {
             info = mBoundCarrierArray[idx];
@@ -239,7 +240,7 @@ int HumanInfo::getCarrierInfoByUsrId(const std::string& usrId, HumanInfo::Carrie
 
 int HumanInfo::getCarrierInfoByDevId(const std::string& devId, CarrierInfo& info) const
 {
-    info = {"", "", {"", "", 0}};
+    info = CarrierInfo();
     for(auto idx = 0; idx < mBoundCarrierArray.size(); idx++) {
         if(mBoundCarrierArray[idx].mDevInfo.mDevId == devId) {
             info = mBoundCarrierArray[idx];
