@@ -254,6 +254,44 @@ int ChannelImplCarrier::requestFriend(const std::string& friendCode,
     return 0;
 }
 
+int ChannelImplCarrier::removeFriend(const std::string& friendCode)
+{
+    std::string usrId;
+    bool valid = IsValidCarrierUsrId(friendCode);
+    if(valid == true) {
+        usrId = friendCode;
+    } else {
+        bool valid = IsValidCarrierAddress(friendCode);
+        if (valid == true) {
+            GetCarrierUsrIdByAddress(friendCode, usrId);
+        }
+    }
+    if(usrId.empty() == true) {
+        return ErrCode::InvalidArgument;
+    }
+
+    bool isFriend = ela_is_friend(mCarrier.get(), usrId.c_str());
+    if(isFriend == false) {
+        Log::W(Log::TAG, "Ignore to remove a friend: %s, it's not exists.", usrId.c_str());
+        return 0;
+    }
+
+    int ret = ela_remove_friend(mCarrier.get(), usrId.c_str());
+    if(ret != 0) {
+        int err = ela_get_error();
+        if(err == ELA_GENERAL_ERROR(ELAERR_ALREADY_EXIST)) {
+            return ErrCode::ChannelFailedFriendExists;
+        }
+
+        char strerr_buf[512] = {0};
+        ela_get_strerror(err, strerr_buf, sizeof(strerr_buf));
+        Log::E(Log::TAG, "Failed to remove friend! ret=%s(0x%x)", strerr_buf, err);
+        return ErrCode::ChannelFailedCarrier;
+    }
+
+    return 0;
+}
+
 int ChannelImplCarrier::sendMessage(const std::string& friendCode,
                                     std::vector<uint8_t> msgContent)
 {

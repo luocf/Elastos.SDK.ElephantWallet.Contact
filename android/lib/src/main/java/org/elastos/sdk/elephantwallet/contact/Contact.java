@@ -1,6 +1,7 @@
 package org.elastos.sdk.elephantwallet.contact;
 
 import org.elastos.sdk.elephantwallet.contact.internal.ContactBridge;
+import org.elastos.sdk.elephantwallet.contact.internal.ContactDebug;
 import org.elastos.sdk.elephantwallet.contact.internal.ContactFactory;
 import org.elastos.sdk.elephantwallet.contact.internal.ContactListener;
 
@@ -34,6 +35,9 @@ public final class Contact extends ContactBridge {
             super(type, data, cryptoAlgorithm);
         }
     } // class Message
+
+    public abstract static class Debug extends ContactDebug {
+    } // class Listener
 
     private Contact() {
     }

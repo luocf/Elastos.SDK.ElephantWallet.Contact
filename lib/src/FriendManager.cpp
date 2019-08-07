@@ -176,14 +176,14 @@ int FriendManager::restoreFriendsInfo()
 }
 
 int FriendManager::tryAddFriend(const std::string& friendCode, const std::string& summary,
-                                bool remoteRequest)
+                                bool remoteRequest, bool forceRequest)
 {
     auto kind = HumanInfo::AnalyzeHumanKind(friendCode);
     if(static_cast<int>(kind) < 0) {
         return static_cast<int>(kind);
     }
 
-    int ret = addFriend(kind, friendCode, summary, remoteRequest);
+    int ret = addFriend(kind, friendCode, summary, remoteRequest, forceRequest);
     CHECK_ERROR(ret)
 
     return 0;
@@ -228,16 +228,16 @@ int FriendManager::tryGetFriendInfo(const std::string& friendCode, std::shared_p
 }
 
 int FriendManager::addFriend(FriendInfo::HumanKind friendKind, const std::string& friendCode,
-                             const std::string& summary, bool remoteRequest)
+                             const std::string& summary, bool remoteRequest, bool forceRequest)
 {
     int ret = ErrCode::InvalidArgument;
 
     if(friendKind == FriendInfo::HumanKind::Did) {
-        ret = addFriendByDid(friendCode, summary, remoteRequest);
+        ret = addFriendByDid(friendCode, summary, remoteRequest, forceRequest);
     } else if(friendKind == FriendInfo::HumanKind::Ela) {
-        ret = addFriendByEla(friendCode, summary, remoteRequest);
+        ret = addFriendByEla(friendCode, summary, remoteRequest, forceRequest);
     } else if(friendKind == FriendInfo::HumanKind::Carrier) {
-        ret = addFriendByCarrier(friendCode, summary, remoteRequest);
+        ret = addFriendByCarrier(friendCode, summary, remoteRequest, forceRequest);
     }
 
     return ret;
@@ -467,7 +467,7 @@ int FriendManager::cacheFriendToDidChain(std::shared_ptr<FriendInfo> friendInfo)
 /***********************************************/
 /***** class private function implement  *******/
 /***********************************************/
-int FriendManager::addFriendByDid(const std::string& did, const std::string& summary, bool remoteRequest)
+int FriendManager::addFriendByDid(const std::string& did, const std::string& summary, bool remoteRequest, bool forceRequest)
 {
     auto bcClient = BlkChnClient::GetInstance();
 
@@ -494,7 +494,7 @@ int FriendManager::addFriendByDid(const std::string& did, const std::string& sum
     ret = friendInfo->getAllCarrierInfo(carrierInfoArray);
     CHECK_ERROR(ret)
     for(const auto& info: carrierInfoArray) {
-        ret = addFriendByCarrier(info.mUsrAddr, summary, true);
+        ret = addFriendByCarrier(info.mUsrAddr, summary, true, forceRequest);
         CHECK_ERROR(ret)
     }
 
@@ -503,10 +503,10 @@ int FriendManager::addFriendByDid(const std::string& did, const std::string& sum
     return 0;
 }
 
-int FriendManager::addFriendByCarrier(const std::string& carrierAddress, const std::string& summary, bool remoteRequest)
+int FriendManager::addFriendByCarrier(const std::string& carrierAddress, const std::string& summary, bool remoteRequest, bool forceRequest)
 {
     auto msgMgr = SAFE_GET_PTR(mMessageManager);
-    int ret = msgMgr->requestFriend(carrierAddress, MessageManager::ChannelType::Carrier, summary, remoteRequest);
+    int ret = msgMgr->requestFriend(carrierAddress, MessageManager::ChannelType::Carrier, summary, remoteRequest, forceRequest);
     CHECK_ERROR(ret)
 
     std::shared_ptr<FriendInfo> friendInfo;
@@ -526,7 +526,7 @@ int FriendManager::addFriendByCarrier(const std::string& carrierAddress, const s
     return 0;
 }
 
-int FriendManager::addFriendByEla(const std::string& elaAddress, const std::string& summary, bool remoteRequest)
+int FriendManager::addFriendByEla(const std::string& elaAddress, const std::string& summary, bool remoteRequest, bool forceRequest)
 {
     if(::isAddressValid(elaAddress.c_str()) == false) {
         return ErrCode::InvalidArgument;
@@ -541,12 +541,43 @@ int FriendManager::addFriendByEla(const std::string& elaAddress, const std::stri
 
 int FriendManager::removeFriendByDid(const std::string& did)
 {
-    throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
+    std::shared_ptr<FriendInfo> friendInfo;
+    int ret = tryGetFriendInfo(did, friendInfo);
+    CHECK_ERROR(ret);
+
+    std::vector<FriendInfo::CarrierInfo> carrierInfoArray;
+    ret = friendInfo->getAllCarrierInfo(carrierInfoArray);
+    CHECK_ERROR(ret)
+    for(const auto& info: carrierInfoArray) {
+        ret = removeFriendByCarrier(info.mUsrId);
+        CHECK_ERROR(ret)
+    }
+
+    ret = friendInfo->setHumanStatus(HumanInfo::HumanKind::Did, HumanInfo::Status::Removed);
+    CHECK_ERROR(ret)
+
+    ret = cacheFriendToDidChain(friendInfo);
+    CHECK_ERROR(ret)
+
+    Log::I(Log::TAG, "FriendManager::removeFriendByDid() Remove friend did: %s.", did.c_str());
+
+    return 0;
 }
 
-int FriendManager::removeFriendByCarrier(const std::string& carrierAddress)
+int FriendManager::removeFriendByCarrier(const std::string& carrierUsrId)
 {
-    throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
+    auto msgMgr = SAFE_GET_PTR(mMessageManager);
+    int ret = msgMgr->removeFriend(carrierUsrId, MessageManager::ChannelType::Carrier);
+    CHECK_ERROR(ret)
+
+    std::shared_ptr<FriendInfo> friendInfo;
+    ret = tryGetFriendInfo(carrierUsrId, friendInfo);
+    CHECK_ERROR(ret)
+
+    ret = friendInfo->delCarrierInfo(carrierUsrId);
+    CHECK_ERROR(ret)
+
+    return 0;
 }
 
 int FriendManager::removeFriendByEla(const std::string& elaAddress)

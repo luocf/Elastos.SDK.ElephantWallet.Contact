@@ -31,6 +31,7 @@ import org.elastos.sdk.elephantwallet.contact.internal.Utils;
 import org.elastos.sdk.keypair.ElastosKeypair;
 
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends Activity {
@@ -138,8 +139,15 @@ public class MainActivity extends Activity {
             case R.id.add_friend:
                 message = scanUserInfo();
                 break;
+            case R.id.del_friend:
+                message = removeFriend();
+                break;
             case R.id.send_message:
                 message = sendMessage();
+                break;
+
+            case R.id.show_cached_didprop:
+                message = sendCachedDidProp();
                 break;
         }
         showMessage(message);
@@ -337,6 +345,40 @@ public class MainActivity extends Activity {
         return "Success to list friend info.";
     }
 
+    private String removeFriend() {
+        if (mContact == null) {
+            return ErrorPrefix + "Contact is null.";
+        }
+        Contact.UserInfo info = mContact.getUserInfo();
+        if (info.status != ContactStatus.Online) {
+            return ErrorPrefix + "Contact is not online.";
+        }
+
+        List<String> friendCodeList = new ArrayList<>();
+        List<Contact.FriendInfo> friendList = mContact.listFriendInfo();
+        for(Contact.FriendInfo friendInfo : friendList) {
+            friendCodeList.add(friendInfo.humanCode + " [" + friendInfo.status + "]");
+        }
+        Helper.showFriendList(this, friendCodeList, (friendCode) -> {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setMessage("Are you sure to remove friend: " + friendCode);
+            builder.setPositiveButton("Delete", (dialog, which) -> {
+                int ret = mContact.removeFriend(friendCode);
+                if(ret < 0) {
+                    showMessage(ErrorPrefix + "Failed to delete friend. ret=" + ret);
+                    return;
+                }
+            });
+            builder.setNegativeButton("Cancel", (dialog, which) -> {
+                dialog.dismiss();
+            });
+            new Handler(Looper.getMainLooper()).post(() -> {
+                builder.create().show();
+            });
+        });
+        return "Success to send message.";
+    }
+
     private String sendMessage() {
         if (mContact == null) {
             return ErrorPrefix + "Contact is null.";
@@ -364,6 +406,17 @@ public class MainActivity extends Activity {
             });
         });
         return "Success to send message.";
+    }
+
+    private String sendCachedDidProp() {
+        if (mContact == null) {
+            return ErrorPrefix + "Contact is null.";
+        }
+
+        StringBuffer cachedDidProp = new StringBuffer();
+        Contact.Debug.GetCachedDidProp(cachedDidProp);
+        Helper.showDetails(MainActivity.this, cachedDidProp.toString());
+        return "Success to get cached didprop.";
     }
 
     private String testSyncUpload() {

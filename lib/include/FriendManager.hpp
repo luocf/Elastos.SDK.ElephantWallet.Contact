@@ -49,13 +49,13 @@ public:
     bool contains(const std::string& friendCode);
     bool contains(const std::shared_ptr<HumanInfo>& friendInfo);
 
-    virtual int tryAddFriend(const std::string& friendCode, const std::string& summary, bool remoteRequest = true);
+    virtual int tryAddFriend(const std::string& friendCode, const std::string& summary, bool remoteRequest = true, bool forceRequest = false);
     virtual int tryAcceptFriend(const std::string& friendCode);
     virtual int tryRemoveFriend(const std::string& friendCode);
     virtual int tryGetFriendInfo(const std::string& friendCode, std::shared_ptr<FriendInfo>& friendInfo);
 
     virtual int addFriend(FriendInfo::HumanKind friendKind, const std::string& friendCode,
-                          const std::string& summary, bool remoteRequest = true);
+                          const std::string& summary, bool remoteRequest = true, bool forceRequest = false);
     virtual int removeFriend(FriendInfo::HumanKind friendKind, const std::string& friendCode);
 
     virtual int addFriendInfo(std::shared_ptr<FriendInfo> friendInfo);
@@ -82,9 +82,9 @@ private:
     static constexpr const char* DataFileName = "frienddata.dat";
 
     /*** class function and variable ***/
-    virtual int addFriendByDid(const std::string& did, const std::string& summary, bool remoteRequest);
-    virtual int addFriendByCarrier(const std::string& carrierAddress, const std::string& summary, bool remoteRequest);
-    virtual int addFriendByEla(const std::string& elaAddress, const std::string& summary, bool remoteRequest);
+    virtual int addFriendByDid(const std::string& did, const std::string& summary, bool remoteRequest, bool forceRequest = false);
+    virtual int addFriendByCarrier(const std::string& carrierAddress, const std::string& summary, bool remoteRequest, bool forceRequest = false);
+    virtual int addFriendByEla(const std::string& elaAddress, const std::string& summary, bool remoteRequest, bool forceRequest);
     virtual int removeFriendByDid(const std::string& did);
     virtual int removeFriendByCarrier(const std::string& carrierAddress);
     virtual int removeFriendByEla(const std::string& elaAddress);

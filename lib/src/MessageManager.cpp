@@ -240,6 +240,25 @@ int MessageManager::updateFriend(const std::string& did)
     return lastRet;
 }
 
+int MessageManager::removeFriend(const std::string& friendCode, ChannelType humanChType)
+{
+    Log::W(Log::TAG, ">>>>>>>>>>>>> removeFriend code:%s", friendCode.c_str());
+    auto it = mMessageChannelMap.find(humanChType);
+    if(it == mMessageChannelMap.end()) {
+        return ErrCode::ChannelNotFound;
+    }
+    auto channel = it->second;
+
+    if(channel->isReady() == false) {
+        return ErrCode::ChannelNotReady;
+    }
+
+    int ret = channel->removeFriend(friendCode);
+    CHECK_ERROR(ret)
+
+    return 0;
+}
+
 int MessageManager::monitorDidChainCarrierID(const std::string& did)
 {
     auto callback = [=](int errcode,

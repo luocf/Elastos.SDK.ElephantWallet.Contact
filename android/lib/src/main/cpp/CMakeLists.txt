@@ -6,6 +6,7 @@ include_directories("${CFG_DEPENDS_DIR}/${ANDROID_ABI}/include")
 
 include( "${CROSSPL_CMAKEFILE}" )
 include_directories(base/include)
+include_directories(base/src)
 
 add_subdirectory(base/common)
 add_subdirectory(base/src)

@@ -206,6 +206,24 @@ int HumanInfo::addCarrierInfo(const HumanInfo::CarrierInfo& info, const HumanInf
     return mBoundCarrierArray.size();
 }
 
+int HumanInfo::delCarrierInfo(const std::string& carrierCode)
+{
+    Log::D(Log::TAG, " ============    %s", __PRETTY_FUNCTION__);
+    if(carrierCode.empty() == true) {
+        return ErrCode::InvalidArgument;
+    }
+
+    for(auto idx = 0; idx < mBoundCarrierArray.size(); idx++) {
+        if(mBoundCarrierArray[idx].mUsrAddr == carrierCode
+        || mBoundCarrierArray[idx].mUsrId == carrierCode) {
+            mBoundCarrierStatus[idx] = Status::Removed;
+            return idx;
+        }
+    }
+
+    return ErrCode::NotFoundError;
+}
+
 int HumanInfo::getCarrierInfoByUsrId(const std::string& usrId, HumanInfo::CarrierInfo& info) const
 {
     info = {"", "", {"", "", 0}};

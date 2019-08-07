@@ -54,15 +54,13 @@ public class Helper {
                 listener.onResult(root.getText().toString());
             });
             builder.setNegativeButton("Cancel", (dialog, which) -> {
-                dialog.dismiss();
+                dismissDialog();
             });
         } catch (Exception e) {
             builder.setMessage("Failed to show address." + e);
         }
 
-        new Handler(Looper.getMainLooper()).post(() -> {
-            builder.create().show();
-        });
+        showDialog(builder);
     }
 
     public static void showAddress(Context context, String[] humanCode, String presentDevId, OnListener listener) {
@@ -76,12 +74,10 @@ public class Helper {
         }
 
         builder.setNegativeButton("Cancel", (dialog, which) -> {
-            dialog.dismiss();
+            dismissDialog();
         });
 
-        new Handler(Looper.getMainLooper()).post(() -> {
-            builder.create().show();
-        });
+        showDialog(builder);
     }
 
     public static void showDetails(Context context, String msg) {
@@ -92,9 +88,7 @@ public class Helper {
             dialog.dismiss();
         });
 
-        new Handler(Looper.getMainLooper()).post(() -> {
-            builder.create().show();
-        });
+        builder.create().show();
     }
 
     public static void showFriendList(Context context, List<String> friendList, OnListener listener) {
@@ -109,12 +103,10 @@ public class Helper {
         builder.setTitle("Friend List");
         builder.setView(listView);
         builder.setNegativeButton("Cancel", (dialog, which) -> {
-            dialog.dismiss();
+            dismissDialog();
         });
 
-        new Handler(Looper.getMainLooper()).post(() -> {
-            builder.create().show();
-        });
+        showDialog(builder);
     }
 
     public static void showAddFriend(Context context, String friendCode, OnListener listener) {
@@ -125,15 +117,13 @@ public class Helper {
         builder.setTitle("Find Address");
         builder.setView(root);
         builder.setNegativeButton("Cancel", (dialog, which) -> {
-            dialog.dismiss();
+            dismissDialog();
         });
         builder.setPositiveButton("Add Friend", (dialog, which) -> {
             listener.onResult(edit.getText().toString());
         });
 
-        new Handler(Looper.getMainLooper()).post(() -> {
-            builder.create().show();
-        });
+        showDialog(builder);
     }
 
     public static void showFriendRequest(Context context, String humanCode, String summary, OnListener listener) {
@@ -147,12 +137,10 @@ public class Helper {
             listener.onResult(null);
         });
         builder.setNegativeButton("Cannel", (dialog, which) -> {
-            dialog.dismiss();
+            dismissDialog();
         });
 
-        new Handler(Looper.getMainLooper()).post(() -> {
-            builder.create().show();
-        });
+        showDialog(builder);
     }
 
     public static void showSendMessage(Context context, String friendCode, OnListener listener) {
@@ -163,15 +151,13 @@ public class Helper {
         builder.setTitle("Send Message");
         builder.setView(root);
         builder.setNegativeButton("Cancel", (dialog, which) -> {
-            dialog.dismiss();
+            dismissDialog();
         });
         builder.setPositiveButton("Send", (dialog, which) -> {
             listener.onResult(edit.getText().toString());
         });
 
-        new Handler(Looper.getMainLooper()).post(() -> {
-            builder.create().show();
-        });
+        showDialog(builder);
     }
 
     public static void scanAddress(MainActivity activity, OnListener listener) {
@@ -328,6 +314,28 @@ public class Helper {
         return bitmap;
     }
 
+    private static void showDialog(AlertDialog.Builder builder) {
+        new Handler(Looper.getMainLooper()).post(() -> {
+            if(mLastDialog != null) {
+                mLastDialog.dismiss();
+            }
+            mLastDialog = builder.create();
+            mLastDialog.show();
+        });
+    }
+
+    private static void dismissDialog() {
+        new Handler(Looper.getMainLooper()).post(() -> {
+            if(mLastDialog == null) {
+                return;
+            }
+            mLastDialog.dismiss();
+            mLastDialog = null;
+        });
+
+    }
+
+    private static AlertDialog mLastDialog;
     private static OnListener mOnScanListener;
     private static final int REQUEST_CODE_QR_SCAN = 101;
 }

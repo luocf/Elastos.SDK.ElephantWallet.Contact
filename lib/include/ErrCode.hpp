@@ -17,8 +17,7 @@ public:
 #define CHECK_RETVAL(ret) \
 	if(ret < 0) { \
 		Log::E(Log::TAG, "Failed to call %s in line %d, return %d.", __PRETTY_FUNCTION__, __LINE__, ret); \
-		elastos::ErrCode::SetError(ret, std::string(__PRETTY_FUNCTION__) + " line:" + std::to_string(__LINE__)); \
-		return; \
+        return; \
 	}
 
 #define CHECK_AND_NOTIFY_ERROR(ret) \

@@ -41,7 +41,13 @@
         android:title="   |- Friend Info" />
     <item android:id="@+id/add_friend"
         android:title="   |- Add Friend" />
+    <item android:id="@+id/del_friend"
+        android:title="   |- Del Friend" />
     <item android:id="@+id/send_message"
         android:title="   `- Send Message" />
 
+    <item android:enabled="false"
+        android:title="Debug" />
+    <item android:id="@+id/show_cached_didprop"
+        android:title="   `- Show Cached DidProp" />
 </menu>

@@ -44,6 +44,8 @@ public:
                               bool remoteRequest = true,
                               bool forceRequest = false) override;
 
+    virtual int removeFriend(const std::string& friendAddr) override;
+
     virtual int sendMessage(const std::string& friendCode,
                             std::vector<uint8_t> msgContent) override;
 

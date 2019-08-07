@@ -66,6 +66,8 @@ public:
                               bool remoteRequest = true,
                               bool forceRequest = false) = 0;
 
+    virtual int removeFriend(const std::string& friendAddr) = 0;
+
     virtual int sendMessage(const std::string& friendCode,
                             std::vector<uint8_t> msgContent) = 0;
 

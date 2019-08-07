@@ -122,7 +122,7 @@ int ContactBridge::addFriend(const char* friendCode, const char* summary)
     auto weakFriendMgr = mContactImpl->getFriendManager();
     auto friendMgr =  SAFE_GET_PTR(weakFriendMgr);                                                                      \
 
-    int ret = friendMgr->tryAddFriend(friendCode, summary);
+    int ret = friendMgr->tryAddFriend(friendCode, summary, true, true);
     CHECK_ERROR(ret);
 
     return 0;

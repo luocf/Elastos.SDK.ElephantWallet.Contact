@@ -26,6 +26,7 @@ public:
     virtual int toJson(std::shared_ptr<Json>& value) const override;
 
     virtual int addCarrierInfo(const CarrierInfo& info, const Status status) override;
+    virtual int delCarrierInfo(const std::string& carrierUsrId) override;
     virtual int setHumanInfo(Item item, const std::string& value) override;
     virtual int mergeHumanInfo(const HumanInfo& value, const Status status) override;
 

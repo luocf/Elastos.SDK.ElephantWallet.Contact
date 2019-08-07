@@ -107,7 +107,23 @@ int FriendInfo::toJson(std::shared_ptr<Json>& value) const
 int FriendInfo::addCarrierInfo(const CarrierInfo& info, const Status status)
 {
     int ret = HumanInfo::addCarrierInfo(info, status);
-    if(ret <= 0) { // error or not changed
+    if(ret < 0) { // error or not changed
+        return ret;
+    }
+
+    auto friendMgr = SAFE_GET_PTR(mFriendManager);
+    ret = friendMgr->saveLocalData();
+    if(ret < 0) {
+        return ret;
+    }
+
+    return 0;
+}
+
+int FriendInfo::delCarrierInfo(const std::string& carrierUsrId)
+{
+    int ret = HumanInfo::delCarrierInfo(carrierUsrId);
+    if(ret < 0) { // error or not changed
         return ret;
     }
 
