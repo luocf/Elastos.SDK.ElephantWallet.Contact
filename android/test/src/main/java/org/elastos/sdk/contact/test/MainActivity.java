@@ -64,7 +64,7 @@ public class MainActivity extends Activity {
 //                mSavedMnemonic = UploadedMnemonic1;
 //            }
             if (devId.startsWith("fa65a")) {
-                mSavedMnemonic = UploadedMnemonic2;
+                mSavedMnemonic = UploadedMnemonic1;
             }
 
             newAndSaveMnemonic(mSavedMnemonic);
@@ -667,6 +667,6 @@ public class MainActivity extends Activity {
     private static final String SavedMnemonicKey = "mnemonic";
 
 
-    private static final String UploadedMnemonic1 = "ceiling detail diet cotton shed false under riot leaf wait escape busy";
+    private static final String UploadedMnemonic1 = "month business urban nurse joy derive acquire snap venue hello city buyer";
     private static final String UploadedMnemonic2 = "ramp lady bulb stand silk dinosaur goose viable bid output month shock";
 }

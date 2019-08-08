@@ -7,7 +7,7 @@
 
 #include <ContactDebug.hpp>
 
-#include "BlkChnClient.hpp"
+#include "DidChnMonitor.hpp"
 #include "Log.hpp"
 
 /***********************************************/
@@ -20,10 +20,13 @@
 
 int ContactDebug::GetCachedDidProp(std::stringstream* value)
 {
-    auto bcClient = elastos::BlkChnClient::GetInstance();
+    auto monitor = elastos::DidChnMonitor::GetInstance();
+    if(monitor.get() == nullptr) {
+        return elastos::ErrCode::NotReadyError;
+    }
 
     std::string cachedDidProp;
-    int ret = bcClient->printCachedDidProp(cachedDidProp);
+    int ret = monitor->printCachedDidProp(cachedDidProp);
     CHECK_ERROR(ret);
 
     value->str(cachedDidProp);

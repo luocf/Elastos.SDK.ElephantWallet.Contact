@@ -47,6 +47,8 @@ struct JsonKey {
     static constexpr const char* PlainContent    = "PlainContent";
     static constexpr const char* CryptoAlgorithm = "CryptoAlgorithm";
     static constexpr const char* TimeStamp       = "TimeStamp";
+
+    static constexpr const char* DidPropCache       = "DidPropCache";
 };
 
 // HumanInfo

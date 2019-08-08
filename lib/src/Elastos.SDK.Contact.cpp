@@ -11,6 +11,7 @@
 #include "ChannelImplCarrier.hpp"
 #include "CompatibleFileSystem.hpp"
 #include "DateTime.hpp"
+#include "DidChnMonitor.hpp"
 #include "Log.hpp"
 #include "Platform.hpp"
 #include "SafePtr.hpp"
@@ -123,12 +124,12 @@ int Contact::syncInfoDownloadFromDidChain()
 
 int Contact::syncInfoUploadToDidChain()
 {
-    auto bcClient = BlkChnClient::GetInstance();
-    if(bcClient.get() == nullptr) {
+    auto monitor = DidChnMonitor::GetInstance();
+    if(monitor.get() == nullptr) {
         return ErrCode::NotReadyError;
     }
 
-    int ret = bcClient->uploadCachedDidProp();
+    int ret = monitor->uploadCachedDidProp();
     CHECK_ERROR(ret)
 
     return 0;
@@ -228,6 +229,9 @@ int Contact::initGlobal()
     mFriendManager->setConfig(mConfig, mMessageManager);
 
     ret = BlkChnClient::InitInstance(mConfig, mSecurityManager);
+    CHECK_ERROR(ret)
+
+    ret = DidChnMonitor::InitInstance(mConfig, mSecurityManager);
     CHECK_ERROR(ret)
 
     return 0;

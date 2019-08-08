@@ -39,10 +39,10 @@ int main(int argc, char **argv)
 	const char* nickname = "Friend";
     const char* fifoFilePath = (argc > 1 ? argv[1] : nullptr);
     if(fifoFilePath != nullptr) {
-        gSavedMnemonic = "bachelor sail glove swing despair lawsuit exhibit travel slot practice latin glass";
+//        gSavedMnemonic = "bachelor sail glove swing despair lawsuit exhibit travel slot practice latin glass";
         nickname = "Me";
     } else {
-        gSavedMnemonic = "ramp lady bulb stand silk dinosaur goose viable bid output month shock";
+//        gSavedMnemonic = "ramp lady bulb stand silk dinosaur goose viable bid output month shock";
     }
 
     Log::I(Log::TAG, "Start Contact Test.");

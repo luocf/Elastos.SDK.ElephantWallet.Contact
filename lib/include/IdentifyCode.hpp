@@ -40,7 +40,7 @@ private:
 
     /*** class function and variable ***/
     std::map<Type, std::string> mIdCodeMap;
-    long mUpdateTime;
+    int64_t mUpdateTime;
 }; // class IdentifyCode
 
 } // namespace elastos

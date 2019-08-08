@@ -8,6 +8,7 @@
 #include <UserManager.hpp>
 
 #include "BlkChnClient.hpp"
+#include "DidChnMonitor.hpp"
 #include <CompatibleFileSystem.hpp>
 #include <DateTime.hpp>
 #include <Log.hpp>
@@ -173,13 +174,13 @@ int UserManager::ensureUserCarrierInfo()
     ret = HumanInfo::serialize(carrierInfo, carrierInfoStr);
     CHECK_ERROR(ret)
 
-    auto bcClient = BlkChnClient::GetInstance();
+    auto monitor = DidChnMonitor::GetInstance();
     std::string pubKey;
     ret = mUserInfo->getHumanInfo(HumanInfo::Item::ChainPubKey, pubKey);
     CHECK_ERROR(ret)
-    ret = bcClient->cacheDidProp("PublicKey", pubKey);
+    ret = monitor->cacheDidProp("PublicKey", pubKey);
     CHECK_ERROR(ret)
-    ret = bcClient->cacheDidProp("CarrierID", carrierInfoStr);
+    ret = monitor->cacheDidProp("CarrierID", carrierInfoStr);
     CHECK_ERROR(ret)
 
     Log::V(Log::TAG, "%s new carrier info: %s", __PRETTY_FUNCTION__, carrierInfoStr.c_str());

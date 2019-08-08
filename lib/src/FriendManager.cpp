@@ -9,6 +9,7 @@
 
 #include <algorithm>
 #include "BlkChnClient.hpp"
+#include "DidChnMonitor.hpp"
 #include <CompatibleFileSystem.hpp>
 #include <DateTime.hpp>
 #include <Elastos.Wallet.Utility.h>
@@ -450,8 +451,8 @@ int FriendManager::cacheFriendToDidChain(std::shared_ptr<FriendInfo> friendInfo)
 
     std::string friendID = jsonInfo.dump();
 
-    auto bcClient = BlkChnClient::GetInstance();
-    ret = bcClient->cacheDidProp("FriendID", friendID);
+    auto monitor = DidChnMonitor::GetInstance();
+    ret = monitor->cacheDidProp("FriendID", friendID);
     if (ret < 0) {
         return ret;
     }
@@ -637,7 +638,7 @@ int FriendManager::mergeFriendInfoFromJsonArray(const std::string& jsonArray)
         Json jsonInfo = Json::parse(it);
         std::string friendCode = jsonInfo["FriendCode"];
         HumanInfo::Status status = jsonInfo["Status"];
-        long updateTime = jsonInfo["UpdateTime"];
+        int64_t updateTime = jsonInfo["UpdateTime"];
 
         if(status == HumanInfo::Status::Removed) {
             continue;

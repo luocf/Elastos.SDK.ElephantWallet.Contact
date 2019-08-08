@@ -96,7 +96,7 @@ protected:
     std::vector<Status> mBoundCarrierStatus;
     std::map<Item, std::string> mCommonInfoMap;
     std::map<HumanKind, Status> mStatusMap;
-    long mUpdateTime;
+    int64_t mUpdateTime;
 
 }; // class HumanInfo
 
