@@ -7,11 +7,11 @@
 
 #include <Elastos.SDK.Contact.hpp>
 
-#include "BlkChnClient.hpp"
 #include "ChannelImplCarrier.hpp"
 #include "CompatibleFileSystem.hpp"
 #include "DateTime.hpp"
-#include "DidChnMonitor.hpp"
+#include "DidChnClient.hpp"
+#include "DidChnDataListener.hpp"
 #include "Log.hpp"
 #include "Platform.hpp"
 #include "SafePtr.hpp"
@@ -98,14 +98,16 @@ int Contact::start()
     ret = mMessageManager->openChannels();
     CHECK_ERROR(ret)
 
-    ret = mUserManager->monitorDidChainData();
-    CHECK_ERROR(ret)
+//    ret = mUserManager->monitorDidChainData();
+//    CHECK_ERROR(ret)
+//
+//    ret = mFriendManager->monitorDidChainData();
+//    CHECK_ERROR(ret)
 
-    ret = mFriendManager->monitorDidChainData();
+    ret = monitorDidChainData();
     CHECK_ERROR(ret)
-
-    auto bcClient = BlkChnClient::GetInstance();
-    ret = bcClient->startMonitor();
+    auto dcClient = DidChnClient::GetInstance();
+    ret = dcClient->startMonitor();
     CHECK_ERROR(ret)
 
     return 0;
@@ -113,23 +115,33 @@ int Contact::start()
 
 int Contact::syncInfoDownloadFromDidChain()
 {
-    int ret = mUserManager->syncDownloadDidChainData();
+    std::string did;
+    int ret = mSecurityManager->getDid(did);
     CHECK_ERROR(ret)
 
-    ret = mFriendManager->syncDownloadDidChainData();
-    CHECK_ERROR(ret)
+    auto dcClient = DidChnClient::GetInstance();
+
+    std::map<std::string, std::vector<std::string>> didProps;
+    ret = dcClient->downloadDidProp(did, false, didProps);
+    CHECK_ERROR(ret);
+
+    auto listener = DidChnDataListener::GetInstance();
+    for(auto& [key, value]: didProps) {
+        ret = listener->onChanged(did, key, value);
+        CHECK_ERROR(ret);
+    }
 
     return 0;
 }
 
 int Contact::syncInfoUploadToDidChain()
 {
-    auto monitor = DidChnMonitor::GetInstance();
-    if(monitor.get() == nullptr) {
+    auto dcClient = DidChnClient::GetInstance();
+    if(dcClient.get() == nullptr) {
         return ErrCode::NotReadyError;
     }
 
-    int ret = monitor->uploadCachedDidProp();
+    int ret = dcClient->uploadCachedDidProp();
     CHECK_ERROR(ret)
 
     return 0;
@@ -228,10 +240,10 @@ int Contact::initGlobal()
     mUserManager->setConfig(mConfig, mMessageManager);
     mFriendManager->setConfig(mConfig, mMessageManager);
 
-    ret = BlkChnClient::InitInstance(mConfig, mSecurityManager);
+    ret = DidChnClient::InitInstance(mConfig, mSecurityManager);
     CHECK_ERROR(ret)
 
-    ret = DidChnMonitor::InitInstance(mConfig, mSecurityManager);
+    ret = DidChnDataListener::InitInstance(mUserManager, mFriendManager);
     CHECK_ERROR(ret)
 
     return 0;
@@ -239,12 +251,30 @@ int Contact::initGlobal()
 
 int Contact::monitorDidChainData()
 {
+    auto listener = DidChnDataListener::GetInstance();
+    auto dcClient = DidChnClient::GetInstance();
+
     std::string did;
     int ret = mSecurityManager->getDid(did);
     CHECK_ERROR(ret)
 
-    ret = mMessageManager->monitorDidChainCarrierID(did);
+    ret = dcClient->appendMoniter(did, listener, false);
     CHECK_ERROR(ret)
+
+    std::vector<std::shared_ptr<FriendInfo>> friendList;
+    ret = mFriendManager->getFriendInfoList(friendList);
+    CHECK_ERROR(ret)
+
+    for(const auto& it: friendList) {
+        ret = it->getHumanInfo(HumanInfo::Item::Did, did);
+        if(ret < 0) {
+            Log::W(Log::TAG, "Contact::monitorDidChainData() Failed to get friend did.");
+            continue;
+        }
+
+        ret = dcClient->appendMoniter(did, listener, false);
+        CHECK_ERROR(ret)
+    }
 
     return 0;
 }

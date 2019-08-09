@@ -7,8 +7,8 @@
 
 #include <UserManager.hpp>
 
-#include "BlkChnClient.hpp"
-#include "DidChnMonitor.hpp"
+//#include "BlkChnClient.hpp"
+#include "DidChnClient.hpp"
 #include <CompatibleFileSystem.hpp>
 #include <DateTime.hpp>
 #include <Log.hpp>
@@ -174,13 +174,13 @@ int UserManager::ensureUserCarrierInfo()
     ret = HumanInfo::serialize(carrierInfo, carrierInfoStr);
     CHECK_ERROR(ret)
 
-    auto monitor = DidChnMonitor::GetInstance();
+    auto dcClient = DidChnClient::GetInstance();
     std::string pubKey;
     ret = mUserInfo->getHumanInfo(HumanInfo::Item::ChainPubKey, pubKey);
     CHECK_ERROR(ret)
-    ret = monitor->cacheDidProp("PublicKey", pubKey);
+    ret = dcClient->cacheDidProp("PublicKey", pubKey);
     CHECK_ERROR(ret)
-    ret = monitor->cacheDidProp("CarrierID", carrierInfoStr);
+    ret = dcClient->cacheDidProp("CarrierID", carrierInfoStr);
     CHECK_ERROR(ret)
 
     Log::V(Log::TAG, "%s new carrier info: %s", __PRETTY_FUNCTION__, carrierInfoStr.c_str());
@@ -210,55 +210,98 @@ bool UserManager::contains(const std::shared_ptr<HumanInfo>& userInfo)
     return mUserInfo->contains(userInfo);
 }
 
-int UserManager::monitorDidChainData()
-{
-    auto sectyMgr = SAFE_GET_PTR(mSecurityManager);
-    auto msgMgr = SAFE_GET_PTR(mMessageManager);
+//int UserManager::monitorDidChainData()
+//{
+//    class UserDataMonitor final : public DidChnClient::MonitorCallback {
+//    public:
+//        explicit UserDataMonitor(std::weak_ptr<UserManager> friendManager)
+//        : mUserManager(friendManager) {
+//        }
+//        virtual ~UserDataMonitor() = default;
+//
+//        virtual void onError(const std::string& did, const std::string& key,
+//                             int errcode) override {
+//            Log::I(Log::TAG, "%s did=%s, key=%s errcode=%d", __PRETTY_FUNCTION__, did.c_str(), key.c_str(), errcode);
+//        }
+//
+//        virtual int onChanged(const std::string& did, const std::string& key,
+//                               const std::vector<std::string>& didProps) override {
+//            Log::I(Log::TAG, "%s did=%s, key=%s", __PRETTY_FUNCTION__, did.c_str(), key.c_str());
+//
+//            auto userMgr = SAFE_GET_PTR(mUserManager);
+//
+//            std::shared_ptr<UserInfo> userInfo;
+//            int ret = userMgr->getUserInfo(userInfo);
+//            CHECK_ERROR(ret);
+//
+//            for(const auto& it: didProps) {
+//                if(key == DidChnClient::NameCarrierKey) {
+//                    HumanInfo::CarrierInfo carrierInfo;
+//                    ret = HumanInfo::deserialize(it, carrierInfo);
+//                    CHECK_ERROR(ret);
+//
+//                    ret = userInfo->addCarrierInfo(carrierInfo, HumanInfo::Status::WaitForAccept);
+//                    if(ret == ErrCode::IgnoreMergeOldInfo) {
+//                        Log::V(Log::TAG, "MessageManager::monitorDidChainCarrierID() Ignore to sync CarrierId: %s", it.c_str());
+//                        continue;
+//                    }
+//                    CHECK_ERROR(ret);
+//                } else if(key == DidChnClient::NameIdentifyKey) {
+//                    int ret = userMgr->mergeIdentifyCodeFromJsonArray(it);
+//                    CHECK_ERROR(ret);
+//                }
+//            }
+//
+//            return 0;
+//        }
+//    private:
+//        std::weak_ptr<UserManager> mUserManager;
+//    };
+//    auto callback = std::make_shared<UserDataMonitor>(shared_from_this());
+//
+//    auto sectyMgr = SAFE_GET_PTR(mSecurityManager);
+//    std::string did;
+//    int ret = sectyMgr->getDid(did);
+//    CHECK_ERROR(ret)
+//
+//    auto dcClient = DidChnClient::GetInstance();
+//    ret = dcClient->appendMoniter(did, callback, false);
+//    CHECK_ERROR(ret)
+//
+//    return 0;
+//}
 
-    std::string did;
-    int ret = sectyMgr->getDid(did);
-    CHECK_ERROR(ret)
-
-    ret = msgMgr->monitorDidChainCarrierID(did);
-    CHECK_ERROR(ret)
-
-    ret = monitorDidChainIdentifyCode();
-    CHECK_ERROR(ret)
-
-    return 0;
-}
-
-int UserManager::monitorDidChainIdentifyCode()
-{
-    auto callback = [=](int errcode,
-                        const std::string& keyPath,
-                        const std::string& result) {
-        Log::D(Log::TAG, "UserManager::monitorDidChainIdentifyCode() ecode=%d, path=%s, result=%s", errcode, keyPath.c_str(), result.c_str());
-        CHECK_RETVAL(errcode);
-
-        int ret = mergeIdentifyCodeFromJsonArray(result);
-        CHECK_RETVAL(ret);
-
-        return;
-    };
-
-    auto sectyMgr = SAFE_GET_PTR(mSecurityManager);
-    std::string did;
-    int ret = sectyMgr->getDid(did);
-    CHECK_ERROR(ret)
-
-    auto bcClient = BlkChnClient::GetInstance();
-
-    std::string keyPath;
-    ret = bcClient->getDidPropHistoryPath(did, "IdentifyCode", keyPath);
-    CHECK_ERROR(ret)
-
-    Log::I(Log::TAG, "UserManager::monitorDidChainIdentifyCode() keyPath=%s", keyPath.c_str());
-    ret = bcClient->appendMoniter(keyPath, callback);
-    CHECK_ERROR(ret)
-
-    return 0;
-}
+//int UserManager::monitorDidChainIdentifyCode()
+//{
+//    auto callback = [=](int errcode,
+//                        const std::string& keyPath,
+//                        const std::string& result) {
+//        Log::D(Log::TAG, "UserManager::monitorDidChainIdentifyCode() ecode=%d, path=%s, result=%s", errcode, keyPath.c_str(), result.c_str());
+//        CHECK_RETVAL(errcode);
+//
+//        int ret = mergeIdentifyCodeFromJsonArray(result);
+//        CHECK_RETVAL(ret);
+//
+//        return;
+//    };
+//
+//    auto sectyMgr = SAFE_GET_PTR(mSecurityManager);
+//    std::string did;
+//    int ret = sectyMgr->getDid(did);
+//    CHECK_ERROR(ret)
+//
+//    auto bcClient = BlkChnClient::GetInstance();
+//
+//    std::string keyPath;
+//    ret = bcClient->getDidPropHistoryPath(did, "IdentifyCode", keyPath);
+//    CHECK_ERROR(ret)
+//
+//    Log::I(Log::TAG, "UserManager::monitorDidChainIdentifyCode() keyPath=%s", keyPath.c_str());
+//    ret = bcClient->appendMoniter(keyPath, callback);
+//    CHECK_ERROR(ret)
+//
+//    return 0;
+//}
 
 // int UserManager::uploadUserInfo()
 // {
@@ -293,30 +336,34 @@ int UserManager::setupMultiDevChannels()
     return 0;
 }
 
-int UserManager::syncDownloadDidChainData()
-{
-    auto sectyMgr = SAFE_GET_PTR(mSecurityManager);
-    std::string did;
-    int ret = sectyMgr->getDid(did);
-    CHECK_ERROR(ret)
-
-    auto bcClient = BlkChnClient::GetInstance();
-
-    std::string keyPath;
-    ret = bcClient->getDidPropHistoryPath(did, "IdentifyCode", keyPath);
-    if (ret < 0) {
-        return ret;
-    }
-
-    std::string result;
-    ret = bcClient->downloadFromDidChn(keyPath, result);
-    CHECK_ERROR(ret);
-
-    ret = mergeIdentifyCodeFromJsonArray(result);
-    CHECK_ERROR(ret);
-
-    return 0;
-}
+//int UserManager::syncDownloadDidChainData()
+//{
+//    auto sectyMgr = SAFE_GET_PTR(mSecurityManager);
+//    std::string did;
+//    int ret = sectyMgr->getDid(did);
+//    CHECK_ERROR(ret)
+//
+//    auto dcClient = DidChnClient::GetInstance();
+//
+//    std::map<std::string, std::vector<std::string>> didProps;
+//    ret = dcClient->downloadDidProp(did, false, didProps);
+//    CHECK_ERROR(ret);
+//
+////    std::string keyPath;
+////    ret = bcClient->getDidPropHistoryPath(did, "IdentifyCode", keyPath);
+////    if (ret < 0) {
+////        return ret;
+////    }
+////
+////    std::string result;
+////    ret = bcClient->downloadFromDidChn(keyPath, result);
+////    CHECK_ERROR(ret);
+////
+////    ret = mergeIdentifyCodeFromJsonArray(result);
+////    CHECK_ERROR(ret);
+//
+//    return 0;
+//}
 
 
 /***********************************************/

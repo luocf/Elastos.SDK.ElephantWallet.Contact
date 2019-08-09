@@ -69,9 +69,9 @@ public:
 
     virtual std::vector<FriendInfo> filterFriends(std::string regex);
 
-    int syncDownloadDidChainData();
-    int monitorDidChainData();
-    int monitorDidChainFriendID();
+//    int syncDownloadDidChainData();
+//    int monitorDidChainData();
+//    int monitorDidChainFriendID();
     // int uploadFriendInfo();
 
     int cacheFriendToDidChain(std::shared_ptr<FriendInfo> friendInfo);

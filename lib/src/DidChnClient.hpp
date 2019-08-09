@@ -1,5 +1,5 @@
-#ifndef _DIDCHN_MONITOR_HPP_
-#define _DIDCHN_MONITOR_HPP_
+#ifndef _DIDCHN_CLIENT_HPP_
+#define _DIDCHN_CLIENT_HPP_
 
 
 #include <map>
@@ -13,36 +13,40 @@
 
 namespace elastos {
 
-class DidChnMonitor {
+class DidChnClient {
 public:
     /*** type define ***/
     class MonitorCallback {
     public:
-        virtual void onError(const std::string& did, const std::string& key, int errcode)  = 0;
-        virtual void onChanged(const std::string& did, const std::string& key, const std::vector<std::string>& didProps)  = 0;
+        virtual void onError(const std::string& did, const std::string& key, int errcode) = 0;
+        virtual int onChanged(const std::string& did, const std::string& key, const std::vector<std::string>& didProps) = 0;
 
     private:
-        bool mWithFriendId;
-        friend DidChnMonitor;
+        bool mHumanInfoOnly;
+        friend DidChnClient;
     };
 
     /*** static function and variable ***/
     static int InitInstance(std::weak_ptr<Config> config, std::weak_ptr<SecurityManager> sectyMgr);
-    static std::shared_ptr<DidChnMonitor> GetInstance();
+    static std::shared_ptr<DidChnClient> GetInstance();
 
-    static constexpr const char* NamePublicKey = "PublicKey";
-    static constexpr const char* NameCarrierId = "CarrierID";
-    static constexpr const char* NameFriendId  = "FriendID";
+    static constexpr const char* NamePublicKey     = "PublicKey";
+    static constexpr const char* NameCarrierKey     = "CarrierKey";
+    static constexpr const char* NameIdentifyKey    = "IdentifyKey";
+    static constexpr const char* NameFriendKey      = "FriendKey";
 
     /*** class function and variable ***/
     int setConnectTimeout(uint32_t milliSecond);
 
-    int appendMoniter(const std::string& did, std::shared_ptr<MonitorCallback> callback, bool withFriendId);
+    int appendMoniter(const std::string& did, std::shared_ptr<MonitorCallback> callback, bool humanInfoOnly);
     int removeMoniter(const std::string& did);
 
     int cacheDidProp(const std::string& key, const std::string& value);
     int uploadCachedDidProp();
     int printCachedDidProp(std::string& output);
+
+    int downloadDidProp(const std::string& did, bool humanInfoOnly,
+                        std::map<std::string, std::vector<std::string>>& didProps);
 
     int startMonitor();
 
@@ -86,12 +90,12 @@ private:
     };
 
     /*** static function and variable ***/
-    static std::shared_ptr<DidChnMonitor> gDidChnMonitor;
+    static std::shared_ptr<DidChnClient> gDidChnClient;
     static constexpr const char* DataFileName = "cacheddata.dat";
 
     /*** class function and variable ***/
-    explicit DidChnMonitor(std::weak_ptr<Config> config, std::weak_ptr<SecurityManager> sectyMgr);
-    virtual ~DidChnMonitor();
+    explicit DidChnClient(std::weak_ptr<Config> config, std::weak_ptr<SecurityManager> sectyMgr);
+    virtual ~DidChnClient();
 
     int uploadDidPropsByAgent(const std::vector<std::pair<std::string, std::string>>& didProps);
     int serializeDidProps(const std::vector<std::pair<std::string, std::string>>& didProps, std::string& result);
@@ -99,7 +103,7 @@ private:
     int uploadDidAgentData(const std::string& didAgentData);
 
     int checkDidProps(const std::string& did, std::shared_ptr<MonitorCallback> callback);
-    int checkDidProps(const std::string& did, const std::string& key, const std::vector<std::string>& didProps);
+    int64_t checkDidProps(const std::string& did, const std::string& key, const std::vector<std::string>& didProps);
 
     int downloadDidPropsByAgent(const std::string& did, const std::string& key, bool withHistory,
                                 std::vector<std::string>& values);
@@ -107,7 +111,7 @@ private:
 
     int getDidPropPath(const std::string& did, const std::string& key, bool withHistory, std::string& path);
 
-    void refreshUpdateTime(const std::string& did, const std::string& key);
+    void refreshUpdateTime(const std::string& did, const std::string& key, int64_t updateTime);
     bool checkUpdateTime(const std::string& did, const std::string& key, int64_t updateTime);
     int clearDidPropCache(bool refreshUpdateTime);
 
@@ -138,5 +142,5 @@ private:
 
 } // namespace elastos
 
-#endif /* _DIDCHN_MONITOR_HPP_ */
+#endif /* _DIDCHN_CLIENT_HPP_ */
 

@@ -138,7 +138,7 @@ public:
 
     virtual int removeFriend(const std::string& friendCode, ChannelType humanChType);
 
-    virtual int monitorDidChainCarrierID(const std::string& did);
+//    virtual int monitorDidChainCarrierID(const std::string& did);
 
     virtual int sendMessage(const std::shared_ptr<HumanInfo> humanInfo,
                             ChannelType chType,

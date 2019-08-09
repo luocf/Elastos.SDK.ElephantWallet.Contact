@@ -51,10 +51,10 @@ public:
     int ensureUserCarrierInfo();
     int getUserInfo(std::shared_ptr<UserInfo>& userInfo);
 
-    int syncDownloadDidChainData();
-    int monitorDidChainData();
-    int monitorDidChainIdentifyCode();
-    // int uploadUserInfo();
+//    int syncDownloadDidChainData();
+//    int monitorDidChainData();
+//    int monitorDidChainIdentifyCode();
+//    int uploadUserInfo();
 
     int setupMultiDevChannels();
 

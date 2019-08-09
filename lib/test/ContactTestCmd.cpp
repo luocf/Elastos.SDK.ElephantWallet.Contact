@@ -4,7 +4,7 @@
 #include <iterator>
 #include <sstream>
 
-#include <BlkChnClient.hpp>
+#include <DidChnClient.hpp>
 
 /* =========================================== */
 /* === static variables initialize =========== */
@@ -141,10 +141,10 @@ int ContactTestCmd::PrintCachedInfo(std::shared_ptr<elastos::Contact> contact,
                                     const std::vector<std::string>& args,
                                     std::string& errMsg)
 {
-    auto bcClient = elastos::BlkChnClient::GetInstance();
+    auto dcClient = elastos::DidChnClient::GetInstance();
 
     std::string value;
-    bcClient->printCachedDidProp(value);
+    dcClient->printCachedDidProp(value);
 
     std::cout << "==========================" << std::endl;
     std::cout << value << std::endl;

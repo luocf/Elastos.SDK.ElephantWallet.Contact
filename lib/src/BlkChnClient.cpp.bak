@@ -310,7 +310,7 @@ int BlkChnClient::downloadHumanInfo(const std::string& did, std::shared_ptr<Huma
     CHECK_ERROR(ret)
 
     std::vector<std::string> propHistory;
-    ret = downloadDidPropHistory(did, NameCarrierId, propHistory);
+    ret = downloadDidPropHistory(did, NameCarrierKey, propHistory);
     CHECK_ERROR(ret)
 
     for(const auto& it: propHistory) {

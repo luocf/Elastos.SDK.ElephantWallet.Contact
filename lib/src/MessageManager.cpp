@@ -13,7 +13,7 @@
 #include <Log.hpp>
 #include <Random.hpp>
 #include <SafePtr.hpp>
-#include "BlkChnClient.hpp"
+//#include "BlkChnClient.hpp"
 
 namespace elastos {
 
@@ -259,88 +259,88 @@ int MessageManager::removeFriend(const std::string& friendCode, ChannelType huma
     return 0;
 }
 
-int MessageManager::monitorDidChainCarrierID(const std::string& did)
-{
-    auto callback = [=](int errcode,
-                        const std::string& keyPath,
-                        const std::string& result) {
-        Log::D(Log::TAG, "MessageManager::monitorDidChainCarrierID() ecode=%d, path=%s, result=%s", errcode, keyPath.c_str(), result.c_str());
-        CHECK_RETVAL(errcode);
-
-        auto userMgr = SAFE_GET_PTR_NO_RETVAL(mUserManager);
-        auto friendMgr = SAFE_GET_PTR_NO_RETVAL(mFriendManager);
-
-        std::shared_ptr<HumanInfo> humanInfo;
-        if (userMgr->contains(did)) {
-            std::shared_ptr<elastos::UserInfo> userInfo;
-            std::ignore = userMgr->getUserInfo(userInfo);
-            humanInfo = userInfo;
-        } else if (friendMgr->contains(did)) {
-            std::shared_ptr<FriendInfo> friendInfo;
-            std::ignore  = friendMgr->tryGetFriendInfo(did, friendInfo);
-            humanInfo = friendInfo;
-        } else {
-            Log::E(Log::TAG, "MessageManager::monitorDidChainCarrierID() Failed to process CarrierId for did: %s", did.c_str());
-            CHECK_RETVAL(ErrCode::InvalidFriendCode);
-            return;
-        }
-
-        std::vector<std::string> values;
-        Json jsonPropArray = Json::parse(result);
-        for (const auto& it : jsonPropArray) {
-            values.push_back(it["value"]);
-        }
-
-        bool carrierInfoChanged = false;
-        for(const auto& it: values) {
-            HumanInfo::CarrierInfo carrierInfo;
-            int ret = HumanInfo::deserialize(it, carrierInfo);
-            if(ret < 0) {
-                Log::W(Log::TAG, "MessageManager::monitorDidChainCarrierID() Failed to sync CarrierId: %s", it.c_str());
-                continue; // ignore error
-            }
-
-            ret = humanInfo->addCarrierInfo(carrierInfo, HumanInfo::Status::WaitForAccept);
-            if(ret < 0) {
-                if(ret == ErrCode::IgnoreMergeOldInfo) {
-                    Log::V(Log::TAG, "MessageManager::monitorDidChainCarrierID() Ignore to sync CarrierId: %s", it.c_str());
-                } else {
-                    Log::E(Log::TAG, "MessageManager::monitorDidChainCarrierID() Failed to sync carrier info. CarrierId: %s", it.c_str());
-                }
-                continue; // ignore error
-            } else {
-                carrierInfoChanged = true;
-            }
-        }
-
-//        if(carrierInfoChanged == false) {
-//            Log::D(Log::TAG, "MessageManager::monitorDidChainCarrierID() did %s, CarrierId not changed.", did.c_str());
+//int MessageManager::monitorDidChainCarrierID(const std::string& did)
+//{
+//    auto callback = [=](int errcode,
+//                        const std::string& keyPath,
+//                        const std::string& result) {
+//        Log::D(Log::TAG, "MessageManager::monitorDidChainCarrierID() ecode=%d, path=%s, result=%s", errcode, keyPath.c_str(), result.c_str());
+//        CHECK_RETVAL(errcode);
+//
+//        auto userMgr = SAFE_GET_PTR_NO_RETVAL(mUserManager);
+//        auto friendMgr = SAFE_GET_PTR_NO_RETVAL(mFriendManager);
+//
+//        std::shared_ptr<HumanInfo> humanInfo;
+//        if (userMgr->contains(did)) {
+//            std::shared_ptr<elastos::UserInfo> userInfo;
+//            std::ignore = userMgr->getUserInfo(userInfo);
+//            humanInfo = userInfo;
+//        } else if (friendMgr->contains(did)) {
+//            std::shared_ptr<FriendInfo> friendInfo;
+//            std::ignore  = friendMgr->tryGetFriendInfo(did, friendInfo);
+//            humanInfo = friendInfo;
+//        } else {
+//            Log::E(Log::TAG, "MessageManager::monitorDidChainCarrierID() Failed to process CarrierId for did: %s", did.c_str());
+//            CHECK_RETVAL(ErrCode::InvalidFriendCode);
 //            return;
 //        }
 //
-        int ret = updateFriend(did);
-        if(ret < 0) {
-            Log::E(Log::TAG, "MessageManager::monitorDidChainCarrierID() Failed to update friend. ret=%d", ret);
-            return;
-        }
-    };
-
-    auto bcClient = BlkChnClient::GetInstance();
-
-    std::string keyPath;
-    int ret = bcClient->getDidPropHistoryPath(did, "CarrierID", keyPath);
-    if (ret < 0) {
-        return ret;
-    }
-
-    Log::I(Log::TAG, "MessageManager::monitorDidChainCarrierID() keyPath=%s", keyPath.c_str());
-    ret = bcClient->appendMoniter(keyPath, callback);
-    if (ret < 0) {
-        return ret;
-    }
-
-    return 0;
-}
+//        std::vector<std::string> values;
+//        Json jsonPropArray = Json::parse(result);
+//        for (const auto& it : jsonPropArray) {
+//            values.push_back(it["value"]);
+//        }
+//
+//        bool carrierInfoChanged = false;
+//        for(const auto& it: values) {
+//            HumanInfo::CarrierInfo carrierInfo;
+//            int ret = HumanInfo::deserialize(it, carrierInfo);
+//            if(ret < 0) {
+//                Log::W(Log::TAG, "MessageManager::monitorDidChainCarrierID() Failed to sync CarrierId: %s", it.c_str());
+//                continue; // ignore error
+//            }
+//
+//            ret = humanInfo->addCarrierInfo(carrierInfo, HumanInfo::Status::WaitForAccept);
+//            if(ret < 0) {
+//                if(ret == ErrCode::IgnoreMergeOldInfo) {
+//                    Log::V(Log::TAG, "MessageManager::monitorDidChainCarrierID() Ignore to sync CarrierId: %s", it.c_str());
+//                } else {
+//                    Log::E(Log::TAG, "MessageManager::monitorDidChainCarrierID() Failed to sync carrier info. CarrierId: %s", it.c_str());
+//                }
+//                continue; // ignore error
+//            } else {
+//                carrierInfoChanged = true;
+//            }
+//        }
+//
+////        if(carrierInfoChanged == false) {
+////            Log::D(Log::TAG, "MessageManager::monitorDidChainCarrierID() did %s, CarrierId not changed.", did.c_str());
+////            return;
+////        }
+////
+//        int ret = updateFriend(did);
+//        if(ret < 0) {
+//            Log::E(Log::TAG, "MessageManager::monitorDidChainCarrierID() Failed to update friend. ret=%d", ret);
+//            return;
+//        }
+//    };
+//
+//    auto bcClient = BlkChnClient::GetInstance();
+//
+//    std::string keyPath;
+//    int ret = bcClient->getDidPropHistoryPath(did, "CarrierID", keyPath);
+//    if (ret < 0) {
+//        return ret;
+//    }
+//
+//    Log::I(Log::TAG, "MessageManager::monitorDidChainCarrierID() keyPath=%s", keyPath.c_str());
+//    ret = bcClient->appendMoniter(keyPath, callback);
+//    if (ret < 0) {
+//        return ret;
+//    }
+//
+//    return 0;
+//}
 
 std::shared_ptr<MessageManager::MessageInfo> MessageManager::MakeMessage(MessageType type,
                                                                          const std::vector<uint8_t>& plainContent,

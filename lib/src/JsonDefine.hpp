@@ -31,6 +31,7 @@ struct JsonKey {
     static constexpr const char* DeviceInfo  = "DeviceInfo";
 
     // FriendInfo
+    static constexpr const char* FriendCode = "FriendCode";
     static constexpr const char* Alias = "Alias";
 
     // IdentifyCode

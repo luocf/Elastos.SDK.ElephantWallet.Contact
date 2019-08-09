@@ -1,4 +1,4 @@
-#include <DidChnMonitor.hpp>
+#include <DidChnClient.hpp>
 
 #include <iomanip>
 
@@ -11,7 +11,7 @@
 #include <Platform.hpp>
 #include <SafePtr.hpp>
 #include "JsonDefine.hpp"
-#include "DidChnMonitor.hpp"
+#include "DidChnClient.hpp"
 #include "../include/ErrCode.hpp"
 
 
@@ -20,29 +20,40 @@ namespace elastos {
 /* =========================================== */
 /* === static variables initialize =========== */
 /* =========================================== */
-std::shared_ptr<DidChnMonitor> DidChnMonitor::gDidChnMonitor {};
+std::shared_ptr<DidChnClient> DidChnClient::gDidChnClient {};
+
+const struct {
+    const char* key;
+    bool withHistory;
+} DidPropNames [] = {
+        { DidChnClient::NamePublicKey, false },
+        { DidChnClient::NameCarrierKey, true },
+        { DidChnClient::NameIdentifyKey, true },
+        { DidChnClient::NameFriendKey, true },
+};
+
 
 /* =========================================== */
 /* === static function implement ============= */
 /* =========================================== */
-int DidChnMonitor::InitInstance(std::weak_ptr<Config> config,
+int DidChnClient::InitInstance(std::weak_ptr<Config> config,
                                std::weak_ptr<SecurityManager> sectyMgr) {
-    if (gDidChnMonitor.get() != nullptr) {
-        return 0;
-    }
+//    if (gDidChnClient.get() != nullptr) {
+//        gDidChnClient.reset();
+//    }
 
-    struct Impl : DidChnMonitor {
+    struct Impl : DidChnClient {
         Impl(std::weak_ptr<Config> config,
              std::weak_ptr<SecurityManager> sectyMgr)
-            : DidChnMonitor(config, sectyMgr) {}
+            : DidChnClient(config, sectyMgr) {}
     };
 
     HttpClient::InitGlobal();
-    gDidChnMonitor = std::make_shared<Impl>(config, sectyMgr);
+    gDidChnClient = std::make_shared<Impl>(config, sectyMgr);
 
-    int ret = gDidChnMonitor->loadLocalData();
+    int ret = gDidChnClient->loadLocalData();
     if(ret == ErrCode::FileNotExistsError) {
-        Log::D(Log::TAG, "DidChnMonitor::InitInstance() Local data file is not exists.");
+        Log::D(Log::TAG, "DidChnClient::InitInstance() Local data file is not exists.");
         return 0;
     }
     CHECK_ERROR(ret);
@@ -50,35 +61,35 @@ int DidChnMonitor::InitInstance(std::weak_ptr<Config> config,
     return 0;
 }
 
-std::shared_ptr<DidChnMonitor> DidChnMonitor::GetInstance()
+std::shared_ptr<DidChnClient> DidChnClient::GetInstance()
 {
-    assert(gDidChnMonitor.get() != nullptr);
-    return gDidChnMonitor;
+    assert(gDidChnClient.get() != nullptr);
+    return gDidChnClient;
 }
 
 /* =========================================== */
 /* === class public function implement  ====== */
 /* =========================================== */
-int DidChnMonitor::setConnectTimeout(uint32_t milliSecond)
+int DidChnClient::setConnectTimeout(uint32_t milliSecond)
 {
     mConnectTimeoutMS = milliSecond;
     return 0;
 }
 
-int DidChnMonitor::appendMoniter(const std::string& did, std::shared_ptr<MonitorCallback> callback, bool withFriendId)
+int DidChnClient::appendMoniter(const std::string& did, std::shared_ptr<MonitorCallback> callback, bool humanInfoOnly)
 {
     if(did.empty() == true) {
         return ErrCode::InvalidArgument;
     }
 
 	std::lock_guard<std::recursive_mutex> lock(mMutex);
-    callback->mWithFriendId = withFriendId;
+    callback->mHumanInfoOnly = humanInfoOnly;
     mMonitor.mMonitorCallbackMap[did] = callback;
 
     return 0;
 }
 
-int DidChnMonitor::removeMoniter(const std::string& did)
+int DidChnClient::removeMoniter(const std::string& did)
 {
     if(did.empty() == true) {
         return ErrCode::InvalidArgument;
@@ -90,18 +101,19 @@ int DidChnMonitor::removeMoniter(const std::string& did)
     return 0;
 }
 
-int DidChnMonitor::cacheDidProp(const std::string& key, const std::string& value)
+int DidChnClient::cacheDidProp(const std::string& key, const std::string& value)
 {
-    Log::I(Log::TAG, "DidChnMonitor::cacheDidProp() key=%s, value=%s", key.c_str(), value.c_str());
-
-    std::lock_guard<std::recursive_mutex> lock(mMutex);
+    Log::I(Log::TAG, "DidChnClient::cacheDidProp() key=%s, value=%s", key.c_str(), value.c_str());
 
     auto sectyMgr = SAFE_GET_PTR(mSecurityManager);
     std::string did;
     int ret = sectyMgr->getDid(did);
     CHECK_ERROR(ret)
 
-    refreshUpdateTime(did, key);
+
+    std::lock_guard<std::recursive_mutex> lock(mMutex);
+
+    // refreshUpdateTime(did, key);
     mDidPropCache.push_back({key, value});
 
     ret = saveLocalData();
@@ -110,7 +122,7 @@ int DidChnMonitor::cacheDidProp(const std::string& key, const std::string& value
     return 0;
 }
 
-int DidChnMonitor::uploadCachedDidProp()
+int DidChnClient::uploadCachedDidProp()
 {
     std::lock_guard<std::recursive_mutex> lock(mMutex);
 
@@ -123,7 +135,7 @@ int DidChnMonitor::uploadCachedDidProp()
     return 0;
 }
 
-int DidChnMonitor::printCachedDidProp(std::string& output)
+int DidChnClient::printCachedDidProp(std::string& output)
 {
     std::lock_guard<std::recursive_mutex> lock(mMutex);
 
@@ -140,6 +152,31 @@ int DidChnMonitor::printCachedDidProp(std::string& output)
     return 0;
 }
 
+int DidChnClient::downloadDidProp(const std::string& did, bool humanInfoOnly,
+                                  std::map<std::string, std::vector<std::string>>& didProps)
+{
+    didProps.clear();
+
+    for(const auto& it: DidPropNames) {
+        if (humanInfoOnly == true) {
+            if (it.key == NameFriendKey
+            || it.key == NameIdentifyKey) {
+                continue;
+            }
+        }
+
+        std::string key = it.key;
+
+        std::vector<std::string> props;
+        int ret = downloadDidPropsByAgent(did, key, it.withHistory, props);
+        CHECK_ERROR(ret)
+
+        didProps.insert({ key, std::move(props)} );
+    }
+
+    return 0;
+}
+
 /* =========================================== */
 /* === class protected function implement  === */
 /* =========================================== */
@@ -148,7 +185,7 @@ int DidChnMonitor::printCachedDidProp(std::string& output)
 /* =========================================== */
 /* === class private function implement  ===== */
 /* =========================================== */
-DidChnMonitor::DidChnMonitor(std::weak_ptr<Config> config, std::weak_ptr<SecurityManager> sectyMgr)
+DidChnClient::DidChnClient(std::weak_ptr<Config> config, std::weak_ptr<SecurityManager> sectyMgr)
     : mConfig(config)
     , mSecurityManager(sectyMgr)
     , mConnectTimeoutMS(10000)
@@ -159,11 +196,11 @@ DidChnMonitor::DidChnMonitor(std::weak_ptr<Config> config, std::weak_ptr<Securit
 {
 }
 
-DidChnMonitor::~DidChnMonitor()
+DidChnClient::~DidChnClient()
 {
 }
 
-int DidChnMonitor::startMonitor()
+int DidChnClient::startMonitor()
 {
     mMonitor.mMonitorLooper = [&]() {
         int64_t current = DateTime::CurrentMS();
@@ -178,10 +215,10 @@ int DidChnMonitor::startMonitor()
             auto& did = it.first;
             auto& callback = it.second;
 
-            std::ignore = DidChnMonitor::checkDidProps(did, callback);
+            std::ignore = DidChnClient::checkDidProps(did, callback);
         }
 
-        int ret = mMonitor.mMonitorThread.sleepMS(mMonitor.MonitorPendingMS);
+        std::ignore = mMonitor.mMonitorThread.sleepMS(mMonitor.MonitorPendingMS);
         mMonitor.mMonitorThread.post(mMonitor.mMonitorLooper);
     };
 
@@ -190,16 +227,16 @@ int DidChnMonitor::startMonitor()
     return 0;
 }
 
-void DidChnMonitor::refreshUpdateTime(const std::string& did, const std::string& key)
+void DidChnClient::refreshUpdateTime(const std::string& did, const std::string& key, int64_t updateTime)
 {
-    std::string updateTimeKey = (did + "-" + key);
+    std::string updateTimeKey = (did + ":" + key);
 
-    mDidPropUpdateTime.insert({updateTimeKey, DateTime::CurrentMS()});
+    mDidPropUpdateTime.insert({updateTimeKey, updateTime});
 }
 
-bool DidChnMonitor::checkUpdateTime(const std::string& did, const std::string& key, int64_t updateTime)
+bool DidChnClient::checkUpdateTime(const std::string& did, const std::string& key, int64_t updateTime)
 {
-    std::string updateTimeKey = (did + "-" + key);
+    std::string updateTimeKey = (did + ":" + key);
 
     if(mDidPropUpdateTime.find(updateTimeKey) == mDidPropUpdateTime.end()) {
         return true;
@@ -213,10 +250,10 @@ bool DidChnMonitor::checkUpdateTime(const std::string& did, const std::string& k
     return false;
 }
 
-int DidChnMonitor::uploadDidPropsByAgent(const std::vector<std::pair<std::string, std::string>>& didProps)
+int DidChnClient::uploadDidPropsByAgent(const std::vector<std::pair<std::string, std::string>>& didProps)
 {
     if(didProps.size() == 0) {
-        Log::I(Log::TAG, "DidChnMonitor::uploadCachedDidProp() Ignore to update empty cache.");
+        Log::I(Log::TAG, "DidChnClient::uploadCachedDidProp() Ignore to update empty cache.");
         return 0;
     }
 
@@ -234,7 +271,7 @@ int DidChnMonitor::uploadDidPropsByAgent(const std::vector<std::pair<std::string
     return 0;
 }
 
-int DidChnMonitor::serializeDidProps(const std::vector<std::pair<std::string, std::string>>& didProps,
+int DidChnClient::serializeDidProps(const std::vector<std::pair<std::string, std::string>>& didProps,
                                      std::string& result)
 {
     if(didProps.size() == 0) {
@@ -274,7 +311,7 @@ int DidChnMonitor::serializeDidProps(const std::vector<std::pair<std::string, st
     return 0;
 }
 
-int DidChnMonitor::makeDidAgentData(const std::string& didProtocolData, std::string& result)
+int DidChnClient::makeDidAgentData(const std::string& didProtocolData, std::string& result)
 {
     if(didProtocolData.empty() == true) {
         return ErrCode::BlkChnEmptyPropError;
@@ -303,7 +340,7 @@ int DidChnMonitor::makeDidAgentData(const std::string& didProtocolData, std::str
     return 0;
 }
 
-int DidChnMonitor::uploadDidAgentData(const std::string& didAgentData)
+int DidChnClient::uploadDidAgentData(const std::string& didAgentData)
 {
     if(didAgentData.empty() == true) {
         return ErrCode::BlkChnEmptyPropError;
@@ -320,7 +357,7 @@ int DidChnMonitor::uploadDidAgentData(const std::string& didAgentData)
     CHECK_ERROR(ret)
 
     const auto& reqBody = didAgentData;
-    Log::I(Log::TAG, "DidChnMonitor::uploadDidAgentData() reqBody=%s", reqBody.c_str());
+    Log::I(Log::TAG, "DidChnClient::uploadDidAgentData() reqBody=%s", reqBody.c_str());
 
     HttpClient httpClient;
     httpClient.url(agentUploadUrl);
@@ -336,7 +373,7 @@ int DidChnMonitor::uploadDidAgentData(const std::string& didAgentData)
     if(ret < 0) {
         return ErrCode::HttpClientError + ret;
     }
-    Log::I(Log::TAG, "DidChnMonitor::uploadDidAgentData() respBody=%s", respBody.c_str());
+    Log::I(Log::TAG, "DidChnClient::uploadDidAgentData() respBody=%s", respBody.c_str());
 
     Json jsonResp = Json::parse(respBody);
     if(jsonResp["status"] != 200) {
@@ -351,59 +388,64 @@ int DidChnMonitor::uploadDidAgentData(const std::string& didAgentData)
     return 0;
 }
 
-int DidChnMonitor::checkDidProps(const std::string& did, std::shared_ptr<MonitorCallback> callback)
+int DidChnClient::checkDidProps(const std::string& did, std::shared_ptr<MonitorCallback> callback)
 {
     if(callback.get() == nullptr) {
         return ErrCode::InvalidArgument;
     }
 
-    const struct {
-        const char* key;
-        bool withHistory;
-    } checkPropKeys [] = {
-            { NameCarrierId, true },
-            { NameFriendId, true },
-    };
-
-    for(const auto& it: checkPropKeys) {
-        if(callback->mWithFriendId == false
-        && it.key == NameFriendId) {
-            continue;
+    for(const auto& it: DidPropNames) {
+        if(callback->mHumanInfoOnly == true) {
+            if(it.key == NameFriendKey
+            || it.key == NameIdentifyKey) {
+                continue;
+            }
         }
 
         std::string key = it.key;
 
         std::vector<std::string> didProps;
-        int ret = downloadDidPropsByAgent(did, key, it.withHistory, didProps);
+        int64_t ret = downloadDidPropsByAgent(did, key, it.withHistory, didProps);
         if(ret < 0) {
-            Log::V(Log::TAG, "DidChnMonitor::checkDidProps() Failed to check %s: %s", did.c_str(), key.c_str());
+            Log::V(Log::TAG, "DidChnClient::checkDidProps() Failed to check %s: %s", did.c_str(), key.c_str());
             callback->onError(did, key, ret);
             continue;
         }
 
         ret  = checkDidProps(did, key, didProps);
+        if(ret == ErrCode::BlkChnOldUpdateTimeError) { // not changed
+            continue;
+        }
         if(ret < 0) {
             callback->onError(did, key, ret);
             continue;
         }
-        if(ret == 0) { // not changed
+        int64_t lastUpdateTime = ret;
+
+        ret = callback->onChanged(did, key, didProps);
+        if(ret < 0) {
+            callback->onError(did, key, ret);
             continue;
         }
 
-        refreshUpdateTime(did, key);
-        callback->onChanged(did, key, didProps);
+        refreshUpdateTime(did, key, lastUpdateTime);
     }
 
     return 0;
 }
 
-int DidChnMonitor::checkDidProps(const std::string& did, const std::string& key, const std::vector<std::string>& didProps)
+int64_t DidChnClient::checkDidProps(const std::string& did, const std::string& key, const std::vector<std::string>& didProps)
 {
     int64_t lastUpdateTime = -1;
     for(const auto& prop: didProps) {
+        if(key == NamePublicKey) {
+            lastUpdateTime = 0;
+            break;
+        }
+
         Json jsonProp = Json::parse(prop);
         if(jsonProp.find(JsonKey::UpdateTime) == jsonProp.end()) {
-            Log::V(Log::TAG, "DidChnMonitor::checkDidProps() Failed to get updatetime from %s: %s -> %s", did.c_str(), key.c_str(), prop.c_str());
+            Log::V(Log::TAG, "DidChnClient::checkDidProps() Failed to get updatetime from %s: %s -> %s", did.c_str(), key.c_str(), prop.c_str());
             return ErrCode::BlkChnBadUpdateTimeError;
         }
 
@@ -414,12 +456,12 @@ int DidChnMonitor::checkDidProps(const std::string& did, const std::string& key,
     }
 
     bool changed = checkUpdateTime(did, key, lastUpdateTime);
-    Log::V(Log::TAG, "DidChnMonitor::checkDidProps() %s: %s changed=%d.", did.c_str(), key.c_str(), changed);
+    Log::V(Log::TAG, "DidChnClient::checkDidProps() %s: %s changed=%d.", did.c_str(), key.c_str(), changed);
 
-    return (changed == true ? 1 : 0);
+    return (changed == true ? lastUpdateTime : ErrCode::BlkChnOldUpdateTimeError);
 }
 
-int DidChnMonitor::downloadDidPropsByAgent(const std::string& did, const std::string& key, bool withHistory,
+int DidChnClient::downloadDidPropsByAgent(const std::string& did, const std::string& key, bool withHistory,
                                            std::vector<std::string>& values)
 {
 
@@ -439,7 +481,7 @@ int DidChnMonitor::downloadDidPropsByAgent(const std::string& did, const std::st
     return 0;
 }
 
-int DidChnMonitor::downloadDidChnData(const std::string& path, std::string& result)
+int DidChnClient::downloadDidChnData(const std::string& path, std::string& result)
 {
     auto sectyMgr = SAFE_GET_PTR(mSecurityManager);
     auto config = SAFE_GET_PTR(mConfig);
@@ -475,7 +517,7 @@ int DidChnMonitor::downloadDidChnData(const std::string& path, std::string& resu
     return 0;
 }
 
-int DidChnMonitor::getDidPropPath(const std::string& did, const std::string& key, bool withHistory,
+int DidChnClient::getDidPropPath(const std::string& did, const std::string& key, bool withHistory,
                                   std::string& path)
 {
     path.clear();
@@ -495,21 +537,33 @@ int DidChnMonitor::getDidPropPath(const std::string& did, const std::string& key
     return 0;
 }
 
-int DidChnMonitor::clearDidPropCache(bool refreshUpdateTime)
+int DidChnClient::clearDidPropCache(bool refreshUpdateTime)
 {
-    Log::I(Log::TAG, "DidChnMonitor::clearDidPropCache() refreshUpdateTime=%d", refreshUpdateTime);
-
-    std::lock_guard<std::recursive_mutex> lock(mMutex);
+    Log::I(Log::TAG, "DidChnClient::clearDidPropCache() refreshUpdateTime=%d", refreshUpdateTime);
 
     auto sectyMgr = SAFE_GET_PTR(mSecurityManager);
     std::string did;
     int ret = sectyMgr->getDid(did);
     CHECK_ERROR(ret)
 
+    std::lock_guard<std::recursive_mutex> lock(mMutex);
+
     if(refreshUpdateTime == true) {
         for (const auto &it: mDidPropCache) {
             const auto &key = it.first;
-            DidChnMonitor::refreshUpdateTime(did, key);
+
+            std::vector<std::string> props = {it.second};
+            int64_t ret = DidChnClient::checkDidProps(did, key, props);
+            if (ret == ErrCode::BlkChnOldUpdateTimeError) { // cached did prop is old
+                continue;
+            }
+            if (ret < 0) {  // cached did prop is old=
+                Log::E(Log::TAG, "DidChnClient::clearDidPropCache() Failed to check %s:%s", did.c_str(), key.c_str());
+                continue;
+            }
+            int64_t lastUpdateTime = ret;
+
+            DidChnClient::refreshUpdateTime(did, key, lastUpdateTime);
         }
     }
 
@@ -521,7 +575,7 @@ int DidChnMonitor::clearDidPropCache(bool refreshUpdateTime)
     return 0;
 }
 
-int DidChnMonitor::loadLocalData()
+int DidChnClient::loadLocalData()
 {
     auto config = SAFE_GET_PTR(mConfig);
     auto dataFilePath = elastos::filesystem::path(config->mUserDataDir.c_str()) / DataFileName;
@@ -546,7 +600,7 @@ int DidChnMonitor::loadLocalData()
     return 0;
 }
 
-int DidChnMonitor::saveLocalData()
+int DidChnClient::saveLocalData()
 {
     auto config = SAFE_GET_PTR(mConfig);
     auto dataFilePath = elastos::filesystem::path(config->mUserDataDir.c_str()) / DataFileName;
@@ -572,7 +626,7 @@ int DidChnMonitor::saveLocalData()
     return 0;
 }
 
-int DidChnMonitor::getPropKeyPathPrefix(std::string& keyPathPrefix)
+int DidChnClient::getPropKeyPathPrefix(std::string& keyPathPrefix)
 {
     std::lock_guard<std::recursive_mutex> lock(mMutex);
 
@@ -593,7 +647,7 @@ int DidChnMonitor::getPropKeyPathPrefix(std::string& keyPathPrefix)
     return 0;
 }
 
-int DidChnMonitor::getPropKeyPath(const std::string& key, std::string& keyPath)
+int DidChnClient::getPropKeyPath(const std::string& key, std::string& keyPath)
 {
     if(key == "PublicKey") {
         keyPath = key;

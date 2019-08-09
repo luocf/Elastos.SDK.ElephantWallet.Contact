@@ -1,7 +1,7 @@
 #include <iostream>
 #include <signal.h>
 
-#include <BlkChnClient.hpp>
+#include <DidChnClient.hpp>
 #include <DateTime.hpp>
 #include <Elastos.SDK.Contact.hpp>
 #include <Elastos.SDK.Keypair.C/Elastos.Wallet.Utility.h>
@@ -15,7 +15,7 @@ const char* gKeypairWords = "";
 
 void signalHandler(int sig);
 std::shared_ptr<elastos::SecurityManager::SecurityListener> getSecurityListener();
-int testMonitor(std::shared_ptr<elastos::BlkChnClient> bcClient);
+int testMonitor(std::shared_ptr<elastos::DidChnClient> bcClient);
 
 int main(int argc, char **argv)
 {
@@ -28,12 +28,12 @@ int main(int argc, char **argv)
     auto sectyListener = getSecurityListener();
     sectyMgr->setSecurityListener(sectyListener);
 
-    int ret = elastos::BlkChnClient::InitInstance(config, sectyMgr);
+    int ret = elastos::DidChnClient::InitInstance(config, sectyMgr);
     if(ret < 0) {
         throw std::runtime_error(std::string("Failed to init instance! ret=") + std::to_string(ret));
     }
 
-    auto bcClient = elastos::BlkChnClient::GetInstance();;
+    auto bcClient = elastos::DidChnClient::GetInstance();;
 
     ret = testMonitor(bcClient);
     if(ret < 0) {
@@ -169,33 +169,33 @@ std::shared_ptr<elastos::SecurityManager::SecurityListener> getSecurityListener(
     return std::make_shared<SecurityListener>();
 }
 
-int testMonitor(std::shared_ptr<elastos::BlkChnClient> bcClient)
+int testMonitor(std::shared_ptr<elastos::DidChnClient> bcClient)
 {
-    std::string did = getDid();
+    //std::string did = getDid();
 
-    std::string carrierIdHistoryPath;
-    int ret = bcClient->getDidPropHistoryPath(did, elastos::BlkChnClient::NameCarrierId, carrierIdHistoryPath);
-    if(ret < 0) {
-        return ret;
-    }
+    //std::string carrierIdHistoryPath;
+    //int ret = bcClient->getDidPropHistoryPath(did, elastos::DidChnClient::NameCarrierId, carrierIdHistoryPath);
+    //if(ret < 0) {
+        //return ret;
+    //}
 
-    // remove keypath which not exists.
-    ret = bcClient->removeMoniter(carrierIdHistoryPath);
-    if(ret < 0) {
-        return ret;
-    }
+    //// remove keypath which not exists.
+    //ret = bcClient->removeMoniter(carrierIdHistoryPath);
+    //if(ret < 0) {
+        //return ret;
+    //}
 
-    auto monitorCallback = [](int errcode, const std::string& keyPath, const std::string& result) {
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
-        std::cout << " errcode=" << errcode << std::endl;
-        std::cout << " keyPath=" << keyPath << std::endl;
-        std::cout << " result=" << result << std::endl;
-    };
+    //auto monitorCallback = [](int errcode, const std::string& keyPath, const std::string& result) {
+        //std::cout << __PRETTY_FUNCTION__ << std::endl;
+        //std::cout << " errcode=" << errcode << std::endl;
+        //std::cout << " keyPath=" << keyPath << std::endl;
+        //std::cout << " result=" << result << std::endl;
+    //};
 
-    ret = bcClient->appendMoniter(carrierIdHistoryPath, monitorCallback);
-    if(ret < 0) {
-        return ret;
-    }
+    //ret = bcClient->appendMoniter(carrierIdHistoryPath, monitorCallback);
+    //if(ret < 0) {
+        //return ret;
+    //}
 
     return 0;
 }

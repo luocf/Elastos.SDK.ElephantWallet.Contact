@@ -8,8 +8,8 @@
 #include <FriendManager.hpp>
 
 #include <algorithm>
-#include "BlkChnClient.hpp"
-#include "DidChnMonitor.hpp"
+//#include "BlkChnClient.hpp"
+#include "DidChnClient.hpp"
 #include <CompatibleFileSystem.hpp>
 #include <DateTime.hpp>
 #include <Elastos.Wallet.Utility.h>
@@ -291,84 +291,146 @@ std::vector<FriendInfo> FriendManager::filterFriends(std::string regex)
     throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
 }
 
-int FriendManager::syncDownloadDidChainData()
-{
-    auto sectyMgr = SAFE_GET_PTR(mSecurityManager);
-    std::string did;
-    int ret = sectyMgr->getDid(did);
-    CHECK_ERROR(ret)
+//int FriendManager::syncDownloadDidChainData()
+//{
+//    auto sectyMgr = SAFE_GET_PTR(mSecurityManager);
+//    std::string did;
+//    int ret = sectyMgr->getDid(did);
+//    CHECK_ERROR(ret)
+//
+//    auto bcClient = BlkChnClient::GetInstance();
+//
+//    std::string keyPath;
+//    ret = bcClient->getDidPropHistoryPath(did, "FriendID", keyPath);
+//    if (ret < 0) {
+//        return ret;
+//    }
+//
+//    std::string result;
+//    ret = bcClient->downloadFromDidChn(keyPath, result);
+//    CHECK_ERROR(ret);
+//
+//    ret = mergeFriendInfoFromJsonArray(result);
+//    CHECK_ERROR(ret);
+//
+//    return 0;
+//}
 
-    auto bcClient = BlkChnClient::GetInstance();
+//int FriendManager::monitorDidChainData()
+//{
+//    class FriendDataMonitor final : public DidChnClient::MonitorCallback {
+//    public:
+//        explicit FriendDataMonitor(std::weak_ptr<FriendManager> friendManager)
+//                : mFriendManager(friendManager) {
+//        }
+//        virtual ~FriendDataMonitor() = default;
+//
+//        virtual void onError(const std::string& did, const std::string& key,
+//                             int errcode) override {
+//            Log::I(Log::TAG, "%s did=%s, key=%s errcode=%d", __PRETTY_FUNCTION__, did.c_str(), key.c_str(), errcode);
+//        }
+//
+//        virtual int onChanged(const std::string& did, const std::string& key,
+//                              const std::vector<std::string>& didProps) override {
+//            Log::I(Log::TAG, "%s did=%s, key=%s", __PRETTY_FUNCTION__, did.c_str(), key.c_str());
+//
+//            auto friendMgr = SAFE_GET_PTR(mFriendManager);
+//
+//            for(const auto& it: didProps) {
+//                if(key == DidChnClient::NameCarrierKey) {
+//                    HumanInfo::CarrierInfo carrierInfo;
+//                    int ret = HumanInfo::deserialize(it, carrierInfo);
+//                    CHECK_ERROR(ret);
+//
+//                    std::shared_ptr<FriendInfo> friendInfo;
+//                    ret = friendMgr->tryGetFriendInfo(did, friendInfo);
+//                    CHECK_ERROR(ret)
+//
+//                    ret = friendInfo->addCarrierInfo(carrierInfo, HumanInfo::Status::WaitForAccept);
+//                    if(ret == ErrCode::IgnoreMergeOldInfo) {
+//                        Log::V(Log::TAG, "MessageManager::monitorDidChainCarrierID() Ignore to sync CarrierId: %s", it.c_str());
+//                        continue;
+//                    }
+//                    CHECK_ERROR(ret);
+//                }
+//            }
+//
+//            return 0;
+//        }
+//
+//    private:
+//        std::weak_ptr<FriendManager> mFriendManager;
+//    };
+//    auto callback = std::make_shared<FriendDataMonitor>(shared_from_this());
+//
+//    auto dcClient = DidChnClient::GetInstance();
+//
+//    for(auto& it: mFriendList) {
+//        std::string did;
+//        int ret = it->getHumanInfo(HumanInfo::Item::Did, did);
+//        if (ret < 0) {
+//            continue;
+//        }
+//
+//        ret = dcClient->appendMoniter(did, callback, true);
+//        CHECK_ERROR(ret)
+//    }
+//
+//    return 0;
+//}
 
-    std::string keyPath;
-    ret = bcClient->getDidPropHistoryPath(did, "FriendID", keyPath);
-    if (ret < 0) {
-        return ret;
-    }
+//{
+//    auto sectyMgr = SAFE_GET_PTR(mSecurityManager);
+//    auto msgMgr = SAFE_GET_PTR(mMessageManager);
+//
+//    for(auto& it: mFriendList) {
+//        std::string did;
+//        int ret = it->getHumanInfo(HumanInfo::Item::Did, did);
+//        if(ret < 0) {
+//            continue;
+//        }
+//
+//        ret = msgMgr->monitorDidChainCarrierID(did);
+//        CHECK_ERROR(ret)
+//    }
+//
+////    int ret = monitorDidChainFriendID();
+////    CHECK_ERROR(ret)
+//
+//    return 0;
+//}
 
-    std::string result;
-    ret = bcClient->downloadFromDidChn(keyPath, result);
-    CHECK_ERROR(ret);
-
-    ret = mergeFriendInfoFromJsonArray(result);
-    CHECK_ERROR(ret);
-
-    return 0;
-}
-
-int FriendManager::monitorDidChainData()
-{
-    auto sectyMgr = SAFE_GET_PTR(mSecurityManager);
-    auto msgMgr = SAFE_GET_PTR(mMessageManager);
-
-    for(auto& it: mFriendList) {
-        std::string did;
-        int ret = it->getHumanInfo(HumanInfo::Item::Did, did);
-        if(ret < 0) {
-            continue;
-        }
-
-        ret = msgMgr->monitorDidChainCarrierID(did);
-        CHECK_ERROR(ret)
-    }
-
-    int ret = monitorDidChainFriendID();
-    CHECK_ERROR(ret)
-
-    return 0;
-}
-
-int FriendManager::monitorDidChainFriendID()
-{
-    auto callback = [=](int errcode,
-                        const std::string& keyPath,
-                        const std::string& result) {
-        Log::D(Log::TAG, "FriendManager::monitorDidChainFriendID() ecode=%d, path=%s, result=%s", errcode, keyPath.c_str(), result.c_str());
-        CHECK_RETVAL(errcode);
-
-        int ret = mergeFriendInfoFromJsonArray(result);
-        CHECK_RETVAL(ret);
-
-        return;
-    };
-
-    auto sectyMgr = SAFE_GET_PTR(mSecurityManager);
-    std::string did;
-    int ret = sectyMgr->getDid(did);
-    CHECK_ERROR(ret)
-
-    auto bcClient = BlkChnClient::GetInstance();
-
-    std::string keyPath;
-    ret = bcClient->getDidPropHistoryPath(did, "FriendID", keyPath);
-    CHECK_ERROR(ret)
-
-    Log::I(Log::TAG, "FriendManager::monitorDidChainFriendID() keyPath=%s", keyPath.c_str());
-    ret = bcClient->appendMoniter(keyPath, callback);
-    CHECK_ERROR(ret)
-
-    return 0;
-}
+//int FriendManager::monitorDidChainFriendID()
+//{
+//    auto callback = [=](int errcode,
+//                        const std::string& keyPath,
+//                        const std::string& result) {
+//        Log::D(Log::TAG, "FriendManager::monitorDidChainFriendID() ecode=%d, path=%s, result=%s", errcode, keyPath.c_str(), result.c_str());
+//        CHECK_RETVAL(errcode);
+//
+//        int ret = mergeFriendInfoFromJsonArray(result);
+//        CHECK_RETVAL(ret);
+//
+//        return;
+//    };
+//
+//    auto sectyMgr = SAFE_GET_PTR(mSecurityManager);
+//    std::string did;
+//    int ret = sectyMgr->getDid(did);
+//    CHECK_ERROR(ret)
+//
+//    auto bcClient = BlkChnClient::GetInstance();
+//
+//    std::string keyPath;
+//    ret = bcClient->getDidPropHistoryPath(did, "FriendID", keyPath);
+//    CHECK_ERROR(ret)
+//
+//    Log::I(Log::TAG, "FriendManager::monitorDidChainFriendID() keyPath=%s", keyPath.c_str());
+//    ret = bcClient->appendMoniter(keyPath, callback);
+//    CHECK_ERROR(ret)
+//
+//    return 0;
+//}
 
 
 // int FriendManager::uploadFriendInfo()
@@ -445,14 +507,14 @@ int FriendManager::cacheFriendToDidChain(std::shared_ptr<FriendInfo> friendInfo)
     }
 
     Json jsonInfo = Json::object();
-    jsonInfo["FriendCode"] = humanCode;
-    jsonInfo["Status"] = friendInfo->getHumanStatus();
-    jsonInfo["UpdateTime"] = DateTime::CurrentMS();
+    jsonInfo[JsonKey::FriendCode] = humanCode;
+    jsonInfo[JsonKey::Status] = friendInfo->getHumanStatus();
+    jsonInfo[JsonKey::UpdateTime] = DateTime::CurrentMS();
 
     std::string friendID = jsonInfo.dump();
 
-    auto monitor = DidChnMonitor::GetInstance();
-    ret = monitor->cacheDidProp("FriendID", friendID);
+    auto dcClient = DidChnClient::GetInstance();
+    ret = dcClient->cacheDidProp(DidChnClient::NameFriendKey, friendID);
     if (ret < 0) {
         return ret;
     }
@@ -470,10 +532,10 @@ int FriendManager::cacheFriendToDidChain(std::shared_ptr<FriendInfo> friendInfo)
 /***********************************************/
 int FriendManager::addFriendByDid(const std::string& did, const std::string& summary, bool remoteRequest, bool forceRequest)
 {
-    auto bcClient = BlkChnClient::GetInstance();
+    auto dcClient = DidChnClient::GetInstance();
 
-    auto humanInfo = std::make_shared<HumanInfo>();
-    int ret = bcClient->downloadHumanInfo(did, humanInfo);
+    std::map<std::string, std::vector<std::string>> didProps;
+    int ret = dcClient->downloadDidProp(did, true, didProps);
     if(ret < 0) {
         Log::W(Log::TAG, "FriendManager::addFriendByDid() Failed to add friend did: %s.", did.c_str());
         return ret;
@@ -485,7 +547,7 @@ int FriendManager::addFriendByDid(const std::string& did, const std::string& sum
         friendInfo = std::make_shared<FriendInfo>(weak_from_this());
         mFriendList.push_back(friendInfo);
     }
-    ret = friendInfo->mergeHumanInfo(*humanInfo, HumanInfo::Status::WaitForAccept);
+//    TODO: ret = friendInfo->mergeHumanInfo(*humanInfo, HumanInfo::Status::WaitForAccept);
     if(ret < 0) {
         Log::W(Log::TAG, "FriendManager::addFriendByDid() Failed to merge friend did: %s.", did.c_str());
         return ret;

@@ -73,6 +73,7 @@ public:
     constexpr static const int BlkChnEmptyPropError = -302;
     constexpr static const int BlkChnBadTxIdError = -303;
 	constexpr static const int BlkChnBadUpdateTimeError = -304;
+	constexpr static const int BlkChnOldUpdateTimeError = -305;
 
     constexpr static const int HttpClientError = -500;
 

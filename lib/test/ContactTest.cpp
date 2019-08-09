@@ -42,7 +42,7 @@ int main(int argc, char **argv)
 //        gSavedMnemonic = "bachelor sail glove swing despair lawsuit exhibit travel slot practice latin glass";
         nickname = "Me";
     } else {
-//        gSavedMnemonic = "ramp lady bulb stand silk dinosaur goose viable bid output month shock";
+       gSavedMnemonic = "month business urban nurse joy derive acquire snap venue hello city buyer";
     }
 
     Log::I(Log::TAG, "Start Contact Test.");
