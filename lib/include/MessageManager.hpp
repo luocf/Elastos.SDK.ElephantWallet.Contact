@@ -142,7 +142,10 @@ public:
 
     virtual int sendMessage(const std::shared_ptr<HumanInfo> humanInfo,
                             ChannelType chType,
-                            const std::shared_ptr<MessageInfo> msgInfo);
+                            const std::shared_ptr<MessageInfo> msgInfo,
+                            bool sendToOtherDev = true);
+
+    virtual int broadcastDesc(ChannelType chType);
 
 private:
     /*** type define ***/
@@ -153,7 +156,7 @@ private:
     /*** class function and variable ***/
     template <class T>
     int getChannel(ChannelType chType, std::weak_ptr<T>& channel);
-    int sendDescMessage(const std::shared_ptr<HumanInfo> humanInfo, ChannelType chType);
+    int sendDescMessage(const std::vector<std::shared_ptr<HumanInfo>>& humanList, ChannelType chType);
 
     std::weak_ptr<SecurityManager> mSecurityManager;
     std::weak_ptr<UserManager> mUserManager;

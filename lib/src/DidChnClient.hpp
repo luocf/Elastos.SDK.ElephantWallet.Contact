@@ -31,9 +31,10 @@ public:
     static std::shared_ptr<DidChnClient> GetInstance();
 
     static constexpr const char* NamePublicKey     = "PublicKey";
-    static constexpr const char* NameCarrierKey     = "CarrierKey";
-    static constexpr const char* NameIdentifyKey    = "IdentifyKey";
-    static constexpr const char* NameFriendKey      = "FriendKey";
+    static constexpr const char* NameCarrierKey    = "CarrierKey";
+    static constexpr const char* NameDetailKey     = "DetailKey";
+    static constexpr const char* NameIdentifyKey   = "IdentifyKey";
+    static constexpr const char* NameFriendKey     = "FriendKey";
 
     /*** class function and variable ***/
     int setConnectTimeout(uint32_t milliSecond);

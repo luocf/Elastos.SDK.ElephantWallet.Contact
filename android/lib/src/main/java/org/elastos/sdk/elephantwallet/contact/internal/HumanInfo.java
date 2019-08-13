@@ -10,43 +10,75 @@ import java.util.HashMap;
 import java.util.List;
 
 public class HumanInfo {
+    public enum Item {
+        ChainPubKey(1),
+        Did(2),
+        ElaAddress(3),
+        Nickname(4),
+        Avatar(5),
+        Gender(6),
+        Description(7);
+
+        public static Item valueOf(int id) {
+            Item[] values = Item.values();
+            for(int idx = 0; idx < values.length; idx++) {
+                if(values[idx].id == id) {
+                    return values[idx];
+                }
+            }
+
+            return null;
+        }
+
+        int id(){
+            return this.id;
+        }
+
+        private Item(int id){
+            this.id = id;
+        }
+        private int id;
+    }
+
     public class HumanJson {
-        @SerializedName("HumanInfo")
+        @SerializedName(JsonKey.HumanInfo)
         HumanInfo humanInfo;
     }
 
     public class CarrierInfo {
         public class DeviceInfo {
-            @SerializedName("DevId")
+            @SerializedName(JsonKey.DeviceId)
             public String devId;
-            @SerializedName("DevName")
+            @SerializedName(JsonKey.DeviceName)
             public String devName;
-            @SerializedName("UpdateTime")
+            @SerializedName(JsonKey.UpdateTime)
             public long updateTime;
 
             @Override
             public String toString() { return Utils.ToString(this); }
         }
 
-        @SerializedName("CarrierAddr")
+        @SerializedName(JsonKey.CarrierAddr)
         public String usrAddr;
-        @SerializedName("CarrierId")
+        @SerializedName(JsonKey.CarrierId)
         public String usrId;
-        @SerializedName("DeviceInfo")
+        @SerializedName(JsonKey.DeviceInfo)
         public DeviceInfo devInfo;
 
         @Override
         public String toString() { return Utils.ToString(this); }
     }
 
-    @SerializedName(BoundCarrierArray)
+    @SerializedName(JsonKey.BoundCarrierArray)
     public List<CarrierInfo> boundCarrierArray;
-    @SerializedName(CommonInfoMap)
+    @SerializedName(JsonKey.CommonInfoMap)
     private HashMap<Integer, String> commonInfoMap;
-    @SerializedName(Status)
+    @SerializedName(JsonKey.Status)
     public ContactStatus status;
-    @SerializedName(HumanCode)
+    @SerializedName(JsonKey.HumanCode)
     public String humanCode;
+    @SerializedName(JsonKey.UpdateTime)
+    public long updateTime;
 
     public String chainPubKey;
     public String did;
@@ -74,6 +106,7 @@ public class HumanInfo {
         this.boundCarrierArray = info.humanInfo.boundCarrierArray;
         this.status = info.humanInfo.status;
         this.humanCode = info.humanInfo.humanCode;
+        this.updateTime = info.humanInfo.updateTime;
 
         this.chainPubKey = info.humanInfo.commonInfoMap.get(Item.ChainPubKey.id());
         this.did = info.humanInfo.commonInfoMap.get(Item.Did.id());
@@ -100,28 +133,4 @@ public class HumanInfo {
 
     protected HumanInfo() {
     }
-
-    private enum Item {
-        ChainPubKey(1),
-        Did(2),
-        ElaAddress(3),
-        Nickname(4),
-        Avatar(5),
-        Gender(6),
-        Description(7);
-
-        int id(){
-            return this.id;
-        }
-
-        private Item(int id){
-            this.id = id;
-        }
-        private int id;
-    }
-
-    private static final String BoundCarrierArray = "BoundCarrierArray";
-    private static final String CommonInfoMap = "CommonInfoMap";
-    private static final String Status = "Status";
-    private static final String HumanCode = "HumanCode";
 } // class Factory

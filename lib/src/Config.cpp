@@ -64,7 +64,7 @@ int Config::loadDefaultValues()
 
     mElaChainConfig = std::make_unique<ElaChainConfig>();
     mElaChainConfig->mUrl = "https://api-wallet-ela.elastos.org/api/1";
-    mElaChainConfig->mUrl = "https://api-wallet-ela-testnet.elastos.org/api/1";
+//    mElaChainConfig->mUrl = "https://api-wallet-ela-testnet.elastos.org/api/1";
     mElaChainConfig->mApi.mGetBalance = "/balance/"; //{address}
     mElaChainConfig->mApi.mCreateTx = "/createTx";
     mElaChainConfig->mApi.mCreateCrossTx = "/createCrossTx";

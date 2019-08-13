@@ -171,16 +171,17 @@ int UserManager::ensureUserCarrierInfo()
     CHECK_ERROR(ret)
 
     std::string carrierInfoStr;
-    ret = HumanInfo::serialize(carrierInfo, carrierInfoStr);
+    ret = HumanInfo::SerializeCarrierInfo(carrierInfo, carrierInfoStr);
     CHECK_ERROR(ret)
 
-    auto dcClient = DidChnClient::GetInstance();
     std::string pubKey;
     ret = mUserInfo->getHumanInfo(HumanInfo::Item::ChainPubKey, pubKey);
     CHECK_ERROR(ret)
-    ret = dcClient->cacheDidProp("PublicKey", pubKey);
+
+    auto dcClient = DidChnClient::GetInstance();
+    ret = dcClient->cacheDidProp(DidChnClient::NamePublicKey, pubKey);
     CHECK_ERROR(ret)
-    ret = dcClient->cacheDidProp("CarrierID", carrierInfoStr);
+    ret = dcClient->cacheDidProp(DidChnClient::NameCarrierKey, carrierInfoStr);
     CHECK_ERROR(ret)
 
     Log::V(Log::TAG, "%s new carrier info: %s", __PRETTY_FUNCTION__, carrierInfoStr.c_str());
@@ -196,6 +197,30 @@ int UserManager::getUserInfo(std::shared_ptr<UserInfo>& userInfo)
     }
 
     userInfo = mUserInfo;
+
+    return 0;
+}
+
+int UserManager::setUserInfo(UserInfo::Item item, const std::string& value)
+{
+    if(mUserInfo.get() == nullptr) {
+        return ErrCode::NotReadyError;
+    }
+
+    int ret = mUserInfo->setHumanInfo(item, value);
+    CHECK_ERROR(ret);
+
+    std::string userDetails;
+    ret = mUserInfo->serializeDetails(userDetails);
+    CHECK_ERROR(ret);
+
+    auto dcClient = DidChnClient::GetInstance();
+    ret = dcClient->cacheDidProp(DidChnClient::NameDetailKey, userDetails);
+    CHECK_ERROR(ret)
+
+    auto msgMgr = SAFE_GET_PTR(mMessageManager);
+    ret = msgMgr->broadcastDesc(MessageManager::ChannelType::Carrier);
+    CHECK_ERROR(ret)
 
     return 0;
 }

@@ -32,8 +32,12 @@ import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 
+import org.elastos.sdk.elephantwallet.contact.Contact;
+import org.json.JSONObject;
+
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.elastos.sdk.contact.test.MainActivity.TAG;
 
@@ -63,16 +67,41 @@ public class Helper {
         showDialog(builder);
     }
 
-    public static void showAddress(Context context, String[] humanCode, String presentDevId, OnListener listener) {
+    public static void showAddress(Context context, HashMap<String, String> humanCode, String presentDevId, String ext,
+                                   OnListener listener) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle("My Address");
         try {
-            View root = makeAddressView(context, humanCode, presentDevId, listener);
+            View root = makeAddressView(context, humanCode, presentDevId, ext, listener);
             builder.setView(root);
         } catch (Exception e) {
             builder.setMessage("Failed to show address." + e);
         }
 
+        builder.setNegativeButton("Cancel", (dialog, which) -> {
+            dismissDialog();
+        });
+
+        showDialog(builder);
+    }
+
+    public static void showSetDetails(Context context, String separator, OnListener listener) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setTitle("Set Details");
+
+        RadioGroup radioGrp = new RadioGroup(context);
+        EditText editView = new EditText(context);
+        View root = makeSetDetailView(context, radioGrp, editView);
+        builder.setView(root);
+
+        builder.setPositiveButton("OK", (dialog, which) -> {
+            int checkedId = radioGrp.getCheckedRadioButtonId();
+            RadioButton checkedBtn = radioGrp.findViewById(checkedId);
+            String key = checkedBtn.getText().toString();
+            String value = editView.getText().toString();
+
+            listener.onResult(key + separator + value);
+        });
         builder.setNegativeButton("Cancel", (dialog, which) -> {
             dismissDialog();
         });
@@ -217,21 +246,38 @@ public class Helper {
         }
     }
 
-    private static View makeAddressView(Context context, String[] humanCode, String presentDevId, OnListener listener) {
+    private static View makeAddressView(Context context, HashMap<String, String> humanCode, String presentDevId, String ext,
+                                        OnListener listener) {
         TextView txtDevId = new TextView(context);
         ImageView image = new ImageView(context);
         TextView txtCode = new TextView(context);
         RadioGroup radioGrp = new RadioGroup(context);
         Button btn = new Button(context);
 
-        RadioButton btnDid = new RadioButton(context);
-        btnDid.setId(View.generateViewId());
-        btnDid.setText("Did");
-        RadioButton btnCarrier = new RadioButton(context);
-        btnCarrier.setId(View.generateViewId());
-        btnCarrier.setText("Carrier");
-        radioGrp.addView(btnDid);
-        radioGrp.addView(btnCarrier);
+        for(HashMap.Entry<String, String> entry : humanCode.entrySet()) {
+            String key = entry.getKey();
+            String value = entry.getValue();
+
+            RadioButton radiobtn = new RadioButton(context);
+            radiobtn.setText(key + ": " + value.substring(0, 5) + " ... " + value.substring(value.length()-5));
+
+            radioGrp.addView(radiobtn);
+            radioGrp.setOnCheckedChangeListener((group, checkedId) -> {
+                int mapIdx = checkedId - 1;
+                String checkedVal = (String) humanCode.values().toArray()[mapIdx];
+                String showed = checkedVal;
+                if(mapIdx == humanCode.size() - 1) {
+                    showed += "\n----------------\n" + ext;
+                }
+                Bitmap bitmap = makeQRCode(checkedVal);
+                image.setImageBitmap(bitmap);
+                txtCode.setText(showed);
+            });
+
+            if(radioGrp.getChildCount() == 1) {
+                radioGrp.check(radiobtn.getId());
+            }
+        }
 
         LinearLayout root = new LinearLayout(context);
         root.setOrientation(LinearLayout.VERTICAL);
@@ -245,25 +291,41 @@ public class Helper {
         root.addView(btn);
 
         ViewGroup.MarginLayoutParams txtLayout = (ViewGroup.MarginLayoutParams) txtCode.getLayoutParams();
-        txtLayout.setMargins(30, 10, 30, 20);
-
-        radioGrp.setOnCheckedChangeListener((group, checkedId) -> {
-            String value = humanCode[0];
-            String showed = value;
-            if(checkedId == btnCarrier.getId()) {
-                value = humanCode[1];
-                showed = value + "\n----------------\n" + humanCode[2];
-            }
-            Bitmap bitmap = makeQRCode(value);
-            image.setImageBitmap(bitmap);
-            txtCode.setText(showed);
-        });
-        radioGrp.check(btnCarrier.getId());
+        txtLayout.setMargins(20, 10, 20, 20);
 
         btn.setText("Details");
         btn.setOnClickListener((v) -> {
             listener.onResult(null);
         });
+
+        return root;
+    }
+
+    private static View makeSetDetailView(Context context, RadioGroup radioGrp, EditText editView) {
+        TextView txtView = new TextView(context);
+
+        LinearLayout root = new LinearLayout(context);
+        root.setOrientation(LinearLayout.VERTICAL);
+        root.addView(radioGrp);
+        root.addView(txtView);
+        root.addView(editView);
+
+        HashMap<Integer, String> details = new HashMap<Integer, String>() {{
+            put(View.generateViewId(), Contact.UserInfo.Item.Nickname.name());
+            put(View.generateViewId(), Contact.UserInfo.Item.Avatar.name());
+            put(View.generateViewId(), Contact.UserInfo.Item.Gender.name());
+            put(View.generateViewId(), Contact.UserInfo.Item.Description.name());
+        }};
+        for(Map.Entry<Integer, String> entry: details.entrySet()) {
+            RadioButton btn = new RadioButton(context);
+            btn.setId(entry.getKey());
+            btn.setText(entry.getValue());
+            radioGrp.addView(btn);
+            radioGrp.check(entry.getKey());
+        }
+
+        txtView.setText("Value: ");
+        editView.setText("TestUser");
 
         return root;
     }

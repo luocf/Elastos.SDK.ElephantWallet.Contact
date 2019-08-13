@@ -40,6 +40,12 @@ public class ContactBridge extends CrossBase {
         setListener(mListener);
     }
 
+    public int setUserInfo(UserInfo.Item item, String value) {
+        int ret = setUserInfo(item.id(), value);
+        return ret;
+    }
+
+
     public Contact.UserInfo getUserInfo() {
         assert(mListener != null);
 
@@ -161,6 +167,9 @@ public class ContactBridge extends CrossBase {
 
     @CrossInterface
     private native void setListener(CrossBase listener);
+
+    @CrossInterface
+    private native int setUserInfo(int item, String value);
 
     @CrossInterface
     private native int getHumanInfo(String humanCode, StringBuffer info);

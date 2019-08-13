@@ -12,7 +12,9 @@ public:
     /*** type define ***/
 
     /*** static function and variable ***/
-    static int InitInstance(std::weak_ptr<UserManager> userMgr, std::weak_ptr<FriendManager> friendMgr);
+    static int InitInstance(std::weak_ptr<UserManager> userMgr,
+                            std::weak_ptr<FriendManager> friendMgr,
+                            std::weak_ptr<MessageManager> msgMgr);
     static std::shared_ptr<DidChnDataListener> GetInstance();
 
     /*** class function and variable ***/
@@ -34,17 +36,19 @@ private:
 
     /*** class function and variable ***/
     explicit DidChnDataListener(std::weak_ptr<UserManager> userMgr,
-                                std::weak_ptr<FriendManager> friendMgr);
+                                std::weak_ptr<FriendManager> friendMgr,
+                                std::weak_ptr<MessageManager> msgMgr);
     virtual ~DidChnDataListener();
 
     int processPublicKeyChanged(std::shared_ptr<HumanInfo> humanInfo, const std::vector<std::string>& didProps);
     int processCarrierKeyChanged(std::shared_ptr<HumanInfo> humanInfo, const std::vector<std::string>& didProps);
+    int processDetailKeyChanged(std::shared_ptr<HumanInfo> humanInfo, const std::vector<std::string>& didProps);
     int processIdentifyKeyChanged(std::shared_ptr<HumanInfo> humanInfo, const std::vector<std::string>& didProps);
     int processFriendKeyChanged(std::shared_ptr<HumanInfo> humanInfo, const std::vector<std::string>& didProps);
 
     std::weak_ptr<UserManager> mUserManager;
     std::weak_ptr<FriendManager> mFriendManager;
-
+    std::weak_ptr<MessageManager> mMessageManager;
 };
 
 /***********************************************/

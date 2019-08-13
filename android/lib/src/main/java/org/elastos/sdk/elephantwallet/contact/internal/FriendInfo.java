@@ -4,7 +4,7 @@ import com.google.gson.annotations.SerializedName;
 
 public class FriendInfo extends HumanInfo {
     public class FriendJson extends HumanJson {
-        @SerializedName("Alias")
+        @SerializedName(JsonKey.Alias)
         String alias;
     }
 

@@ -28,8 +28,10 @@ const struct {
 } DidPropNames [] = {
         { DidChnClient::NamePublicKey, false },
         { DidChnClient::NameCarrierKey, true },
-        { DidChnClient::NameIdentifyKey, true },
-        { DidChnClient::NameFriendKey, true },
+//         ignore to sync for this revision
+//        { DidChnClient::NameDetailKey, false },
+//        { DidChnClient::NameIdentifyKey, true },
+//        { DidChnClient::NameFriendKey, true },
 };
 
 
@@ -307,6 +309,7 @@ int DidChnClient::serializeDidProps(const std::vector<std::pair<std::string, std
     jsonPropProt[DidProtocol::Name::Properties] = jsonPropArray;
 
     result = jsonPropProt.dump();
+    Log::I(Log::TAG, "DidChnClient::serializeDidProps() result=%s", result.c_str());
 
     return 0;
 }

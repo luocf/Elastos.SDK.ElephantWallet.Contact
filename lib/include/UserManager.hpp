@@ -50,6 +50,7 @@ public:
     int restoreUserInfo();
     int ensureUserCarrierInfo();
     int getUserInfo(std::shared_ptr<UserInfo>& userInfo);
+    int setUserInfo(UserInfo::Item item, const std::string& value);
 
 //    int syncDownloadDidChainData();
 //    int monitorDidChainData();

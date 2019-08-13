@@ -368,7 +368,8 @@ std::shared_ptr<MessageManager::MessageInfo> MessageManager::MakeTextMessage(con
 
 int MessageManager::sendMessage(const std::shared_ptr<HumanInfo> humanInfo,
                                 ChannelType humanChType,
-                                const std::shared_ptr<MessageInfo> msgInfo)
+                                const std::shared_ptr<MessageInfo> msgInfo,
+                                bool sendToOtherDev)
 {
     auto it = mMessageChannelMap.find(humanChType);
     if(it == mMessageChannelMap.end()) {
@@ -411,19 +412,22 @@ int MessageManager::sendMessage(const std::shared_ptr<HumanInfo> humanInfo,
         auto userMgr = SAFE_GET_PTR(mUserManager);
         std::shared_ptr<UserInfo> userInfo;
         userMgr->getUserInfo(userInfo);
-        int ret = userInfo->getAllCarrierInfo(infoArray);
-        if(ret < 0) {
-            return ErrCode::ChannelNotEstablished;
+
+        if(sendToOtherDev == true) {
+            int ret = userInfo->getAllCarrierInfo(infoArray);
+            if (ret < 0) {
+                return ErrCode::ChannelNotEstablished;
+            }
         }
 
         std::vector<HumanInfo::CarrierInfo> friendArray;
-        ret = humanInfo->getAllCarrierInfo(friendArray);
+        int ret = humanInfo->getAllCarrierInfo(friendArray);
         if(ret < 0) {
             return ErrCode::ChannelNotEstablished;
         }
-        for(auto& it: infoArray) {
-            Log::I(Log::TAG, "+++++++++++ %s", it.mUsrId.c_str());
-        }
+//        for(auto& it: infoArray) {
+//            Log::I(Log::TAG, "+++++++++++ %s", it.mUsrId.c_str());
+//        }
         infoArray.insert(infoArray.end(), friendArray.begin(), friendArray.end());
         for(auto& it: infoArray) {
             Log::I(Log::TAG, "----------- %s", it.mUsrId.c_str());
@@ -450,6 +454,31 @@ int MessageManager::sendMessage(const std::shared_ptr<HumanInfo> humanInfo,
     } else {
         throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
     }
+}
+
+int MessageManager::broadcastDesc(ChannelType chType)
+{
+    auto userMgr = SAFE_GET_PTR(mUserManager);
+    auto friendMgr = SAFE_GET_PTR(mFriendManager);
+
+    std::vector<std::shared_ptr<HumanInfo>> broadcastList;
+
+    std::shared_ptr<UserInfo> userInfo;
+    int ret = userMgr->getUserInfo(userInfo);
+    CHECK_ERROR(ret)
+    broadcastList.push_back(userInfo);
+
+    std::vector<std::shared_ptr<FriendInfo>> friendList;
+    ret = friendMgr->getFriendInfoList(friendList);
+    CHECK_ERROR(ret)
+    for(auto& it: friendList) {
+        broadcastList.push_back(it);
+    }
+
+    ret = sendDescMessage(broadcastList, chType);
+    CHECK_ERROR(ret)
+
+    return 0;
 }
 
 /***********************************************/
@@ -588,7 +617,7 @@ void MessageManager::MessageListener::onReceivedMessage(const std::string& frien
     if(msgInfo->mType == MessageType::CtrlSyncDesc) {
         std::string humanDesc {msgInfo->mPlainContent.begin(), msgInfo->mPlainContent.end()};
         auto newInfo = HumanInfo();
-        newInfo.HumanInfo::deserialize(humanDesc, true);
+        ret = newInfo.HumanInfo::deserialize(humanDesc, true);
         if(ret < 0) {
             Log::E(Log::TAG, "Failed to process friend desc.");
             return;
@@ -802,7 +831,8 @@ void MessageManager::MessageListener::onFriendStatusChanged(const std::string& f
 
     if(fromHumanInfo.get() != nullptr) {
         if(humanStatus == HumanInfo::Status::Online) {
-            std::ignore = msgMgr->sendDescMessage(fromHumanInfo, humanChType);
+            std::vector<std::shared_ptr<HumanInfo>> humanList = {fromHumanInfo};
+            std::ignore = msgMgr->sendDescMessage(humanList, humanChType);
         }
     } else {
         Log::W(Log::TAG, "onFriendStatusChanged() friendCode=%s is not managed", friendCode.c_str());
@@ -827,7 +857,7 @@ std::shared_ptr<MessageManager::MessageInfo> MessageManager::MakeMessage(std::sh
     return msgInfo;
 }
 
-int MessageManager::sendDescMessage(const std::shared_ptr<HumanInfo> humanInfo, ChannelType chType)
+int MessageManager::sendDescMessage(const std::vector<std::shared_ptr<HumanInfo>>& humanList, ChannelType chType)
 {
     // send latest user desc.
     auto userMgr = SAFE_GET_PTR(mUserManager);
@@ -846,10 +876,16 @@ int MessageManager::sendDescMessage(const std::shared_ptr<HumanInfo> humanInfo, 
     }
     std::vector<uint8_t> humanDescBytes(humanDesc.begin(), humanDesc.end());
     auto msgInfo = MakeMessage(MessageType::CtrlSyncDesc, humanDescBytes);
-    ret = sendMessage(humanInfo, chType, msgInfo);
-    if(ret < 0) {
-        Log::E(Log::TAG, "Failed to send sync desc message. ret=%d", ret);
-        return ret;
+
+    for(const auto& it: humanList) {
+        std::string humanCode;
+        it->getHumanCode(humanCode);
+
+        ret = sendMessage(it, chType, msgInfo, false);
+        Log::I(Log::TAG, "Failed to send sync desc message to %s. ret=%d", humanCode.c_str(), ret);
+        if(ret < 0) {
+            continue;
+        }
     }
 
     return 0;

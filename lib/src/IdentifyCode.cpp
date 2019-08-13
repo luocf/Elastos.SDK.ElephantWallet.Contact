@@ -54,6 +54,10 @@ int IdentifyCode::getIdentifyCode(Type type, std::string& value) const
 
 int IdentifyCode::mergeIdentifyCode(const IdentifyCode& value)
 {
+    if(this->mUpdateTime >= value.mUpdateTime) {
+        return ErrCode::IgnoreMergeOldInfo;
+    }
+
     for(const auto& it: value.mIdCodeMap) {
         int ret = setIdentifyCode(it.first, it.second);
         if(ret < 0) {
@@ -69,6 +73,7 @@ int IdentifyCode::serialize(std::string& value) const
     Json jsonInfo = Json::object();
 
     jsonInfo[JsonKey::IdCodeMap] = mIdCodeMap;
+    jsonInfo[JsonKey::UpdateTime] = mUpdateTime;
 
     value = jsonInfo.dump();
 
@@ -87,6 +92,8 @@ int IdentifyCode::deserialize(const std::string& value)
     if(jsonInfo.find(JsonKey::IdCodeMap) != jsonInfo.end()) {
         mIdCodeMap = jsonInfo[JsonKey::IdCodeMap].get<std::map<Type, std::string>>();
     }
+
+    mUpdateTime = jsonInfo[JsonKey::UpdateTime];
 
     return 0;
 }

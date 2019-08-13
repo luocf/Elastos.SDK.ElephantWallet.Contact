@@ -1,55 +1,45 @@
 package org.elastos.sdk.elephantwallet.contact.internal;
 
-import android.util.Log;
+final class JsonKey {
+    private JsonKey() { }
 
-import org.elastos.sdk.elephantwallet.contact.Contact;
+    static final String  UpdateTime = "UpdateTime";
 
-import java.lang.reflect.Field;
-import java.math.BigInteger;
-import java.security.MessageDigest;
+    // HumanInfo
+    static final String  HumanInfo          = "HumanInfo";
+    static final String  BoundCarrierArray  = "BoundCarrierArray";
+    static final String  BoundCarrierStatus = "BoundCarrierStatus";
+    static final String  CommonInfoMap      = "CommonInfoMap";
+    static final String  StatusMap          = "StatusMap";
+    static final String  Status             = "Status";
+    static final String  HumanCode          = "HumanCode";
 
-public final class JsonDefine {
-    private JsonDefine() { }
+    static final String  DeviceId   = "DevId";
+    static final String  DeviceName = "DevName";
 
-    public static String ToString(Object obj) {
-        StringBuilder result = new StringBuilder();
+    static final String  CarrierAddr = "CarrierAddr";
+    static final String  CarrierId   = "CarrierId";
+    static final String  DeviceInfo  = "DeviceInfo";
 
-        result.append(obj.getClass().getName());
-        result.append("{");
+    // FriendInfo
+    static final String  FriendCode = "FriendCode";
+    static final String  Alias = "Alias";
 
-        Field[] fields = obj.getClass().getDeclaredFields();
-        for ( Field field : fields  ) {
-            field.setAccessible(true);
-            result.append(field.getName());
-            result.append("=");
-            try {
-                Object val = field.get(obj);
-                result.append(val);
-            } catch (Exception e) {
-                Log.e(Contact.TAG, "Failed to print object to string", e);
-                result.append("unknown");
-            }
-            result.append(";");
-        }
+    // IdentifyCode
+    static final String  IdentifyCode        = "IdentifyCode";
+    static final String  IdCodeMap           = "IdCodeMap";
 
-        result.append("}");
+    // MessageInfo
+    static final String  Did         = "Did";
+    static final String  Summary     = "Summary";
+    static final String  MessageData = "MessageData";
 
-        return result.toString();
-    }
 
-    public static String getMd5(String str) {
-        try {
-            MessageDigest md = MessageDigest.getInstance("MD5");
-            md.update(str.getBytes());
-            String md5 = new BigInteger(1, md.digest()).toString(16);
-            return fillMD5(md5);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to get md5.", e);
-        }
-    }
+    static final String  Type            = "Type";
+    static final String  PlainContent    = "PlainContent";
+    static final String  CryptoAlgorithm = "CryptoAlgorithm";
+    static final String  TimeStamp       = "TimeStamp";
 
-    private static String fillMD5(String md5) {
-        return md5.length() == 32 ? md5 : fillMD5("0" + md5);
-    }
+    static final String  DidPropCache       = "DidPropCache";
 }
 

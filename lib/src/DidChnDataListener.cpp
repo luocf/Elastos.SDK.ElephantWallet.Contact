@@ -15,18 +15,21 @@ std::shared_ptr<DidChnDataListener> DidChnDataListener::gDidChnDataListener {};
 /* === static function implement ============= */
 /* =========================================== */
 int DidChnDataListener::InitInstance(std::weak_ptr<UserManager> userMgr,
-                                     std::weak_ptr<FriendManager> friendMgr) {
+                                     std::weak_ptr<FriendManager> friendMgr,
+                                     std::weak_ptr<MessageManager> msgMgr)
+{
 //    if (gDidChnDataListener.get() != nullptr) {
 //        gDidChnDataListener.reset();
 //    }
 
     struct Impl : DidChnDataListener {
         Impl(std::weak_ptr<UserManager> userMgr,
-             std::weak_ptr<FriendManager> friendMgr)
-                : DidChnDataListener(userMgr, friendMgr) {}
+             std::weak_ptr<FriendManager> friendMgr,
+             std::weak_ptr<MessageManager> msgMgr)
+                : DidChnDataListener(userMgr, friendMgr, msgMgr) {}
     };
 
-    gDidChnDataListener = std::make_shared<Impl>(userMgr, friendMgr);
+    gDidChnDataListener = std::make_shared<Impl>(userMgr, friendMgr, msgMgr);
 
     return 0;
 }
@@ -71,6 +74,9 @@ int DidChnDataListener::onChanged(const std::string& did, const std::string& key
     } else if(key == DidChnClient::NameCarrierKey) {
         int ret = processCarrierKeyChanged(humanInfo, didProps);
         CHECK_ERROR(ret);
+    } else if(key == DidChnClient::NameDetailKey) {
+        int ret = processDetailKeyChanged(humanInfo, didProps);
+        CHECK_ERROR(ret);
     } else if(key == DidChnClient::NameIdentifyKey) {
         int ret = processIdentifyKeyChanged(humanInfo, didProps);
         CHECK_ERROR(ret);
@@ -93,9 +99,11 @@ int DidChnDataListener::onChanged(const std::string& did, const std::string& key
 /* === class private function implement  ===== */
 /* =========================================== */
 DidChnDataListener::DidChnDataListener(std::weak_ptr<UserManager> userMgr,
-                                       std::weak_ptr<FriendManager> friendMgr)
+                                       std::weak_ptr<FriendManager> friendMgr,
+                                       std::weak_ptr<MessageManager> msgMgr)
         : mUserManager(userMgr)
         , mFriendManager(friendMgr)
+        , mMessageManager(msgMgr)
 {
 }
 
@@ -119,7 +127,7 @@ int DidChnDataListener::processCarrierKeyChanged(std::shared_ptr<HumanInfo> huma
 {
     for(const auto& it: didProps) {
         HumanInfo::CarrierInfo carrierInfo;
-        int ret = HumanInfo::deserialize(it, carrierInfo);
+        int ret = HumanInfo::DeserializeCarrierInfo(it, carrierInfo);
         CHECK_ERROR(ret);
 
         ret = humanInfo->addCarrierInfo(carrierInfo, HumanInfo::Status::WaitForAccept);
@@ -128,6 +136,25 @@ int DidChnDataListener::processCarrierKeyChanged(std::shared_ptr<HumanInfo> huma
             continue;
         }
         CHECK_ERROR(ret);
+
+        Log::I(Log::TAG, "DidChnDataListener::processCarrierInfoChanged() Success to sync CarrierId: %s", it.c_str());
+    }
+
+    return 0;
+}
+
+int DidChnDataListener::processDetailKeyChanged(std::shared_ptr<HumanInfo> humanInfo,
+                                                const std::vector<std::string>& didProps)
+{
+    for(const auto& it: didProps) {
+        int ret = humanInfo->deserializeDetails(it);
+        if(ret == ErrCode::IgnoreMergeOldInfo) {
+            Log::V(Log::TAG, "DidChnDataListener::processCarrierInfoChanged() Ignore to sync CarrierId: %s", it.c_str());
+            continue;
+        }
+        CHECK_ERROR(ret);
+
+        Log::I(Log::TAG, "DidChnDataListener::processCarrierInfoChanged() Success to sync CarrierId: %s", it.c_str());
     }
 
     return 0;
@@ -147,6 +174,10 @@ int DidChnDataListener::processIdentifyKeyChanged(std::shared_ptr<HumanInfo> hum
         CHECK_ERROR(ret);
 
         ret = userInfo->mergeIdentifyCode(identifyCode);
+        if(ret == ErrCode::IgnoreMergeOldInfo) {
+            Log::V(Log::TAG, "DidChnDataListener::processIdentifyKeyChanged() Ignore to sync IdentifyCode: %s", it.c_str());
+            continue;
+        }
         CHECK_ERROR(ret);
     }
 

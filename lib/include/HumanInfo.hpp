@@ -54,6 +54,8 @@ public:
 
     /*** static function and variable ***/
     static HumanKind AnalyzeHumanKind(const std::string& code);
+    static int SerializeCarrierInfo(const CarrierInfo& info, std::string& value);
+    static int DeserializeCarrierInfo(const std::string& value, CarrierInfo& info);
 
     /*** class function and variable ***/
     explicit HumanInfo();
@@ -71,8 +73,6 @@ public:
     virtual int getAllCarrierInfo(std::vector<CarrierInfo>& infoArray) const;
     virtual int setCarrierStatus(const std::string& usrId, const Status status);
     virtual int getCarrierStatus(const std::string& usrId, Status& status) const;
-    static int serialize(const CarrierInfo& info, std::string& value);
-    static int deserialize(const std::string& value, CarrierInfo& info);
 
     virtual int setHumanInfo(Item item, const std::string& value);
     virtual int getHumanInfo(Item item, std::string& value) const;
@@ -85,6 +85,8 @@ public:
 
     virtual int serialize(std::string& value, bool summaryOnly = false) const;
     virtual int deserialize(const std::string& value, bool summaryOnly = false);
+    virtual int serializeDetails(std::string& value);
+    virtual int deserializeDetails(const std::string& value);
     virtual int toJson(std::shared_ptr<Json>& value) const;
 protected:
     /*** type define ***/

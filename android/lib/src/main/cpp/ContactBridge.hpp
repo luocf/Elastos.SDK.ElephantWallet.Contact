@@ -30,6 +30,8 @@ public:
     void setListener(CrossBase* listener);
     int start();
 
+    int setUserInfo(int item, const char* value);
+
     int getHumanInfo(const char* humanCode, std::stringstream* info);
     int getHumanStatus(const char* humanCode);
 

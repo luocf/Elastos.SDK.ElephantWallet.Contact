@@ -243,7 +243,7 @@ int Contact::initGlobal()
     ret = DidChnClient::InitInstance(mConfig, mSecurityManager);
     CHECK_ERROR(ret)
 
-    ret = DidChnDataListener::InitInstance(mUserManager, mFriendManager);
+    ret = DidChnDataListener::InitInstance(mUserManager, mFriendManager, mMessageManager);
     CHECK_ERROR(ret)
 
     return 0;

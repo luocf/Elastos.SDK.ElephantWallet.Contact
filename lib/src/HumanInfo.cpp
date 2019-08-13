@@ -316,6 +316,10 @@ int HumanInfo::setHumanInfo(Item item, const std::string& value)
 
     mCommonInfoMap[item] = value;
 
+    if(item != Item::ChainPubKey) {
+        mUpdateTime = DateTime::CurrentMS();
+    }
+
     return static_cast<int>(item);
 }
 
@@ -373,6 +377,10 @@ int HumanInfo::mergeHumanInfo(const HumanInfo& value, const Status status)
             continue;
         }
         CHECK_ERROR(ret)
+    }
+
+    if(this->mUpdateTime < value.mUpdateTime) {
+        this->mCommonInfoMap = value.mCommonInfoMap;
     }
 
     return 0;
@@ -439,14 +447,14 @@ HumanInfo::Status HumanInfo::getHumanStatus() const
     return status;
 }
 
-int HumanInfo::serialize(const CarrierInfo& info, std::string& value)
+int HumanInfo::SerializeCarrierInfo(const CarrierInfo& info, std::string& value)
 {
     Json jsonInfo= Json(info);
     value = jsonInfo.dump();
     return 0;
 }
 
-int HumanInfo::deserialize(const std::string& value, CarrierInfo& info)
+int HumanInfo::DeserializeCarrierInfo(const std::string& value, CarrierInfo& info)
 {
     Json jsonInfo= Json::parse(value);
     info = jsonInfo.get<CarrierInfo>();
@@ -470,6 +478,8 @@ int HumanInfo::serialize(std::string& value, bool summaryOnly) const
         jsonInfo[JsonKey::StatusMap] = mStatusMap;
     }
 
+    jsonInfo[JsonKey::UpdateTime] = mUpdateTime;
+
     value = jsonInfo.dump();
 
     return 0;
@@ -485,6 +495,11 @@ int HumanInfo::deserialize(const std::string& value, bool summaryOnly)
         return ErrCode::JsonParseException;
     }
 
+    auto updateTime = jsonInfo[JsonKey::UpdateTime];
+//    if(this->mUpdateTime >= updateTime) {
+//        return ErrCode::IgnoreMergeOldInfo;
+//    }
+
     mCommonInfoMap = jsonInfo[JsonKey::CommonInfoMap].get<std::map<Item, std::string>>();
     mBoundCarrierArray = jsonInfo[JsonKey::BoundCarrierArray].get<std::vector<CarrierInfo>>();
 
@@ -492,6 +507,49 @@ int HumanInfo::deserialize(const std::string& value, bool summaryOnly)
         mBoundCarrierStatus = jsonInfo[JsonKey::BoundCarrierStatus].get<std::vector<Status>>();
         mStatusMap = jsonInfo[JsonKey::StatusMap].get<std::map<HumanKind, Status>>();
     }
+
+    mUpdateTime = updateTime;
+
+    return 0;
+}
+
+int HumanInfo::serializeDetails(std::string& value)
+{
+    auto details = mCommonInfoMap;
+    details.erase(Item::ChainPubKey);
+    details.erase(Item::Did);
+    details.erase(Item::ElaAddress);
+
+    Json jsonInfo = Json::object();
+
+    jsonInfo[JsonKey::CommonInfoMap] = details;
+    jsonInfo[JsonKey::UpdateTime] = mUpdateTime;
+
+    value = jsonInfo.dump();
+
+    return 0;
+}
+
+int HumanInfo::deserializeDetails(const std::string& value)
+{
+    Log::D(Log::TAG, "HumanInfo::deserializeDetails() value=%s", value.c_str());
+    Json jsonInfo;
+    try {
+        jsonInfo= Json::parse(value);
+    } catch(Json::parse_error) {
+        return ErrCode::JsonParseException;
+    }
+
+    auto commonInfoMap = jsonInfo[JsonKey::CommonInfoMap].get<std::map<Item, std::string>>();
+    auto updateTime = jsonInfo[JsonKey::UpdateTime];
+    if(this->mUpdateTime >= updateTime) {
+        return ErrCode::IgnoreMergeOldInfo;
+    }
+
+    for(const auto [key, value]: commonInfoMap) {
+        mCommonInfoMap[key] = value;
+    }
+    mUpdateTime = updateTime;
 
     return 0;
 }
@@ -511,6 +569,7 @@ int HumanInfo::toJson(std::shared_ptr<Json>& value) const
     jsonInfo[JsonKey::BoundCarrierArray] = mBoundCarrierArray;
     jsonInfo[JsonKey::Status] = getHumanStatus();
     jsonInfo[JsonKey::HumanCode] = humanCode;
+    jsonInfo[JsonKey::UpdateTime] = mUpdateTime;
 
     (*value)[JsonKey::HumanInfo] = jsonInfo;
 

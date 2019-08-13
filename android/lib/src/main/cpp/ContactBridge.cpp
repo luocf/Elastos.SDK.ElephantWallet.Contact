@@ -63,6 +63,17 @@ int ContactBridge::start()
     return ret;
 }
 
+int ContactBridge::setUserInfo(int item, const char* value)
+{
+    auto weakUserMgr = mContactImpl->getUserManager();
+    auto userMgr =  SAFE_GET_PTR(weakUserMgr);                                                                      \
+
+    int ret = userMgr->setUserInfo(static_cast<elastos::UserInfo::Item>(item), value);
+    CHECK_ERROR(ret);
+
+    return 0;
+}
+
 int ContactBridge::getHumanInfo(const char* humanCode, std::stringstream* info)
 {
     if(humanCode == nullptr) {
@@ -80,15 +91,16 @@ int ContactBridge::getHumanInfo(const char* humanCode, std::stringstream* info)
     || userMgr->contains(humanCode) == true) {
         std::shared_ptr<elastos::UserInfo> userInfo;
         ret = userMgr->getUserInfo(userInfo);
+        CHECK_ERROR(ret);
         humanInfo = userInfo;
     } else if (friendMgr->contains(humanInfo) == true) {
         std::shared_ptr<elastos::FriendInfo> friendInfo;
         ret = friendMgr->tryGetFriendInfo(humanCode, friendInfo);
+        CHECK_ERROR(ret);
         humanInfo = friendInfo;
     } else {
         return elastos::ErrCode::NotFoundError;
     }
-    CHECK_ERROR(ret);
 
     auto jsonInfo = std::make_shared<elastos::Json>();
     ret = humanInfo->toJson(jsonInfo);
