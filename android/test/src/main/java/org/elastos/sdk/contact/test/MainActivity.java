@@ -338,11 +338,6 @@ public class MainActivity extends Activity {
             return (ErrorPrefix + "Contact is null.");
         }
 
-        Contact.UserInfo info = mContact.getUserInfo();
-        if (mContact.getStatus(info.humanCode) != ContactStatus.Online) {
-            return (ErrorPrefix + "Contact is not online.");
-        }
-
         Helper.scanAddress(this, result -> {
             showMessage(result);
 

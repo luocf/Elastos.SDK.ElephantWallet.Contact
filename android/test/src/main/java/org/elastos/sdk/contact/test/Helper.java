@@ -75,7 +75,9 @@ public class Helper {
             View root = makeAddressView(context, humanCode, presentDevId, ext, listener);
             builder.setView(root);
         } catch (Exception e) {
-            builder.setMessage("Failed to show address." + e);
+            String msg = "Failed to show address.";
+            builder.setMessage(msg + e);
+            Log.w(TAG, msg, e);
         }
 
         builder.setNegativeButton("Cancel", (dialog, which) -> {
@@ -165,7 +167,7 @@ public class Helper {
         builder.setPositiveButton("Accept", (dialog, which) -> {
             listener.onResult(null);
         });
-        builder.setNegativeButton("Cannel", (dialog, which) -> {
+        builder.setNegativeButton("Cancel", (dialog, which) -> {
             dismissDialog();
         });
 
@@ -254,28 +256,29 @@ public class Helper {
         RadioGroup radioGrp = new RadioGroup(context);
         Button btn = new Button(context);
 
+        radioGrp.setOnCheckedChangeListener((group, checkedId) -> {
+            RadioButton checkedView = group.findViewById(checkedId);
+            int mapIdx = group.indexOfChild(checkedView);
+            String checkedVal = (String) humanCode.values().toArray()[mapIdx];
+            String showed = checkedVal;
+            if(mapIdx == humanCode.size() - 1) {
+                showed += "\n----------------\n" + ext;
+            }
+            Bitmap bitmap = makeQRCode(checkedVal);
+            image.setImageBitmap(bitmap);
+            txtCode.setText(showed);
+        });
         for(HashMap.Entry<String, String> entry : humanCode.entrySet()) {
             String key = entry.getKey();
             String value = entry.getValue();
 
             RadioButton radiobtn = new RadioButton(context);
             radiobtn.setText(key + ": " + value.substring(0, 5) + " ... " + value.substring(value.length()-5));
+            radiobtn.setId(View.generateViewId());
 
             radioGrp.addView(radiobtn);
-            radioGrp.setOnCheckedChangeListener((group, checkedId) -> {
-                int mapIdx = checkedId - 1;
-                String checkedVal = (String) humanCode.values().toArray()[mapIdx];
-                String showed = checkedVal;
-                if(mapIdx == humanCode.size() - 1) {
-                    showed += "\n----------------\n" + ext;
-                }
-                Bitmap bitmap = makeQRCode(checkedVal);
-                image.setImageBitmap(bitmap);
-                txtCode.setText(showed);
-            });
-
             if(radioGrp.getChildCount() == 1) {
-                radioGrp.check(radiobtn.getId());
+                radiobtn.setChecked(true);
             }
         }
 

@@ -60,31 +60,31 @@ bool HumanInfo::contains(const std::string& humanCode)
 {
     auto kind = AnalyzeHumanKind(humanCode);
 
+    std::string info;
+
     int ret = ErrCode::UnknownError;
     switch(kind) {
     case HumanKind::Did:
-        {
-            std::string info;
-            ret = getHumanInfo(Item::Did, info);
-        }
+        ret = getHumanInfo(Item::Did, info);
         break;
     case HumanKind::Ela:
-        {
-            std::string info;
-            ret = getHumanInfo(Item::ElaAddress, info);
-        }
+        ret = getHumanInfo(Item::ElaAddress, info);
         break;
     case HumanKind::Carrier:
-        {
-            CarrierInfo info;
-            ret = getCarrierInfoByUsrId(humanCode, info);
+        ret = hasCarrierInfo(humanCode);
+        if(ret >= 0) {
+            info = humanCode;
         }
         break;
     default:
         break;
     }
+    if(ret >= 0
+    && humanCode == info) {
+        return true;
+    }
 
-    return (ret >=0 ? true : false);
+    return false;
 }
 
 bool HumanInfo::contains(const std::shared_ptr<HumanInfo>& humanInfo)
@@ -218,6 +218,23 @@ int HumanInfo::delCarrierInfo(const std::string& carrierCode)
         if(mBoundCarrierArray[idx].mUsrAddr == carrierCode
         || mBoundCarrierArray[idx].mUsrId == carrierCode) {
             mBoundCarrierStatus[idx] = Status::Removed;
+            return idx;
+        }
+    }
+
+    return ErrCode::NotFoundError;
+}
+
+int HumanInfo::hasCarrierInfo(const std::string& carrierCode)
+{
+    Log::D(Log::TAG, " ============    %s", __PRETTY_FUNCTION__);
+    if(carrierCode.empty() == true) {
+        return ErrCode::InvalidArgument;
+    }
+
+    for(auto idx = 0; idx < mBoundCarrierArray.size(); idx++) {
+        if(mBoundCarrierArray[idx].mUsrAddr == carrierCode
+        || mBoundCarrierArray[idx].mUsrId == carrierCode) {
             return idx;
         }
     }

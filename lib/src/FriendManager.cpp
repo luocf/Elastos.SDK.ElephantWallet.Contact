@@ -592,9 +592,24 @@ int FriendManager::addFriendByEla(const std::string& elaAddress, const std::stri
         return ErrCode::InvalidArgument;
     }
 
-    auto msgMgr = SAFE_GET_PTR(mMessageManager);
-    int ret = msgMgr->requestFriend(elaAddress, MessageManager::ChannelType::ElaChain, summary);
+//    auto msgMgr = SAFE_GET_PTR(mMessageManager);
+//    int ret = msgMgr->requestFriend(elaAddress, MessageManager::ChannelType::ElaChain, summary);
+//    CHECK_ERROR(ret)
+
+    bool hasExists = contains(elaAddress);
+    if(hasExists == true) {
+        Log::I(Log::TAG, "Friend %s has been exists.", elaAddress.c_str());
+        return 0;
+    }
+
+    auto friendInfo = std::make_shared<FriendInfo>(weak_from_this());
+    int ret = friendInfo->setHumanInfo(HumanInfo::Item::ElaAddress, elaAddress);
     CHECK_ERROR(ret)
+
+    ret = friendInfo->setHumanStatus(HumanInfo::HumanKind ::Ela, HumanInfo::Status::Offline);
+    CHECK_ERROR(ret)
+
+    mFriendList.push_back(friendInfo);
 
     return 0;
 }
