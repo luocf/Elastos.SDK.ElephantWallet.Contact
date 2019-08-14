@@ -623,7 +623,17 @@ void MessageManager::MessageListener::onReceivedMessage(const std::string& frien
             return;
         }
 
-        humanInfo->mergeHumanInfo(newInfo, HumanInfo::Status::Online);
+        ret = humanInfo->mergeHumanInfo(newInfo, HumanInfo::Status::Online);
+        if(ret == ErrCode::IgnoreMergeOldInfo) {
+            Log::W(Log::TAG, "Ignore to merge friend desc.");
+            return;
+        }
+        if(ret < 0) {
+            Log::E(Log::TAG, "Failed to merge friend desc.");
+            return;
+        }
+
+        onHumanInfoChanged(humanInfo, humanChType);
 
         if(friendMgr->contains(humanInfo)) {
             std::vector<HumanInfo::CarrierInfo> infoArray;
@@ -655,9 +665,9 @@ void MessageManager::MessageListener::onReceivedMessage(const std::string& frien
                 //return;
             //}
         //}
+    } else {
+        onReceivedMessage(humanInfo, humanChType, msgInfo);
     }
-
-    onReceivedMessage(humanInfo, humanChType, msgInfo);
 }
 
 void MessageManager::MessageListener::onSentMessage(int msgIndex, int errCode)
@@ -720,6 +730,10 @@ void MessageManager::MessageListener::onFriendRequest(const std::string& friendC
 
         if(friendDid == userDid) {
             ret = userInfo->mergeHumanInfo(humanInfo, HumanInfo::Status::Offline);
+            if(ret == ErrCode::IgnoreMergeOldInfo) {
+                Log::W(Log::TAG, "Ignore to add other dev.");
+                return;
+            }
             if(ret < 0) {
                 Log::E(Log::TAG, "Failed to add other dev. ret=%d", ret);
                 return;
@@ -745,6 +759,10 @@ void MessageManager::MessageListener::onFriendRequest(const std::string& friendC
         }
         Log::W(Log::TAG, "=============================================== 1");
         ret = friendInfo->mergeHumanInfo(humanInfo, friendStatus);
+        if(ret == ErrCode::IgnoreMergeOldInfo) {
+            Log::W(Log::TAG, "Ignore to add other dev to friend.");
+            return;
+        }
         if(ret < 0) {
             Log::E(Log::TAG, "Failed to add other dev to friend.");
             return;

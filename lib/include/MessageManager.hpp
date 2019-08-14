@@ -83,6 +83,10 @@ public:
         virtual void onFriendStatusChanged(std::shared_ptr<FriendInfo> friendInfo,
                                            ChannelType channelType,
                                            FriendInfo::Status status) = 0;
+
+        virtual void onHumanInfoChanged(std::shared_ptr<HumanInfo> humanInfo,
+                                        ChannelType channelType) = 0;
+
     private:
         virtual void onStatusChanged(const std::string& userCode,
                                      uint32_t channelType,

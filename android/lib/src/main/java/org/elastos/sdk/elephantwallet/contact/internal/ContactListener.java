@@ -2,6 +2,8 @@ package org.elastos.sdk.elephantwallet.contact.internal;
 
 import android.util.Log;
 
+import com.google.gson.Gson;
+
 import org.elastos.sdk.elephantwallet.contact.Contact;
 import org.elastos.tools.crosspl.CrossBase;
 import org.elastos.tools.crosspl.annotation.CrossClass;
@@ -58,6 +60,33 @@ public abstract class ContactListener extends CrossBase {
         public String summary;
     }
 
+    public class InfoEvent extends EventArgs {
+        public InfoEvent(int type, String humanCode, int channelType, byte[] data) {
+            super(type, humanCode, channelType, data);
+
+            String info = new String(data);
+            if(info.contains(JsonKey.IsMyself) == true) {
+                Contact.UserInfo.UserJson json = new Gson().fromJson(info, Contact.UserInfo.UserJson.class);
+                humanInfo = new UserInfo();
+                humanInfo.fromJson(json);
+            } else if(info.contains(JsonKey.IsFriend) == true) {
+                Contact.FriendInfo.FriendJson json = new Gson().fromJson(info, Contact.FriendInfo.FriendJson.class);
+                humanInfo = new FriendInfo();
+                humanInfo.fromJson(json);
+            } else {
+               Log.w(Contact.TAG, "InfoEvent: Failed to parse human data.");
+            }
+        }
+        @Override
+        public String toString() {
+            return "StatusEvent" + "[type=" + type
+                    + ",humanCode=" + humanCode + ",channelType=" + channelType
+                    + ",humanInfo=" + humanInfo +"]";
+        }
+
+        public HumanInfo humanInfo;
+    }
+
     public ContactListener() {
         super(ContactListener.class.getName(), 0);
     }
@@ -80,15 +109,13 @@ public abstract class ContactListener extends CrossBase {
         EventArgs.Type type = EventArgs.Type.valueOf(eventType);
         switch (type) {
             case StatusChanged:
-            case FriendStatusChanged:
                 args = new StatusEvent(eventType, humanCode, channelType, data);
-                break;
-            case ReceivedMessage:
-                break;
-            case SentMessage:
                 break;
             case FriendRequest:
                 args = new RequestEvent(eventType, humanCode, channelType, data);
+                break;
+            case HumanInfoChanged:
+                args = new InfoEvent(eventType, humanCode, channelType, data);
                 break;
             default:
                 throw new RuntimeException("Unimplemented type: " + type);

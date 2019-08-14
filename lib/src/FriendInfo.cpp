@@ -100,6 +100,7 @@ int FriendInfo::toJson(std::shared_ptr<Json>& value) const
     CHECK_ERROR(ret)
 
     (*value)[JsonKey::Alias] = mAlias;
+    (*value)[JsonKey::IsFriend] = true;
 
     return 0;
 }

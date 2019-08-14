@@ -3,10 +3,11 @@ package org.elastos.sdk.elephantwallet.contact.internal;
 public class EventArgs {
     public enum Type {
         StatusChanged(101),
-        ReceivedMessage(102),
-        SentMessage(103),
+//        ReceivedMessage(102),
+//        SentMessage(103),
         FriendRequest(104),
-        FriendStatusChanged(105);
+//        FriendStatusChanged(105),
+        HumanInfoChanged(106);
 
         public static Type valueOf(int id) {
             Type[] values = Type.values();

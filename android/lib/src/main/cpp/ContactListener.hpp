@@ -30,10 +30,11 @@ public:
 
     enum class EventType: int {
         StatusChanged = 101,
-        ReceivedMessage = 102,
-        SentMessage = 103,
+//        ReceivedMessage = 102,
+//        SentMessage = 103,
         FriendReuqest = 104,
-        FriendStatusChanged = 105,
+//        FriendStatusChanged = 105,
+        HumanInfoChanged = 106,
     };
 
     enum class ContactChannel: int { //TODO: Same as elastos::MessageManager::ChannelType, need merge to one.

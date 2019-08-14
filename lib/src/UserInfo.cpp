@@ -100,6 +100,8 @@ int UserInfo::toJson(std::shared_ptr<Json>& value) const
     ret = IdentifyCode::toJson(value);
     CHECK_ERROR(ret)
 
+    (*value)[JsonKey::IsMyself] = true;
+
     return 0;
 }
 

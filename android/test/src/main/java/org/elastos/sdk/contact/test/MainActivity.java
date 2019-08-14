@@ -514,17 +514,15 @@ public class MainActivity extends Activity {
         switch (event.type) {
             case StatusChanged:
                 break;
-            case ReceivedMessage:
-                break;
-            case SentMessage:
-                break;
             case FriendRequest:
                 Contact.Listener.RequestEvent requestEvent = (Contact.Listener.RequestEvent) event;
                 Helper.showFriendRequest(this, requestEvent.humanCode, requestEvent.summary, v -> {
                     mContact.acceptFriend(requestEvent.humanCode);
                 });
                 break;
-            case FriendStatusChanged:
+            case HumanInfoChanged:
+                String msg = event.humanCode + " info changed: " + new String(event.data);
+                showEvent(msg);
                 break;
             default:
                 Log.w(TAG, "Unprocessed event: " + event);

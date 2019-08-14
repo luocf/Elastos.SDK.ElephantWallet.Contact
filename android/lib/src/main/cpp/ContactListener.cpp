@@ -210,6 +210,21 @@ std::shared_ptr<elastos::MessageManager::MessageListener> ContactListener::makeM
             sContactListenerInstance->onEvent(EventType::StatusChanged, humanCode,
                                               static_cast<ContactChannel>(channelType), &data);
         }
+
+        virtual void onHumanInfoChanged(std::shared_ptr<elastos::HumanInfo> humanInfo,
+                                           elastos::MessageManager::ChannelType channelType) override {
+            Log::I(Log::TAG, "%s", __PRETTY_FUNCTION__);
+            std::string humanCode;
+            humanInfo->getHumanCode(humanCode);
+
+            auto jsonInfo = std::make_shared<elastos::Json>();
+            humanInfo->toJson(jsonInfo);
+            std::string info = jsonInfo->dump();
+
+            std::span<uint8_t> data(reinterpret_cast<uint8_t*>(info.data()), info.size());
+            sContactListenerInstance->onEvent(EventType::HumanInfoChanged, humanCode,
+                                              static_cast<ContactChannel>(channelType), &data);
+        }
     };
 
     return std::make_shared<MessageListener>();

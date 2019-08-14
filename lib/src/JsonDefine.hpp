@@ -22,6 +22,8 @@ struct JsonKey {
     static constexpr const char* StatusMap          = "StatusMap";
     static constexpr const char* Status             = "Status";
     static constexpr const char* HumanCode          = "HumanCode";
+    static constexpr const char* IsMyself          = "IsMyself";
+    static constexpr const char* IsFriend          = "IsFriend";
 
     static constexpr const char* DeviceId   = "DevId";
     static constexpr const char* DeviceName = "DevName";

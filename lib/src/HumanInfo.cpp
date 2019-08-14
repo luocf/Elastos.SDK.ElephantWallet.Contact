@@ -356,6 +356,8 @@ int HumanInfo::getHumanInfo(Item item, std::string& value) const
 
 int HumanInfo::mergeHumanInfo(const HumanInfo& value, const Status status)
 {
+    bool changed = false;
+
     auto it = value.mCommonInfoMap.find(Item::ChainPubKey);
     if(it != value.mCommonInfoMap.end() && it->second.empty() == false) {
         if(this->mCommonInfoMap[Item::ChainPubKey].empty() == false
@@ -394,13 +396,17 @@ int HumanInfo::mergeHumanInfo(const HumanInfo& value, const Status status)
             continue;
         }
         CHECK_ERROR(ret)
+
+        changed = true;
     }
 
     if(this->mUpdateTime < value.mUpdateTime) {
         this->mCommonInfoMap = value.mCommonInfoMap;
+        this->mUpdateTime = value.mUpdateTime;
+        changed = true;
     }
 
-    return 0;
+    return (changed == true ? 0 : ErrCode::IgnoreMergeOldInfo);
 }
 
 int HumanInfo::setHumanStatus(HumanInfo::HumanKind kind, const HumanInfo::Status status)
