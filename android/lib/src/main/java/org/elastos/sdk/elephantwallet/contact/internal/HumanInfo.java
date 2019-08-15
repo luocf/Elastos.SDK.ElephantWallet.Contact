@@ -51,8 +51,6 @@ public class HumanInfo {
             public String devId;
             @SerializedName(JsonKey.DeviceName)
             public String devName;
-            @SerializedName(JsonKey.UpdateTime)
-            public long updateTime;
 
             @Override
             public String toString() { return Utils.ToString(this); }
@@ -64,6 +62,8 @@ public class HumanInfo {
         public String usrId;
         @SerializedName(JsonKey.DeviceInfo)
         public DeviceInfo devInfo;
+        @SerializedName(JsonKey.UpdateTime)
+        public long updateTime;
 
         @Override
         public String toString() { return Utils.ToString(this); }
@@ -73,6 +73,8 @@ public class HumanInfo {
     public List<CarrierInfo> boundCarrierArray;
     @SerializedName(JsonKey.CommonInfoMap)
     private HashMap<Integer, String> commonInfoMap;
+    @SerializedName(JsonKey.WalletAddressMap)
+    private HashMap<String, String> walletAddressMap;
     @SerializedName(JsonKey.Status)
     public ContactStatus status;
     @SerializedName(JsonKey.HumanCode)
@@ -103,6 +105,7 @@ public class HumanInfo {
     @CallSuper
     public int fromJson(HumanJson info) {
         this.commonInfoMap = null;
+        this.walletAddressMap = info.humanInfo.walletAddressMap;
         this.boundCarrierArray = info.humanInfo.boundCarrierArray;
         this.status = info.humanInfo.status;
         this.humanCode = info.humanInfo.humanCode;

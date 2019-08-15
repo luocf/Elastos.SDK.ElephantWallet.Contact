@@ -225,6 +225,30 @@ int UserManager::setUserInfo(UserInfo::Item item, const std::string& value)
     return 0;
 }
 
+int UserManager::setWalletAddress(const std::string& name, const std::string& value)
+{
+    if(mUserInfo.get() == nullptr) {
+        return ErrCode::NotReadyError;
+    }
+
+    int ret = mUserInfo->setWalletAddress(name, value);
+    CHECK_ERROR(ret);
+
+    std::string userDetails;
+    ret = mUserInfo->serializeDetails(userDetails);
+    CHECK_ERROR(ret);
+
+    auto dcClient = DidChnClient::GetInstance();
+    ret = dcClient->cacheDidProp(DidChnClient::NameDetailKey, userDetails);
+    CHECK_ERROR(ret)
+
+    auto msgMgr = SAFE_GET_PTR(mMessageManager);
+    ret = msgMgr->broadcastDesc(MessageManager::ChannelType::Carrier);
+    CHECK_ERROR(ret)
+
+    return 0;
+}
+
 bool UserManager::contains(const std::string& userCode)
 {
     return mUserInfo->contains(userCode);

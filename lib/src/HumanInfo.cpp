@@ -47,6 +47,7 @@ HumanInfo::HumanInfo()
     : mBoundCarrierArray()
     , mBoundCarrierStatus()
     , mCommonInfoMap()
+    , mWalletAddressMap()
     , mStatusMap()
     , mUpdateTime()
 {
@@ -329,6 +330,8 @@ int HumanInfo::setHumanInfo(Item item, const std::string& value)
         CHECK_ERROR(ret)
         ret = HumanInfo::setHumanInfo(Item::ElaAddress, expectedElaAddr);
         CHECK_ERROR(ret)
+
+        mWalletAddressMap["ELA"] = expectedElaAddr;
     }
 
     mCommonInfoMap[item] = value;
@@ -402,6 +405,7 @@ int HumanInfo::mergeHumanInfo(const HumanInfo& value, const Status status)
 
     if(this->mUpdateTime < value.mUpdateTime) {
         this->mCommonInfoMap = value.mCommonInfoMap;
+        this->mWalletAddressMap = value.mWalletAddressMap;
         this->mUpdateTime = value.mUpdateTime;
         changed = true;
     }
@@ -489,6 +493,7 @@ int HumanInfo::serialize(std::string& value, bool summaryOnly) const
     Json jsonInfo = Json::object();
 
     jsonInfo[JsonKey::CommonInfoMap] = mCommonInfoMap;
+    jsonInfo[JsonKey::WalletAddressMap] = mWalletAddressMap;
     jsonInfo[JsonKey::BoundCarrierArray] = mBoundCarrierArray;
     //if(summaryOnly == true) {
         //for(auto& carrierInfo: jsonInfo[JsonKey::BoundCarrierArray]) {
@@ -524,6 +529,7 @@ int HumanInfo::deserialize(const std::string& value, bool summaryOnly)
 //    }
 
     mCommonInfoMap = jsonInfo[JsonKey::CommonInfoMap].get<std::map<Item, std::string>>();
+    mWalletAddressMap = jsonInfo[JsonKey::WalletAddressMap].get<std::map<std::string, std::string>>();
     mBoundCarrierArray = jsonInfo[JsonKey::BoundCarrierArray].get<std::vector<CarrierInfo>>();
 
     if(summaryOnly == false) {
@@ -546,6 +552,7 @@ int HumanInfo::serializeDetails(std::string& value)
     Json jsonInfo = Json::object();
 
     jsonInfo[JsonKey::CommonInfoMap] = details;
+    jsonInfo[JsonKey::WalletAddressMap] = mWalletAddressMap;
     jsonInfo[JsonKey::UpdateTime] = mUpdateTime;
 
     value = jsonInfo.dump();
@@ -564,6 +571,7 @@ int HumanInfo::deserializeDetails(const std::string& value)
     }
 
     auto commonInfoMap = jsonInfo[JsonKey::CommonInfoMap].get<std::map<Item, std::string>>();
+    auto walletAddressMap = jsonInfo[JsonKey::WalletAddressMap].get<std::map<std::string, std::string>>();
     auto updateTime = jsonInfo[JsonKey::UpdateTime];
     if(this->mUpdateTime >= updateTime) {
         return ErrCode::IgnoreMergeOldInfo;
@@ -571,6 +579,9 @@ int HumanInfo::deserializeDetails(const std::string& value)
 
     for(const auto [key, value]: commonInfoMap) {
         mCommonInfoMap[key] = value;
+    }
+    for(const auto [key, value]: walletAddressMap) {
+        mWalletAddressMap[key] = value;
     }
     mUpdateTime = updateTime;
 
@@ -589,6 +600,7 @@ int HumanInfo::toJson(std::shared_ptr<Json>& value) const
 
     Json jsonInfo;
     jsonInfo[JsonKey::CommonInfoMap] = mCommonInfoMap;
+    jsonInfo[JsonKey::WalletAddressMap] = mWalletAddressMap;
     jsonInfo[JsonKey::BoundCarrierArray] = mBoundCarrierArray;
     jsonInfo[JsonKey::Status] = getHumanStatus();
     jsonInfo[JsonKey::HumanCode] = humanCode;

@@ -87,13 +87,13 @@ public class Helper {
         showDialog(builder);
     }
 
-    public static void showSetDetails(Context context, String separator, OnListener listener) {
+    public static void showSetDetails(Context context, List<String> checkList, String separator, OnListener listener) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle("Set Details");
 
         RadioGroup radioGrp = new RadioGroup(context);
         EditText editView = new EditText(context);
-        View root = makeSetDetailView(context, radioGrp, editView);
+        View root = makeSetDetailView(context, radioGrp, checkList, editView);
         builder.setView(root);
 
         builder.setPositiveButton("OK", (dialog, which) -> {
@@ -304,7 +304,7 @@ public class Helper {
         return root;
     }
 
-    private static View makeSetDetailView(Context context, RadioGroup radioGrp, EditText editView) {
+    private static View makeSetDetailView(Context context, RadioGroup radioGrp, List<String> checkList, EditText editView) {
         TextView txtView = new TextView(context);
 
         LinearLayout root = new LinearLayout(context);
@@ -313,18 +313,13 @@ public class Helper {
         root.addView(txtView);
         root.addView(editView);
 
-        HashMap<Integer, String> details = new HashMap<Integer, String>() {{
-            put(View.generateViewId(), Contact.UserInfo.Item.Nickname.name());
-            put(View.generateViewId(), Contact.UserInfo.Item.Avatar.name());
-            put(View.generateViewId(), Contact.UserInfo.Item.Gender.name());
-            put(View.generateViewId(), Contact.UserInfo.Item.Description.name());
-        }};
-        for(Map.Entry<Integer, String> entry: details.entrySet()) {
-            RadioButton btn = new RadioButton(context);
-            btn.setId(entry.getKey());
-            btn.setText(entry.getValue());
-            radioGrp.addView(btn);
-            radioGrp.check(entry.getKey());
+        for(String it: checkList) {
+            RadioButton radiobtn = new RadioButton(context);
+            radiobtn.setText(it);
+            radioGrp.addView(radiobtn);
+            if(radioGrp.getChildCount() == 1) {
+                radiobtn.setChecked(true);
+            }
         }
 
         txtView.setText("Value: ");

@@ -45,6 +45,8 @@ public:
     int syncInfoDownloadFromDidChain();
     int syncInfoUploadToDidChain();
 
+    int setWalletAddress(const char* name, const char* value);
+
 private:
     /*** type define ***/
 

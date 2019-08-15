@@ -98,6 +98,7 @@ protected:
     std::vector<CarrierInfo> mBoundCarrierArray;
     std::vector<Status> mBoundCarrierStatus;
     std::map<Item, std::string> mCommonInfoMap;
+    std::map<std::string, std::string> mWalletAddressMap;
     std::map<HumanKind, Status> mStatusMap;
     int64_t mUpdateTime;
 

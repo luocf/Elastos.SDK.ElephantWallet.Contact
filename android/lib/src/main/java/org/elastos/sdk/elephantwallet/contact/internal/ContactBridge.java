@@ -45,7 +45,6 @@ public class ContactBridge extends CrossBase {
         return ret;
     }
 
-
     public Contact.UserInfo getUserInfo() {
         assert(mListener != null);
 
@@ -164,6 +163,9 @@ public class ContactBridge extends CrossBase {
 
     @CrossInterface
     public native int syncInfoUploadToDidChain();
+
+    @CrossInterface
+    public native int setWalletAddress(String name, String value);
 
     @CrossInterface
     private native void setListener(CrossBase listener);

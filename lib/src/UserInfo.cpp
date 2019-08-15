@@ -12,6 +12,7 @@
 #include <JsonDefine.hpp>
 #include <Platform.hpp>
 #include <SafePtr.hpp>
+#include <DateTime.hpp>
 
 namespace elastos {
 
@@ -144,6 +145,22 @@ int UserInfo::mergeHumanInfo(const HumanInfo& value, const Status status)
 
     auto userMgr = SAFE_GET_PTR(mUserManager);
     ret = userMgr->saveLocalData();
+    CHECK_ERROR(ret)
+
+    return 0;
+}
+
+int UserInfo::setWalletAddress(const std::string& name, const std::string& value)
+{
+    if(name.empty() == true) {
+        return ErrCode::InvalidArgument;
+    }
+
+    mWalletAddressMap[name] = value;
+    HumanInfo::mUpdateTime = DateTime::CurrentMS();
+
+    auto userMgr = SAFE_GET_PTR(mUserManager);
+    int ret = userMgr->saveLocalData();
     CHECK_ERROR(ret)
 
     return 0;

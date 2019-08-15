@@ -33,8 +33,10 @@ import org.json.JSONObject;
 
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -133,6 +135,9 @@ public class MainActivity extends Activity {
                 break;
             case R.id.set_user_details:
                 message = showSetUserDetails();
+                break;
+            case R.id.set_wallet_address:
+                message = showSetWalletAddress();
                 break;
             case R.id.sync_upload:
                 message = testSyncUpload();
@@ -271,9 +276,9 @@ public class MainActivity extends Activity {
             int ret = mContact.start();
 //        });
 //        mThread.start();
-//        if(ret < 0) {
-//            return "Failed to start contact instance. ret=" + ret;
-//        }
+        if(ret < 0) {
+            return "Failed to start contact instance. ret=" + ret;
+        }
 
         return "Success to start contact instance.";
     }
@@ -313,8 +318,15 @@ public class MainActivity extends Activity {
             return ErrorPrefix + "Contact is null.";
         }
 
+        LinkedList<String> checkList = new LinkedList<>(Arrays.asList(
+            Contact.UserInfo.Item.Nickname.name(),
+            Contact.UserInfo.Item.Avatar.name(),
+            Contact.UserInfo.Item.Gender.name(),
+            Contact.UserInfo.Item.Description.name()
+        ));
         String separator = ":-:-:";
-        Helper.showSetDetails(this, separator, (result) -> {
+
+        Helper.showSetDetails(this, checkList, separator, (result) -> {
             HashMap<String, Contact.UserInfo.Item> details = new HashMap<String, Contact.UserInfo.Item>() {{
                 put(Contact.UserInfo.Item.Nickname.name(), Contact.UserInfo.Item.Nickname);
                 put(Contact.UserInfo.Item.Avatar.name(), Contact.UserInfo.Item.Avatar);
@@ -327,6 +339,30 @@ public class MainActivity extends Activity {
             String value = keyValue[1];
 
             mContact.setUserInfo(item, value);
+        });
+
+        Contact.UserInfo info = mContact.getUserInfo();
+        return info.toString();
+    }
+
+    private String showSetWalletAddress() {
+        if (mContact == null) {
+            return ErrorPrefix + "Contact is null.";
+        }
+
+        LinkedList<String> checkList = new LinkedList<>(Arrays.asList(
+                "ELA",
+                "BTC",
+                "ETH"
+        ));
+        String separator = ":-:-:";
+
+        Helper.showSetDetails(this, checkList, separator, (result) -> {
+            String[] keyValue = result.split(separator);
+            String name = keyValue[0];
+            String value = keyValue[1];
+
+            mContact.setWalletAddress(name, value);
         });
 
         Contact.UserInfo info = mContact.getUserInfo();

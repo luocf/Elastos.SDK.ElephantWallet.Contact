@@ -33,6 +33,8 @@
         android:title="   |- Get User Info" />
     <item android:id="@+id/set_user_details"
         android:title="   |- Set User Details" />
+    <item android:id="@+id/set_wallet_address"
+        android:title="   |- Set Wallet Address" />
     <item android:id="@+id/sync_upload"
         android:title="   |- Sync Upload" />
     <item android:id="@+id/sync_download"

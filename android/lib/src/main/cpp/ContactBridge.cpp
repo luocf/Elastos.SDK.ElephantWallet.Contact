@@ -222,6 +222,17 @@ int ContactBridge::syncInfoUploadToDidChain()
     return 0;
 }
 
+int ContactBridge::setWalletAddress(const char* name, const char* value)
+{
+    auto weakUserMgr = mContactImpl->getUserManager();
+    auto userMgr =  SAFE_GET_PTR(weakUserMgr);                                                                      \
+
+    int ret = userMgr->setWalletAddress(name, value);
+    CHECK_ERROR(ret);
+
+    return 0;
+}
+
 /***********************************************/
 /***** class protected function implement  *****/
 /***********************************************/

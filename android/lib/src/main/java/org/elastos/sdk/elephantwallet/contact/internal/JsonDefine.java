@@ -10,6 +10,7 @@ final class JsonKey {
     static final String BoundCarrierArray  = "BoundCarrierArray";
     static final String BoundCarrierStatus = "BoundCarrierStatus";
     static final String CommonInfoMap      = "CommonInfoMap";
+    static final String WalletAddressMap   = "WalletAddressMap";
     static final String StatusMap          = "StatusMap";
     static final String Status             = "Status";
     static final String HumanCode          = "HumanCode";

@@ -41,6 +41,8 @@ public:
     virtual int setHumanInfo(Item item, const std::string& value) override;
     virtual int mergeHumanInfo(const HumanInfo& value, const Status status) override;
 
+    virtual int setWalletAddress(const std::string& name, const std::string& value);
+
     virtual int setIdentifyCode(Type type, const std::string& value) override;
 
 private:
