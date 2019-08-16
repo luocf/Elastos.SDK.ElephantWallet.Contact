@@ -65,6 +65,10 @@ int ContactBridge::start()
 
 int ContactBridge::setUserInfo(int item, const char* value)
 {
+    if(mContactImpl->isStarted() == false) {
+        return elastos::ErrCode::NotReadyError;
+    }
+
     auto weakUserMgr = mContactImpl->getUserManager();
     auto userMgr =  SAFE_GET_PTR(weakUserMgr);                                                                      \
 
@@ -76,6 +80,10 @@ int ContactBridge::setUserInfo(int item, const char* value)
 
 int ContactBridge::getHumanInfo(const char* humanCode, std::stringstream* info)
 {
+    if(mContactImpl->isStarted() == false) {
+        return elastos::ErrCode::NotReadyError;
+    }
+
     if(humanCode == nullptr) {
         return elastos::ErrCode::InvalidArgument;
     }
@@ -112,6 +120,10 @@ int ContactBridge::getHumanInfo(const char* humanCode, std::stringstream* info)
 
 int ContactBridge::getHumanStatus(const char* humanCode)
 {
+    if(mContactImpl->isStarted() == false) {
+        return elastos::ErrCode::NotReadyError;
+    }
+
     auto weakUserMgr = mContactImpl->getUserManager();
     auto userMgr =  SAFE_GET_PTR(weakUserMgr);                                                                      \
 
@@ -131,6 +143,10 @@ int ContactBridge::getHumanStatus(const char* humanCode)
 
 int ContactBridge::addFriend(const char* friendCode, const char* summary)
 {
+    if(mContactImpl->isStarted() == false) {
+        return elastos::ErrCode::NotReadyError;
+    }
+
     auto weakFriendMgr = mContactImpl->getFriendManager();
     auto friendMgr =  SAFE_GET_PTR(weakFriendMgr);                                                                      \
 
@@ -142,6 +158,10 @@ int ContactBridge::addFriend(const char* friendCode, const char* summary)
 
 int ContactBridge::removeFriend(const char* friendCode)
 {
+    if(mContactImpl->isStarted() == false) {
+        return elastos::ErrCode::NotReadyError;
+    }
+
     auto weakFriendMgr = mContactImpl->getFriendManager();
     auto friendMgr =  SAFE_GET_PTR(weakFriendMgr);                                                                      \
 
@@ -153,6 +173,10 @@ int ContactBridge::removeFriend(const char* friendCode)
 
 int ContactBridge::acceptFriend(const char* friendCode)
 {
+    if(mContactImpl->isStarted() == false) {
+        return elastos::ErrCode::NotReadyError;
+    }
+
     auto weakFriendMgr = mContactImpl->getFriendManager();
     auto friendMgr =  SAFE_GET_PTR(weakFriendMgr);                                                                      \
 
@@ -164,6 +188,10 @@ int ContactBridge::acceptFriend(const char* friendCode)
 
 int ContactBridge::getFriendList(std::stringstream* info)
 {
+    if(mContactImpl->isStarted() == false) {
+        return elastos::ErrCode::NotReadyError;
+    }
+
     auto weakFriendMgr = mContactImpl->getFriendManager();
     auto friendMgr =  SAFE_GET_PTR(weakFriendMgr);                                                                      \
 
@@ -186,6 +214,10 @@ int ContactBridge::getFriendList(std::stringstream* info)
 
 int ContactBridge::sendMessage(const char* friendCode, int chType, CrossBase* message)
 {
+    if(mContactImpl->isStarted() == false) {
+        return elastos::ErrCode::NotReadyError;
+    }
+
     auto msgInfo = dynamic_cast<ContactMessage*>(message);
     if(msgInfo == nullptr) {
         return elastos::ErrCode::InvalidArgument;
@@ -208,6 +240,10 @@ int ContactBridge::sendMessage(const char* friendCode, int chType, CrossBase* me
 
 int ContactBridge::syncInfoDownloadFromDidChain()
 {
+    if(mContactImpl->isStarted() == false) {
+        return elastos::ErrCode::NotReadyError;
+    }
+
     int ret = mContactImpl->syncInfoDownloadFromDidChain();
     CHECK_ERROR(ret);
 
@@ -216,6 +252,10 @@ int ContactBridge::syncInfoDownloadFromDidChain()
 
 int ContactBridge::syncInfoUploadToDidChain()
 {
+    if(mContactImpl->isStarted() == false) {
+        return elastos::ErrCode::NotReadyError;
+    }
+
     int ret = mContactImpl->syncInfoUploadToDidChain();
     CHECK_ERROR(ret);
 
@@ -224,6 +264,10 @@ int ContactBridge::syncInfoUploadToDidChain()
 
 int ContactBridge::setWalletAddress(const char* name, const char* value)
 {
+    if(mContactImpl->isStarted() == false) {
+        return elastos::ErrCode::NotReadyError;
+    }
+
     auto weakUserMgr = mContactImpl->getUserManager();
     auto userMgr =  SAFE_GET_PTR(weakUserMgr);                                                                      \
 

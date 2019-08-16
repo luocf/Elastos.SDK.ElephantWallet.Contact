@@ -57,6 +57,7 @@ public:
     std::weak_ptr<MessageManager> getMessageManager();
 
     int start();
+    bool isStarted();
 
     int syncInfoDownloadFromDidChain();
     int syncInfoUploadToDidChain();
@@ -77,8 +78,8 @@ private:
     std::shared_ptr<UserManager> mUserManager;
     std::shared_ptr<FriendManager> mFriendManager;
     std::shared_ptr<MessageManager> mMessageManager;
-
     std::shared_ptr<Config> mConfig;
+    bool mStarted;
 }; // class Contact
 
 } // namespace elastos

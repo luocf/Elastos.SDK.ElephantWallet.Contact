@@ -49,6 +49,7 @@ public:
     constexpr static const int IgnoreMergeOldInfo = -14;
     constexpr static const int EmptyInfoError = -15;
 	constexpr static const int InvalidFriendCode = -16;
+	constexpr static const int RepeatOperationError = -17;
 
     constexpr static const int InvalidLocalDataDir = -50;
     constexpr static const int NoSecurityListener = -51;

@@ -160,7 +160,7 @@ public class MainActivity extends Activity {
                 break;
 
             case R.id.show_cached_didprop:
-                message = sendCachedDidProp();
+                message = getCachedDidProp();
                 break;
         }
         showMessage(message);
@@ -299,6 +299,9 @@ public class MainActivity extends Activity {
         }
 
         Contact.UserInfo info = mContact.getUserInfo();
+        if(info == null) {
+            return ErrorPrefix + "Failed to get user info.";
+        }
 
         LinkedHashMap<String, String> humanCode = new LinkedHashMap<String, String>() {{
             put("Did", info.did);
@@ -338,10 +341,17 @@ public class MainActivity extends Activity {
             Contact.UserInfo.Item item = details.get(keyValue[0]);
             String value = keyValue[1];
 
-            mContact.setUserInfo(item, value);
+            int ret = mContact.setUserInfo(item, value);
+            if(ret < 0) {
+                showMessage(ErrorPrefix + "Failed to set " + result + ". ret=" + ret);
+            }
         });
 
         Contact.UserInfo info = mContact.getUserInfo();
+        if(info == null) {
+            return ErrorPrefix + "Failed to get user info.";
+        }
+
         return info.toString();
     }
 
@@ -362,10 +372,17 @@ public class MainActivity extends Activity {
             String name = keyValue[0];
             String value = keyValue[1];
 
-            mContact.setWalletAddress(name, value);
+            int ret = mContact.setWalletAddress(name, value);
+            if(ret < 0) {
+                showMessage(ErrorPrefix + "Failed to set " + result + ". ret=" + ret);
+            }
         });
 
         Contact.UserInfo info = mContact.getUserInfo();
+        if(info == null) {
+            return ErrorPrefix + "Failed to get user info.";
+        }
+
         return info.toString();
     }
 
@@ -417,6 +434,10 @@ public class MainActivity extends Activity {
             return ErrorPrefix + "Contact is null.";
         }
         Contact.UserInfo info = mContact.getUserInfo();
+        if(info == null) {
+            return ErrorPrefix + "Failed to get user info.";
+        }
+
         if (info.status != ContactStatus.Online) {
             return ErrorPrefix + "Contact is not online.";
         }
@@ -454,6 +475,10 @@ public class MainActivity extends Activity {
             return ErrorPrefix + "Contact is null.";
         }
         Contact.UserInfo info = mContact.getUserInfo();
+        if(info == null) {
+            return ErrorPrefix + "Failed to get user info.";
+        }
+
         if (info.status != ContactStatus.Online) {
             return ErrorPrefix + "Contact is not online.";
         }
@@ -478,7 +503,7 @@ public class MainActivity extends Activity {
         return "Success to send message.";
     }
 
-    private String sendCachedDidProp() {
+    private String getCachedDidProp() {
         if (mContact == null) {
             return ErrorPrefix + "Contact is null.";
         }

@@ -80,6 +80,10 @@ void Contact::setListener(std::shared_ptr<SecurityManager::SecurityListener> sec
 
 int Contact::start()
 {
+    if(mStarted == true) {
+        return ErrCode::RepeatOperationError;
+    }
+
     int ret = initGlobal();
     CHECK_ERROR(ret)
 
@@ -110,7 +114,13 @@ int Contact::start()
     ret = dcClient->startMonitor();
     CHECK_ERROR(ret)
 
+    mStarted = true;
     return 0;
+}
+
+bool Contact::isStarted()
+{
+    return mStarted;
 }
 
 int Contact::syncInfoDownloadFromDidChain()
@@ -181,6 +191,7 @@ Contact::Contact()
     , mFriendManager(std::make_shared<FriendManager>(mSecurityManager))
     , mMessageManager(std::make_shared<MessageManager>(mSecurityManager, mUserManager, mFriendManager))
     , mConfig()
+    , mStarted(false)
 {
 }
 

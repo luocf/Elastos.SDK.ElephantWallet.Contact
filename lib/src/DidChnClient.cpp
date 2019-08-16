@@ -65,7 +65,7 @@ int DidChnClient::InitInstance(std::weak_ptr<Config> config,
 
 std::shared_ptr<DidChnClient> DidChnClient::GetInstance()
 {
-    assert(gDidChnClient.get() != nullptr);
+//    assert(gDidChnClient.get() != nullptr);
     return gDidChnClient;
 }
 
