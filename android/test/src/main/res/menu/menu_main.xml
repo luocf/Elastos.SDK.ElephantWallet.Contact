@@ -20,10 +20,8 @@
 
     <item android:enabled="false"
         android:title="Contact" />
-    <item android:id="@+id/new_contact"
-        android:title="   |- New Contact" />
-    <item android:id="@+id/start_contact"
-        android:title="   |- Start Contact" />
+    <item android:id="@+id/new_and_start_contact"
+        android:title="   |- New and Start Contact" />
     <item android:id="@+id/del_contact"
         android:title="   `- Del Contact" />
 

@@ -72,7 +72,7 @@ public class MainActivity extends Activity {
             if (devId.startsWith("fa65a")) {
                 mSavedMnemonic = UploadedMnemonic1;
             }
-            mSavedMnemonic = UploadedMnemonic1;
+//            mSavedMnemonic = UploadedMnemonic1;
 
             newAndSaveMnemonic(mSavedMnemonic);
         }
@@ -120,11 +120,9 @@ public class MainActivity extends Activity {
                 message = importMnemonic();
                 break;
 
-            case R.id.new_contact:
+            case R.id.new_and_start_contact:
                 message = testNewContact();
-                break;
-            case R.id.start_contact:
-                message = testStart();
+                message += testStart();
                 break;
             case R.id.del_contact:
                 message = testDelContact();
@@ -171,6 +169,7 @@ public class MainActivity extends Activity {
     private void clearEvent() {
         TextView txtCbMsg = findViewById(R.id.txt_event);
         txtCbMsg.setText("");
+        txtCbMsg.invalidate();
     }
 
     private void getStarted() {
@@ -760,6 +759,6 @@ public class MainActivity extends Activity {
     private static final String SavedMnemonicKey = "mnemonic";
 
 
-    private static final String UploadedMnemonic1 = "month business urban nurse joy derive acquire snap venue hello city buyer";
-    private static final String UploadedMnemonic2 = "ramp lady bulb stand silk dinosaur goose viable bid output month shock";
+    private static final String UploadedMnemonic1 = "grab fiber sail lonely film salmon seven tackle solid news ribbon giggle";
+//    private static final String UploadedMnemonic2 = "rare diamond fit plastic friend pull hollow adjust radar fun hedgehog endless";
 }

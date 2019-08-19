@@ -101,7 +101,7 @@ int ContactBridge::getHumanInfo(const char* humanCode, std::stringstream* info)
         ret = userMgr->getUserInfo(userInfo);
         CHECK_ERROR(ret);
         humanInfo = userInfo;
-    } else if (friendMgr->contains(humanInfo) == true) {
+    } else if (friendMgr->contains(humanCode) == true) {
         std::shared_ptr<elastos::FriendInfo> friendInfo;
         ret = friendMgr->tryGetFriendInfo(humanCode, friendInfo);
         CHECK_ERROR(ret);
@@ -126,17 +126,26 @@ int ContactBridge::getHumanStatus(const char* humanCode)
 
     auto weakUserMgr = mContactImpl->getUserManager();
     auto userMgr =  SAFE_GET_PTR(weakUserMgr);                                                                      \
+    auto weakFriendMgr = mContactImpl->getFriendManager();
+    auto friendMgr =  SAFE_GET_PTR(weakFriendMgr);                                                                      \
 
-    std::shared_ptr<elastos::UserInfo> userInfo;
-    int ret = userMgr->getUserInfo(userInfo);
-    CHECK_ERROR(ret);
-
-    elastos::HumanInfo::Status status;
-    if(userInfo->contains(humanCode) == true) {
-        status = userInfo->getHumanStatus();
+    std::shared_ptr<elastos::HumanInfo> humanInfo;
+    if(std::string("-user-info-") == humanCode
+    || userMgr->contains(humanCode) == true) {
+        std::shared_ptr<elastos::UserInfo> userInfo;
+        int ret = userMgr->getUserInfo(userInfo);
+        CHECK_ERROR(ret);
+        humanInfo = userInfo;
+    } else if (friendMgr->contains(humanCode) == true) {
+        std::shared_ptr<elastos::FriendInfo> friendInfo;
+        int ret = friendMgr->tryGetFriendInfo(humanCode, friendInfo);
+        CHECK_ERROR(ret);
+        humanInfo = friendInfo;
     } else {
-        return elastos::ErrCode::UnimplementedError;
+        return elastos::ErrCode::NotFoundError;
     }
+
+    auto status = humanInfo->getHumanStatus();
 
     return static_cast<int>(status);
 }

@@ -43,31 +43,10 @@ std::shared_ptr<DidChnDataListener> DidChnDataListener::GetInstance()
 /* =========================================== */
 /* === class public function implement  ====== */
 /* =========================================== */
-void DidChnDataListener::onError(const std::string& did, const std::string& key, int errcode)
+int DidChnDataListener::mergeHumanInfo(std::shared_ptr<HumanInfo> humanInfo,
+                                       const std::string& key,
+                                       const std::vector<std::string>& didProps)
 {
-    Log::I(Log::TAG, "%s did=%s, key=%s errcode=%d", __PRETTY_FUNCTION__, did.c_str(), key.c_str(), errcode);
-}
-
-int DidChnDataListener::onChanged(const std::string& did, const std::string& key, const std::vector<std::string>& didProps)
-{
-    Log::I(Log::TAG, "%s did=%s, key=%s", __PRETTY_FUNCTION__, did.c_str(), key.c_str());
-
-    auto userMgr = SAFE_GET_PTR(mUserManager);
-    auto friendMgr = SAFE_GET_PTR(mFriendManager);
-
-    std::shared_ptr<HumanInfo> humanInfo;
-    if (userMgr->contains(did)) {
-        std::shared_ptr<elastos::UserInfo> userInfo;
-        std::ignore = userMgr->getUserInfo(userInfo);
-        humanInfo = userInfo;
-    } else if (friendMgr->contains(did)) {
-        std::shared_ptr<FriendInfo> friendInfo;
-        std::ignore  = friendMgr->tryGetFriendInfo(did, friendInfo);
-        humanInfo = friendInfo;
-    } else {
-        CHECK_ERROR(ErrCode::InvalidFriendCode);
-    }
-
     if(key == DidChnClient::NamePublicKey) {
         int ret = processPublicKeyChanged(humanInfo, didProps);
         CHECK_ERROR(ret);
@@ -86,6 +65,41 @@ int DidChnDataListener::onChanged(const std::string& did, const std::string& key
     } else {
         CHECK_ERROR(ErrCode::InvalidFriendCode);
     }
+
+    return 0;
+}
+
+void DidChnDataListener::onError(const std::string& did, const std::string& key, int errcode)
+{
+    std::string msg = std::string("DidChnDataListener::onError did=") + did + ", key=" + key + " errcode=" + std::to_string(errcode);
+    Log::W(Log::TAG, msg.c_str());
+    CHECK_AND_NOTIFY_RETVAL(errcode);
+}
+
+int DidChnDataListener::onChanged(const std::string& did, const std::string& key, const std::vector<std::string>& didProps)
+{
+    Log::I(Log::TAG, "%s did=%s, key=%s", __PRETTY_FUNCTION__, did.c_str(), key.c_str());
+
+    auto userMgr = SAFE_GET_PTR(mUserManager);
+    auto friendMgr = SAFE_GET_PTR(mFriendManager);
+
+    std::shared_ptr<HumanInfo> humanInfo;
+    if (userMgr->contains(did)) {
+        std::shared_ptr<elastos::UserInfo> userInfo;
+        int ret = userMgr->getUserInfo(userInfo);
+        CHECK_AND_NOTIFY_ERROR(ret);
+        humanInfo = userInfo;
+    } else if (friendMgr->contains(did)) {
+        std::shared_ptr<FriendInfo> friendInfo;
+        int ret  = friendMgr->tryGetFriendInfo(did, friendInfo);
+        CHECK_AND_NOTIFY_ERROR(ret);
+        humanInfo = friendInfo;
+    } else {
+        CHECK_AND_NOTIFY_ERROR(ErrCode::InvalidFriendCode);
+    }
+
+    int ret = mergeHumanInfo(humanInfo, key, didProps);
+    CHECK_AND_NOTIFY_ERROR(ret);
 
     return 0;
 }

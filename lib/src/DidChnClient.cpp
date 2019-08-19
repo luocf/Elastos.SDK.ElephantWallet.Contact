@@ -112,7 +112,6 @@ int DidChnClient::cacheDidProp(const std::string& key, const std::string& value)
     int ret = sectyMgr->getDid(did);
     CHECK_ERROR(ret)
 
-
     std::lock_guard<std::recursive_mutex> lock(mMutex);
 
     // refreshUpdateTime(did, key);

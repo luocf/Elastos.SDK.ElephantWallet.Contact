@@ -151,7 +151,9 @@ int ChannelImplCarrier::preset(const std::string& profile)
     std::string address;
     ret = ChannelImplCarrier::getAddress(address);
     CHECK_ERROR(ret)
-    Log::I(Log::TAG, "ChannelImplCarrier::preset() Success new carrier on address: %s.", address.c_str());
+    Log::I(Log::TAG, "ChannelImplCarrier::preset() Success preset carrier on address: %s.", address.c_str());
+
+
 
     return 0;
 }

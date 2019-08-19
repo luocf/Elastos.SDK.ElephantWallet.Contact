@@ -169,7 +169,9 @@ std::shared_ptr<elastos::MessageManager::MessageListener> ContactListener::makeM
                                      elastos::UserInfo::Status status) override {
             Log::I(Log::TAG, "%s", __PRETTY_FUNCTION__);
             std::string humanCode;
-            userInfo->getHumanCode(humanCode);
+            int ret = userInfo->getHumanCode(humanCode);
+            CHECK_AND_NOTIFY_RETVAL(ret);
+
             std::span<uint8_t> data {reinterpret_cast<uint8_t*>(&status), 1 };
             sContactListenerInstance->onEvent(EventType::StatusChanged, humanCode,
                                               static_cast<ContactChannel>(channelType), &data);
@@ -180,7 +182,9 @@ std::shared_ptr<elastos::MessageManager::MessageListener> ContactListener::makeM
                                        const std::shared_ptr<elastos::MessageManager::MessageInfo> msgInfo) override {
             Log::I(Log::TAG, "%s", __PRETTY_FUNCTION__);
             std::string humanCode;
-            humanInfo->getHumanCode(humanCode);
+            int ret = humanInfo->getHumanCode(humanCode);
+            CHECK_AND_NOTIFY_RETVAL(ret);
+
             sContactListenerInstance->onReceivedMessage(humanCode, static_cast<ContactChannel>(channelType), msgInfo);
         }
 
@@ -193,7 +197,9 @@ std::shared_ptr<elastos::MessageManager::MessageListener> ContactListener::makeM
                                      const std::string& summary) override {
             Log::I(Log::TAG, "%s", __PRETTY_FUNCTION__);
             std::string humanCode;
-            friendInfo->getHumanCode(humanCode);
+            int ret = friendInfo->getHumanCode(humanCode);
+            CHECK_AND_NOTIFY_RETVAL(ret);
+
             std::span<uint8_t> data {reinterpret_cast<uint8_t*>(const_cast<char*>(summary.c_str())),
                                      summary.length() };
             sContactListenerInstance->onEvent(EventType::FriendReuqest, humanCode,
@@ -205,7 +211,9 @@ std::shared_ptr<elastos::MessageManager::MessageListener> ContactListener::makeM
                                            elastos::FriendInfo::Status status) override {
             Log::I(Log::TAG, "%s", __PRETTY_FUNCTION__);
             std::string humanCode;
-            friendInfo->getHumanCode(humanCode);
+            int ret = friendInfo->getHumanCode(humanCode);
+            CHECK_AND_NOTIFY_RETVAL(ret);
+
             std::span<uint8_t> data {reinterpret_cast<uint8_t*>(&status), 1 };
             sContactListenerInstance->onEvent(EventType::StatusChanged, humanCode,
                                               static_cast<ContactChannel>(channelType), &data);
@@ -215,10 +223,12 @@ std::shared_ptr<elastos::MessageManager::MessageListener> ContactListener::makeM
                                            elastos::MessageManager::ChannelType channelType) override {
             Log::I(Log::TAG, "%s", __PRETTY_FUNCTION__);
             std::string humanCode;
-            humanInfo->getHumanCode(humanCode);
+            int ret = humanInfo->getHumanCode(humanCode);
+            CHECK_AND_NOTIFY_RETVAL(ret);
 
             auto jsonInfo = std::make_shared<elastos::Json>();
-            humanInfo->toJson(jsonInfo);
+            ret = humanInfo->toJson(jsonInfo);
+            CHECK_AND_NOTIFY_RETVAL(ret);
             std::string info = jsonInfo->dump();
 
             std::span<uint8_t> data(reinterpret_cast<uint8_t*>(info.data()), info.size());

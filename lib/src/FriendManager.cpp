@@ -10,6 +10,7 @@
 #include <algorithm>
 //#include "BlkChnClient.hpp"
 #include "DidChnClient.hpp"
+#include "DidChnDataListener.hpp"
 #include <CompatibleFileSystem.hpp>
 #include <DateTime.hpp>
 #include <Elastos.Wallet.Utility.h>
@@ -547,10 +548,11 @@ int FriendManager::addFriendByDid(const std::string& did, const std::string& sum
         friendInfo = std::make_shared<FriendInfo>(weak_from_this());
         mFriendList.push_back(friendInfo);
     }
-//    TODO: ret = friendInfo->mergeHumanInfo(*humanInfo, HumanInfo::Status::WaitForAccept);
-    if(ret < 0) {
-        Log::W(Log::TAG, "FriendManager::addFriendByDid() Failed to merge friend did: %s.", did.c_str());
-        return ret;
+
+    auto dcDataListener = DidChnDataListener::GetInstance();
+    for (auto& [key, values]: didProps) {
+        ret = dcDataListener->mergeHumanInfo(friendInfo, key, values);
+        CHECK_ERROR(ret)
     }
 
     std::vector<FriendInfo::CarrierInfo> carrierInfoArray;

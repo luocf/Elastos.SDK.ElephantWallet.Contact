@@ -18,6 +18,9 @@ public:
     static std::shared_ptr<DidChnDataListener> GetInstance();
 
     /*** class function and variable ***/
+    int mergeHumanInfo(std::shared_ptr<HumanInfo> humanInfo,
+                       const std::string& key, const std::vector<std::string>& didProps);
+
     virtual void onError(const std::string& did, const std::string& key, int errcode) override;
     virtual int onChanged(const std::string& did, const std::string& key, const std::vector<std::string>& didProps) override;
 
