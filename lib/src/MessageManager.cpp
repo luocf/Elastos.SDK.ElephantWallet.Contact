@@ -140,9 +140,22 @@ int MessageManager::openChannels()
     return 0;
 }
 
-int MessageManager::closehannels()
+int MessageManager::closeChannels()
 {
-    throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
+    bool hasFailed = false;
+
+    for(const auto& channel: mMessageChannelMap) {
+        int ret = channel.second->close();
+        if(ret < 0) {
+            hasFailed = true;
+            Log::W(Log::TAG, "Failed to close channel %d", channel.first);
+        }
+    }
+    if(hasFailed) {
+        return ErrCode::ChannelFailedCloseAll;
+    }
+
+    return 0;
 }
 
 int MessageManager::requestFriend(const std::string& friendAddr,
@@ -626,6 +639,9 @@ void MessageManager::MessageListener::onReceivedMessage(const std::string& frien
             if(ret > 0) {
                 for(auto& it: infoArray) {
                     ret = msgMgr->requestFriend(it.mUsrAddr, humanChType, "", true);
+                    if(ret = ErrCode::ChannelFailedFriendExists) {
+                        continue;
+                    }
                     CHECK_AND_NOTIFY_RETVAL(ret)
                 }
             }

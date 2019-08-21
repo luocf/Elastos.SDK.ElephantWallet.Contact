@@ -130,7 +130,7 @@ public:
 
     virtual int presetChannels(std::weak_ptr<Config> config);
     virtual int openChannels();
-    virtual int closehannels();
+    virtual int closeChannels();
 
     virtual int requestFriend(const std::string& friendAddr,
                               ChannelType chType,

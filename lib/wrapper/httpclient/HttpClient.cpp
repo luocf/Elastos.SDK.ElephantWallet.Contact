@@ -45,8 +45,9 @@ int HttpClient::InitGlobal()
 /* === class public function implement  ====== */
 /* =========================================== */
 HttpClient::HttpClient()
-	: mUrl()
-	, mConnectTimeoutMS(10000)
+	: mCancelFlag(false)
+	, mUrl()
+	, mConnectTimeoutMS(5000)
 	, mReqHeaders()
 	, mRespStatus(-1)
 	, mRespReason()
@@ -175,6 +176,12 @@ int HttpClient::syncPost(const std::string& body)
 	return ret;
 }
 
+void HttpClient::cancel()
+{
+	Log::I(Log::TAG, "%s url:%s", __PRETTY_FUNCTION__, mUrl.c_str());
+	mCancelFlag = true;
+}
+
 int HttpClient::getResponseStatus() const
 {
 	return mRespStatus;
@@ -292,6 +299,18 @@ size_t HttpClient::CurlReadCallback(char* buffer, size_t size, size_t nitems, vo
 	return -1;
 }
 
+int HttpClient::CurlProgressCallback(void *userdata, double dltotal, double dlnow, double ultotal, double ulnow)
+{
+	HttpClient* httpClient = static_cast<HttpClient*>(userdata);
+//	Log::I(Log::TAG, "HttpClient::CurlProgressCallback() mCancelFlag=%d.", httpClient->mCancelFlag);
+	if(httpClient->mCancelFlag == true) {
+		Log::I(Log::TAG, "HttpClient::CurlProgressCallback() cancel by user.");
+		return -1;
+	}
+
+	return 0;
+}
+
 int HttpClient::makeCurl(std::shared_ptr<void>& curlHandlePtr, std::shared_ptr<struct curl_slist>& curlHeadersPtr) const
 {
 	CURLcode curle;
@@ -299,7 +318,7 @@ int HttpClient::makeCurl(std::shared_ptr<void>& curlHandlePtr, std::shared_ptr<s
 	curlHandlePtr.reset();
 	curlHeadersPtr.reset();
 
-	CURL*curlHandle = curl_easy_init();
+	CURL* curlHandle = curl_easy_init();
 	if(curlHandle == nullptr) {
 		return (ErrCode::CurlBaseCode);
 	}
@@ -360,14 +379,19 @@ int HttpClient::makeCurl(std::shared_ptr<void>& curlHandlePtr, std::shared_ptr<s
 
 	curle = curl_easy_setopt(curlHandlePtr.get(), CURLOPT_WRITEFUNCTION, CurlWriteCallback);
 	CHECK_CURL(curle);
-
 	curle = curl_easy_setopt(curlHandlePtr.get(), CURLOPT_WRITEDATA, this);
 	CHECK_CURL(curle);
 
 	curle = curl_easy_setopt(curlHandlePtr.get(), CURLOPT_READFUNCTION, CurlReadCallback);
 	CHECK_CURL(curle);
-
 	curle = curl_easy_setopt(curlHandlePtr.get(), CURLOPT_READDATA, this);
+	CHECK_CURL(curle);
+
+	curle = curl_easy_setopt(curlHandlePtr.get(), CURLOPT_NOPROGRESS, 0);
+	CHECK_CURL(curle);
+	curle = curl_easy_setopt(curlHandlePtr.get(), CURLOPT_PROGRESSFUNCTION, CurlProgressCallback);
+	CHECK_CURL(curle);
+	curle = curl_easy_setopt(curlHandlePtr.get(), CURLOPT_PROGRESSDATA, this);
 	CHECK_CURL(curle);
 
 	return 0;

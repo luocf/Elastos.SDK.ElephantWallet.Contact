@@ -45,6 +45,11 @@ public class ContactBridge extends CrossBase {
         return ret;
     }
 
+    public int setIdentifyCode(IdentifyCode.Type type, String value) {
+        int ret = setIdentifyCode(type.id(), value);
+        return ret;
+    }
+
     public Contact.UserInfo getUserInfo() {
         assert(mListener != null);
 
@@ -55,11 +60,8 @@ public class ContactBridge extends CrossBase {
             return null;
         }
 
-
         Contact.UserInfo userInfo = new Contact.UserInfo();
-
-        Contact.UserInfo.UserJson json = new Gson().fromJson(sbInfo.toString(), Contact.UserInfo.UserJson.class);
-        ret  = userInfo.fromJson(json);
+        ret  = userInfo.fromJson(sbInfo.toString());
         if(ret < 0) {
             Log.w(TAG, "Failed to deserialize user info. ret=" + ret);
             return null;
@@ -150,6 +152,9 @@ public class ContactBridge extends CrossBase {
     public native int start();
 
     @CrossInterface
+    public native int stop();
+
+    @CrossInterface
     public native int addFriend(String friendCode, String summary);
 
     @CrossInterface
@@ -172,6 +177,9 @@ public class ContactBridge extends CrossBase {
 
     @CrossInterface
     private native int setUserInfo(int item, String value);
+
+    @CrossInterface
+    private native int setIdentifyCode(int item, String value);
 
     @CrossInterface
     private native int getHumanInfo(String humanCode, StringBuffer info);

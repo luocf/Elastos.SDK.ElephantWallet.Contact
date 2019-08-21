@@ -57,6 +57,7 @@ public:
     std::weak_ptr<MessageManager> getMessageManager();
 
     int start();
+    int stop();
     bool isStarted();
 
     int syncInfoDownloadFromDidChain();

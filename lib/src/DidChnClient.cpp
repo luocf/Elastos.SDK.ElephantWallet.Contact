@@ -40,9 +40,9 @@ const struct {
 /* =========================================== */
 int DidChnClient::InitInstance(std::weak_ptr<Config> config,
                                std::weak_ptr<SecurityManager> sectyMgr) {
-//    if (gDidChnClient.get() != nullptr) {
-//        gDidChnClient.reset();
-//    }
+    if (gDidChnClient.get() != nullptr) {
+        gDidChnClient.reset();
+    }
 
     struct Impl : DidChnClient {
         Impl(std::weak_ptr<Config> config,
@@ -65,7 +65,7 @@ int DidChnClient::InitInstance(std::weak_ptr<Config> config,
 
 std::shared_ptr<DidChnClient> DidChnClient::GetInstance()
 {
-//    assert(gDidChnClient.get() != nullptr);
+    assert(gDidChnClient.get() != nullptr);
     return gDidChnClient;
 }
 
@@ -85,8 +85,12 @@ int DidChnClient::appendMoniter(const std::string& did, std::shared_ptr<MonitorC
     }
 
 	std::lock_guard<std::recursive_mutex> lock(mMutex);
+    if(mMonitor.get() == nullptr) {
+        return ErrCode::BlkChnMonStoppedError;
+    }
+
     callback->mHumanInfoOnly = humanInfoOnly;
-    mMonitor.mMonitorCallbackMap[did] = callback;
+    mMonitor->mMonitorCallbackMap[did] = callback;
 
     return 0;
 }
@@ -98,7 +102,11 @@ int DidChnClient::removeMoniter(const std::string& did)
     }
 
 	std::lock_guard<std::recursive_mutex> lock(mMutex);
-    mMonitor.mMonitorCallbackMap.erase(did);
+    if(mMonitor.get() == nullptr) {
+        return ErrCode::BlkChnMonStoppedError;
+    }
+
+    mMonitor->mMonitorCallbackMap.erase(did);
 
     return 0;
 }
@@ -168,8 +176,9 @@ int DidChnClient::downloadDidProp(const std::string& did, bool humanInfoOnly,
 
         std::string key = it.key;
 
+        std::shared_ptr<HttpClient> httpClient;
         std::vector<std::string> props;
-        int ret = downloadDidPropsByAgent(did, key, it.withHistory, props);
+        int ret = downloadDidPropsByAgent(httpClient, did, key, it.withHistory, props);
         CHECK_ERROR(ret)
 
         didProps.insert({ key, std::move(props)} );
@@ -195,35 +204,101 @@ DidChnClient::DidChnClient(std::weak_ptr<Config> config, std::weak_ptr<SecurityM
     , mDidPropCache()
     , mMonitor()
 {
+    Log::I(Log::TAG, "%s", __PRETTY_FUNCTION__);
 }
 
 DidChnClient::~DidChnClient()
 {
+    stopMonitor();
+    Log::I(Log::TAG, "%s", __PRETTY_FUNCTION__);
 }
 
 int DidChnClient::startMonitor()
 {
-    mMonitor.mMonitorLooper = [&]() {
+    std::lock_guard<std::recursive_mutex> lock(mMutex);
+    mMonitor = std::make_shared<Monitor>();
+    mMonitor->mMonitorThread = std::make_shared<ThreadPool>("didchn-monitor");
+
+    mMonitor->mMonitorStopFlag = false;
+    mMonitor->mMonitorLooper = [&]() {
         int64_t current = DateTime::CurrentMS();
         Log::I(Log::TAG, "%s current timestamp=%lld", __PRETTY_FUNCTION__, current);
+        std::shared_ptr<Monitor> monitor;
         std::map<std::string, std::shared_ptr<MonitorCallback>> monitorCallbackMap;
         {
             std::lock_guard<std::recursive_mutex> lock(mMutex);
-            monitorCallbackMap = mMonitor.mMonitorCallbackMap;
+
+            monitor = mMonitor;
+            if(monitor.get() == nullptr
+            || monitor->mMonitorStopFlag == true) {
+                Log::W(Log::TAG, "%s:%d Exit DidChnClient::Monitor loop", __PRETTY_FUNCTION__, __LINE__);
+                return;
+            }
+
+            monitorCallbackMap = monitor->mMonitorCallbackMap;
         }
 
         for(const auto& it: monitorCallbackMap) {
             auto& did = it.first;
             auto& callback = it.second;
 
-            std::ignore = DidChnClient::checkDidProps(did, callback);
+            std::ignore = DidChnClient::checkDidProps(monitor->mHttpClient, monitor->mMonitorStopFlag,
+                                                      did, callback);
+            if(monitor->mMonitorStopFlag == true) {
+                Log::W(Log::TAG, "%s:%d Exit DidChnClient::Monitor loop", __PRETTY_FUNCTION__, __LINE__);
+                return;
+            }
+        }
+        if(monitor->mMonitorStopFlag == true) {
+            Log::W(Log::TAG, "%s:%d Exit DidChnClient::Monitor loop", __PRETTY_FUNCTION__, __LINE__);
+            return;
         }
 
-        std::ignore = mMonitor.mMonitorThread.sleepMS(mMonitor.MonitorPendingMS);
-        mMonitor.mMonitorThread.post(mMonitor.mMonitorLooper);
+        constexpr const uint32_t sleepTime = 200; //ms
+        uint32_t sleepCount = monitor->MonitorPendingMS / sleepTime;
+        for(int idx = 0; idx < sleepCount; idx++) {
+            std::ignore = monitor->mMonitorThread->sleepMS(sleepTime);
+            if(monitor->mMonitorStopFlag == true) {
+                Log::W(Log::TAG, "%s:%d Exit DidChnClient::Monitor loop", __PRETTY_FUNCTION__, __LINE__);
+                return;
+            }
+        }
+
+        {
+            std::lock_guard<std::recursive_mutex> lock(mMutex);
+            if(monitor->mMonitorThread.get() == nullptr) {
+                Log::W(Log::TAG, "%s:%d Exit DidChnClient::Monitor loop", __PRETTY_FUNCTION__, __LINE__);
+                return;
+            }
+            monitor->mMonitorThread->post(monitor->mMonitorLooper);
+        }
     };
 
-    mMonitor.mMonitorThread.post(mMonitor.mMonitorLooper);
+    mMonitor->mMonitorThread->post(mMonitor->mMonitorLooper);
+    Log::I(Log::TAG, "%s", __PRETTY_FUNCTION__);
+
+    return 0;
+}
+
+int DidChnClient::stopMonitor()
+{
+    std::lock_guard<std::recursive_mutex> lock(mMutex);
+    if(mMonitor.get() == nullptr) {
+        return 0;
+    }
+
+    mMonitor->mMonitorCallbackMap.clear();
+
+    if(mMonitor->mHttpClient.get() != nullptr) {
+        Log::I(Log::TAG, "%s cancel HttpClient", __PRETTY_FUNCTION__);
+        mMonitor->mHttpClient->cancel();
+    }
+
+    mMonitor->mMonitorStopFlag = true;
+
+    mMonitor->mMonitorThread = nullptr;
+    mMonitor = nullptr;
+    Log::I(Log::TAG, "%s", __PRETTY_FUNCTION__);
 
     return 0;
 }
@@ -390,7 +465,8 @@ int DidChnClient::uploadDidAgentData(const std::string& didAgentData)
     return 0;
 }
 
-int DidChnClient::checkDidProps(const std::string& did, std::shared_ptr<MonitorCallback> callback)
+int DidChnClient::checkDidProps(std::shared_ptr<HttpClient>& httpClient, const bool& stopFlag,
+                                const std::string& did, std::shared_ptr<MonitorCallback> callback)
 {
     if(callback.get() == nullptr) {
         return ErrCode::InvalidArgument;
@@ -407,7 +483,12 @@ int DidChnClient::checkDidProps(const std::string& did, std::shared_ptr<MonitorC
         std::string key = it.key;
 
         std::vector<std::string> didProps;
-        int64_t ret = downloadDidPropsByAgent(did, key, it.withHistory, didProps);
+        int64_t ret = downloadDidPropsByAgent(httpClient, did, key, it.withHistory, didProps);
+        if(stopFlag == true) {
+            Log::V(Log::TAG, "DidChnClient::checkDidProps() Stop to check %s: %s", did.c_str(), key.c_str());
+            return ErrCode::BlkChnMonStoppedError;
+        }
+
         if(ret < 0) {
             Log::V(Log::TAG, "DidChnClient::checkDidProps() Failed to check %s: %s", did.c_str(), key.c_str());
             callback->onError(did, key, ret);
@@ -463,8 +544,9 @@ int64_t DidChnClient::checkDidProps(const std::string& did, const std::string& k
     return (changed == true ? lastUpdateTime : ErrCode::BlkChnOldUpdateTimeError);
 }
 
-int DidChnClient::downloadDidPropsByAgent(const std::string& did, const std::string& key, bool withHistory,
-                                           std::vector<std::string>& values)
+int DidChnClient::downloadDidPropsByAgent(std::shared_ptr<HttpClient>& httpClient,
+                                          const std::string& did, const std::string& key, bool withHistory,
+                                          std::vector<std::string>& values)
 {
 
     std::string dataPath;
@@ -472,7 +554,7 @@ int DidChnClient::downloadDidPropsByAgent(const std::string& did, const std::str
     CHECK_ERROR(ret)
 
     std::string propArrayStr;
-    ret = downloadDidChnData(dataPath, propArrayStr);
+    ret = downloadDidChnData(httpClient, dataPath, propArrayStr);
     CHECK_ERROR(ret)
 
     Json jsonPropArray = Json::parse(propArrayStr);
@@ -483,7 +565,8 @@ int DidChnClient::downloadDidPropsByAgent(const std::string& did, const std::str
     return 0;
 }
 
-int DidChnClient::downloadDidChnData(const std::string& path, std::string& result)
+int DidChnClient::downloadDidChnData(std::shared_ptr<HttpClient>& httpClient,
+                                     const std::string& path, std::string& result)
 {
     auto sectyMgr = SAFE_GET_PTR(mSecurityManager);
     auto config = SAFE_GET_PTR(mConfig);
@@ -491,15 +574,15 @@ int DidChnClient::downloadDidChnData(const std::string& path, std::string& resul
     auto didConfigUrl = config->mDidChainConfig->mUrl;
     std::string agentUrl = didConfigUrl + path;
 
-    HttpClient httpClient;
-    httpClient.url(agentUrl);
-    int ret = httpClient.syncGet();
+    httpClient = std::make_shared<HttpClient>();
+    httpClient->url(agentUrl);
+    int ret = httpClient->syncGet();
     if(ret < 0) {
         return ErrCode::HttpClientError + ret;
     }
 
     std::string respBody;
-    ret = httpClient.getResponseBody(respBody);
+    ret = httpClient->getResponseBody(respBody);
     if(ret < 0) {
         return ErrCode::HttpClientError + ret;
     }

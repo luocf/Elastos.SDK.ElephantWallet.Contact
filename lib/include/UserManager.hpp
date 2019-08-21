@@ -51,6 +51,7 @@ public:
     int ensureUserCarrierInfo();
     int getUserInfo(std::shared_ptr<UserInfo>& userInfo);
     int setUserInfo(UserInfo::Item item, const std::string& value);
+    int setIdentifyCode(UserInfo::Type type, const std::string& value);
 
     int setWalletAddress(const std::string& name, const std::string& value);
 

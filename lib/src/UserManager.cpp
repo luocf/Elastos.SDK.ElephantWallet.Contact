@@ -225,6 +225,33 @@ int UserManager::setUserInfo(UserInfo::Item item, const std::string& value)
     return 0;
 }
 
+int UserManager::setIdentifyCode(elastos::IdentifyCode::Type type, const std::string &value)
+{
+    if(mUserInfo.get() == nullptr) {
+        return ErrCode::NotReadyError;
+    }
+
+    int ret = mUserInfo->setIdentifyCode(type, value);
+    if(ret == 0) { // not changed
+        return ret;
+    }
+    CHECK_ERROR(ret);
+
+    std::string userIdentify;
+    ret = mUserInfo->IdentifyCode::serialize(userIdentify);
+    CHECK_ERROR(ret);
+
+    auto dcClient = DidChnClient::GetInstance();
+    ret = dcClient->cacheDidProp(DidChnClient::NameIdentifyKey, userIdentify);
+    CHECK_ERROR(ret)
+
+//    auto msgMgr = SAFE_GET_PTR(mMessageManager);
+//    ret = msgMgr->broadcastDesc(MessageManager::ChannelType::Carrier);
+//    CHECK_ERROR(ret)
+
+    return 0;
+}
+
 int UserManager::setWalletAddress(const std::string& name, const std::string& value)
 {
     if(mUserInfo.get() == nullptr) {

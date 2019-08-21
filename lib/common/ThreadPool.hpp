@@ -30,7 +30,7 @@ public:
     /*** static function and variable ***/
 
     /*** class function and variable ***/
-    explicit ThreadPool(const std::string& threadName = "", size_t threadCnt = 1);
+    explicit ThreadPool(const std::string& threadName, size_t threadCnt = 1);
     virtual ~ThreadPool();
 
     int sleepMS(long milliSecond);

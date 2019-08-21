@@ -23,6 +23,8 @@ public:
     /*** type define ***/
 
     /*** static function and variable ***/
+    static void DetachCurrentThread();
+
     static std::string GetBacktrace();
     static int GetCurrentDevId(std::string& devId);
     static int GetCurrentDevName(std::string& devName);

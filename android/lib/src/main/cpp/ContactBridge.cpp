@@ -34,6 +34,8 @@ ContactBridge::ContactBridge()
 ContactBridge::~ContactBridge()
 {
     Log::I(Log::TAG, "%s", __PRETTY_FUNCTION__);
+
+    elastos::ErrCode::SetErrorListener(nullptr);
 }
 
 void ContactBridge::setListener(CrossBase* listener)
@@ -63,6 +65,15 @@ int ContactBridge::start()
     return ret;
 }
 
+int ContactBridge::stop()
+{
+    Log::I(Log::TAG, "%s", __PRETTY_FUNCTION__);
+
+    int ret = mContactImpl->stop();
+
+    return ret;
+}
+
 int ContactBridge::setUserInfo(int item, const char* value)
 {
     if(mContactImpl->isStarted() == false) {
@@ -73,6 +84,21 @@ int ContactBridge::setUserInfo(int item, const char* value)
     auto userMgr =  SAFE_GET_PTR(weakUserMgr);                                                                      \
 
     int ret = userMgr->setUserInfo(static_cast<elastos::UserInfo::Item>(item), value);
+    CHECK_ERROR(ret);
+
+    return 0;
+}
+
+int ContactBridge::setIdentifyCode(int type, const char* value)
+{
+    if(mContactImpl->isStarted() == false) {
+        return elastos::ErrCode::NotReadyError;
+    }
+
+    auto weakUserMgr = mContactImpl->getUserManager();
+    auto userMgr =  SAFE_GET_PTR(weakUserMgr);                                                                      \
+
+    int ret = userMgr->setIdentifyCode(static_cast<elastos::UserInfo::Type>(type), value);
     CHECK_ERROR(ret);
 
     return 0;

@@ -122,14 +122,28 @@ public class MainActivity extends Activity {
 
             case R.id.new_and_start_contact:
                 message = testNewContact();
-                message += testStart();
+                message += testStartContact();
                 break;
-            case R.id.del_contact:
-                message = testDelContact();
+            case R.id.stop_and_del_contact:
+                message = testStopContact();
+                message += testDelContact();
+                break;
+            case R.id.recreate_contact:
+                message = testStopContact();
+                message += testDelContact();
+                message += testNewContact();
+                message += testStartContact();
+                break;
+            case R.id.restart_contact:
+                message = testStopContact();
+                message += testStartContact();
                 break;
 
             case R.id.get_user_info:
                 message = showGetUserInfo();
+                break;
+            case R.id.set_user_identifycode:
+                message = showSetUserIdentifyCode();
                 break;
             case R.id.set_user_details:
                 message = showSetUserDetails();
@@ -266,7 +280,7 @@ public class MainActivity extends Activity {
         return "Success to create a contact instance.";
     }
 
-    private String testStart() {
+    private String testStartContact() {
         if(mContact == null) {
             return ErrorPrefix + "Contact is null.";
         }
@@ -280,6 +294,19 @@ public class MainActivity extends Activity {
         }
 
         return "Success to start contact instance.";
+    }
+
+    private String testStopContact() {
+        if(mContact == null) {
+            return ErrorPrefix + "Contact is null.";
+        }
+
+        int ret = mContact.stop();
+        if(ret < 0) {
+            return "Failed to stop contact instance. ret=" + ret;
+        }
+
+        return "Success to stop contact instance.";
     }
 
     private String testDelContact() {
@@ -311,6 +338,43 @@ public class MainActivity extends Activity {
         Helper.showAddress(this, humanCode, getDeviceId(), ext, (result) -> {
             Helper.showDetails(MainActivity.this, info.toJson());
         });
+
+        return info.toString();
+    }
+
+    private String showSetUserIdentifyCode() {
+        if (mContact == null) {
+            return ErrorPrefix + "Contact is null.";
+        }
+
+        LinkedList<String> checkList = new LinkedList<>(Arrays.asList(
+                Contact.UserInfo.Type.PhoneNumber.name(),
+                Contact.UserInfo.Type.EmailAddress.name(),
+                Contact.UserInfo.Type.WechatId.name()
+        ));
+        String separator = ":-:-:";
+
+        Helper.showSetDetails(this, checkList, separator, (result) -> {
+            HashMap<String, Contact.UserInfo.Type> details = new HashMap<String, Contact.UserInfo.Type>() {{
+                put(Contact.UserInfo.Type.PhoneNumber.name(), Contact.UserInfo.Type.PhoneNumber);
+                put(Contact.UserInfo.Type.EmailAddress.name(), Contact.UserInfo.Type.EmailAddress);
+                put(Contact.UserInfo.Type.WechatId.name(), Contact.UserInfo.Type.WechatId);
+            }};
+
+            String[] keyValue = result.split(separator);
+            Contact.UserInfo.Type type = details.get(keyValue[0]);
+            String value = keyValue[1];
+
+            int ret = mContact.setIdentifyCode(type, value);
+            if(ret < 0) {
+                showMessage(ErrorPrefix + "Failed to set " + result + ". ret=" + ret);
+            }
+        });
+
+        Contact.UserInfo info = mContact.getUserInfo();
+        if(info == null) {
+            return ErrorPrefix + "Failed to get user info.";
+        }
 
         return info.toString();
     }

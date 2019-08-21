@@ -9,7 +9,7 @@ namespace elastos {
 /* =========================================== */
 /* === static variables initialize =========== */
 /* =========================================== */
-std::shared_ptr<DidChnDataListener> DidChnDataListener::gDidChnDataListener {};
+std::shared_ptr<DidChnDataListener> DidChnDataListener::gDidChnDataListener;
 
 /* =========================================== */
 /* === static function implement ============= */

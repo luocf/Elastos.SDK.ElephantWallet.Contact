@@ -66,13 +66,13 @@ public abstract class ContactListener extends CrossBase {
 
             String info = new String(data);
             if(info.contains(JsonKey.IsMyself) == true) {
-                Contact.UserInfo.UserJson json = new Gson().fromJson(info, Contact.UserInfo.UserJson.class);
-                humanInfo = new UserInfo();
-                humanInfo.fromJson(json);
+                UserInfo userInfo = new UserInfo();
+                userInfo.fromJson(info);
+                humanInfo = userInfo;
             } else if(info.contains(JsonKey.IsFriend) == true) {
-                Contact.FriendInfo.FriendJson json = new Gson().fromJson(info, Contact.FriendInfo.FriendJson.class);
-                humanInfo = new FriendInfo();
-                humanInfo.fromJson(json);
+                FriendInfo friendInfo = new FriendInfo();
+                friendInfo.fromJson(info);
+                humanInfo = friendInfo;
             } else {
                Log.w(Contact.TAG, "InfoEvent: Failed to parse human data.");
             }

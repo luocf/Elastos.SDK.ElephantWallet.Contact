@@ -36,9 +36,15 @@ IdentifyCode::~IdentifyCode()
 
 int IdentifyCode::setIdentifyCode(Type type, const std::string& value)
 {
+    const auto& it = mIdCodeMap.find(type);
+    if (it != mIdCodeMap.end()
+    && it->second == value) {
+        return 0;
+    }
+
     mIdCodeMap[type] = value;
 
-    return 0;
+    return static_cast<int>(type);
 }
 
 int IdentifyCode::getIdentifyCode(Type type, std::string& value) const

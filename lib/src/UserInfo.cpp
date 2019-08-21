@@ -169,9 +169,10 @@ int UserInfo::setWalletAddress(const std::string& name, const std::string& value
 int UserInfo::setIdentifyCode(Type type, const std::string& value)
 {
     int ret = IdentifyCode::setIdentifyCode(type, value);
-    if(ret <= 0) { // error or not changed
+    if(ret == 0) { // not changed
         return ret;
     }
+    CHECK_ERROR(ret);
 
     auto userMgr = SAFE_GET_PTR(mUserManager);
     ret = userMgr->saveLocalData();

@@ -1,9 +1,5 @@
 package org.elastos.sdk.elephantwallet.contact.internal;
 
-import android.support.annotation.CallSuper;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.SerializedName;
 
 import java.util.HashMap;
@@ -90,20 +86,7 @@ public class HumanInfo {
     public String gender;
     public String description;
 
-//    @CallSuper
-//    public int fromJson(String value) {
-//        HumanJson info = new Gson().fromJson(value, HumanJson.class);
-//        if (info.humanInfo == null) {
-//            return -1;
-//        }
-//
-//        int ret = fromJson(info);
-//
-//        return ret;
-//    }
-
-    @CallSuper
-    public int fromJson(HumanJson info) {
+    protected int fromJsonObj(HumanJson info) {
         this.commonInfoMap = null;
         this.walletAddressMap = info.humanInfo.walletAddressMap;
         this.boundCarrierArray = info.humanInfo.boundCarrierArray;
@@ -111,27 +94,56 @@ public class HumanInfo {
         this.humanCode = info.humanInfo.humanCode;
         this.updateTime = info.humanInfo.updateTime;
 
-        this.chainPubKey = info.humanInfo.commonInfoMap.get(Item.ChainPubKey.id());
-        this.did = info.humanInfo.commonInfoMap.get(Item.Did.id());
-        this.elaAddress = info.humanInfo.commonInfoMap.get(Item.ElaAddress.id());
-        this.nickname = info.humanInfo.commonInfoMap.get(Item.Nickname.id());
-        this.avatar = info.humanInfo.commonInfoMap.get(Item.Avatar.id());
-        this.gender = info.humanInfo.commonInfoMap.get(Item.Gender.id());
-        this.description = info.humanInfo.commonInfoMap.get(Item.Description.id());
+        this.chainPubKey = info.humanInfo.chainPubKey;
+        this.did = info.humanInfo.did;
+        this.elaAddress = info.humanInfo.elaAddress;
+        this.nickname = info.humanInfo.nickname;
+        this.avatar = info.humanInfo.avatar;
+        this.gender = info.humanInfo.gender;
+        this.description = info.humanInfo.description;
+
+        if(info.humanInfo.commonInfoMap != null) {
+            this.chainPubKey = info.humanInfo.commonInfoMap.get(Item.ChainPubKey.id());
+            this.did = info.humanInfo.commonInfoMap.get(Item.Did.id());
+            this.elaAddress = info.humanInfo.commonInfoMap.get(Item.ElaAddress.id());
+            this.nickname = info.humanInfo.commonInfoMap.get(Item.Nickname.id());
+            this.avatar = info.humanInfo.commonInfoMap.get(Item.Avatar.id());
+            this.gender = info.humanInfo.commonInfoMap.get(Item.Gender.id());
+            this.description = info.humanInfo.commonInfoMap.get(Item.Description.id());
+        }
 
         return 0;
     }
 
-    public String toJson() {
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        String val = gson.toJson(this);
-        return val;
-    }
+    protected int toJsonObj(HumanJson json) {
+        json.humanInfo = new HumanInfo();
 
-    public String prettyPrint() {
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        String val = gson.toJson(this);
-        return val;
+        json.humanInfo.commonInfoMap = null;
+        json.humanInfo.walletAddressMap = this.walletAddressMap;
+        json.humanInfo.boundCarrierArray = this.boundCarrierArray;
+        json.humanInfo.status = this.status;
+        json.humanInfo.humanCode = this.humanCode;
+        json.humanInfo.updateTime = this.updateTime;
+
+        json.humanInfo.chainPubKey = this.chainPubKey;
+        json.humanInfo.did = this.did;
+        json.humanInfo.elaAddress = this.elaAddress;
+        json.humanInfo.nickname = this.nickname;
+        json.humanInfo.avatar = this.avatar;
+        json.humanInfo.gender = this.gender;
+        json.humanInfo.description = this.description;
+
+        if(this.commonInfoMap != null) {
+            json.humanInfo.chainPubKey = this.commonInfoMap.get(Item.ChainPubKey.id());
+            json.humanInfo.did = this.commonInfoMap.get(Item.Did.id());
+            json.humanInfo.elaAddress = this.commonInfoMap.get(Item.ElaAddress.id());
+            json.humanInfo.nickname = this.commonInfoMap.get(Item.Nickname.id());
+            json.humanInfo.avatar = this.commonInfoMap.get(Item.Avatar.id());
+            json.humanInfo.gender = this.commonInfoMap.get(Item.Gender.id());
+            json.humanInfo.description = this.commonInfoMap.get(Item.Description.id());
+        }
+
+        return 0;
     }
 
     protected HumanInfo() {

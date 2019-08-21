@@ -13,6 +13,8 @@
 
 namespace elastos {
 
+class HttpClient;
+
 class DidChnClient {
 public:
     /*** type define ***/
@@ -50,6 +52,7 @@ public:
                         std::map<std::string, std::vector<std::string>>& didProps);
 
     int startMonitor();
+    int stopMonitor();
 
 protected:
     /*** type define ***/
@@ -84,10 +87,12 @@ private:
     public:
         constexpr static uint32_t MonitorPendingMS = 30000;
 
-        ThreadPool mMonitorThread;
+        std::shared_ptr<ThreadPool> mMonitorThread;
+        std::shared_ptr<HttpClient> mHttpClient;
         std::map<std::string, std::shared_ptr<MonitorCallback>> mMonitorCallbackMap;
 
         std::function<void()> mMonitorLooper;
+        bool mMonitorStopFlag;
     };
 
     /*** static function and variable ***/
@@ -103,12 +108,14 @@ private:
     int makeDidAgentData(const std::string& didProtocolData, std::string& result);
     int uploadDidAgentData(const std::string& didAgentData);
 
-    int checkDidProps(const std::string& did, std::shared_ptr<MonitorCallback> callback);
+    int checkDidProps(std::shared_ptr<HttpClient>& httpClient, const bool& stopFlag,
+                      const std::string& did, std::shared_ptr<MonitorCallback> callback);
     int64_t checkDidProps(const std::string& did, const std::string& key, const std::vector<std::string>& didProps);
 
-    int downloadDidPropsByAgent(const std::string& did, const std::string& key, bool withHistory,
+    int downloadDidPropsByAgent(std::shared_ptr<HttpClient>& httpClient,
+                                const std::string& did, const std::string& key, bool withHistory,
                                 std::vector<std::string>& values);
-    int downloadDidChnData(const std::string& path, std::string& result);
+    int downloadDidChnData(std::shared_ptr<HttpClient>& httpClient, const std::string& path, std::string& result);
 
     int getDidPropPath(const std::string& did, const std::string& key, bool withHistory, std::string& path);
 
@@ -130,7 +137,7 @@ private:
     std::string mPropKeyPathPrefix;
     std::vector<std::pair<std::string, std::string>> mDidPropCache;
     std::map<std::string, int64_t> mDidPropUpdateTime;
-    Monitor mMonitor;
+    std::shared_ptr<Monitor> mMonitor;
 };
 
 /***********************************************/

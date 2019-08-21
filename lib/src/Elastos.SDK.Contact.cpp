@@ -108,13 +108,33 @@ int Contact::start()
 //    ret = mFriendManager->monitorDidChainData();
 //    CHECK_ERROR(ret)
 
-    ret = monitorDidChainData();
-    CHECK_ERROR(ret)
     auto dcClient = DidChnClient::GetInstance();
     ret = dcClient->startMonitor();
     CHECK_ERROR(ret)
 
+    ret = monitorDidChainData();
+    CHECK_ERROR(ret)
+
     mStarted = true;
+    return 0;
+}
+
+int Contact::stop()
+{
+    if(mStarted == false) {
+        return 0;
+    }
+
+    int ret = mMessageManager->closeChannels();
+    CHECK_ERROR(ret)
+
+    mConfig.reset();
+
+    auto dcClient = DidChnClient::GetInstance();
+    ret = dcClient->stopMonitor();
+    CHECK_ERROR(ret)
+
+    mStarted = false;
     return 0;
 }
 
@@ -197,6 +217,8 @@ Contact::Contact()
 
 Contact::~Contact()
 {
+    auto dcClient = DidChnClient::GetInstance();
+    dcClient->stopMonitor();
 }
 
 

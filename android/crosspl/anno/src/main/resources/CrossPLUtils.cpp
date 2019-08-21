@@ -1,5 +1,6 @@
 #include "CrossPLUtils.hpp"
 #include "../../../../../../../../../../Library/Android/sdk/ndk-bundle/toolchains/llvm/prebuilt/darwin-x86_64/sysroot/usr/include/jni.h"
+#include "../../../../../../../../../../Library/Android/sdk/ndk-bundle/toolchains/llvm/prebuilt/darwin-x86_64/sysroot/usr/include/android/log.h"
 
 #include <android/log.h>
 #include <vector>
@@ -31,6 +32,17 @@ void CrossPLUtils::SetJavaVM(JavaVM* jvm)
     sJVM = jvm;
 }
 
+void CrossPLUtils::DetachCurrentThread()
+{
+//    JNIEnv *jenv;
+//    jint jret = sJVM->GetEnv((void **) &jenv, JNI_VERSION_1_6);
+//    if (jret != JNI_OK) {
+        std::thread::id threadId = std::this_thread::get_id();
+        __android_log_print(ANDROID_LOG_WARN, "crosspl", "============= DetachCurrentThread tid=%d", threadId);
+        sJVM->DetachCurrentThread();
+//    }
+}
+
 std::shared_ptr<JNIEnv> CrossPLUtils::SafeGetEnv()
 {
     std::shared_ptr<JNIEnv> ret;
@@ -43,8 +55,7 @@ std::shared_ptr<JNIEnv> CrossPLUtils::SafeGetEnv()
         if (jret != JNI_OK) {
             jret = sJVM->AttachCurrentThread(&jenv, nullptr);
             if (jret != JNI_OK) {
-                throw std::runtime_error(
-                        "CrossPL: Failed to get jni env, AttachCurrentThread return error");
+                throw std::runtime_error("CrossPL: Failed to get jni env, AttachCurrentThread return error");
             }
             needDetach = true;
         }

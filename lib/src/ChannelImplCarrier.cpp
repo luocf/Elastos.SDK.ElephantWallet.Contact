@@ -67,6 +67,7 @@ ChannelImplCarrier::ChannelImplCarrier(uint32_t chType,
 
 ChannelImplCarrier::~ChannelImplCarrier()
 {
+    close();
 }
 
 int ChannelImplCarrier::preset(const std::string& profile)
@@ -161,7 +162,7 @@ int ChannelImplCarrier::preset(const std::string& profile)
 int ChannelImplCarrier::open()
 {
     if(mTaskThread == nullptr) {
-        mTaskThread = std::make_unique<ThreadPool>();
+        mTaskThread = std::make_unique<ThreadPool>("carrier-channel");
     }
     mTaskThread->post(std::bind(&ChannelImplCarrier::runCarrier, this));
 

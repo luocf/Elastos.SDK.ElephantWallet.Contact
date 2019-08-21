@@ -14,10 +14,12 @@ target_include_directories(common PUBLIC
     "${pkg-openssl_INCLUDE_DIRS}")
 
 target_link_libraries(common PUBLIC
+    platform
     ${pkg-openssl_STATIC_LDFLAGS})
 if("${CMAKE_SYSTEM_NAME}" STREQUAL "Android")
     target_link_libraries(common PUBLIC
         log)
 endif()
+
 
 set(CMAKE_INCLUDE_CURRENT_DIR TRUE)

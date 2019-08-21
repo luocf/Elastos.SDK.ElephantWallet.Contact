@@ -50,6 +50,8 @@ public:
 	int syncPost(const int8_t* body, int size);
 	int syncPost(const std::string& body);
 
+	void cancel();
+
 	int getResponseStatus() const;
 	int getResponseReason(std::string& message) const;
 	int getResponseHeaders(HeaderMap& headers) const;
@@ -76,11 +78,14 @@ private:
 	static size_t CurlHeaderCallback(char* buffer, size_t size, size_t nitems, void* userdata);
 	static size_t CurlWriteCallback(char* buffer, size_t size, size_t nitems, void* userdata);
 	static size_t CurlReadCallback(char* buffer, size_t size, size_t nitems, void* userdata);
+	static int CurlProgressCallback(void *userdata, double dltotal, double dlnow, double ultotal, double ulnow);
 
-  /*** class function and variable ***/
+	/*** class function and variable ***/
 	int makeCurl(std::shared_ptr<void>& curlHandlePtr, std::shared_ptr<struct curl_slist>& curlHeadersPtr) const;
 	int addHeader(HeaderMap& headers,
 				  const std::string& name, const std::string& value) const;
+
+	bool mCancelFlag;
 
 	std::string mUrl;
 	long mConnectTimeoutMS;

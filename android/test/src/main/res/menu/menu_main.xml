@@ -22,13 +22,19 @@
         android:title="Contact" />
     <item android:id="@+id/new_and_start_contact"
         android:title="   |- New and Start Contact" />
-    <item android:id="@+id/del_contact"
-        android:title="   `- Del Contact" />
+    <item android:id="@+id/stop_and_del_contact"
+        android:title="   |- Stop and Del Contact" />
+    <item android:id="@+id/recreate_contact"
+        android:title="   `- Recreate Contact" />
+    <item android:id="@+id/restart_contact"
+        android:title="   `- Restart Contact" />
 
     <item android:enabled="false"
         android:title="User" />
     <item android:id="@+id/get_user_info"
         android:title="   |- Get User Info" />
+    <item android:id="@+id/set_user_identifycode"
+        android:title="   |- Set User IdentifyCode" />
     <item android:id="@+id/set_user_details"
         android:title="   |- Set User Details" />
     <item android:id="@+id/set_wallet_address"

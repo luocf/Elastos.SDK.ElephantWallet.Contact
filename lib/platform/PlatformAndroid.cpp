@@ -14,6 +14,8 @@
 #include "ErrCode.hpp"
 #include "Log.hpp"
 
+#include "CrossPLUtils.hpp"
+
 namespace elastos {
 
 /***********************************************/
@@ -24,6 +26,11 @@ std::string PlatformAndroid::mCurrentDevId;
 /***********************************************/
 /***** static function implement ***************/
 /***********************************************/
+void PlatformAndroid::DetachCurrentThread()
+{
+    crosspl::CrossPLUtils::DetachCurrentThread();
+}
+
 std::string PlatformAndroid::GetBacktrace()
 {
     const size_t max = 30;

@@ -58,10 +58,11 @@ public:
 
     constexpr static const int ChannelFailedPresetAll = -200;
     constexpr static const int ChannelFailedOpenAll = -201;
-    constexpr static const int ChannelFailedMultiOpen = -202;
-    constexpr static const int ChannelFailedCarrier = -203;
-    constexpr static const int ChannelFailedFriendExists = -204;
-    constexpr static const int ChannelFailedFriendSelf = -205;
+	constexpr static const int ChannelFailedCloseAll = -202;
+    constexpr static const int ChannelFailedMultiOpen = -203;
+    constexpr static const int ChannelFailedCarrier = -204;
+    constexpr static const int ChannelFailedFriendExists = -205;
+    constexpr static const int ChannelFailedFriendSelf = -206;
     constexpr static const int ChannelNotFound = -207;
     constexpr static const int ChannelNotReady = -208;
     constexpr static const int ChannelNotEstablished = -209;
@@ -75,6 +76,7 @@ public:
     constexpr static const int BlkChnBadTxIdError = -303;
 	constexpr static const int BlkChnBadUpdateTimeError = -304;
 	constexpr static const int BlkChnOldUpdateTimeError = -305;
+	constexpr static const int BlkChnMonStoppedError = -306;
 
     constexpr static const int HttpClientError = -500;
 
