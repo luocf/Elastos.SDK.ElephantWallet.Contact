@@ -25,6 +25,35 @@ start
   **Return**
     =0 if succeeded, or <0 if failed.
 
+setUserInfo
+~~~~~~~~~~~~~~~~~~~
+
+.. cpp:function:: Contact.UserInfo setUserInfo(UserInfo.Item item, String value)
+
+  Set contact user info, ONLY valid after contact is started.
+
+  **Parameter**
+    :[in] item: user info type.
+    :[in] value: user info value.
+
+  **Return**
+    =0 if succeeded, or <0 if failed.
+
+setIdentifyCode
+~~~~~~~~~~~~~~~~~~~
+
+.. cpp:function:: Contact.UserInfo setIdentifyCode(IdentifyCode.Type type, String value)
+
+  Set contact user identify code, ONLY valid after contact is started.
+
+  **Parameter**
+    :[in] type: user identify type.
+    :[in] value: user identify value.
+
+  **Return**
+    =0 if succeeded, or <0 if failed.
+
+
 getUserInfo
 ~~~~~~~~~~~~~~~~~~~
 
@@ -129,6 +158,20 @@ addFriend
   **Parameter**
     :[in] friendCode: friend key code.
     :[in] summary: summary.
+
+  **Return**
+    =0 if succeeded, or <0 if failed.
+
+
+removeFriend
+~~~~~~~~~~~~~~~~~~~
+
+.. cpp:function:: int removeFriend(String friendCode)
+
+  Remove a friend, after removed, friend status mask to REMOVED. ONLY valid after contact is online.
+
+  **Parameter**
+    :[in] friendCode: friend key code.
 
   **Return**
     =0 if succeeded, or <0 if failed.
