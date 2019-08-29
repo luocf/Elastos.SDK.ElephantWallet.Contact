@@ -111,3 +111,10 @@ Contact.Listener.AcquireArgs.Type
 
   .. cpp:enumerator:: SignData = 206
 
+Contact.Listener.EventArgs
+================
+
+.. cpp:class:: Contact.Listener.EventArgs
+
+  The contact event argument class of SDK.
+

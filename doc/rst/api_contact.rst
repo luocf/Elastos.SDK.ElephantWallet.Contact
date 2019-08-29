@@ -25,6 +25,16 @@ start
   **Return**
     =0 if succeeded, or <0 if failed.
 
+stop
+~~~~~~~~~~~~~~~~~~~
+
+.. cpp:function:: int stop()
+
+  Stop to run contact instance after created.
+
+  **Return**
+    =0 if succeeded, or <0 if failed.
+
 setUserInfo
 ~~~~~~~~~~~~~~~~~~~
 
