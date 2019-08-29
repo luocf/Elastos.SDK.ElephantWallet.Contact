@@ -645,7 +645,8 @@ public class MainActivity extends Activity {
                 });
                 break;
             case HumanInfoChanged:
-                String msg = event.humanCode + " info changed: " + new String(event.data);
+                Contact.Listener.InfoEvent infoEvent = (Contact.Listener.InfoEvent) event;
+                String msg = event.humanCode + " info changed: " + infoEvent.toString();
                 showEvent(msg);
                 break;
             default:
