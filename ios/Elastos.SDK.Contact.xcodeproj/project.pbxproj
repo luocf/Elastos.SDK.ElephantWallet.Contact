@@ -32,7 +32,7 @@
 		DE5961F3232F6F8100BDB4EE /* testlib.h in Headers */ = {isa = PBXBuildFile; fileRef = DE5961F1232F6F8100BDB4EE /* testlib.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		DE5961F6232F6F8100BDB4EE /* testlib.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DE5961EF232F6F8100BDB4EE /* testlib.framework */; };
 		DE5961F7232F6F8100BDB4EE /* testlib.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = DE5961EF232F6F8100BDB4EE /* testlib.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		DE5961FC232F702F00BDB4EE /* CrossPL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DED5255D218DF4C800619F59 /* CrossPL.framework */; };
+		DE5961FC232F702F00BDB4EE /* Elastos.SDK.Contact.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DED5255D218DF4C800619F59 /* Elastos.SDK.Contact.framework */; };
 		DE596209232F712800BDB4EE /* test.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE596204232F712800BDB4EE /* test.swift */; };
 		DE59620A232F712800BDB4EE /* InternalTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DE596205232F712800BDB4EE /* InternalTest.cpp */; };
 		DE59620B232F712800BDB4EE /* ExternalTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DE596206232F712800BDB4EE /* ExternalTest.cpp */; };
@@ -129,7 +129,7 @@
 		DE76DD732328A26B0041A703 /* experimental-span.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = "experimental-span.hpp"; sourceTree = "<group>"; };
 		DECA49C4232CA40D00C98A0D /* CrossPLUtils.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = CrossPLUtils.mm; sourceTree = "<group>"; };
 		DECA49C5232CA40D00C98A0D /* CrossPLUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CrossPLUtils.h; sourceTree = "<group>"; };
-		DED5255D218DF4C800619F59 /* CrossPL.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CrossPL.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		DED5255D218DF4C800619F59 /* Elastos.SDK.Contact.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Elastos.SDK.Contact.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		DED52561218DF4C800619F59 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		DEDB2484218DF5F200F07F42 /* CrossPL-Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "CrossPL-Bridging-Header.h"; sourceTree = "<group>"; };
 		DEDB2493218DF71C00F07F42 /* test.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = test.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -153,7 +153,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DE5961FC232F702F00BDB4EE /* CrossPL.framework in Frameworks */,
+				DE5961FC232F702F00BDB4EE /* Elastos.SDK.Contact.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -320,7 +320,7 @@
 		DED5255E218DF4C800619F59 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				DED5255D218DF4C800619F59 /* CrossPL.framework */,
+				DED5255D218DF4C800619F59 /* Elastos.SDK.Contact.framework */,
 				DEDB2493218DF71C00F07F42 /* test.app */,
 				DE283ECC231FBD1800D9740C /* anno */,
 				DE5961EF232F6F8100BDB4EE /* testlib.framework */,
@@ -439,7 +439,7 @@
 			);
 			name = lib;
 			productName = Elastos.ORG.Wallet.Lib;
-			productReference = DED5255D218DF4C800619F59 /* CrossPL.framework */;
+			productReference = DED5255D218DF4C800619F59 /* Elastos.SDK.Contact.framework */;
 			productType = "com.apple.product-type.framework";
 		};
 		DEDB2492218DF71C00F07F42 /* test */ = {
@@ -486,7 +486,7 @@
 					};
 				};
 			};
-			buildConfigurationList = DED52557218DF4C800619F59 /* Build configuration list for PBXProject "CrossPL" */;
+			buildConfigurationList = DED52557218DF4C800619F59 /* Build configuration list for PBXProject "Elastos.SDK.Contact" */;
 			compatibilityVersion = "Xcode 9.3";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -666,7 +666,7 @@
 				CODE_SIGN_IDENTITY = "Mac Developer";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = LFU7T9UYL5;
-				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
 				SWIFT_VERSION = 5.0;
@@ -680,7 +680,7 @@
 				CODE_SIGN_IDENTITY = "Mac Developer";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = LFU7T9UYL5;
-				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
 				SWIFT_VERSION = 5.0;
@@ -895,7 +895,7 @@
 				OTHER_LDFLAGS = "-lstdc++";
 				PRIVATE_HEADERS_FOLDER_PATH = "";
 				PRODUCT_BUNDLE_IDENTIFIER = org.elastos.tools.crosspl;
-				PRODUCT_NAME = CrossPL;
+				PRODUCT_NAME = Elastos.SDK.Contact;
 				SKIP_INSTALL = YES;
 				SWIFT_OBJC_BRIDGING_HEADER = "lib/CrossPL-Bridging-Header.h";
 				SWIFT_OBJC_INTERFACE_HEADER_NAME = "$(SWIFT_MODULE_NAME)-Swift.h";
@@ -931,7 +931,7 @@
 				OTHER_LDFLAGS = "-lstdc++";
 				PRIVATE_HEADERS_FOLDER_PATH = "";
 				PRODUCT_BUNDLE_IDENTIFIER = org.elastos.tools.crosspl;
-				PRODUCT_NAME = CrossPL;
+				PRODUCT_NAME = Elastos.SDK.Contact;
 				SKIP_INSTALL = YES;
 				SWIFT_OBJC_BRIDGING_HEADER = "lib/CrossPL-Bridging-Header.h";
 				SWIFT_OBJC_INTERFACE_HEADER_NAME = "$(SWIFT_MODULE_NAME)-Swift.h";
@@ -1012,7 +1012,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		DED52557218DF4C800619F59 /* Build configuration list for PBXProject "CrossPL" */ = {
+		DED52557218DF4C800619F59 /* Build configuration list for PBXProject "Elastos.SDK.Contact" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				DED52563218DF4C800619F59 /* Debug */,

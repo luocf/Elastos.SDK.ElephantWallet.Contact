@@ -17,7 +17,7 @@
                BlueprintIdentifier = "DE283ECB231FBD1800D9740C"
                BuildableName = "anno"
                BlueprintName = "anno"
-               ReferencedContainer = "container:CrossPL.xcodeproj">
+               ReferencedContainer = "container:Elastos.SDK.Contact.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -35,7 +35,7 @@
             BlueprintIdentifier = "DE283ECB231FBD1800D9740C"
             BuildableName = "anno"
             BlueprintName = "anno"
-            ReferencedContainer = "container:CrossPL.xcodeproj">
+            ReferencedContainer = "container:Elastos.SDK.Contact.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
       <AdditionalOptions>
@@ -58,7 +58,7 @@
             BlueprintIdentifier = "DE283ECB231FBD1800D9740C"
             BuildableName = "anno"
             BlueprintName = "anno"
-            ReferencedContainer = "container:CrossPL.xcodeproj">
+            ReferencedContainer = "container:Elastos.SDK.Contact.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
       <CommandLineArguments>
@@ -95,7 +95,7 @@
             BlueprintIdentifier = "DE283ECB231FBD1800D9740C"
             BuildableName = "anno"
             BlueprintName = "anno"
-            ReferencedContainer = "container:CrossPL.xcodeproj">
+            ReferencedContainer = "container:Elastos.SDK.Contact.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>
