@@ -14,6 +14,68 @@
 		DE1F526423214A9400A70F78 /* Annotation.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE1F526323214A9400A70F78 /* Annotation.swift */; };
 		DE1F52662321E43E00A70F78 /* CrossVariableType.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE1F52652321E43E00A70F78 /* CrossVariableType.swift */; };
 		DE1F52692322076C00A70F78 /* CrossProxyGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE1F52682322076C00A70F78 /* CrossProxyGenerator.swift */; };
+		DE27576C23334805001B635B /* sdk.h in Headers */ = {isa = PBXBuildFile; fileRef = DE27576A23334805001B635B /* sdk.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		DE2757DC2333486B001B635B /* HttpClient.hpp in Headers */ = {isa = PBXBuildFile; fileRef = DE2757832333486B001B635B /* HttpClient.hpp */; };
+		DE2757DD2333486B001B635B /* HttpClient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DE2757842333486B001B635B /* HttpClient.cpp */; };
+		DE2757DF2333486B001B635B /* Json.hpp in Headers */ = {isa = PBXBuildFile; fileRef = DE2757872333486B001B635B /* Json.hpp */; };
+		DE2757E02333486B001B635B /* Json.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DE2757882333486B001B635B /* Json.cpp */; };
+		DE2757E12333486B001B635B /* UserManager.hpp in Headers */ = {isa = PBXBuildFile; fileRef = DE27578A2333486B001B635B /* UserManager.hpp */; };
+		DE2757E22333486B001B635B /* MessageChannelStrategy.hpp in Headers */ = {isa = PBXBuildFile; fileRef = DE27578B2333486B001B635B /* MessageChannelStrategy.hpp */; };
+		DE2757E32333486B001B635B /* SecurityManager.hpp in Headers */ = {isa = PBXBuildFile; fileRef = DE27578C2333486B001B635B /* SecurityManager.hpp */; };
+		DE2757E42333486B001B635B /* Elastos.SDK.Contact.hpp in Headers */ = {isa = PBXBuildFile; fileRef = DE27578D2333486B001B635B /* Elastos.SDK.Contact.hpp */; };
+		DE2757E52333486B001B635B /* HumanInfo.hpp in Headers */ = {isa = PBXBuildFile; fileRef = DE27578E2333486B001B635B /* HumanInfo.hpp */; };
+		DE2757E62333486B001B635B /* Config.hpp in Headers */ = {isa = PBXBuildFile; fileRef = DE27578F2333486B001B635B /* Config.hpp */; };
+		DE2757E72333486B001B635B /* MessageManager.hpp in Headers */ = {isa = PBXBuildFile; fileRef = DE2757902333486B001B635B /* MessageManager.hpp */; };
+		DE2757E82333486B001B635B /* UserInfo.hpp in Headers */ = {isa = PBXBuildFile; fileRef = DE2757912333486B001B635B /* UserInfo.hpp */; };
+		DE2757E92333486B001B635B /* FriendManager.hpp in Headers */ = {isa = PBXBuildFile; fileRef = DE2757922333486B001B635B /* FriendManager.hpp */; };
+		DE2757EA2333486B001B635B /* IdentifyCode.hpp in Headers */ = {isa = PBXBuildFile; fileRef = DE2757932333486B001B635B /* IdentifyCode.hpp */; };
+		DE2757EB2333486B001B635B /* FriendInfo.hpp in Headers */ = {isa = PBXBuildFile; fileRef = DE2757942333486B001B635B /* FriendInfo.hpp */; };
+		DE2757EC2333486B001B635B /* ErrCode.hpp in Headers */ = {isa = PBXBuildFile; fileRef = DE2757952333486B001B635B /* ErrCode.hpp */; };
+		DE2757ED2333486B001B635B /* PlatformAndroid.hpp in Headers */ = {isa = PBXBuildFile; fileRef = DE2757972333486B001B635B /* PlatformAndroid.hpp */; };
+		DE2757EE2333486B001B635B /* PlatformUnixLike.hpp in Headers */ = {isa = PBXBuildFile; fileRef = DE2757982333486B001B635B /* PlatformUnixLike.hpp */; };
+		DE2757EF2333486B001B635B /* PlatformIos.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DE2757992333486B001B635B /* PlatformIos.cpp */; };
+		DE2757F12333486B001B635B /* PlatformDarwin.hpp in Headers */ = {isa = PBXBuildFile; fileRef = DE27579B2333486B001B635B /* PlatformDarwin.hpp */; };
+		DE2757F22333486B001B635B /* Platform.hpp in Headers */ = {isa = PBXBuildFile; fileRef = DE27579C2333486B001B635B /* Platform.hpp */; };
+		DE2757F32333486B001B635B /* PlatformDarwin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DE27579D2333486B001B635B /* PlatformDarwin.cpp */; };
+		DE2757F42333486B001B635B /* PlatformAndroid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DE27579E2333486B001B635B /* PlatformAndroid.cpp */; };
+		DE2757F52333486B001B635B /* PlatformUnixLike.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DE27579F2333486B001B635B /* PlatformUnixLike.cpp */; };
+		DE2757F62333486B001B635B /* PlatformIos.hpp in Headers */ = {isa = PBXBuildFile; fileRef = DE2757A02333486B001B635B /* PlatformIos.hpp */; };
+		DE2757F82333486B001B635B /* ThreadPool.hpp in Headers */ = {isa = PBXBuildFile; fileRef = DE2757A32333486B001B635B /* ThreadPool.hpp */; };
+		DE2757F92333486B001B635B /* MD5.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DE2757A42333486B001B635B /* MD5.cpp */; };
+		DE2757FA2333486B001B635B /* DateTime.hpp in Headers */ = {isa = PBXBuildFile; fileRef = DE2757A52333486B001B635B /* DateTime.hpp */; };
+		DE2757FB2333486B001B635B /* Log.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DE2757A62333486B001B635B /* Log.cpp */; };
+		DE2757FD2333486B001B635B /* Random.hpp in Headers */ = {isa = PBXBuildFile; fileRef = DE2757A82333486B001B635B /* Random.hpp */; };
+		DE2757FE2333486B001B635B /* ghc-filesystem.hpp in Headers */ = {isa = PBXBuildFile; fileRef = DE2757A92333486B001B635B /* ghc-filesystem.hpp */; };
+		DE2757FF2333486B001B635B /* taskthread.hpp.bak in Resources */ = {isa = PBXBuildFile; fileRef = DE2757AA2333486B001B635B /* taskthread.hpp.bak */; };
+		DE2758002333486B001B635B /* SafePtr.hpp in Headers */ = {isa = PBXBuildFile; fileRef = DE2757AB2333486B001B635B /* SafePtr.hpp */; };
+		DE2758012333486B001B635B /* ThreadPool.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DE2757AC2333486B001B635B /* ThreadPool.cpp */; };
+		DE2758022333486B001B635B /* MD5.hpp in Headers */ = {isa = PBXBuildFile; fileRef = DE2757AD2333486B001B635B /* MD5.hpp */; };
+		DE2758032333486B001B635B /* Log.hpp in Headers */ = {isa = PBXBuildFile; fileRef = DE2757AE2333486B001B635B /* Log.hpp */; };
+		DE2758042333486B001B635B /* CompatibleFileSystem.hpp in Headers */ = {isa = PBXBuildFile; fileRef = DE2757AF2333486B001B635B /* CompatibleFileSystem.hpp */; };
+		DE2758052333486B001B635B /* Base64.hpp in Headers */ = {isa = PBXBuildFile; fileRef = DE2757B02333486B001B635B /* Base64.hpp */; };
+		DE27580A2333486B001B635B /* FriendInfo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DE2757B72333486B001B635B /* FriendInfo.cpp */; };
+		DE27580B2333486B001B635B /* ChannelImplCarrier.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DE2757B82333486B001B635B /* ChannelImplCarrier.cpp */; };
+		DE27580C2333486B001B635B /* ErrCode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DE2757B92333486B001B635B /* ErrCode.cpp */; };
+		DE27580E2333486B001B635B /* DidChnDataListener.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DE2757BB2333486B001B635B /* DidChnDataListener.cpp */; };
+		DE27580F2333486B001B635B /* BlkChnClient.hpp.bak in Resources */ = {isa = PBXBuildFile; fileRef = DE2757BC2333486B001B635B /* BlkChnClient.hpp.bak */; };
+		DE2758102333486B001B635B /* DidChnClient.hpp in Headers */ = {isa = PBXBuildFile; fileRef = DE2757BD2333486B001B635B /* DidChnClient.hpp */; };
+		DE2758112333486B001B635B /* MessageManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DE2757BE2333486B001B635B /* MessageManager.cpp */; };
+		DE2758122333486B001B635B /* UserInfo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DE2757BF2333486B001B635B /* UserInfo.cpp */; };
+		DE2758132333486B001B635B /* JsonDefine.hpp in Headers */ = {isa = PBXBuildFile; fileRef = DE2757C02333486B001B635B /* JsonDefine.hpp */; };
+		DE2758142333486B001B635B /* FriendManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DE2757C12333486B001B635B /* FriendManager.cpp */; };
+		DE2758152333486C001B635B /* ChannelImplElaChain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DE2757C22333486B001B635B /* ChannelImplElaChain.cpp */; };
+		DE2758162333486C001B635B /* IdentifyCode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DE2757C32333486B001B635B /* IdentifyCode.cpp */; };
+		DE2758172333486C001B635B /* Config.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DE2757C42333486B001B635B /* Config.cpp */; };
+		DE2758182333486C001B635B /* ChannelImplElaChain.hpp in Headers */ = {isa = PBXBuildFile; fileRef = DE2757C52333486B001B635B /* ChannelImplElaChain.hpp */; };
+		DE2758192333486C001B635B /* BlkChnClient.cpp.bak in Resources */ = {isa = PBXBuildFile; fileRef = DE2757C62333486B001B635B /* BlkChnClient.cpp.bak */; };
+		DE27581A2333486C001B635B /* UserManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DE2757C72333486B001B635B /* UserManager.cpp */; };
+		DE27581B2333486C001B635B /* MessageChannelStrategy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DE2757C82333486B001B635B /* MessageChannelStrategy.cpp */; };
+		DE27581C2333486C001B635B /* ChannelImplCarrier.hpp in Headers */ = {isa = PBXBuildFile; fileRef = DE2757C92333486B001B635B /* ChannelImplCarrier.hpp */; };
+		DE27581D2333486C001B635B /* SecurityManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DE2757CA2333486B001B635B /* SecurityManager.cpp */; };
+		DE27581E2333486C001B635B /* DidChnDataListener.hpp in Headers */ = {isa = PBXBuildFile; fileRef = DE2757CB2333486B001B635B /* DidChnDataListener.hpp */; };
+		DE27581F2333486C001B635B /* Elastos.SDK.Contact.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DE2757CC2333486B001B635B /* Elastos.SDK.Contact.cpp */; };
+		DE2758202333486C001B635B /* HumanInfo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DE2757CD2333486B001B635B /* HumanInfo.cpp */; };
+		DE2758212333486C001B635B /* DidChnClient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DE2757CE2333486B001B635B /* DidChnClient.cpp */; };
 		DE283ECF231FBD1800D9740C /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE283ECE231FBD1800D9740C /* main.swift */; };
 		DE35737F231F630600496E41 /* CrossBase.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE35737E231F630600496E41 /* CrossBase.swift */; };
 		DE357383231F642D00496E41 /* CrossBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DE357381231F642D00496E41 /* CrossBase.cpp */; };
@@ -50,6 +112,70 @@
 		DE1F526323214A9400A70F78 /* Annotation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Annotation.swift; sourceTree = "<group>"; };
 		DE1F52652321E43E00A70F78 /* CrossVariableType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CrossVariableType.swift; sourceTree = "<group>"; };
 		DE1F52682322076C00A70F78 /* CrossProxyGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CrossProxyGenerator.swift; sourceTree = "<group>"; };
+		DE27576823334804001B635B /* sdk.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = sdk.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		DE27576A23334805001B635B /* sdk.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = sdk.h; sourceTree = "<group>"; };
+		DE27576B23334805001B635B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		DE2757832333486B001B635B /* HttpClient.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = HttpClient.hpp; sourceTree = "<group>"; };
+		DE2757842333486B001B635B /* HttpClient.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = HttpClient.cpp; sourceTree = "<group>"; };
+		DE2757872333486B001B635B /* Json.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Json.hpp; sourceTree = "<group>"; };
+		DE2757882333486B001B635B /* Json.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Json.cpp; sourceTree = "<group>"; };
+		DE27578A2333486B001B635B /* UserManager.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = UserManager.hpp; sourceTree = "<group>"; };
+		DE27578B2333486B001B635B /* MessageChannelStrategy.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = MessageChannelStrategy.hpp; sourceTree = "<group>"; };
+		DE27578C2333486B001B635B /* SecurityManager.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SecurityManager.hpp; sourceTree = "<group>"; };
+		DE27578D2333486B001B635B /* Elastos.SDK.Contact.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Elastos.SDK.Contact.hpp; sourceTree = "<group>"; };
+		DE27578E2333486B001B635B /* HumanInfo.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = HumanInfo.hpp; sourceTree = "<group>"; };
+		DE27578F2333486B001B635B /* Config.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Config.hpp; sourceTree = "<group>"; };
+		DE2757902333486B001B635B /* MessageManager.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = MessageManager.hpp; sourceTree = "<group>"; };
+		DE2757912333486B001B635B /* UserInfo.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = UserInfo.hpp; sourceTree = "<group>"; };
+		DE2757922333486B001B635B /* FriendManager.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = FriendManager.hpp; sourceTree = "<group>"; };
+		DE2757932333486B001B635B /* IdentifyCode.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = IdentifyCode.hpp; sourceTree = "<group>"; };
+		DE2757942333486B001B635B /* FriendInfo.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = FriendInfo.hpp; sourceTree = "<group>"; };
+		DE2757952333486B001B635B /* ErrCode.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ErrCode.hpp; sourceTree = "<group>"; };
+		DE2757972333486B001B635B /* PlatformAndroid.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = PlatformAndroid.hpp; sourceTree = "<group>"; };
+		DE2757982333486B001B635B /* PlatformUnixLike.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = PlatformUnixLike.hpp; sourceTree = "<group>"; };
+		DE2757992333486B001B635B /* PlatformIos.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PlatformIos.cpp; sourceTree = "<group>"; };
+		DE27579B2333486B001B635B /* PlatformDarwin.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = PlatformDarwin.hpp; sourceTree = "<group>"; };
+		DE27579C2333486B001B635B /* Platform.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Platform.hpp; sourceTree = "<group>"; };
+		DE27579D2333486B001B635B /* PlatformDarwin.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PlatformDarwin.cpp; sourceTree = "<group>"; };
+		DE27579E2333486B001B635B /* PlatformAndroid.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PlatformAndroid.cpp; sourceTree = "<group>"; };
+		DE27579F2333486B001B635B /* PlatformUnixLike.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PlatformUnixLike.cpp; sourceTree = "<group>"; };
+		DE2757A02333486B001B635B /* PlatformIos.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = PlatformIos.hpp; sourceTree = "<group>"; };
+		DE2757A32333486B001B635B /* ThreadPool.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ThreadPool.hpp; sourceTree = "<group>"; };
+		DE2757A42333486B001B635B /* MD5.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MD5.cpp; sourceTree = "<group>"; };
+		DE2757A52333486B001B635B /* DateTime.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = DateTime.hpp; sourceTree = "<group>"; };
+		DE2757A62333486B001B635B /* Log.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Log.cpp; sourceTree = "<group>"; };
+		DE2757A82333486B001B635B /* Random.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Random.hpp; sourceTree = "<group>"; };
+		DE2757A92333486B001B635B /* ghc-filesystem.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = "ghc-filesystem.hpp"; sourceTree = "<group>"; };
+		DE2757AA2333486B001B635B /* taskthread.hpp.bak */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = taskthread.hpp.bak; sourceTree = "<group>"; };
+		DE2757AB2333486B001B635B /* SafePtr.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SafePtr.hpp; sourceTree = "<group>"; };
+		DE2757AC2333486B001B635B /* ThreadPool.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ThreadPool.cpp; sourceTree = "<group>"; };
+		DE2757AD2333486B001B635B /* MD5.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = MD5.hpp; sourceTree = "<group>"; };
+		DE2757AE2333486B001B635B /* Log.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Log.hpp; sourceTree = "<group>"; };
+		DE2757AF2333486B001B635B /* CompatibleFileSystem.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = CompatibleFileSystem.hpp; sourceTree = "<group>"; };
+		DE2757B02333486B001B635B /* Base64.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Base64.hpp; sourceTree = "<group>"; };
+		DE2757B72333486B001B635B /* FriendInfo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FriendInfo.cpp; sourceTree = "<group>"; };
+		DE2757B82333486B001B635B /* ChannelImplCarrier.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ChannelImplCarrier.cpp; sourceTree = "<group>"; };
+		DE2757B92333486B001B635B /* ErrCode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ErrCode.cpp; sourceTree = "<group>"; };
+		DE2757BB2333486B001B635B /* DidChnDataListener.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DidChnDataListener.cpp; sourceTree = "<group>"; };
+		DE2757BC2333486B001B635B /* BlkChnClient.hpp.bak */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = BlkChnClient.hpp.bak; sourceTree = "<group>"; };
+		DE2757BD2333486B001B635B /* DidChnClient.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = DidChnClient.hpp; sourceTree = "<group>"; };
+		DE2757BE2333486B001B635B /* MessageManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MessageManager.cpp; sourceTree = "<group>"; };
+		DE2757BF2333486B001B635B /* UserInfo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UserInfo.cpp; sourceTree = "<group>"; };
+		DE2757C02333486B001B635B /* JsonDefine.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = JsonDefine.hpp; sourceTree = "<group>"; };
+		DE2757C12333486B001B635B /* FriendManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FriendManager.cpp; sourceTree = "<group>"; };
+		DE2757C22333486B001B635B /* ChannelImplElaChain.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ChannelImplElaChain.cpp; sourceTree = "<group>"; };
+		DE2757C32333486B001B635B /* IdentifyCode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IdentifyCode.cpp; sourceTree = "<group>"; };
+		DE2757C42333486B001B635B /* Config.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Config.cpp; sourceTree = "<group>"; };
+		DE2757C52333486B001B635B /* ChannelImplElaChain.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ChannelImplElaChain.hpp; sourceTree = "<group>"; };
+		DE2757C62333486B001B635B /* BlkChnClient.cpp.bak */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = BlkChnClient.cpp.bak; sourceTree = "<group>"; };
+		DE2757C72333486B001B635B /* UserManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UserManager.cpp; sourceTree = "<group>"; };
+		DE2757C82333486B001B635B /* MessageChannelStrategy.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MessageChannelStrategy.cpp; sourceTree = "<group>"; };
+		DE2757C92333486B001B635B /* ChannelImplCarrier.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ChannelImplCarrier.hpp; sourceTree = "<group>"; };
+		DE2757CA2333486B001B635B /* SecurityManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SecurityManager.cpp; sourceTree = "<group>"; };
+		DE2757CB2333486B001B635B /* DidChnDataListener.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = DidChnDataListener.hpp; sourceTree = "<group>"; };
+		DE2757CC2333486B001B635B /* Elastos.SDK.Contact.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Elastos.SDK.Contact.cpp; sourceTree = "<group>"; };
+		DE2757CD2333486B001B635B /* HumanInfo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = HumanInfo.cpp; sourceTree = "<group>"; };
+		DE2757CE2333486B001B635B /* DidChnClient.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DidChnClient.cpp; sourceTree = "<group>"; };
 		DE283ECC231FBD1800D9740C /* anno */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = anno; sourceTree = BUILT_PRODUCTS_DIR; };
 		DE283ECE231FBD1800D9740C /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		DE283ED4231FBE0400D9740C /* resources */ = {isa = PBXFileReference; lastKnownFileType = folder; path = resources; sourceTree = "<group>"; };
@@ -72,6 +198,13 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		DE27576523334804001B635B /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		DE283EC9231FBD1800D9740C /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -97,6 +230,148 @@
 				DE76DD6923289D640041A703 /* CrossPLUtilsGenerator.swift */,
 			);
 			path = generator;
+			sourceTree = "<group>";
+		};
+		DE27576923334805001B635B /* sdk */ = {
+			isa = PBXGroup;
+			children = (
+				DE2757702333486B001B635B /* cpp */,
+				DE27576A23334805001B635B /* sdk.h */,
+				DE27576B23334805001B635B /* Info.plist */,
+			);
+			path = sdk;
+			sourceTree = "<group>";
+		};
+		DE2757702333486B001B635B /* cpp */ = {
+			isa = PBXGroup;
+			children = (
+				DE2757722333486B001B635B /* base */,
+			);
+			path = cpp;
+			sourceTree = "<group>";
+		};
+		DE2757722333486B001B635B /* base */ = {
+			isa = PBXGroup;
+			children = (
+				DE27577D2333486B001B635B /* wrapper */,
+				DE2757892333486B001B635B /* include */,
+				DE2757962333486B001B635B /* platform */,
+				DE2757A22333486B001B635B /* common */,
+				DE2757B62333486B001B635B /* src */,
+			);
+			path = base;
+			sourceTree = "<group>";
+		};
+		DE27577D2333486B001B635B /* wrapper */ = {
+			isa = PBXGroup;
+			children = (
+				DE27577E2333486B001B635B /* httpclient */,
+				DE2757852333486B001B635B /* json */,
+			);
+			path = wrapper;
+			sourceTree = "<group>";
+		};
+		DE27577E2333486B001B635B /* httpclient */ = {
+			isa = PBXGroup;
+			children = (
+				DE2757832333486B001B635B /* HttpClient.hpp */,
+				DE2757842333486B001B635B /* HttpClient.cpp */,
+			);
+			path = httpclient;
+			sourceTree = "<group>";
+		};
+		DE2757852333486B001B635B /* json */ = {
+			isa = PBXGroup;
+			children = (
+				DE2757872333486B001B635B /* Json.hpp */,
+				DE2757882333486B001B635B /* Json.cpp */,
+			);
+			path = json;
+			sourceTree = "<group>";
+		};
+		DE2757892333486B001B635B /* include */ = {
+			isa = PBXGroup;
+			children = (
+				DE27578A2333486B001B635B /* UserManager.hpp */,
+				DE27578B2333486B001B635B /* MessageChannelStrategy.hpp */,
+				DE27578C2333486B001B635B /* SecurityManager.hpp */,
+				DE27578D2333486B001B635B /* Elastos.SDK.Contact.hpp */,
+				DE27578E2333486B001B635B /* HumanInfo.hpp */,
+				DE27578F2333486B001B635B /* Config.hpp */,
+				DE2757902333486B001B635B /* MessageManager.hpp */,
+				DE2757912333486B001B635B /* UserInfo.hpp */,
+				DE2757922333486B001B635B /* FriendManager.hpp */,
+				DE2757932333486B001B635B /* IdentifyCode.hpp */,
+				DE2757942333486B001B635B /* FriendInfo.hpp */,
+				DE2757952333486B001B635B /* ErrCode.hpp */,
+			);
+			path = include;
+			sourceTree = "<group>";
+		};
+		DE2757962333486B001B635B /* platform */ = {
+			isa = PBXGroup;
+			children = (
+				DE2757972333486B001B635B /* PlatformAndroid.hpp */,
+				DE2757982333486B001B635B /* PlatformUnixLike.hpp */,
+				DE2757992333486B001B635B /* PlatformIos.cpp */,
+				DE27579B2333486B001B635B /* PlatformDarwin.hpp */,
+				DE27579C2333486B001B635B /* Platform.hpp */,
+				DE27579D2333486B001B635B /* PlatformDarwin.cpp */,
+				DE27579E2333486B001B635B /* PlatformAndroid.cpp */,
+				DE27579F2333486B001B635B /* PlatformUnixLike.cpp */,
+				DE2757A02333486B001B635B /* PlatformIos.hpp */,
+			);
+			path = platform;
+			sourceTree = "<group>";
+		};
+		DE2757A22333486B001B635B /* common */ = {
+			isa = PBXGroup;
+			children = (
+				DE2757A32333486B001B635B /* ThreadPool.hpp */,
+				DE2757A42333486B001B635B /* MD5.cpp */,
+				DE2757A52333486B001B635B /* DateTime.hpp */,
+				DE2757A62333486B001B635B /* Log.cpp */,
+				DE2757A82333486B001B635B /* Random.hpp */,
+				DE2757A92333486B001B635B /* ghc-filesystem.hpp */,
+				DE2757AA2333486B001B635B /* taskthread.hpp.bak */,
+				DE2757AB2333486B001B635B /* SafePtr.hpp */,
+				DE2757AC2333486B001B635B /* ThreadPool.cpp */,
+				DE2757AD2333486B001B635B /* MD5.hpp */,
+				DE2757AE2333486B001B635B /* Log.hpp */,
+				DE2757AF2333486B001B635B /* CompatibleFileSystem.hpp */,
+				DE2757B02333486B001B635B /* Base64.hpp */,
+			);
+			path = common;
+			sourceTree = "<group>";
+		};
+		DE2757B62333486B001B635B /* src */ = {
+			isa = PBXGroup;
+			children = (
+				DE2757B72333486B001B635B /* FriendInfo.cpp */,
+				DE2757B82333486B001B635B /* ChannelImplCarrier.cpp */,
+				DE2757B92333486B001B635B /* ErrCode.cpp */,
+				DE2757BB2333486B001B635B /* DidChnDataListener.cpp */,
+				DE2757BC2333486B001B635B /* BlkChnClient.hpp.bak */,
+				DE2757BD2333486B001B635B /* DidChnClient.hpp */,
+				DE2757BE2333486B001B635B /* MessageManager.cpp */,
+				DE2757BF2333486B001B635B /* UserInfo.cpp */,
+				DE2757C02333486B001B635B /* JsonDefine.hpp */,
+				DE2757C12333486B001B635B /* FriendManager.cpp */,
+				DE2757C22333486B001B635B /* ChannelImplElaChain.cpp */,
+				DE2757C32333486B001B635B /* IdentifyCode.cpp */,
+				DE2757C42333486B001B635B /* Config.cpp */,
+				DE2757C52333486B001B635B /* ChannelImplElaChain.hpp */,
+				DE2757C62333486B001B635B /* BlkChnClient.cpp.bak */,
+				DE2757C72333486B001B635B /* UserManager.cpp */,
+				DE2757C82333486B001B635B /* MessageChannelStrategy.cpp */,
+				DE2757C92333486B001B635B /* ChannelImplCarrier.hpp */,
+				DE2757CA2333486B001B635B /* SecurityManager.cpp */,
+				DE2757CB2333486B001B635B /* DidChnDataListener.hpp */,
+				DE2757CC2333486B001B635B /* Elastos.SDK.Contact.cpp */,
+				DE2757CD2333486B001B635B /* HumanInfo.cpp */,
+				DE2757CE2333486B001B635B /* DidChnClient.cpp */,
+			);
+			path = src;
 			sourceTree = "<group>";
 		};
 		DE283ECD231FBD1800D9740C /* anno */ = {
@@ -184,6 +459,7 @@
 			isa = PBXGroup;
 			children = (
 				DEAAFDFE2331C75C004332AB /* crosspl */,
+				DE27576923334805001B635B /* sdk */,
 				DED5255E218DF4C800619F59 /* Products */,
 				DE5961DF232F647D00BDB4EE /* Frameworks */,
 			);
@@ -194,6 +470,7 @@
 			children = (
 				DED5255D218DF4C800619F59 /* CrossPL.framework */,
 				DE283ECC231FBD1800D9740C /* anno */,
+				DE27576823334804001B635B /* sdk.framework */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -213,6 +490,47 @@
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
+		DE27576323334804001B635B /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DE2757E72333486B001B635B /* MessageManager.hpp in Headers */,
+				DE2757E12333486B001B635B /* UserManager.hpp in Headers */,
+				DE2758182333486C001B635B /* ChannelImplElaChain.hpp in Headers */,
+				DE2758022333486B001B635B /* MD5.hpp in Headers */,
+				DE27576C23334805001B635B /* sdk.h in Headers */,
+				DE2757E62333486B001B635B /* Config.hpp in Headers */,
+				DE2757F22333486B001B635B /* Platform.hpp in Headers */,
+				DE2757E22333486B001B635B /* MessageChannelStrategy.hpp in Headers */,
+				DE2757F82333486B001B635B /* ThreadPool.hpp in Headers */,
+				DE2757EC2333486B001B635B /* ErrCode.hpp in Headers */,
+				DE2757E52333486B001B635B /* HumanInfo.hpp in Headers */,
+				DE2757E32333486B001B635B /* SecurityManager.hpp in Headers */,
+				DE2757EB2333486B001B635B /* FriendInfo.hpp in Headers */,
+				DE2757F12333486B001B635B /* PlatformDarwin.hpp in Headers */,
+				DE27581C2333486C001B635B /* ChannelImplCarrier.hpp in Headers */,
+				DE2757FD2333486B001B635B /* Random.hpp in Headers */,
+				DE2758102333486B001B635B /* DidChnClient.hpp in Headers */,
+				DE2758052333486B001B635B /* Base64.hpp in Headers */,
+				DE2757E82333486B001B635B /* UserInfo.hpp in Headers */,
+				DE2757E92333486B001B635B /* FriendManager.hpp in Headers */,
+				DE27581E2333486C001B635B /* DidChnDataListener.hpp in Headers */,
+				DE2758002333486B001B635B /* SafePtr.hpp in Headers */,
+				DE2757EA2333486B001B635B /* IdentifyCode.hpp in Headers */,
+				DE2757DC2333486B001B635B /* HttpClient.hpp in Headers */,
+				DE2757F62333486B001B635B /* PlatformIos.hpp in Headers */,
+				DE2758032333486B001B635B /* Log.hpp in Headers */,
+				DE2757FE2333486B001B635B /* ghc-filesystem.hpp in Headers */,
+				DE2757ED2333486B001B635B /* PlatformAndroid.hpp in Headers */,
+				DE2757EE2333486B001B635B /* PlatformUnixLike.hpp in Headers */,
+				DE2757DF2333486B001B635B /* Json.hpp in Headers */,
+				DE2757E42333486B001B635B /* Elastos.SDK.Contact.hpp in Headers */,
+				DE2757FA2333486B001B635B /* DateTime.hpp in Headers */,
+				DE2758042333486B001B635B /* CompatibleFileSystem.hpp in Headers */,
+				DE2758132333486B001B635B /* JsonDefine.hpp in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		DED52558218DF4C800619F59 /* Headers */ = {
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
@@ -228,6 +546,25 @@
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
+		DE27576723334804001B635B /* sdk */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = DE27576D23334805001B635B /* Build configuration list for PBXNativeTarget "sdk" */;
+			buildPhases = (
+				DE27582223334B29001B635B /* ShellScript */,
+				DE27576323334804001B635B /* Headers */,
+				DE27576423334804001B635B /* Sources */,
+				DE27576523334804001B635B /* Frameworks */,
+				DE27576623334804001B635B /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = sdk;
+			productName = sdk;
+			productReference = DE27576823334804001B635B /* sdk.framework */;
+			productType = "com.apple.product-type.framework";
+		};
 		DE283ECB231FBD1800D9740C /* anno */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = DE283ED2231FBD1800D9740C /* Build configuration list for PBXNativeTarget "anno" */;
@@ -274,6 +611,9 @@
 				LastUpgradeCheck = 1010;
 				ORGANIZATIONNAME = Elastos;
 				TargetAttributes = {
+					DE27576723334804001B635B = {
+						CreatedOnToolsVersion = 10.3;
+					};
 					DE283ECB231FBD1800D9740C = {
 						CreatedOnToolsVersion = 10.3;
 					};
@@ -298,11 +638,22 @@
 			targets = (
 				DE283ECB231FBD1800D9740C /* anno */,
 				DED5255C218DF4C800619F59 /* lib */,
+				DE27576723334804001B635B /* sdk */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		DE27576623334804001B635B /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DE2757FF2333486B001B635B /* taskthread.hpp.bak in Resources */,
+				DE27580F2333486B001B635B /* BlkChnClient.hpp.bak in Resources */,
+				DE2758192333486C001B635B /* BlkChnClient.cpp.bak in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		DED5255B218DF4C800619F59 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -313,6 +664,24 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		DE27582223334B29001B635B /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "
+";
+		};
 		DE5982ED21D37E8F00998AEF /* Run Script */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -335,6 +704,38 @@
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		DE27576423334804001B635B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DE27581B2333486C001B635B /* MessageChannelStrategy.cpp in Sources */,
+				DE27581F2333486C001B635B /* Elastos.SDK.Contact.cpp in Sources */,
+				DE2758142333486B001B635B /* FriendManager.cpp in Sources */,
+				DE2758212333486C001B635B /* DidChnClient.cpp in Sources */,
+				DE27580E2333486B001B635B /* DidChnDataListener.cpp in Sources */,
+				DE2757F42333486B001B635B /* PlatformAndroid.cpp in Sources */,
+				DE27580A2333486B001B635B /* FriendInfo.cpp in Sources */,
+				DE27580C2333486B001B635B /* ErrCode.cpp in Sources */,
+				DE2758152333486C001B635B /* ChannelImplElaChain.cpp in Sources */,
+				DE2758012333486B001B635B /* ThreadPool.cpp in Sources */,
+				DE2757FB2333486B001B635B /* Log.cpp in Sources */,
+				DE2757E02333486B001B635B /* Json.cpp in Sources */,
+				DE2757DD2333486B001B635B /* HttpClient.cpp in Sources */,
+				DE2758172333486C001B635B /* Config.cpp in Sources */,
+				DE2758122333486B001B635B /* UserInfo.cpp in Sources */,
+				DE2757F32333486B001B635B /* PlatformDarwin.cpp in Sources */,
+				DE27580B2333486B001B635B /* ChannelImplCarrier.cpp in Sources */,
+				DE2758162333486C001B635B /* IdentifyCode.cpp in Sources */,
+				DE2757F52333486B001B635B /* PlatformUnixLike.cpp in Sources */,
+				DE2757EF2333486B001B635B /* PlatformIos.cpp in Sources */,
+				DE27581A2333486C001B635B /* UserManager.cpp in Sources */,
+				DE27581D2333486C001B635B /* SecurityManager.cpp in Sources */,
+				DE2757F92333486B001B635B /* MD5.cpp in Sources */,
+				DE2758112333486B001B635B /* MessageManager.cpp in Sources */,
+				DE2758202333486C001B635B /* HumanInfo.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		DE283EC8231FBD1800D9740C /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -368,6 +769,78 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
+		DE27576E23334805001B635B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_STYLE = Automatic;
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = LFU7T9UYL5;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				HEADER_SEARCH_PATHS = "";
+				INFOPLIST_FILE = sdk/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 12.4;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"$(OTHER_CFLAGS)",
+					"-I../build/sysroot/iOS/$ARCHS/include",
+				);
+				OTHER_LDFLAGS = (
+					"-L../build/sysroot/iOS/$ARCHS/lib",
+					"-lElastos.SDK.Contact",
+					"-lcurl",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = org.elastos.sdk.elephantwallet.contact.sdk;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		DE27576F23334805001B635B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_STYLE = Automatic;
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = LFU7T9UYL5;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				HEADER_SEARCH_PATHS = "";
+				INFOPLIST_FILE = sdk/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 12.4;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"$(OTHER_CFLAGS)",
+					"-I../build/sysroot/iOS/$ARCHS/include",
+				);
+				OTHER_LDFLAGS = (
+					"-L../build/sysroot/iOS/$ARCHS/lib",
+					"-lElastos.SDK.Contact",
+					"-lcurl",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = org.elastos.sdk.elephantwallet.contact.sdk;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 		DE283ED0231FBD1800D9740C /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -403,7 +876,7 @@
 				CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
@@ -468,7 +941,7 @@
 				CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
@@ -594,6 +1067,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		DE27576D23334805001B635B /* Build configuration list for PBXNativeTarget "sdk" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DE27576E23334805001B635B /* Debug */,
+				DE27576F23334805001B635B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		DE283ED2231FBD1800D9740C /* Build configuration list for PBXNativeTarget "anno" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

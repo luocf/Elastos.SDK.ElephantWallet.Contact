@@ -7,7 +7,7 @@
 
 #include <SecurityManager.hpp>
 
-#include <Elastos.Wallet.Utility.h>
+#include <Elastos.SDK.Keypair.C/Elastos.Wallet.Utility.h>
 #include <fstream>
 #include <Log.hpp>
 

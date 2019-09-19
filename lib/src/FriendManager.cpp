@@ -13,7 +13,7 @@
 #include "DidChnDataListener.hpp"
 #include <CompatibleFileSystem.hpp>
 #include <DateTime.hpp>
-#include <Elastos.Wallet.Utility.h>
+#include <Elastos.SDK.Keypair.C/Elastos.Wallet.Utility.h>
 #include <Log.hpp>
 #include <JsonDefine.hpp>
 #include <MessageManager.hpp>
