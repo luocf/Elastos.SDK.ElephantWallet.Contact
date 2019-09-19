@@ -1,13 +1,13 @@
 //
-//  PlatformDarwin.cpp
+//  PlatformIos.cpp
 //
 //  Created by mengxk on 19/03/16.
 //  Copyright © 2016 mengxk. All rights reserved.
 //
 
-#if defined(__APPLE__) && defined(TARGET_OS_MAC)
+#include "PlatformIos.hpp"
 
-#include "PlatformDarwin.hpp"
+#if defined(__APPLE__) && (defined(TARGET_OS_IPHONE) || defined(TARGET_IPHONE_SIMULATOR))
 
 #include <execinfo.h>
 #include <sstream>
@@ -22,12 +22,12 @@ namespace elastos {
 /***********************************************/
 /***** static variables initialize *************/
 /***********************************************/
-
+std::string PlatformIos::mCurrentDevId;
 
 /***********************************************/
 /***** static function implement ***************/
 /***********************************************/
-std::string PlatformDarwin::GetBacktrace() {
+std::string PlatformIos::GetBacktrace() {
     void* addrlist[512];
     int addrlen = backtrace( addrlist, sizeof( addrlist ) / sizeof( void* ));
     if(addrlen == 0) {
@@ -44,28 +44,17 @@ std::string PlatformDarwin::GetBacktrace() {
     return sstream.str();
 }
 
-int PlatformDarwin::GetCurrentDevId(std::string& devId)
+int PlatformIos::GetCurrentDevId(std::string& devId)
 {
-    int ret = ErrCode::UnknownError;
-
-    devId = "";
-
-    uuid_t uuid = {};
-    struct timespec ts = { .tv_sec = 5, .tv_nsec = 0 };
-    ret = gethostuuid(uuid, &ts);
-    if(ret < 0) {
+    if(mCurrentDevId.empty()) {
         return ErrCode::DevUUIDError;
     }
 
-    uuid_string_t uuidStr;
-    uuid_unparse_upper(uuid, uuidStr);
-    devId = uuidStr;
-    // devId += "aaa";
-
+    devId = mCurrentDevId;
     return 0;
 }
 
-int PlatformDarwin::GetCurrentDevName(std::string& devName)
+int PlatformIos::GetCurrentDevName(std::string& devName)
 {
     int ret = ErrCode::UnknownError;
 
@@ -79,6 +68,11 @@ int PlatformDarwin::GetCurrentDevName(std::string& devName)
     devName = utsName.sysname;
 
     return 0;
+}
+
+void PlatformIos::SetCurrentDevId(const std::string& devId)
+{
+    mCurrentDevId = devId;
 }
 
 /***********************************************/
@@ -96,4 +90,4 @@ int PlatformDarwin::GetCurrentDevName(std::string& devName)
 
 } // namespace elastos
 
-#endif /* defined(__APPLE__) && defined(TARGET_OS_MAC) */
+#endif /* defined(__APPLE__) && (defined(TARGET_OS_IPHONE) || defined(TARGET_IPHONE_SIMULATOR)) */

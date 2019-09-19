@@ -639,7 +639,7 @@ void MessageManager::MessageListener::onReceivedMessage(const std::string& frien
             if(ret > 0) {
                 for(auto& it: infoArray) {
                     ret = msgMgr->requestFriend(it.mUsrAddr, humanChType, "", true);
-                    if(ret = ErrCode::ChannelFailedFriendExists) {
+                    if(ret == ErrCode::ChannelFailedFriendExists) {
                         continue;
                     }
                     CHECK_AND_NOTIFY_RETVAL(ret)

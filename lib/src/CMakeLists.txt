@@ -47,6 +47,8 @@ target_link_libraries(Elastos.SDK.Contact PUBLIC
     #thirdparty)
 if("${CFG_TARGET_PLATFORM}" STREQUAL "Android")
     target_link_libraries(Elastos.SDK.Contact PRIVATE log)
+elseif("${CFG_TARGET_PLATFORM}" STREQUAL "iOS")
+    target_link_libraries(Elastos.SDK.Contact PRIVATE "-framework CFNetwork")
 endif()
 
 set_target_properties(Elastos.SDK.Contact PROPERTIES PUBLIC_HEADER "${Elastos.SDK.Contact-HEADERS}")

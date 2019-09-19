@@ -1,6 +1,6 @@
 /**
- * @file	PlatformDarwin.hpp
- * @brief	PlatformDarwin
+ * @file	PlatformIos.hpp
+ * @brief	PlatformIos
  * @details	
  *
  * @author	xxx
@@ -8,16 +8,17 @@
  * @copyright	(c) 2012 xxx All rights reserved.
  **/
 
-#ifndef _ELASTOS_PLATFORM_DARWIN_HPP_
-#define _ELASTOS_PLATFORM_DARWIN_HPP_
+#ifndef _ELASTOS_PLATFORM_IOS_HPP_
+#define _ELASTOS_PLATFORM_IOS_HPP_
 
-#if defined(__APPLE__) && defined(TARGET_OS_MAC)
+#include "TargetConditionals.h"
+#if defined(__APPLE__) && (defined(TARGET_OS_IPHONE) || defined(TARGET_IPHONE_SIMULATOR))
 
 #include <string>
 
 namespace elastos {
 
-class PlatformDarwin {
+class PlatformIos {
 public:
     /*** type define ***/
 
@@ -28,7 +29,7 @@ public:
     static int GetCurrentDevId(std::string& devId);
     static int GetCurrentDevName(std::string& devName);
 
-    static void SetCurrentDevId(const std::string& devId) { /* NOUSE */ }
+    static void SetCurrentDevId(const std::string& devId);
     /*** class function and variable ***/
 
 private:
@@ -37,13 +38,15 @@ private:
     /*** static function and variable ***/
 
     /*** class function and variable ***/
-    explicit PlatformDarwin() = delete;
-    virtual ~PlatformDarwin() = delete;
+    explicit PlatformIos() = delete;
+    virtual ~PlatformIos() = delete;
 
-}; // class PlatformDarwin
+    static std::string mCurrentDevId;
+
+}; // class PlatformIos
 
 } // namespace elastos
 
-#endif /* defined(__APPLE__) && defined(TARGET_OS_MAC) */
+#endif /* defined(__APPLE__) && (defined(TARGET_OS_IPHONE) || defined(TARGET_IPHONE_SIMULATOR)) */
 
-#endif /* _ELASTOS_PLATFORM_DARWIN_HPP_ */
+#endif /* _ELASTOS_PLATFORM_IOS_HPP_ */

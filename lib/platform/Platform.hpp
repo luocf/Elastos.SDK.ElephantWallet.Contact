@@ -12,7 +12,15 @@
 #define _ELASTOS_PLATFORM_HPP_
 
 #if defined(__APPLE__)
+#include "TargetConditionals.h"
+#if TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR
+#include "PlatformIos.hpp"
+#elif TARGET_OS_MAC
 #include "PlatformDarwin.hpp"
+#else
+#error "Unsupport Apple Platform"
+#endif
+
 #elif defined(__ANDROID__)
 #include "PlatformAndroid.hpp"
 #elif defined(__linux__)
@@ -24,13 +32,15 @@
 namespace elastos {
 
 #if defined(__APPLE__)
+#if TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR
+class Platform : public PlatformIos {
+#elif TARGET_OS_MAC
 class Platform : public PlatformDarwin {
+#endif
 #elif defined(__ANDROID__)
 class Platform : public PlatformAndroid {
 #elif defined(__linux__)
 class Platform : public PlatformUnixLike {
-#else
-#error "Unsupport Platform"
 #endif
 public:
     /*** type define ***/
