@@ -16,4 +16,4 @@ FOUNDATION_EXPORT const unsigned char sdkVersionString[];
 
 // In this header, you should import all the public headers of your framework using statements like #import <sdk/PublicHeader.h>
 
-
+#import "crosspl/CrossPLFactory.h"

@@ -76,6 +76,16 @@
 		DE27581F2333486C001B635B /* Elastos.SDK.Contact.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DE2757CC2333486B001B635B /* Elastos.SDK.Contact.cpp */; };
 		DE2758202333486C001B635B /* HumanInfo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DE2757CD2333486B001B635B /* HumanInfo.cpp */; };
 		DE2758212333486C001B635B /* DidChnClient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DE2757CE2333486B001B635B /* DidChnClient.cpp */; };
+		DE27582523334F54001B635B /* Contact.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE27582423334F54001B635B /* Contact.swift */; };
+		DE27582823335014001B635B /* ContactFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE27582723335014001B635B /* ContactFactory.swift */; };
+		DE27582923335064001B635B /* CrossPL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DED5255D218DF4C800619F59 /* CrossPL.framework */; };
+		DE27583323335177001B635B /* CrossPLFactory.mm in Sources */ = {isa = PBXBuildFile; fileRef = DE27582B23335177001B635B /* CrossPLFactory.mm */; };
+		DE27583423335177001B635B /* ContactFactory.proxy.mm in Sources */ = {isa = PBXBuildFile; fileRef = DE27582D23335177001B635B /* ContactFactory.proxy.mm */; };
+		DE27583523335177001B635B /* ContactFactory.proxy.h in Headers */ = {isa = PBXBuildFile; fileRef = DE27582E23335177001B635B /* ContactFactory.proxy.h */; };
+		DE27583623335177001B635B /* CrossPLUtils.mm in Sources */ = {isa = PBXBuildFile; fileRef = DE27582F23335177001B635B /* CrossPLUtils.mm */; };
+		DE27583723335177001B635B /* CrossPLFactory.h in Headers */ = {isa = PBXBuildFile; fileRef = DE27583023335177001B635B /* CrossPLFactory.h */; };
+		DE27583823335177001B635B /* CrossPLUtils.h in Headers */ = {isa = PBXBuildFile; fileRef = DE27583123335177001B635B /* CrossPLUtils.h */; };
+		DE27583923335177001B635B /* experimental-span.hpp in Headers */ = {isa = PBXBuildFile; fileRef = DE27583223335177001B635B /* experimental-span.hpp */; };
 		DE283ECF231FBD1800D9740C /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE283ECE231FBD1800D9740C /* main.swift */; };
 		DE35737F231F630600496E41 /* CrossBase.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE35737E231F630600496E41 /* CrossBase.swift */; };
 		DE357383231F642D00496E41 /* CrossBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DE357381231F642D00496E41 /* CrossBase.cpp */; };
@@ -176,6 +186,15 @@
 		DE2757CC2333486B001B635B /* Elastos.SDK.Contact.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Elastos.SDK.Contact.cpp; sourceTree = "<group>"; };
 		DE2757CD2333486B001B635B /* HumanInfo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = HumanInfo.cpp; sourceTree = "<group>"; };
 		DE2757CE2333486B001B635B /* DidChnClient.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DidChnClient.cpp; sourceTree = "<group>"; };
+		DE27582423334F54001B635B /* Contact.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Contact.swift; sourceTree = "<group>"; };
+		DE27582723335014001B635B /* ContactFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactFactory.swift; sourceTree = "<group>"; };
+		DE27582B23335177001B635B /* CrossPLFactory.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = CrossPLFactory.mm; sourceTree = "<group>"; };
+		DE27582D23335177001B635B /* ContactFactory.proxy.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ContactFactory.proxy.mm; sourceTree = "<group>"; };
+		DE27582E23335177001B635B /* ContactFactory.proxy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ContactFactory.proxy.h; sourceTree = "<group>"; };
+		DE27582F23335177001B635B /* CrossPLUtils.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = CrossPLUtils.mm; sourceTree = "<group>"; };
+		DE27583023335177001B635B /* CrossPLFactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CrossPLFactory.h; sourceTree = "<group>"; };
+		DE27583123335177001B635B /* CrossPLUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CrossPLUtils.h; sourceTree = "<group>"; };
+		DE27583223335177001B635B /* experimental-span.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = "experimental-span.hpp"; sourceTree = "<group>"; };
 		DE283ECC231FBD1800D9740C /* anno */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = anno; sourceTree = BUILT_PRODUCTS_DIR; };
 		DE283ECE231FBD1800D9740C /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		DE283ED4231FBE0400D9740C /* resources */ = {isa = PBXFileReference; lastKnownFileType = folder; path = resources; sourceTree = "<group>"; };
@@ -202,6 +221,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DE27582923335064001B635B /* CrossPL.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -235,7 +255,9 @@
 		DE27576923334805001B635B /* sdk */ = {
 			isa = PBXGroup;
 			children = (
+				DE27582A23335177001B635B /* crosspl */,
 				DE2757702333486B001B635B /* cpp */,
+				DE27582323334F40001B635B /* swift */,
 				DE27576A23334805001B635B /* sdk.h */,
 				DE27576B23334805001B635B /* Info.plist */,
 			);
@@ -374,6 +396,46 @@
 			path = src;
 			sourceTree = "<group>";
 		};
+		DE27582323334F40001B635B /* swift */ = {
+			isa = PBXGroup;
+			children = (
+				DE27582623334FCB001B635B /* internal */,
+				DE27582423334F54001B635B /* Contact.swift */,
+			);
+			path = swift;
+			sourceTree = "<group>";
+		};
+		DE27582623334FCB001B635B /* internal */ = {
+			isa = PBXGroup;
+			children = (
+				DE27582723335014001B635B /* ContactFactory.swift */,
+			);
+			path = internal;
+			sourceTree = "<group>";
+		};
+		DE27582A23335177001B635B /* crosspl */ = {
+			isa = PBXGroup;
+			children = (
+				DE27582B23335177001B635B /* CrossPLFactory.mm */,
+				DE27583023335177001B635B /* CrossPLFactory.h */,
+				DE27582F23335177001B635B /* CrossPLUtils.mm */,
+				DE27583123335177001B635B /* CrossPLUtils.h */,
+				DE27583223335177001B635B /* experimental-span.hpp */,
+				DE27582C23335177001B635B /* proxy */,
+			);
+			name = crosspl;
+			path = build/tmp/crosspl;
+			sourceTree = "<group>";
+		};
+		DE27582C23335177001B635B /* proxy */ = {
+			isa = PBXGroup;
+			children = (
+				DE27582D23335177001B635B /* ContactFactory.proxy.mm */,
+				DE27582E23335177001B635B /* ContactFactory.proxy.h */,
+			);
+			path = proxy;
+			sourceTree = "<group>";
+		};
 		DE283ECD231FBD1800D9740C /* anno */ = {
 			isa = PBXGroup;
 			children = (
@@ -494,11 +556,13 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DE27576C23334805001B635B /* sdk.h in Headers */,
 				DE2757E72333486B001B635B /* MessageManager.hpp in Headers */,
 				DE2757E12333486B001B635B /* UserManager.hpp in Headers */,
 				DE2758182333486C001B635B /* ChannelImplElaChain.hpp in Headers */,
+				DE27583523335177001B635B /* ContactFactory.proxy.h in Headers */,
+				DE27583923335177001B635B /* experimental-span.hpp in Headers */,
 				DE2758022333486B001B635B /* MD5.hpp in Headers */,
-				DE27576C23334805001B635B /* sdk.h in Headers */,
 				DE2757E62333486B001B635B /* Config.hpp in Headers */,
 				DE2757F22333486B001B635B /* Platform.hpp in Headers */,
 				DE2757E22333486B001B635B /* MessageChannelStrategy.hpp in Headers */,
@@ -521,10 +585,12 @@
 				DE2757F62333486B001B635B /* PlatformIos.hpp in Headers */,
 				DE2758032333486B001B635B /* Log.hpp in Headers */,
 				DE2757FE2333486B001B635B /* ghc-filesystem.hpp in Headers */,
+				DE27583823335177001B635B /* CrossPLUtils.h in Headers */,
 				DE2757ED2333486B001B635B /* PlatformAndroid.hpp in Headers */,
 				DE2757EE2333486B001B635B /* PlatformUnixLike.hpp in Headers */,
 				DE2757DF2333486B001B635B /* Json.hpp in Headers */,
 				DE2757E42333486B001B635B /* Elastos.SDK.Contact.hpp in Headers */,
+				DE27583723335177001B635B /* CrossPLFactory.h in Headers */,
 				DE2757FA2333486B001B635B /* DateTime.hpp in Headers */,
 				DE2758042333486B001B635B /* CompatibleFileSystem.hpp in Headers */,
 				DE2758132333486B001B635B /* JsonDefine.hpp in Headers */,
@@ -613,6 +679,7 @@
 				TargetAttributes = {
 					DE27576723334804001B635B = {
 						CreatedOnToolsVersion = 10.3;
+						LastSwiftMigration = 1030;
 					};
 					DE283ECB231FBD1800D9740C = {
 						CreatedOnToolsVersion = 10.3;
@@ -679,8 +746,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "
-";
+			shellScript = "export TARGET_PATH=\"$TARGET_NAME\";\nexport ANNO_PATH=\"crosspl/anno\";\nANNO_RESPATH=\"$PWD/$ANNO_PATH/resources/\";\n\"$ANNO_RESPATH/crosspl.sh\";\n";
 		};
 		DE5982ED21D37E8F00998AEF /* Run Script */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -708,11 +774,15 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DE27582523334F54001B635B /* Contact.swift in Sources */,
+				DE27582823335014001B635B /* ContactFactory.swift in Sources */,
 				DE27581B2333486C001B635B /* MessageChannelStrategy.cpp in Sources */,
 				DE27581F2333486C001B635B /* Elastos.SDK.Contact.cpp in Sources */,
 				DE2758142333486B001B635B /* FriendManager.cpp in Sources */,
 				DE2758212333486C001B635B /* DidChnClient.cpp in Sources */,
 				DE27580E2333486B001B635B /* DidChnDataListener.cpp in Sources */,
+				DE27583323335177001B635B /* CrossPLFactory.mm in Sources */,
+				DE27583423335177001B635B /* ContactFactory.proxy.mm in Sources */,
 				DE2757F42333486B001B635B /* PlatformAndroid.cpp in Sources */,
 				DE27580A2333486B001B635B /* FriendInfo.cpp in Sources */,
 				DE27580C2333486B001B635B /* ErrCode.cpp in Sources */,
@@ -722,6 +792,7 @@
 				DE2757E02333486B001B635B /* Json.cpp in Sources */,
 				DE2757DD2333486B001B635B /* HttpClient.cpp in Sources */,
 				DE2758172333486C001B635B /* Config.cpp in Sources */,
+				DE27583623335177001B635B /* CrossPLUtils.mm in Sources */,
 				DE2758122333486B001B635B /* UserInfo.cpp in Sources */,
 				DE2757F32333486B001B635B /* PlatformDarwin.cpp in Sources */,
 				DE27580B2333486B001B635B /* ChannelImplCarrier.cpp in Sources */,
@@ -772,6 +843,7 @@
 		DE27576E23334805001B635B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
 				DEFINES_MODULE = YES;
@@ -800,6 +872,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = org.elastos.sdk.elephantwallet.contact.sdk;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -808,6 +881,7 @@
 		DE27576F23334805001B635B /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
 				DEFINES_MODULE = YES;
