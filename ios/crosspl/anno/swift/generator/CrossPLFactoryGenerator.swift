@@ -1,7 +1,10 @@
 import Foundation
 
 class CrossPLFactoryGenerator {
-  static func Generate(crossplDir: URL, classInfoList: [CrossClassInfo], headerFileList: [URL]) -> Bool {
+  static func Generate(crossplDir: URL, classInfoList: [CrossClassInfo], headerFileList: [URL],
+                       productName: String) -> Bool {
+    CrossPLFactoryGenerator.ProductName = productName
+
     let headerFile = GetHeaderFile(crossplDir: crossplDir)
     let sourceFile = GetSourceFile(crossplDir: crossplDir)
   
@@ -10,7 +13,7 @@ class CrossPLFactoryGenerator {
       return ret
     }
   
-    ret = GenerateSource(sourceFile, classInfoList, headerFileList)
+    ret = GenerateSource(sourceFile, headerFile, classInfoList, headerFileList)
     if ret == false {
       return ret
     }
@@ -19,11 +22,11 @@ class CrossPLFactoryGenerator {
   }
   
   static func GetSourceFile(crossplDir: URL) -> URL {
-    return crossplDir.appendingPathComponent("CrossPLFactory.mm")
+    return crossplDir.appendingPathComponent("CrossPLFactory.\(ProductName!).mm")
   }
   
   static func GetHeaderFile(crossplDir: URL) -> URL {
-    return crossplDir.appendingPathComponent("CrossPLFactory.h")
+    return crossplDir.appendingPathComponent("CrossPLFactory.\(ProductName!).h")
   }
   
   private static func GenerateHeader(_ headerFile: URL, _ headerFileList: [URL]) -> Bool {
@@ -40,10 +43,14 @@ class CrossPLFactoryGenerator {
     return true
   }
   
-  private static func GenerateSource(_ sourceFile: URL, _ classInfoList: [CrossClassInfo], _ headerFileList: [URL]) -> Bool {
+  private static func GenerateSource(_ sourceFile: URL, _ headerFile: URL,
+                                     _ classInfoList: [CrossClassInfo], _ headerFileList: [URL]) -> Bool {
     print("Generate: \(sourceFile.path)")
     var content = CrossTmplUtils.ReadTmplContent(tmplName: CrossPLSourceTmpl)
   
+    var includeFactoryList = "#import \"\(headerFile.lastPathComponent)\""
+    content = content.replacingOccurrences(of: TmplKeyIncludeFactoryHeader, with: includeFactoryList)
+    
     var includeProxyList = ""
     headerFileList.forEach { (it) in
       includeProxyList += "#import \"\(it.lastPathComponent)\"\n"
@@ -78,15 +85,18 @@ class CrossPLFactoryGenerator {
       .replacingOccurrences(of: TmplKeyCreateCppObject, with: createCppObjectList)
       .replacingOccurrences(of: TmplKeyDestroyCppObject, with: destroyCppObjectList)
   
-    content = content.replacingOccurrences(of: TmplKeyProductName, with: CrossClassInfo.ProductName!)
+    content = content.replacingOccurrences(of: TmplKeyProductName, with: ProductName!)
   
     CrossTmplUtils.WriteContent(file: sourceFile, content: content)
     return true
   }
   
+  private static var ProductName: String?
+  
   private static let CrossPLHeaderTmpl = "/CrossPLFactory.h.tmpl"
   private static let CrossPLSourceTmpl = "/CrossPLFactory.mm.tmpl"
   
+  private static let TmplKeyIncludeFactoryHeader = "%IncludeFactoryHeader%"
   private static let TmplKeyIncludeProxyHeader = "%IncludeProxyHeader%"
   private static let TmplKeyIncludeCppHeader = "%IncludeCppHeader%"
   private static let TmplKeyRegisterNativeMethods = "%RegisterNativeMethods%"

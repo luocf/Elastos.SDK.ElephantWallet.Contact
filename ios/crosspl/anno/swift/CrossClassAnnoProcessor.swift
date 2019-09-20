@@ -48,7 +48,8 @@ class CrossClassAnnoProcessor {
       sourceFileList.append(crossplSourceFile)
     }
     
-    var ret = CrossPLFactoryGenerator.Generate(crossplDir: crossplDir, classInfoList: classInfoList, headerFileList: headerFileList)
+    var ret = CrossPLFactoryGenerator.Generate(crossplDir: crossplDir, classInfoList: classInfoList, headerFileList: headerFileList,
+                                               productName: productName)
     if ret == false {
       print("Failed to generate CrossPLFactory.hpp or CrossPLFactory.cpp.")
       return false
