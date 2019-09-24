@@ -11,6 +11,10 @@ extern "C" {
 } // extern "C"
 #endif
 
+#ifdef ENABLE_PLATFORM_FUNCTION
+
 %PlatformFunction%
+
+#endif // ENABLE_PLATFORM_FUNCTION
 
 #endif /* _CROSSPL_PROXY_%ClassName%_HPP_ */

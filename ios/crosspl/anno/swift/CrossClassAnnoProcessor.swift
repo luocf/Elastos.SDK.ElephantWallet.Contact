@@ -42,7 +42,7 @@ class CrossClassAnnoProcessor {
         return false
       }
       
-      let crossplHeaderFile = CrossProxyGenerator.GetHeaderFile(crossProxyDir: crossProxyDir, classInfo: it, isNative: true)
+      let crossplHeaderFile = CrossProxyGenerator.GetHeaderFile(crossProxyDir: crossProxyDir, classInfo: it)
       let crossplSourceFile = CrossProxyGenerator.GetSourceFile(crossProxyDir: crossProxyDir, classInfo: it)
       headerFileList.append(crossplHeaderFile)
       sourceFileList.append(crossplSourceFile)

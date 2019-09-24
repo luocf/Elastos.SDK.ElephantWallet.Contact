@@ -2,16 +2,10 @@ import Foundation
 
 open class CrossProxyGenerator {
   static func Generate(crossProxyDir: URL, classInfo: CrossClassInfo) -> Bool {
-    let proxyNativeHeaderFile = GetHeaderFile(crossProxyDir: crossProxyDir, classInfo: classInfo, isNative: true)
-    let proxyPlatformHeaderFile = GetHeaderFile(crossProxyDir: crossProxyDir, classInfo: classInfo, isNative: false)
+    let proxyHeaderFile = GetHeaderFile(crossProxyDir: crossProxyDir, classInfo: classInfo)
     let proxySourceFile = GetSourceFile(crossProxyDir: crossProxyDir, classInfo: classInfo)
     
-    var ret = GenerateHeader(proxyFile: proxyNativeHeaderFile, classInfo: classInfo, isNative: true)
-    if ret == false {
-      return ret
-    }
-    
-    ret = GenerateHeader(proxyFile: proxyPlatformHeaderFile, classInfo: classInfo, isNative: false)
+    var ret = GenerateHeader(proxyFile: proxyHeaderFile, classInfo: classInfo)
     if ret == false {
       return ret
     }
@@ -29,15 +23,15 @@ open class CrossProxyGenerator {
     return crossProxyDir.appendingPathComponent(classInfo.cppInfo.className! + ".proxy.mm")
   }
   
-  static func GetHeaderFile(crossProxyDir: URL, classInfo: CrossClassInfo, isNative: Bool) -> URL {
-    return crossProxyDir.appendingPathComponent(classInfo.cppInfo.className! + (isNative ? ".native" : ".platform") + ".proxy.h")
+  static func GetHeaderFile(crossProxyDir: URL, classInfo: CrossClassInfo) -> URL {
+    return crossProxyDir.appendingPathComponent(classInfo.cppInfo.className! + ".proxy.h")
   }
 
-  private static func GenerateHeader(proxyFile: URL, classInfo: CrossClassInfo, isNative: Bool) -> Bool {
+  private static func GenerateHeader(proxyFile: URL, classInfo: CrossClassInfo) -> Bool {
     print("Generate: \(proxyFile.path)")
   
     let tmpl = CrossTmplUtils.ReadTmplContent(tmplName: CrossClassProxyHeaderTmpl)
-    let content = classInfo.makeProxyDeclare(tmpl: tmpl, isNative: isNative)
+    let content = classInfo.makeProxyDeclare(tmpl: tmpl)
     CrossTmplUtils.WriteContent(file: proxyFile, content: content)
   
     return true

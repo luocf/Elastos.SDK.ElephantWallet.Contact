@@ -124,7 +124,7 @@ class CrossClassInfo {
     return output
   }
   
-  func makeProxyDeclare(tmpl: String, isNative: Bool) -> String {
+  func makeProxyDeclare(tmpl: String) -> String {
     var nativeFuncList = ""
     var platformFuncList = ""
     methodInfoList.forEach { (it) in
@@ -137,14 +137,7 @@ class CrossClassInfo {
       }
     }
   
-    var content = "";
-    if isNative == true {
-      content = tmpl.replacingOccurrences(of: CrossClassInfo.TmplKeyPlatformFunction, with: "")
-    } else {
-      content = tmpl.replacingOccurrences(of: CrossClassInfo.TmplKeyNativeFunction, with: "")
-    }
-    
-    content = content
+    let content = tmpl
       .replacingOccurrences(of: CrossClassInfo.TmplKeyClassName, with: cppInfo.className!)
       .replacingOccurrences(of: CrossClassInfo.TmplKeyPlatformFunction, with: platformFuncList)
       .replacingOccurrences(of: CrossClassInfo.TmplKeyNativeFunction, with: nativeFuncList)

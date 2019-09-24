@@ -7,7 +7,8 @@
 
 #include <ContactListener.hpp>
 
-#include "ContactListener.platform.proxy.h"
+#define ENABLE_PLATFORM_FUNCTION
+#include "ContactListener.proxy.h"
 #include "Log.hpp"
 
 namespace crosspl {

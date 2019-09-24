@@ -221,56 +221,53 @@ std::shared_ptr<std::vector<uint8_t>> CrossPLUtils::SafeCastByteBuffer(NSData** 
     return ret;
 }
 
-//std::shared_ptr<_jstring> CrossPLUtils::SafeCastString(JNIEnv* jenv, const char* data)
-//{
-//    std::shared_ptr<_jstring> ret;
-//    std::thread::id threadId = std::this_thread::get_id();
-//
-//    if (data == nullptr) {
-//        return ret; // nullptr
-//    }
-//
-//    auto creater = [=]() -> jstring {
-//        EnsureRunOnThread(threadId);
-//        jstring ptr = jenv->NewStringUTF(data);
-//        return ptr;
-//    };
-//
-//    auto deleter = [=](jstring ptr) -> void {
-//        EnsureRunOnThread(threadId);
-//        jenv->DeleteLocalRef(ptr);
-//    };
-//
-//    ret = std::shared_ptr<_jstring>(creater(), deleter);
-//
-//    return ret;
-//}
-//
-//std::shared_ptr<_jbyteArray> CrossPLUtils::SafeCastByteArray(JNIEnv* jenv, const std::span<uint8_t>* data)
-//{
-//    std::shared_ptr<_jbyteArray> ret;
-//    std::thread::id threadId = std::this_thread::get_id();
-//
-//    if(data == nullptr) {
-//        return ret; // nullptr
-//    }
-//
-//    auto creater = [=]() -> jbyteArray {
-//        EnsureRunOnThread(threadId);
-//        jbyteArray jdata = jenv->NewByteArray(data->size());
-//        jenv->SetByteArrayRegion(jdata, 0, data->size(), data->data());
-//        return jdata;
-//    };
-//    auto deleter = [=](jbyteArray ptr) -> void {
-//        EnsureRunOnThread(threadId);
-//        jenv->DeleteLocalRef(ptr);
-//    };
-//
-//    ret = std::shared_ptr<_jbyteArray>(creater(), deleter);
-//
-//    return ret;
-//}
-//
+std::shared_ptr<NSString> CrossPLUtils::SafeCastString(const char* data)
+{
+    std::shared_ptr<NSString> ret;
+    std::thread::id threadId = std::this_thread::get_id();
+
+    if (data == nullptr) {
+        return ret; // nullptr
+    }
+
+    auto creater = [=]() -> NSString* {
+        EnsureRunOnThread(threadId);
+        auto ptr = [NSString stringWithUTF8String: data]; // autorelease
+        return ptr;
+    };
+
+    auto deleter = [=](NSString* ptr) -> void { // autorelease, ignore free memory
+        EnsureRunOnThread(threadId);
+    };
+
+    ret = std::shared_ptr<NSString>(creater(), deleter);
+
+    return ret;
+}
+
+std::shared_ptr<NSData> CrossPLUtils::SafeCastByteArray(const std::span<uint8_t>* data)
+{
+    std::shared_ptr<NSData> ret;
+    std::thread::id threadId = std::this_thread::get_id();
+
+    if(data == nullptr) {
+        return ret; // nullptr
+    }
+
+    auto creater = [=]() -> NSData* {
+        EnsureRunOnThread(threadId);
+        auto ocdata = [NSData dataWithBytesNoCopy:data->data() length:data->size() freeWhenDone:NO];
+        return ocdata;
+    };
+    auto deleter = [=](NSData* ptr) -> void {
+        EnsureRunOnThread(threadId);
+    };
+
+    ret = std::shared_ptr<NSData>(creater(), deleter);
+
+    return ret;
+}
+
 //std::shared_ptr<_jobject> CrossPLUtils::SafeCastFunction(JNIEnv* jenv, const std::function<void()>* data)
 //{
 //    std::shared_ptr<_jobject> ret;
