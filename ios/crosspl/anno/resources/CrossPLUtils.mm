@@ -1,7 +1,8 @@
 #import <Foundation/Foundation.h>
 
 #import "CrossBase.hpp"
-@class CrossBase;
+//@class CrossBase;
+#import "CrossPL/CrossPL-Swift.h"
 #import "CrossPLUtils.h"
 
 
@@ -140,28 +141,28 @@ std::shared_ptr<const char> CrossPLUtils::SafeCastString(NSString* ocdata)
 //    return ret;
 //}
 //
-std::shared_ptr<std::span<int8_t>> CrossPLUtils::SafeCastByteArray(NSData* ocdata)
+std::shared_ptr<std::span<uint8_t>> CrossPLUtils::SafeCastByteArray(NSData* ocdata)
 {
-    std::shared_ptr<std::span<int8_t>> ret;
+    std::shared_ptr<std::span<uint8_t>> ret;
     std::thread::id threadId = std::this_thread::get_id();
 
     if(ocdata == nullptr) {
         return ret; // nullptr
     }
 
-    auto creater = [=]() -> std::span<int8_t>* {
+    auto creater = [=]() -> std::span<uint8_t>* {
         EnsureRunOnThread(threadId);
-        const int8_t* arrayPtr = reinterpret_cast<const int8_t*>([ocdata bytes]);
+        const uint8_t* arrayPtr = reinterpret_cast<const uint8_t*>([ocdata bytes]);
         NSUInteger arrayLen = [ocdata length];
-        auto retPtr = new std::span<int8_t>(const_cast<int8_t*>(arrayPtr), arrayLen);
+        auto retPtr = new std::span<uint8_t>(const_cast<uint8_t*>(arrayPtr), arrayLen);
         return retPtr;
     };
-    auto deleter = [=](std::span<int8_t>* ptr) -> void {
+    auto deleter = [=](std::span<uint8_t>* ptr) -> void {
         EnsureRunOnThread(threadId);
         delete ptr;
     };
 
-    ret = std::shared_ptr<std::span<int8_t>>(creater(), deleter);
+    ret = std::shared_ptr<std::span<uint8_t>>(creater(), deleter);
 
     return ret;
 }
@@ -193,29 +194,29 @@ std::shared_ptr<std::stringstream> CrossPLUtils::SafeCastStringBuffer(NSString**
     return ret;
 }
 
-std::shared_ptr<std::vector<int8_t>> CrossPLUtils::SafeCastByteBuffer(NSData** ocdata)
+std::shared_ptr<std::vector<uint8_t>> CrossPLUtils::SafeCastByteBuffer(NSData** ocdata)
 {
-    std::shared_ptr<std::vector<int8_t>> ret;
+    std::shared_ptr<std::vector<uint8_t>> ret;
     std::thread::id threadId = std::this_thread::get_id();
 
     if(ocdata == nullptr) {
         return ret; // nullptr
     }
 
-    auto creater = [=]() -> std::vector<int8_t>* {
+    auto creater = [=]() -> std::vector<uint8_t>* {
         EnsureRunOnThread(threadId);
 
         auto bytes = SafeCastByteArray(*ocdata);
-        auto retPtr = new std::vector<int8_t>(bytes->data(), bytes->data() + bytes->size());
+        auto retPtr = new std::vector<uint8_t>(bytes->data(), bytes->data() + bytes->size());
 
         return retPtr;
     };
-    auto deleter = [=](std::vector<int8_t>* ptr) -> void {
+    auto deleter = [=](std::vector<uint8_t>* ptr) -> void {
         EnsureRunOnThread(threadId);
         delete ptr;
     };
 
-    ret = std::shared_ptr<std::vector<int8_t>>(creater(), deleter);
+    ret = std::shared_ptr<std::vector<uint8_t>>(creater(), deleter);
 
     return ret;
 }
@@ -245,7 +246,7 @@ std::shared_ptr<std::vector<int8_t>> CrossPLUtils::SafeCastByteBuffer(NSData** o
 //    return ret;
 //}
 //
-//std::shared_ptr<_jbyteArray> CrossPLUtils::SafeCastByteArray(JNIEnv* jenv, const std::span<int8_t>* data)
+//std::shared_ptr<_jbyteArray> CrossPLUtils::SafeCastByteArray(JNIEnv* jenv, const std::span<uint8_t>* data)
 //{
 //    std::shared_ptr<_jbyteArray> ret;
 //    std::thread::id threadId = std::this_thread::get_id();
@@ -330,7 +331,7 @@ std::shared_ptr<std::vector<int8_t>> CrossPLUtils::SafeCastByteBuffer(NSData** o
 //    return ret;
 //}
 //
-//std::shared_ptr<_jobject> CrossPLUtils::SafeCastByteBuffer(JNIEnv* jenv, const std::vector<int8_t>* data)
+//std::shared_ptr<_jobject> CrossPLUtils::SafeCastByteBuffer(JNIEnv* jenv, const std::vector<uint8_t>* data)
 //{
 //    std::shared_ptr<_jobject> ret;
 //    std::thread::id threadId = std::this_thread::get_id();
@@ -374,7 +375,7 @@ std::shared_ptr<std::vector<int8_t>> CrossPLUtils::SafeCastByteBuffer(NSData** o
 //    return 0;
 //}
 //
-//int CrossPLUtils::SafeCopyByteBufferToCpp(JNIEnv* jenv, std::vector<int8_t>* copyTo, jobject jdata)
+//int CrossPLUtils::SafeCopyByteBufferToCpp(JNIEnv* jenv, std::vector<uint8_t>* copyTo, jobject jdata)
 //{
 //    if(copyTo == nullptr) {
 //        return 0; // nullptr
@@ -397,7 +398,7 @@ int CrossPLUtils::SafeCopyStringBufferToSwift(NSString** occopyTo, const std::st
     return 0;
 }
 
-int CrossPLUtils::SafeCopyByteBufferToSwift(NSData** occopyTo, const std::vector<int8_t>* data)
+int CrossPLUtils::SafeCopyByteBufferToSwift(NSData** occopyTo, const std::vector<uint8_t>* data)
 {
     if(occopyTo == nullptr) {
         return 0; // nullptr
@@ -407,6 +408,26 @@ int CrossPLUtils::SafeCopyByteBufferToSwift(NSData** occopyTo, const std::vector
 
     return 0;
 }
+  
+int64_t CrossPLUtils::AddGlobalObject(NSObject* ocobj)
+{
+    return 0;
+}
+  
+int64_t CrossPLUtils::DelGlobalObject(NSObject* ocobj)
+{
+    return 0;
+}
+  
+crosspl::native::CrossBase* CrossPLUtils::SafeCastCrossObjectToNative(NSObject* ocdata) {
+    CrossBase* swiftObj = (CrossBase*) ocdata;
+    
+    int64_t nativeHandle = swiftObj.nativeHandle;
+    
+    auto nativeObj = reinterpret_cast<crosspl::native::CrossBase*>(nativeHandle);
+    return nativeObj;
+  }
+  
 //
 //void* CrossPLUtils::SafeCastCrossObject(JNIEnv* jenv, jobject jdata)
 //{

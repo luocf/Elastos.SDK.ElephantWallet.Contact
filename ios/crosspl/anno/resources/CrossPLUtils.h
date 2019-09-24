@@ -12,6 +12,9 @@
 
 #include "experimental-span.hpp"
 
+#import "CrossBase.hpp"
+@class CrossBase;
+
 namespace crosspl {
 
 class CrossPLUtils {
@@ -24,22 +27,22 @@ public:
 //    static jclass FindJavaClass(JNIEnv* jenv, const char* className);
 //
     static std::shared_ptr<const char> SafeCastString(NSString* ocdata);
-    static std::shared_ptr<std::span<int8_t>> SafeCastByteArray(NSData* ocdata);
+    static std::shared_ptr<std::span<uint8_t>> SafeCastByteArray(NSData* ocdata);
 //    static std::shared_ptr<std::function<void()>> SafeCastFunction(JNIEnv* jenv, jobject jdata);
     static std::shared_ptr<std::stringstream> SafeCastStringBuffer(NSString** ocdata);
-    static std::shared_ptr<std::vector<int8_t>> SafeCastByteBuffer(NSData** ocdata);
+    static std::shared_ptr<std::vector<uint8_t>> SafeCastByteBuffer(NSData** ocdata);
 //
-//    static std::shared_ptr<_jstring> SafeCastString(JNIEnv* jenv, const char* data);
-//    static std::shared_ptr<_jbyteArray> SafeCastByteArray(JNIEnv* jenv, const std::span<int8_t>* data);
+    static std::shared_ptr<NSString> SafeCastString(const char* data);
+    static std::shared_ptr<NSData> SafeCastByteArray(const std::span<uint8_t>* data);
 //    static std::shared_ptr<_jobject> SafeCastFunction(JNIEnv* jenv, const std::function<void()>* data);
 //    static std::shared_ptr<_jobject> SafeCastStringBuffer(JNIEnv* jenv, const std::stringstream* data);
-//    static std::shared_ptr<_jobject> SafeCastByteBuffer(JNIEnv* jenv, const std::vector<int8_t>* data);
+//    static std::shared_ptr<_jobject> SafeCastByteBuffer(JNIEnv* jenv, const std::vector<uint8_t>* data);
 //
 //    static int SafeCopyStringBufferToCpp(JNIEnv* jenv, std::stringstream* copyTo, jobject jdata);
-//    static int SafeCopyByteBufferToCpp(JNIEnv* jenv, std::vector<int8_t>* copyTo, jobject jdata);
+//    static int SafeCopyByteBufferToCpp(JNIEnv* jenv, std::vector<uint8_t>* copyTo, jobject jdata);
 //
     static int SafeCopyStringBufferToSwift(NSString** occopyTo, const std::stringstream* data);
-    static int SafeCopyByteBufferToSwift(NSData** occopyTo, const std::vector<int8_t>* data);
+    static int SafeCopyByteBufferToSwift(NSData** occopyTo, const std::vector<uint8_t>* data);
 
 //    template <class T>
 //    static int64_t SafeCastCrossObject(T* ocdata);
@@ -49,6 +52,11 @@ public:
 //      int64_t handle = reinterpret_cast<int64_t>(ptr);
 //      return handle;
 //    }
+  
+  static int64_t AddGlobalObject(NSObject* ocobj);
+  static int64_t DelGlobalObject(NSObject* ocobj);
+
+  static crosspl::native::CrossBase* SafeCastCrossObjectToNative(NSObject* ocdata);
   
     template <class T>
     static int64_t SafeCastCrossObjectToHandle(NSObject* ocdata) {

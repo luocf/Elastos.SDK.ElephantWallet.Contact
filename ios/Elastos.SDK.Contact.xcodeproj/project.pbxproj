@@ -78,8 +78,6 @@
 		DE27582523334F54001B635B /* Contact.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE27582423334F54001B635B /* Contact.swift */; };
 		DE27582823335014001B635B /* ContactFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE27582723335014001B635B /* ContactFactory.swift */; };
 		DE27582923335064001B635B /* CrossPL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DED5255D218DF4C800619F59 /* CrossPL.framework */; };
-		DE27583423335177001B635B /* ContactFactory.proxy.mm in Sources */ = {isa = PBXBuildFile; fileRef = DE27582D23335177001B635B /* ContactFactory.proxy.mm */; };
-		DE27583523335177001B635B /* ContactFactory.proxy.h in Headers */ = {isa = PBXBuildFile; fileRef = DE27582E23335177001B635B /* ContactFactory.proxy.h */; };
 		DE27583623335177001B635B /* CrossPLUtils.mm in Sources */ = {isa = PBXBuildFile; fileRef = DE27582F23335177001B635B /* CrossPLUtils.mm */; };
 		DE27583823335177001B635B /* CrossPLUtils.h in Headers */ = {isa = PBXBuildFile; fileRef = DE27583123335177001B635B /* CrossPLUtils.h */; };
 		DE27583923335177001B635B /* experimental-span.hpp in Headers */ = {isa = PBXBuildFile; fileRef = DE27583223335177001B635B /* experimental-span.hpp */; };
@@ -98,14 +96,32 @@
 		DE35737F231F630600496E41 /* CrossBase.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE35737E231F630600496E41 /* CrossBase.swift */; };
 		DE357383231F642D00496E41 /* CrossBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DE357381231F642D00496E41 /* CrossBase.cpp */; };
 		DE357384231F642D00496E41 /* CrossBase.hpp in Headers */ = {isa = PBXBuildFile; fileRef = DE357382231F642D00496E41 /* CrossBase.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		DE3C53812338FCCF0053196E /* ContactBridge.proxy.mm in Sources */ = {isa = PBXBuildFile; fileRef = DE3C53752338FCCF0053196E /* ContactBridge.proxy.mm */; };
+		DE3C53842338FCCF0053196E /* ContactFactory.platform.proxy.h in Headers */ = {isa = PBXBuildFile; fileRef = DE3C53782338FCCF0053196E /* ContactFactory.platform.proxy.h */; };
+		DE3C53852338FCCF0053196E /* ContactListener.native.proxy.h in Headers */ = {isa = PBXBuildFile; fileRef = DE3C53792338FCCF0053196E /* ContactListener.native.proxy.h */; };
+		DE3C53862338FCCF0053196E /* ContactBridge.native.proxy.h in Headers */ = {isa = PBXBuildFile; fileRef = DE3C537A2338FCCF0053196E /* ContactBridge.native.proxy.h */; };
+		DE3C53882338FCCF0053196E /* ContactFactory.proxy.mm in Sources */ = {isa = PBXBuildFile; fileRef = DE3C537C2338FCCF0053196E /* ContactFactory.proxy.mm */; };
+		DE3C53892338FCCF0053196E /* ContactBridge.platform.proxy.h in Headers */ = {isa = PBXBuildFile; fileRef = DE3C537D2338FCCF0053196E /* ContactBridge.platform.proxy.h */; };
+		DE3C538A2338FCCF0053196E /* ContactListener.proxy.mm in Sources */ = {isa = PBXBuildFile; fileRef = DE3C537E2338FCCF0053196E /* ContactListener.proxy.mm */; };
+		DE3C538B2338FCCF0053196E /* ContactFactory.native.proxy.h in Headers */ = {isa = PBXBuildFile; fileRef = DE3C537F2338FCCF0053196E /* ContactFactory.native.proxy.h */; };
+		DE3C538C2338FCCF0053196E /* ContactListener.platform.proxy.h in Headers */ = {isa = PBXBuildFile; fileRef = DE3C53802338FCCF0053196E /* ContactListener.platform.proxy.h */; };
 		DE5961A7232F231200BDB4EE /* CrossBase.proxy.mm in Sources */ = {isa = PBXBuildFile; fileRef = DE5961A6232F231200BDB4EE /* CrossBase.proxy.mm */; };
 		DE76DD5623262AF70041A703 /* CrossTmplUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE76DD5523262AF70041A703 /* CrossTmplUtils.swift */; };
 		DE76DD5823287EF40041A703 /* CrossPLFactoryGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE76DD5723287EF40041A703 /* CrossPLFactoryGenerator.swift */; };
 		DE76DD6A23289D640041A703 /* CrossPLUtilsGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE76DD6923289D640041A703 /* CrossPLUtilsGenerator.swift */; };
-		DE76DD762328A26B0041A703 /* CrossBase.proxy.h in Headers */ = {isa = PBXBuildFile; fileRef = DE76DD6F2328A26B0041A703 /* CrossBase.proxy.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		DE76DD7A2328A26B0041A703 /* experimental-span.hpp in Headers */ = {isa = PBXBuildFile; fileRef = DE76DD732328A26B0041A703 /* experimental-span.hpp */; settings = {ATTRIBUTES = (Private, ); }; };
 		DECA49C6232CA40D00C98A0D /* CrossPLUtils.mm in Sources */ = {isa = PBXBuildFile; fileRef = DECA49C4232CA40D00C98A0D /* CrossPLUtils.mm */; };
 		DECA49C7232CA40D00C98A0D /* CrossPLUtils.h in Headers */ = {isa = PBXBuildFile; fileRef = DECA49C5232CA40D00C98A0D /* CrossPLUtils.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		DEDA63672338A38E0024EA12 /* ContactBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEDA63662338A38E0024EA12 /* ContactBridge.swift */; };
+		DEDA63912338AFF10024EA12 /* ContactListener.hpp in Headers */ = {isa = PBXBuildFile; fileRef = DEDA63892338AFF00024EA12 /* ContactListener.hpp */; };
+		DEDA63922338AFF10024EA12 /* ContactBridge.hpp in Headers */ = {isa = PBXBuildFile; fileRef = DEDA638A2338AFF10024EA12 /* ContactBridge.hpp */; };
+		DEDA63932338AFF10024EA12 /* ContactListener.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DEDA638B2338AFF10024EA12 /* ContactListener.cpp */; };
+		DEDA63942338AFF10024EA12 /* ContactDebug.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DEDA638C2338AFF10024EA12 /* ContactDebug.cpp */; };
+		DEDA63952338AFF10024EA12 /* ContactBridge.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DEDA638D2338AFF10024EA12 /* ContactBridge.cpp */; };
+		DEDA63962338AFF10024EA12 /* ContactMessage.hpp in Headers */ = {isa = PBXBuildFile; fileRef = DEDA638E2338AFF10024EA12 /* ContactMessage.hpp */; };
+		DEDA63972338AFF10024EA12 /* ContactDebug.hpp in Headers */ = {isa = PBXBuildFile; fileRef = DEDA638F2338AFF10024EA12 /* ContactDebug.hpp */; };
+		DEDA63982338AFF10024EA12 /* ContactMessage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DEDA63902338AFF10024EA12 /* ContactMessage.cpp */; };
+		DEDA639A2338CB540024EA12 /* ContactListener.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEDA63992338CB540024EA12 /* ContactListener.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -193,8 +209,6 @@
 		DE2757CE2333486B001B635B /* DidChnClient.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DidChnClient.cpp; sourceTree = "<group>"; };
 		DE27582423334F54001B635B /* Contact.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Contact.swift; sourceTree = "<group>"; };
 		DE27582723335014001B635B /* ContactFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactFactory.swift; sourceTree = "<group>"; };
-		DE27582D23335177001B635B /* ContactFactory.proxy.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ContactFactory.proxy.mm; sourceTree = "<group>"; };
-		DE27582E23335177001B635B /* ContactFactory.proxy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ContactFactory.proxy.h; sourceTree = "<group>"; };
 		DE27582F23335177001B635B /* CrossPLUtils.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = CrossPLUtils.mm; sourceTree = "<group>"; };
 		DE27583123335177001B635B /* CrossPLUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CrossPLUtils.h; sourceTree = "<group>"; };
 		DE27583223335177001B635B /* experimental-span.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = "experimental-span.hpp"; sourceTree = "<group>"; };
@@ -218,16 +232,36 @@
 		DE35737E231F630600496E41 /* CrossBase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CrossBase.swift; sourceTree = "<group>"; };
 		DE357381231F642D00496E41 /* CrossBase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CrossBase.cpp; sourceTree = "<group>"; };
 		DE357382231F642D00496E41 /* CrossBase.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = CrossBase.hpp; sourceTree = "<group>"; };
+		DE3C53732338FC410053196E /* CrossBase.native.proxy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CrossBase.native.proxy.h; sourceTree = "<group>"; };
+		DE3C53742338FC410053196E /* CrossBase.platform.proxy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CrossBase.platform.proxy.h; sourceTree = "<group>"; };
+		DE3C53752338FCCF0053196E /* ContactBridge.proxy.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ContactBridge.proxy.mm; sourceTree = "<group>"; };
+		DE3C53782338FCCF0053196E /* ContactFactory.platform.proxy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ContactFactory.platform.proxy.h; sourceTree = "<group>"; };
+		DE3C53792338FCCF0053196E /* ContactListener.native.proxy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ContactListener.native.proxy.h; sourceTree = "<group>"; };
+		DE3C537A2338FCCF0053196E /* ContactBridge.native.proxy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ContactBridge.native.proxy.h; sourceTree = "<group>"; };
+		DE3C537C2338FCCF0053196E /* ContactFactory.proxy.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ContactFactory.proxy.mm; sourceTree = "<group>"; };
+		DE3C537D2338FCCF0053196E /* ContactBridge.platform.proxy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ContactBridge.platform.proxy.h; sourceTree = "<group>"; };
+		DE3C537E2338FCCF0053196E /* ContactListener.proxy.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ContactListener.proxy.mm; sourceTree = "<group>"; };
+		DE3C537F2338FCCF0053196E /* ContactFactory.native.proxy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ContactFactory.native.proxy.h; sourceTree = "<group>"; };
+		DE3C53802338FCCF0053196E /* ContactListener.platform.proxy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ContactListener.platform.proxy.h; sourceTree = "<group>"; };
 		DE5961A6232F231200BDB4EE /* CrossBase.proxy.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = CrossBase.proxy.mm; sourceTree = "<group>"; };
 		DE76DD5523262AF70041A703 /* CrossTmplUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CrossTmplUtils.swift; sourceTree = "<group>"; };
 		DE76DD5723287EF40041A703 /* CrossPLFactoryGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CrossPLFactoryGenerator.swift; sourceTree = "<group>"; };
 		DE76DD6923289D640041A703 /* CrossPLUtilsGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CrossPLUtilsGenerator.swift; sourceTree = "<group>"; };
-		DE76DD6F2328A26B0041A703 /* CrossBase.proxy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CrossBase.proxy.h; sourceTree = "<group>"; };
 		DE76DD732328A26B0041A703 /* experimental-span.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = "experimental-span.hpp"; sourceTree = "<group>"; };
 		DECA49C4232CA40D00C98A0D /* CrossPLUtils.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = CrossPLUtils.mm; sourceTree = "<group>"; };
 		DECA49C5232CA40D00C98A0D /* CrossPLUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CrossPLUtils.h; sourceTree = "<group>"; };
 		DED5255D218DF4C800619F59 /* CrossPL.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CrossPL.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		DED52561218DF4C800619F59 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		DEDA63662338A38E0024EA12 /* ContactBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactBridge.swift; sourceTree = "<group>"; };
+		DEDA63892338AFF00024EA12 /* ContactListener.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ContactListener.hpp; sourceTree = "<group>"; };
+		DEDA638A2338AFF10024EA12 /* ContactBridge.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ContactBridge.hpp; sourceTree = "<group>"; };
+		DEDA638B2338AFF10024EA12 /* ContactListener.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ContactListener.cpp; sourceTree = "<group>"; };
+		DEDA638C2338AFF10024EA12 /* ContactDebug.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ContactDebug.cpp; sourceTree = "<group>"; };
+		DEDA638D2338AFF10024EA12 /* ContactBridge.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ContactBridge.cpp; sourceTree = "<group>"; };
+		DEDA638E2338AFF10024EA12 /* ContactMessage.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ContactMessage.hpp; sourceTree = "<group>"; };
+		DEDA638F2338AFF10024EA12 /* ContactDebug.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ContactDebug.hpp; sourceTree = "<group>"; };
+		DEDA63902338AFF10024EA12 /* ContactMessage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ContactMessage.cpp; sourceTree = "<group>"; };
+		DEDA63992338CB540024EA12 /* ContactListener.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactListener.swift; sourceTree = "<group>"; };
 		DEDB2484218DF5F200F07F42 /* CrossPL-Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "CrossPL-Bridging-Header.h"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -289,6 +323,14 @@
 		DE2757702333486B001B635B /* cpp */ = {
 			isa = PBXGroup;
 			children = (
+				DEDA638D2338AFF10024EA12 /* ContactBridge.cpp */,
+				DEDA638A2338AFF10024EA12 /* ContactBridge.hpp */,
+				DEDA638C2338AFF10024EA12 /* ContactDebug.cpp */,
+				DEDA638F2338AFF10024EA12 /* ContactDebug.hpp */,
+				DEDA638B2338AFF10024EA12 /* ContactListener.cpp */,
+				DEDA63892338AFF00024EA12 /* ContactListener.hpp */,
+				DEDA63902338AFF10024EA12 /* ContactMessage.cpp */,
+				DEDA638E2338AFF10024EA12 /* ContactMessage.hpp */,
 				DE27584423345A20001B635B /* ContactFactory.cpp */,
 				DE27584323345A20001B635B /* ContactFactory.hpp */,
 				DE2757722333486B001B635B /* base */,
@@ -432,7 +474,9 @@
 		DE27582623334FCB001B635B /* internal */ = {
 			isa = PBXGroup;
 			children = (
+				DEDA63662338A38E0024EA12 /* ContactBridge.swift */,
 				DE27582723335014001B635B /* ContactFactory.swift */,
+				DEDA63992338CB540024EA12 /* ContactListener.swift */,
 			);
 			path = internal;
 			sourceTree = "<group>";
@@ -454,8 +498,15 @@
 		DE27582C23335177001B635B /* proxy */ = {
 			isa = PBXGroup;
 			children = (
-				DE27582D23335177001B635B /* ContactFactory.proxy.mm */,
-				DE27582E23335177001B635B /* ContactFactory.proxy.h */,
+				DE3C537A2338FCCF0053196E /* ContactBridge.native.proxy.h */,
+				DE3C537D2338FCCF0053196E /* ContactBridge.platform.proxy.h */,
+				DE3C53752338FCCF0053196E /* ContactBridge.proxy.mm */,
+				DE3C537F2338FCCF0053196E /* ContactFactory.native.proxy.h */,
+				DE3C53782338FCCF0053196E /* ContactFactory.platform.proxy.h */,
+				DE3C537C2338FCCF0053196E /* ContactFactory.proxy.mm */,
+				DE3C53792338FCCF0053196E /* ContactListener.native.proxy.h */,
+				DE3C53802338FCCF0053196E /* ContactListener.platform.proxy.h */,
+				DE3C537E2338FCCF0053196E /* ContactListener.proxy.mm */,
 			);
 			path = proxy;
 			sourceTree = "<group>";
@@ -539,8 +590,9 @@
 		DE76DD6D2328A26B0041A703 /* proxy */ = {
 			isa = PBXGroup;
 			children = (
+				DE3C53732338FC410053196E /* CrossBase.native.proxy.h */,
+				DE3C53742338FC410053196E /* CrossBase.platform.proxy.h */,
 				DE5961A6232F231200BDB4EE /* CrossBase.proxy.mm */,
-				DE76DD6F2328A26B0041A703 /* CrossBase.proxy.h */,
 			);
 			path = proxy;
 			sourceTree = "<group>";
@@ -597,14 +649,18 @@
 			files = (
 				DE2757E72333486B001B635B /* MessageManager.hpp in Headers */,
 				DE2757E12333486B001B635B /* UserManager.hpp in Headers */,
+				DEDA63922338AFF10024EA12 /* ContactBridge.hpp in Headers */,
 				DE2758182333486C001B635B /* ChannelImplElaChain.hpp in Headers */,
-				DE27583523335177001B635B /* ContactFactory.proxy.h in Headers */,
 				DE27583923335177001B635B /* experimental-span.hpp in Headers */,
 				DE2758022333486B001B635B /* MD5.hpp in Headers */,
 				DE2757E62333486B001B635B /* Config.hpp in Headers */,
+				DE3C53862338FCCF0053196E /* ContactBridge.native.proxy.h in Headers */,
 				DE2757F22333486B001B635B /* Platform.hpp in Headers */,
 				DE2757E22333486B001B635B /* MessageChannelStrategy.hpp in Headers */,
+				DEDA63912338AFF10024EA12 /* ContactListener.hpp in Headers */,
+				DE3C53842338FCCF0053196E /* ContactFactory.platform.proxy.h in Headers */,
 				DE2757F82333486B001B635B /* ThreadPool.hpp in Headers */,
+				DE3C538C2338FCCF0053196E /* ContactListener.platform.proxy.h in Headers */,
 				DE2757EC2333486B001B635B /* ErrCode.hpp in Headers */,
 				DE2757E52333486B001B635B /* HumanInfo.hpp in Headers */,
 				DE2757E32333486B001B635B /* SecurityManager.hpp in Headers */,
@@ -613,14 +669,19 @@
 				DE27581C2333486C001B635B /* ChannelImplCarrier.hpp in Headers */,
 				DE27584523345A20001B635B /* ContactFactory.hpp in Headers */,
 				DE2757FD2333486B001B635B /* Random.hpp in Headers */,
+				DEDA63972338AFF10024EA12 /* ContactDebug.hpp in Headers */,
 				DE2758102333486B001B635B /* DidChnClient.hpp in Headers */,
 				DE2758052333486B001B635B /* Base64.hpp in Headers */,
 				DE2757E82333486B001B635B /* UserInfo.hpp in Headers */,
+				DE3C53892338FCCF0053196E /* ContactBridge.platform.proxy.h in Headers */,
+				DEDA63962338AFF10024EA12 /* ContactMessage.hpp in Headers */,
 				DE2757E92333486B001B635B /* FriendManager.hpp in Headers */,
 				DE27581E2333486C001B635B /* DidChnDataListener.hpp in Headers */,
 				DE2758002333486B001B635B /* SafePtr.hpp in Headers */,
 				DE2757EA2333486B001B635B /* IdentifyCode.hpp in Headers */,
 				DE2757DC2333486B001B635B /* HttpClient.hpp in Headers */,
+				DE3C538B2338FCCF0053196E /* ContactFactory.native.proxy.h in Headers */,
+				DE3C53852338FCCF0053196E /* ContactListener.native.proxy.h in Headers */,
 				DE2757F62333486B001B635B /* PlatformIos.hpp in Headers */,
 				DE2758032333486B001B635B /* Log.hpp in Headers */,
 				DE2757FE2333486B001B635B /* ghc-filesystem.hpp in Headers */,
@@ -643,7 +704,6 @@
 			files = (
 				DE357384231F642D00496E41 /* CrossBase.hpp in Headers */,
 				DE76DD7A2328A26B0041A703 /* experimental-span.hpp in Headers */,
-				DE76DD762328A26B0041A703 /* CrossBase.proxy.h in Headers */,
 				DECA49C7232CA40D00C98A0D /* CrossPLUtils.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -846,6 +906,7 @@
 			files = (
 				DE27582523334F54001B635B /* Contact.swift in Sources */,
 				DE27583E23345842001B635B /* CrossPLFactory.CrossPL.mm in Sources */,
+				DEDA639A2338CB540024EA12 /* ContactListener.swift in Sources */,
 				DE27582823335014001B635B /* ContactFactory.swift in Sources */,
 				DE27581B2333486C001B635B /* MessageChannelStrategy.cpp in Sources */,
 				DE27581F2333486C001B635B /* Elastos.SDK.Contact.cpp in Sources */,
@@ -853,13 +914,15 @@
 				DE2758212333486C001B635B /* DidChnClient.cpp in Sources */,
 				DE27584623345A20001B635B /* ContactFactory.cpp in Sources */,
 				DE27580E2333486B001B635B /* DidChnDataListener.cpp in Sources */,
-				DE27583423335177001B635B /* ContactFactory.proxy.mm in Sources */,
+				DE3C538A2338FCCF0053196E /* ContactListener.proxy.mm in Sources */,
 				DE2757F42333486B001B635B /* PlatformAndroid.cpp in Sources */,
+				DEDA63942338AFF10024EA12 /* ContactDebug.cpp in Sources */,
 				DE27580A2333486B001B635B /* FriendInfo.cpp in Sources */,
 				DE27580C2333486B001B635B /* ErrCode.cpp in Sources */,
 				DE2758152333486C001B635B /* ChannelImplElaChain.cpp in Sources */,
 				DE2758012333486B001B635B /* ThreadPool.cpp in Sources */,
 				DE2757FB2333486B001B635B /* Log.cpp in Sources */,
+				DEDA63932338AFF10024EA12 /* ContactListener.cpp in Sources */,
 				DE2757E02333486B001B635B /* Json.cpp in Sources */,
 				DE2757DD2333486B001B635B /* HttpClient.cpp in Sources */,
 				DE2758172333486C001B635B /* Config.cpp in Sources */,
@@ -869,7 +932,12 @@
 				DE27580B2333486B001B635B /* ChannelImplCarrier.cpp in Sources */,
 				DE2758162333486C001B635B /* IdentifyCode.cpp in Sources */,
 				DE2757F52333486B001B635B /* PlatformUnixLike.cpp in Sources */,
+				DE3C53882338FCCF0053196E /* ContactFactory.proxy.mm in Sources */,
+				DEDA63982338AFF10024EA12 /* ContactMessage.cpp in Sources */,
+				DEDA63672338A38E0024EA12 /* ContactBridge.swift in Sources */,
 				DE2757EF2333486B001B635B /* PlatformIos.cpp in Sources */,
+				DEDA63952338AFF10024EA12 /* ContactBridge.cpp in Sources */,
+				DE3C53812338FCCF0053196E /* ContactBridge.proxy.mm in Sources */,
 				DE27581A2333486C001B635B /* UserManager.cpp in Sources */,
 				DE27581D2333486C001B635B /* SecurityManager.cpp in Sources */,
 				DE27584123345876001B635B /* CrossPLFactory.sdk.mm in Sources */,

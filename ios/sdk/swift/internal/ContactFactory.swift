@@ -27,6 +27,6 @@ class ContactFactory: CrossBase {
   
   init() {
     super.init(className: String(describing: ContactFactory.self))
- }
+  }
 } // class Factory
 

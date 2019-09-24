@@ -28,7 +28,7 @@ import Foundation
     unbindPlatformHandle(thisObj: self)
   }
 
-  public private(set) var nativeHandle: Int64
+  @objc public private(set) var nativeHandle: Int64
   private let className: String
   
   /* @CrossNativeInterface */

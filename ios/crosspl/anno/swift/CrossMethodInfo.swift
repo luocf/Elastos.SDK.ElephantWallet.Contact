@@ -146,7 +146,13 @@ class CrossMethodInfo {
       if isPrimitiveType == true {
         prefixContent += "\(CrossTmplUtils.TabSpace)\(type.toCppString()) var\(idx) = ocvar\(idx);\n"
       } else if type.type! == .CROSSBASE {
-        prefixContent += "\(CrossTmplUtils.TabSpace)auto var\(idx) = crosspl::CrossPLUtils::SafeCastCrossObjectToHandle<\(cppClassName)>(ocvar\(idx));\n"
+        if methodName! == "bindPlatformHandle" {
+          prefixContent += "\(CrossTmplUtils.TabSpace)auto var\(idx) = crosspl::CrossPLUtils::AddGlobalObject(ocvar\(idx));\n"
+        } else if methodName! == "unbindPlatformHandle" {
+          prefixContent += "\(CrossTmplUtils.TabSpace)auto var\(idx) = crosspl::CrossPLUtils::DelGlobalObject(ocvar\(idx));\n"
+        } else {
+          prefixContent += "\(CrossTmplUtils.TabSpace)auto var\(idx) = crosspl::CrossPLUtils::SafeCastCrossObjectToNative(ocvar\(idx));\n"
+        }
       } else {
         prefixContent += "\(CrossTmplUtils.TabSpace)auto var\(idx) = crosspl::CrossPLUtils::SafeCast\(type.toString())(ocvar\(idx));\n"
       }
@@ -225,7 +231,7 @@ class CrossMethodInfo {
       } else if type.type! == .CROSSBASE {
         prefixContent += "\(CrossTmplUtils.TabSpace)auto ocvar\(idx) = crosspl::CrossPLUtils::SafeCastCrossObject<\(type.toCppString())>(var\(idx));\n"
       } else {
-        prefixContent += "\(CrossTmplUtils.TabSpace)auto ocvar\(idx) = crosspl::CrossPLUtils::SafeCast\(type)(var\(idx));\n"
+        prefixContent += "\(CrossTmplUtils.TabSpace)auto ocvar\(idx) = crosspl::CrossPLUtils::SafeCast\(type.toString())(var\(idx));\n"
       }
   
       if(type.type! == .STRINGBUFFER
@@ -271,11 +277,11 @@ class CrossMethodInfo {
       let type = paramsType[idx]
       let isPrimitiveType = type.isPrimitiveType()
       if isPrimitiveType == true {
-        argusContent += ": ocvar\(idx)"
+        argusContent += " :ocvar\(idx)"
       } else if type.type! == .CROSSBASE {
-        argusContent += ": ocvar\(idx)"
+        argusContent += " :ocvar\(idx)"
       } else {
-        argusContent += ": ocvar\(idx).get()"
+        argusContent += " :ocvar\(idx).get()"
       }
     }
   
@@ -290,7 +296,7 @@ class CrossMethodInfo {
       } else if returnType!.type! == .CROSSBASE {
         suffixContent += "\(CrossTmplUtils.TabSpace)auto ret = crosspl::CrossPLUtils::SafeCastCrossObject<\(returnType!.toCppString())>(ocret);\n"
       } else {
-        suffixContent += "\(CrossTmplUtils.TabSpace)auto ret = crosspl::CrossPLUtils::SafeCast\(returnType!.toString())(jret);\n"
+        suffixContent += "\(CrossTmplUtils.TabSpace)auto ret = crosspl::CrossPLUtils::SafeCast\(returnType!.toString())(ocret);\n"
       }
       suffixContent += "\(CrossTmplUtils.TabSpace)return ret;"
     }

@@ -3,6 +3,7 @@ import Foundation
 class CrossVariableType {
   public enum `Type` {
     case BOOLEAN
+    case INT
     case INT32
     case INT64
     case DOUBLE
@@ -20,6 +21,7 @@ class CrossVariableType {
   
   static func Parse(sourceContent: String) -> CrossVariableType {
     let supportedTypeKind = ["Bool": Type.BOOLEAN,
+                             "Int": Type.INT,
                              "Int32": Type.INT32,
                              "Int64": Type.INT64,
                              "Double": Type.DOUBLE,
@@ -59,6 +61,7 @@ class CrossVariableType {
   func toString() -> String {
     let typeMap = [
       Type.BOOLEAN: "Bool",
+      Type.INT: "Int",
       Type.INT32: "Int32",
       Type.INT64: "Int64",
       Type.DOUBLE: "Double",
@@ -81,6 +84,7 @@ class CrossVariableType {
   func isPrimitiveType() -> Bool {
     let primitiveTypeSet = [
       Type.BOOLEAN,
+      Type.INT,
       Type.INT32,
       Type.INT64,
       Type.DOUBLE,
@@ -94,28 +98,37 @@ class CrossVariableType {
   func toCppString(isConst: Bool = false) -> String {
     let typeMap = [
       Type.BOOLEAN: "bool",
+      Type.INT: "int",
       Type.INT32: "int32_t",
       Type.INT64: "int64_t",
       Type.DOUBLE: "double",
       Type.VOID: "void",
 
       Type.STRING: "const char*",
-      Type.BYTEARRAY: "std::span<int8_t>",
+      Type.BYTEARRAY: "std::span<uint8_t>",
       Type.FUNCTION: "std::function<void()>",
       Type.STRINGBUFFER: "std::stringstream",
-      Type.BYTEBUFFER: "std::vector<int8_t>",
-      Type.CROSSBASE: "::CrossBase"
+      Type.BYTEBUFFER: "std::vector<uint8_t>",
+      Type.CROSSBASE: "crosspl::native::CrossBase"
     ]
   
 //  var cppType = toString(primitiveTypeMap, classTypeMap, isConst)
     let cppType = typeMap[type!]
     
-    return cppType!
+    
+    if isConst == false
+    || isPrimitiveType() == true
+    || type == Type.STRING {
+      return cppType!
+    } else {
+      return "const \(cppType!)*"
+    }
   }
   
   func toObjcString(isConst: Bool = false) -> String {
     let typeMap = [
       Type.BOOLEAN: "bool",
+      Type.INT: "int",
       Type.INT32: "int32_t",
       Type.INT64: "int64_t",
       Type.DOUBLE: "double",
@@ -138,6 +151,7 @@ class CrossVariableType {
   func toSwiftString() -> String {
     let typeMap = [
       Type.BOOLEAN: "Bool",
+      Type.INT: "Int",
       Type.INT32: "Int32",
       Type.INT64: "Int64",
       Type.DOUBLE: "Double",
