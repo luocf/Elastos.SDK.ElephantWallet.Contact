@@ -61,7 +61,8 @@ class CrossClassInfo {
         if (nativeMethodList.filter() { $0.contains("func \(methodName)(") }.count != 0) {
           isCrossInterface = true
           isNative = true
-        } else if (platformMethodList.filter() { $0.contains("func \(methodName)(") }.count != 0) {
+        } else if (platformMethodList.filter() { $0.contains("func \(methodName)(") }.count != 0)
+        && line.contains(" @objc ") {
           isCrossInterface = true
           isNative = false
         }

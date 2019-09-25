@@ -2,21 +2,16 @@ import CrossPL
 
 /* @CrossClass */
 @objc open class ContactListener: CrossBase {
-  /* @CrossPlatformInterface */
-  @objc public func onError(_ errCode: Int32, _ errStr: String, _ ext: String) {
+  open func onError(errCode: Int32, errStr: String, ext: String?) {
     fatalError("\(#function) not implementation.")
   }
+  open func onAcquire(request: AcquireArgs) -> Data? {
+    fatalError("\(#function) not implementation.")
+  }
+  //  public abstract void onEvent(EventArgs event);
+  //  public abstract void onReceivedMessage(String humanCode, int channelType, Contact.Message message);
+  //
 
-//  public abstract byte[] onAcquire(AcquireArgs request);
-//  public abstract void onEvent(EventArgs event);
-//  public abstract void onReceivedMessage(String humanCode, int channelType, Contact.Message message);
-//
-//  public class AcquireArgs extends org.elastos.sdk.elephantwallet.contact.internal.AcquireArgs {
-//    private AcquireArgs(int type, String pubKey, byte[] data) {
-//      super(type, pubKey, data);
-//    }
-//  }
-//
 //  public class EventArgs extends org.elastos.sdk.elephantwallet.contact.internal.EventArgs {
 //    public EventArgs(int type, String humanCode, int channelType, byte[] data) {
 //      super(type, humanCode, channelType, data);
@@ -86,13 +81,12 @@ import CrossPL
 
   /* @CrossPlatformInterface */
   @objc internal func onAcquire(_ reqType: Int, _ pubKey: String?, _ data: Data?) -> Data? {
-//    Log.i(Contact.TAG, "ContactListener.onAcquire()");
+    Log.i(tag: Contact.TAG, msg: "ContactListener.onAcquire()")
 //
-//    AcquireArgs args = new AcquireArgs(reqType, pubKey, data);
-//    byte[] ret = onAcquire(args);
-//
-//    return ret;
-    return nil
+    let args = AcquireArgs(type: reqType, pubKey: pubKey, data: data)
+    let ret = onAcquire(request: args);
+
+    return ret;
   }
 
   /* @CrossPlatformInterface */
@@ -130,5 +124,10 @@ import CrossPL
 //
 //    onReceivedMessage(humanCode, channelType, message);
     return;
+  }
+  
+  /* @CrossPlatformInterface */
+  @objc internal func onError(_ errCode: Int32, _ errStr: String, _ ext: String?) {
+    onError(errCode: errCode, errStr: errStr, ext: ext)
   }
 }

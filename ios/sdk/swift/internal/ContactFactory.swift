@@ -9,14 +9,14 @@
 import CrossPL
 
 /* @CrossClass */
-class ContactFactory: CrossBase {
+public class ContactFactory: CrossBase {
   /* @CrossNativeInterface */
-  public static func SetLogLevel(level: Int32) {
+  @objc public static func SetLogLevel(level: Int32) {
     crosspl_Proxy_ContactFactory_SetLogLevel(level)
   }
   
   /* @CrossNativeInterface */
-  public static func SetDeviceId(devId: String) {
+  public class func SetDeviceId(devId: String) {
     crosspl_Proxy_ContactFactory_SetDeviceId(devId)
   }
   

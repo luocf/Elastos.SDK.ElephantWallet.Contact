@@ -1,7 +1,7 @@
 import CrossPL
 
 /* @CrossClass */
-class ContactBridge: CrossBase {
+open class ContactBridge: CrossBase {
   public static let TAG = "elastos";
   
   init() {
@@ -14,15 +14,15 @@ class ContactBridge: CrossBase {
     }
   }
   
-//  public func setListener(Contact.Listener listener) {
-//    if(mListener != null) {
-//      mListener!.unbind();
-//    }
-//    mListener = listener;
-//
-//    mListener!.bind();
-//    setListener(mListener);
-//  }
+  public func setupListener(listener: Contact.Listener?) {
+    if(mListener != nil) {
+      mListener!.unbind();
+    }
+    mListener = listener;
+
+    mListener?.bind();
+    setListener(listener: mListener);
+  }
 //
 //  public int setUserInfo(UserInfo.Item item, String value) {
 //    int ret = setUserInfo(item.id(), value);

@@ -45,7 +45,6 @@
 		DE2757FB2333486B001B635B /* Log.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DE2757A62333486B001B635B /* Log.cpp */; };
 		DE2757FD2333486B001B635B /* Random.hpp in Headers */ = {isa = PBXBuildFile; fileRef = DE2757A82333486B001B635B /* Random.hpp */; };
 		DE2757FE2333486B001B635B /* ghc-filesystem.hpp in Headers */ = {isa = PBXBuildFile; fileRef = DE2757A92333486B001B635B /* ghc-filesystem.hpp */; };
-		DE2757FF2333486B001B635B /* taskthread.hpp.bak in Resources */ = {isa = PBXBuildFile; fileRef = DE2757AA2333486B001B635B /* taskthread.hpp.bak */; };
 		DE2758002333486B001B635B /* SafePtr.hpp in Headers */ = {isa = PBXBuildFile; fileRef = DE2757AB2333486B001B635B /* SafePtr.hpp */; };
 		DE2758012333486B001B635B /* ThreadPool.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DE2757AC2333486B001B635B /* ThreadPool.cpp */; };
 		DE2758022333486B001B635B /* MD5.hpp in Headers */ = {isa = PBXBuildFile; fileRef = DE2757AD2333486B001B635B /* MD5.hpp */; };
@@ -56,7 +55,6 @@
 		DE27580B2333486B001B635B /* ChannelImplCarrier.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DE2757B82333486B001B635B /* ChannelImplCarrier.cpp */; };
 		DE27580C2333486B001B635B /* ErrCode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DE2757B92333486B001B635B /* ErrCode.cpp */; };
 		DE27580E2333486B001B635B /* DidChnDataListener.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DE2757BB2333486B001B635B /* DidChnDataListener.cpp */; };
-		DE27580F2333486B001B635B /* BlkChnClient.hpp.bak in Resources */ = {isa = PBXBuildFile; fileRef = DE2757BC2333486B001B635B /* BlkChnClient.hpp.bak */; };
 		DE2758102333486B001B635B /* DidChnClient.hpp in Headers */ = {isa = PBXBuildFile; fileRef = DE2757BD2333486B001B635B /* DidChnClient.hpp */; };
 		DE2758112333486B001B635B /* MessageManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DE2757BE2333486B001B635B /* MessageManager.cpp */; };
 		DE2758122333486B001B635B /* UserInfo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DE2757BF2333486B001B635B /* UserInfo.cpp */; };
@@ -66,7 +64,6 @@
 		DE2758162333486C001B635B /* IdentifyCode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DE2757C32333486B001B635B /* IdentifyCode.cpp */; };
 		DE2758172333486C001B635B /* Config.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DE2757C42333486B001B635B /* Config.cpp */; };
 		DE2758182333486C001B635B /* ChannelImplElaChain.hpp in Headers */ = {isa = PBXBuildFile; fileRef = DE2757C52333486B001B635B /* ChannelImplElaChain.hpp */; };
-		DE2758192333486C001B635B /* BlkChnClient.cpp.bak in Resources */ = {isa = PBXBuildFile; fileRef = DE2757C62333486B001B635B /* BlkChnClient.cpp.bak */; };
 		DE27581A2333486C001B635B /* UserManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DE2757C72333486B001B635B /* UserManager.cpp */; };
 		DE27581B2333486C001B635B /* MessageChannelStrategy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DE2757C82333486B001B635B /* MessageChannelStrategy.cpp */; };
 		DE27581C2333486C001B635B /* ChannelImplCarrier.hpp in Headers */ = {isa = PBXBuildFile; fileRef = DE2757C92333486B001B635B /* ChannelImplCarrier.hpp */; };
@@ -103,6 +100,13 @@
 		DE3C53982339ABC20053196E /* ContactListener.proxy.h in Headers */ = {isa = PBXBuildFile; fileRef = DE3C53922339ABC10053196E /* ContactListener.proxy.h */; };
 		DE3C53992339ABC20053196E /* ContactListener.proxy.mm in Sources */ = {isa = PBXBuildFile; fileRef = DE3C53932339ABC10053196E /* ContactListener.proxy.mm */; };
 		DE3C539A2339ABC20053196E /* ContactFactory.proxy.h in Headers */ = {isa = PBXBuildFile; fileRef = DE3C53942339ABC20053196E /* ContactFactory.proxy.h */; };
+		DE3C53AC2339BFCA0053196E /* ElastosSdkKeypair.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DE3C53A82339BF780053196E /* ElastosSdkKeypair.framework */; };
+		DE3C53AD2339BFCA0053196E /* ElastosSdkKeypair.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = DE3C53A82339BF780053196E /* ElastosSdkKeypair.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		DE3C53B02339C5900053196E /* Log.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE3C53AF2339C5900053196E /* Log.swift */; };
+		DE3C53B12339E5BF0053196E /* ContactSDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DE27576823334804001B635B /* ContactSDK.framework */; };
+		DE3C53B22339E5BF0053196E /* ContactSDK.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = DE27576823334804001B635B /* ContactSDK.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		DE3C53B6233A0FBD0053196E /* AcquireArgs.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE3C53B5233A0FBD0053196E /* AcquireArgs.swift */; };
+		DE3C53B8233A189A0053196E /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE3C53B7233A189A0053196E /* Utils.swift */; };
 		DE5961A7232F231200BDB4EE /* CrossBase.proxy.mm in Sources */ = {isa = PBXBuildFile; fileRef = DE5961A6232F231200BDB4EE /* CrossBase.proxy.mm */; };
 		DE76DD5623262AF70041A703 /* CrossTmplUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE76DD5523262AF70041A703 /* CrossTmplUtils.swift */; };
 		DE76DD5823287EF40041A703 /* CrossPLFactoryGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE76DD5723287EF40041A703 /* CrossPLFactoryGenerator.swift */; };
@@ -122,6 +126,16 @@
 		DEDA639A2338CB540024EA12 /* ContactListener.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEDA63992338CB540024EA12 /* ContactListener.swift */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		DE3C53B32339E5BF0053196E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = DED52554218DF4C800619F59 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = DE27576723334804001B635B;
+			remoteInfo = sdk;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXCopyFilesBuildPhase section */
 		DE283ECA231FBD1800D9740C /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
@@ -131,6 +145,18 @@
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 1;
+		};
+		DE3C53AE2339BFCA0053196E /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				DE3C53B22339E5BF0053196E /* ContactSDK.framework in Embed Frameworks */,
+				DE3C53AD2339BFCA0053196E /* ElastosSdkKeypair.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
 
@@ -142,7 +168,7 @@
 		DE1F526323214A9400A70F78 /* Annotation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Annotation.swift; sourceTree = "<group>"; };
 		DE1F52652321E43E00A70F78 /* CrossVariableType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CrossVariableType.swift; sourceTree = "<group>"; };
 		DE1F52682322076C00A70F78 /* CrossProxyGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CrossProxyGenerator.swift; sourceTree = "<group>"; };
-		DE27576823334804001B635B /* sdk.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = sdk.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		DE27576823334804001B635B /* ContactSDK.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = ContactSDK.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		DE27576B23334805001B635B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		DE2757832333486B001B635B /* HttpClient.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = HttpClient.hpp; sourceTree = "<group>"; };
 		DE2757842333486B001B635B /* HttpClient.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = HttpClient.cpp; sourceTree = "<group>"; };
@@ -237,6 +263,10 @@
 		DE3C53922339ABC10053196E /* ContactListener.proxy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ContactListener.proxy.h; sourceTree = "<group>"; };
 		DE3C53932339ABC10053196E /* ContactListener.proxy.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ContactListener.proxy.mm; sourceTree = "<group>"; };
 		DE3C53942339ABC20053196E /* ContactFactory.proxy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ContactFactory.proxy.h; sourceTree = "<group>"; };
+		DE3C53A82339BF780053196E /* ElastosSdkKeypair.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = ElastosSdkKeypair.framework; sourceTree = "<group>"; };
+		DE3C53AF2339C5900053196E /* Log.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Log.swift; sourceTree = "<group>"; };
+		DE3C53B5233A0FBD0053196E /* AcquireArgs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AcquireArgs.swift; sourceTree = "<group>"; };
+		DE3C53B7233A189A0053196E /* Utils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utils.swift; sourceTree = "<group>"; };
 		DE5961A6232F231200BDB4EE /* CrossBase.proxy.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = CrossBase.proxy.mm; sourceTree = "<group>"; };
 		DE76DD5523262AF70041A703 /* CrossTmplUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CrossTmplUtils.swift; sourceTree = "<group>"; };
 		DE76DD5723287EF40041A703 /* CrossPLFactoryGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CrossPLFactoryGenerator.swift; sourceTree = "<group>"; };
@@ -272,6 +302,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DE3C53B12339E5BF0053196E /* ContactSDK.framework in Frameworks */,
+				DE3C53AC2339BFCA0053196E /* ElastosSdkKeypair.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -468,9 +500,12 @@
 		DE27582623334FCB001B635B /* internal */ = {
 			isa = PBXGroup;
 			children = (
+				DE3C53B5233A0FBD0053196E /* AcquireArgs.swift */,
 				DEDA63662338A38E0024EA12 /* ContactBridge.swift */,
 				DE27582723335014001B635B /* ContactFactory.swift */,
 				DEDA63992338CB540024EA12 /* ContactListener.swift */,
+				DE3C53AF2339C5900053196E /* Log.swift */,
+				DE3C53B7233A189A0053196E /* Utils.swift */,
 			);
 			path = internal;
 			sourceTree = "<group>";
@@ -511,6 +546,7 @@
 				DE27585423345AD6001B635B /* Assets.xcassets */,
 				DE27585623345AD6001B635B /* LaunchScreen.storyboard */,
 				DE27585923345AD6001B635B /* Info.plist */,
+				DE3C53A72339BF780053196E /* Frameworks */,
 			);
 			path = test;
 			sourceTree = "<group>";
@@ -547,6 +583,14 @@
 				DE357382231F642D00496E41 /* CrossBase.hpp */,
 			);
 			path = cpp;
+			sourceTree = "<group>";
+		};
+		DE3C53A72339BF780053196E /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				DE3C53A82339BF780053196E /* ElastosSdkKeypair.framework */,
+			);
+			path = Frameworks;
 			sourceTree = "<group>";
 		};
 		DE5961DF232F647D00BDB4EE /* Frameworks */ = {
@@ -612,7 +656,7 @@
 			children = (
 				DED5255D218DF4C800619F59 /* CrossPL.framework */,
 				DE283ECC231FBD1800D9740C /* anno */,
-				DE27576823334804001B635B /* sdk.framework */,
+				DE27576823334804001B635B /* ContactSDK.framework */,
 				DE27584B23345AD4001B635B /* test.app */,
 			);
 			name = Products;
@@ -715,7 +759,7 @@
 			);
 			name = sdk;
 			productName = sdk;
-			productReference = DE27576823334804001B635B /* sdk.framework */;
+			productReference = DE27576823334804001B635B /* ContactSDK.framework */;
 			productType = "com.apple.product-type.framework";
 		};
 		DE27584A23345AD4001B635B /* test */ = {
@@ -725,10 +769,12 @@
 				DE27584723345AD4001B635B /* Sources */,
 				DE27584823345AD4001B635B /* Frameworks */,
 				DE27584923345AD4001B635B /* Resources */,
+				DE3C53AE2339BFCA0053196E /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				DE3C53B42339E5BF0053196E /* PBXTargetDependency */,
 			);
 			name = test;
 			productName = test;
@@ -823,9 +869,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DE2757FF2333486B001B635B /* taskthread.hpp.bak in Resources */,
-				DE27580F2333486B001B635B /* BlkChnClient.hpp.bak in Resources */,
-				DE2758192333486C001B635B /* BlkChnClient.cpp.bak in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -914,11 +957,13 @@
 				DE2757E02333486B001B635B /* Json.cpp in Sources */,
 				DE2757DD2333486B001B635B /* HttpClient.cpp in Sources */,
 				DE2758172333486C001B635B /* Config.cpp in Sources */,
+				DE3C53B02339C5900053196E /* Log.swift in Sources */,
 				DE27583623335177001B635B /* CrossPLUtils.mm in Sources */,
 				DE2758122333486B001B635B /* UserInfo.cpp in Sources */,
 				DE2757F32333486B001B635B /* PlatformDarwin.cpp in Sources */,
 				DE27580B2333486B001B635B /* ChannelImplCarrier.cpp in Sources */,
 				DE2758162333486C001B635B /* IdentifyCode.cpp in Sources */,
+				DE3C53B8233A189A0053196E /* Utils.swift in Sources */,
 				DE2757F52333486B001B635B /* PlatformUnixLike.cpp in Sources */,
 				DE3C53972339ABC20053196E /* ContactFactory.proxy.mm in Sources */,
 				DEDA63982338AFF10024EA12 /* ContactMessage.cpp in Sources */,
@@ -928,6 +973,7 @@
 				DE3C53962339ABC20053196E /* ContactBridge.proxy.mm in Sources */,
 				DE27581A2333486C001B635B /* UserManager.cpp in Sources */,
 				DE27581D2333486C001B635B /* SecurityManager.cpp in Sources */,
+				DE3C53B6233A0FBD0053196E /* AcquireArgs.swift in Sources */,
 				DE27584123345876001B635B /* CrossPLFactory.sdk.mm in Sources */,
 				DE2757F92333486B001B635B /* MD5.cpp in Sources */,
 				DE2758112333486B001B635B /* MessageManager.cpp in Sources */,
@@ -975,6 +1021,14 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		DE3C53B42339E5BF0053196E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = DE27576723334804001B635B /* sdk */;
+			targetProxy = DE3C53B32339E5BF0053196E /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin PBXVariantGroup section */
 		DE27585123345AD4001B635B /* Main.storyboard */ = {
 			isa = PBXVariantGroup;
@@ -1021,11 +1075,27 @@
 				);
 				OTHER_LDFLAGS = (
 					"-L../build/sysroot/iOS/$ARCHS/lib",
-					"-lElastos.SDK.Contact",
+					"-lElastos.SDK.Keypair.C",
+					"-lz",
+					"-lcrypto",
+					"-lssl",
 					"-lcurl",
+					"-lelacarrier",
+					"-lelasession",
+					"-lflatccrt",
+					"-lhive-api",
+					"-lhive-api++",
+					"-lpjmedia",
+					"-lpjnath",
+					"-lpjlib-util",
+					"-lpj",
+					"-lcrystal",
+					"-lsrtp",
+					"-ltoxcore",
+					"-lsodium",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = org.elastos.sdk.elephantwallet.contact.sdk;
-				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				PRODUCT_NAME = ContactSDK;
 				SKIP_INSTALL = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
@@ -1059,11 +1129,27 @@
 				);
 				OTHER_LDFLAGS = (
 					"-L../build/sysroot/iOS/$ARCHS/lib",
-					"-lElastos.SDK.Contact",
+					"-lElastos.SDK.Keypair.C",
+					"-lz",
+					"-lcrypto",
+					"-lssl",
 					"-lcurl",
+					"-lelacarrier",
+					"-lelasession",
+					"-lflatccrt",
+					"-lhive-api",
+					"-lhive-api++",
+					"-lpjmedia",
+					"-lpjnath",
+					"-lpjlib-util",
+					"-lpj",
+					"-lcrystal",
+					"-lsrtp",
+					"-ltoxcore",
+					"-lsodium",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = org.elastos.sdk.elephantwallet.contact.sdk;
-				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				PRODUCT_NAME = ContactSDK;
 				SKIP_INSTALL = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -1073,10 +1159,15 @@
 		DE27585B23345AD6001B635B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = LFU7T9UYL5;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/test/Frameworks",
+				);
 				INFOPLIST_FILE = test/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 12.4;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1093,10 +1184,15 @@
 		DE27585C23345AD6001B635B /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = LFU7T9UYL5;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/test/Frameworks",
+				);
 				INFOPLIST_FILE = test/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 12.4;
 				LD_RUNPATH_SEARCH_PATHS = (

@@ -29,7 +29,7 @@ class CrossMethodInfo {
     let returnType = CrossVariableType.Parse(sourceContent: returnContent)
     methodInfo.returnType = returnType
     
-    methodInfo.isStatic = sourceContent.contains(" static ")
+    methodInfo.isStatic = (sourceContent.contains(" static ") || sourceContent.contains(" class "))
     methodInfo.isNative = isNative
 //    print("CrossMethodInfo.Parse() ============== 4")
     return methodInfo
