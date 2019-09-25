@@ -1,6 +1,6 @@
 
 public class AcquireArgs {
-  public enum `Type`: Int {
+  public enum Kind: Int {
     case PublicKey = 201
     case EncryptData = 202
     case DecryptData = 203
@@ -10,7 +10,7 @@ public class AcquireArgs {
   }
   
   public init(type: Int, pubKey: String?, data: Data?) {
-    self.type = Type(rawValue: type)!
+    self.type = Kind(rawValue: type)!
     self.publicKey = pubKey
     self.data = data
   }
@@ -23,7 +23,7 @@ public class AcquireArgs {
           + "]"
   }
 
-  public let type: Type
+  public let type: Kind
   public let publicKey: String?
   public let data: Data?
 }

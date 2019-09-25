@@ -11,7 +11,7 @@ import CrossPL
 /* @CrossClass */
 public class ContactFactory: CrossBase {
   /* @CrossNativeInterface */
-  @objc public static func SetLogLevel(level: Int32) {
+  public static func SetLogLevel(level: Int32) {
     crosspl_Proxy_ContactFactory_SetLogLevel(level)
   }
   

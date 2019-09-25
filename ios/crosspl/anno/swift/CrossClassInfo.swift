@@ -57,7 +57,7 @@ class CrossClassInfo {
       && line.contains(" func ") {
         let methodName = line.replace(".*func (\\w*)\\(.*") { "\($0[1])" }
         var isCrossInterface = false
-        var isNative: Bool?
+        var isNative = false
         if (nativeMethodList.filter() { $0.contains("func \(methodName)(") }.count != 0) {
           isCrossInterface = true
           isNative = true
@@ -68,7 +68,7 @@ class CrossClassInfo {
         }
        
         if isCrossInterface == true {
-          let methodInfo = CrossMethodInfo.Parse(sourceContent: line, methodName: methodName, isNative: isNative!)
+          let methodInfo = CrossMethodInfo.Parse(sourceContent: line, methodName: methodName, isNative: isNative)
           print("  \(methodInfo.toString())")
           
           classInfo.methodInfoList.append(methodInfo)
@@ -113,14 +113,22 @@ class CrossClassInfo {
   private static func printAst(filePath: String) -> String {
     let task = Process()
     task.launchPath = "/bin/bash"
-    task.arguments = ["-c", "swiftc -print-ast \(filePath) 2>/dev/null"]
+    task.arguments = ["-c", "swiftc -target x86_64-apple-ios8.0-macabi -print-ast \(filePath) 2>/dev/null"]
     
-    let pipe = Pipe()
-    task.standardOutput = pipe
+    let outputPipe = Pipe()
+    let errorPipe = Pipe()
+    task.standardOutput = outputPipe
+    task.standardError = errorPipe
     task.launch()
+    var data = outputPipe.fileHandleForReading.readDataToEndOfFile()
+    let output = String(data: data, encoding: .utf8)!
     
-    let data = pipe.fileHandleForReading.readDataToEndOfFile()
-    let output: String = NSString(data: data, encoding: String.Encoding.utf8.rawValue)! as String
+    data = errorPipe.fileHandleForReading.readDataToEndOfFile()
+    let error = String(data: data, encoding: .utf8)!
+    
+    task.waitUntilExit()
+    print("print-ast error: \(filePath):\n\(error)")
+    print("print-ast: \(filePath):\n\(output)")
     
     return output
   }

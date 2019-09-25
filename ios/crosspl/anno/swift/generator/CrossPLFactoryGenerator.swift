@@ -48,7 +48,7 @@ class CrossPLFactoryGenerator {
     print("Generate: \(sourceFile.path)")
     var content = CrossTmplUtils.ReadTmplContent(tmplName: CrossPLSourceTmpl)
   
-    var includeFactoryList = "#import \"\(headerFile.lastPathComponent)\""
+    let includeFactoryList = "#import \"\(headerFile.lastPathComponent)\""
     content = content.replacingOccurrences(of: TmplKeyIncludeFactoryHeader, with: includeFactoryList)
     
     var includeProxyList = ""

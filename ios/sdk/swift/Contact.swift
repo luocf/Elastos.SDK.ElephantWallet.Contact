@@ -18,4 +18,7 @@ open class Contact: ContactBridge {
   open class Listener: ContactListener {
   } // class Listener
 
+  open class Message: ContactMessage {
+  } // class Message
+
 }

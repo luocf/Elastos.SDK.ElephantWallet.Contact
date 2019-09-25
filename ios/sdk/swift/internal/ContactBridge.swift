@@ -195,7 +195,7 @@ open class ContactBridge: CrossBase {
     if ret < 0 {
       return ret
     }
-    info = nsinfo as! String
+    info = nsinfo! as String
     
     return 0
   }
@@ -207,7 +207,7 @@ open class ContactBridge: CrossBase {
     if ret < 0 {
       return ret
     }
-    info = nsinfo as! String
+    info = nsinfo! as String
     
     return 0
   }

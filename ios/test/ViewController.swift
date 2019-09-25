@@ -177,40 +177,44 @@ class ViewController: UIViewController {
     mContactListener = {
       class Impl: Contact.Listener {
         init(_ vc: ViewController) {
-           viewController = vc
+           viewCtrl = vc
         }
         
         override func onAcquire(request: AcquireArgs) -> Data? {
-          let ret = viewController.processAcquire(request: request);
+          let ret = viewCtrl.processAcquire(request: request);
           
-            var msg = "onAcquire(): req=\(request.toString())\n";
-            msg += "onAcquire(): resp=\(ret)\n";
-            viewController.showEvent(msg);
+          var msg = "onAcquire(): req=\(request.toString())\n";
+          msg += "onAcquire(): resp=\(ret)\n";
+          viewCtrl.showEvent(msg);
           
-            return ret;
+          return ret;
         }
+        
+        override func onEvent(event: EventArgs) {
+          viewCtrl.processEvent(event: event);
+          
+          let msg = "onEvent(): ev=\(event.toString())\n";
+          viewCtrl.showEvent(msg);
+        }
+        
+//        override func onReceivedMessage(humanCode: String, channelType: Int, message: Contact.Message) {
+//          fatalError("\(#function) not implementation.")
+//        }
         
         override func onError(errCode: Int32, errStr: String, ext: String?) {
           var msg = "\(errCode): \(errStr)"
           msg += "\n\(ext)";
-          viewController.showError(msg);
+          viewCtrl.showError(msg);
         }
         
-        private let viewController: ViewController
+        private let viewCtrl: ViewController
       }
       
       return Impl(self)
     }()
     
 
-//
-//  @Override
-//  public void onEvent(EventArgs event) {
-//  processEvent(event);
-//
-//  String msg = "onEvent(): ev=" + event + "\n";
-//  showEvent(msg);
-//  }
+
 //
 //  @Override
 //  public void onReceivedMessage(String humanCode, int channelType, Contact.Message message) {
@@ -283,6 +287,27 @@ class ViewController: UIViewController {
     return response;
   }
 
+  private func processEvent(event: EventArgs) {
+    switch (event.type) {
+      case .StatusChanged:
+        break
+      case .FriendRequest:
+        let requestEvent = event as Contact.Listener.RequestEvent
+        Helper.showFriendRequest(this, requestEvent.humanCode, requestEvent.summary, v -> {
+          mContact.acceptFriend(requestEvent.humanCode);
+  });
+  break;
+  case HumanInfoChanged:
+  Contact.Listener.InfoEvent infoEvent = (Contact.Listener.InfoEvent) event;
+  String msg = event.humanCode + " info changed: " + infoEvent.toString();
+  showEvent(msg);
+  break;
+  default:
+  Log.w(TAG, "Unprocessed event: " + event);
+  }
+  }
+
+  
   private func getPublicKey() -> String {
     var seed = Data()
     let seedLen = ElastosKeypair.GetSeedFromMnemonic(seed: &seed,

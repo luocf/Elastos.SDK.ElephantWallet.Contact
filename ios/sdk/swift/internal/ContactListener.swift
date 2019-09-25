@@ -8,76 +8,90 @@ import CrossPL
   open func onAcquire(request: AcquireArgs) -> Data? {
     fatalError("\(#function) not implementation.")
   }
-  //  public abstract void onEvent(EventArgs event);
-  //  public abstract void onReceivedMessage(String humanCode, int channelType, Contact.Message message);
-  //
+  open func onEvent(event: EventArgs) {
+    fatalError("\(#function) not implementation.")
+  }
+  open func onReceivedMessage(humanCode: String, channelType: Int, message: Contact.Message) {
+    fatalError("\(#function) not implementation.")
+  }
+  
 
 //  public class EventArgs extends org.elastos.sdk.elephantwallet.contact.internal.EventArgs {
 //    public EventArgs(int type, String humanCode, int channelType, byte[] data) {
 //      super(type, humanCode, channelType, data);
 //    }
 //  }
-//
-//  public class StatusEvent extends EventArgs {
-//    public StatusEvent(int type, String humanCode, int channelType, byte[] data) {
-//      super(type, humanCode, channelType, data);
-//      status = ContactStatus.valueOf(data[0]);
-//    }
-//    @Override
-//    public String toString() {
-//      return "StatusEvent" + "[type=" + type
-//        + ",humanCode=" + humanCode + ",channelType=" + channelType
-//        + ",status=" + status +"]";
-//    }
-//
-//    public ContactStatus status;
-//  }
-//
-//  public class RequestEvent extends EventArgs {
-//    public RequestEvent(int type, String humanCode, int channelType, byte[] data) {
-//      super(type, humanCode, channelType, data);
-//      summary = new String(data);
-//    }
-//    @Override
-//    public String toString() {
-//      return "StatusEvent" + "[type=" + type
-//        + ",humanCode=" + humanCode + ",channelType=" + channelType
-//        + ",summary=" + summary +"]";
-//    }
-//
-//    public String summary;
-//  }
-//
-//  public class InfoEvent extends EventArgs {
-//    public InfoEvent(int type, String humanCode, int channelType, byte[] data) {
-//      super(type, humanCode, channelType, data);
-//
-//      String info = new String(data);
-//      if(info.contains(JsonKey.IsMyself) == true) {
-//        UserInfo userInfo = new UserInfo();
-//        userInfo.fromJson(info);
-//        humanInfo = userInfo;
-//      } else if(info.contains(JsonKey.IsFriend) == true) {
-//        FriendInfo friendInfo = new FriendInfo();
-//        friendInfo.fromJson(info);
-//        humanInfo = friendInfo;
-//      } else {
-//        Log.w(Contact.TAG, "InfoEvent: Failed to parse human data.");
-//      }
-//    }
-//    @Override
-//    public String toString() {
-//      return "StatusEvent" + "[type=" + type
-//        + ",humanCode=" + humanCode + ",channelType=" + channelType
-//        + ",humanInfo=" + humanInfo +"]";
-//    }
-//
-//    public HumanInfo humanInfo;
-//  }
-//
-//  public ContactListener() {
-//    super(ContactListener.class.getName(), 0);
-//  }
+
+  public class StatusEvent: EventArgs {
+    public override init(type: Int, humanCode: String, channelType: Int, data: Data?) {
+      status = ContactStatus(rawValue: Int(data![0]))!
+      super.init(type: type, humanCode: humanCode, channelType: channelType, data: data)
+    }
+   
+    public override func toString() -> String {
+      return  "StatusEvent"
+            + "[type=\(type)"
+            + ",humanCode=\(humanCode)"
+            + ",channelType=\(channelType)"
+            + ",status=\(status)"
+            + "]"
+    }
+
+    public let status: ContactStatus
+  }
+
+  public class RequestEvent: EventArgs {
+    public override init(type: Int, humanCode: String, channelType: Int, data: Data?) {
+      summary = Data.ToString(from: data) ?? ""
+      super.init(type: type, humanCode: humanCode, channelType: channelType, data: data)
+    }
+    
+    public override func toString() -> String {
+    return  "StatusEvent"
+          + "[type=\(type)"
+          + ",humanCode=\(humanCode)"
+          + ",channelType=\(channelType)"
+          + ",summary=\(summary)"
+          + "]"
+    }
+
+    public let summary: String
+  }
+
+  public class InfoEvent: EventArgs {
+    public override init(type: Int, humanCode: String, channelType: Int, data: Data?) {
+      let info =  Data.ToString(from: data) ?? ""
+      if info.contains(JsonKey.IsMyself) == true {
+        let userInfo = UserInfo()
+        _ = userInfo.fromJson(info: info)
+        humanInfo = userInfo
+      } else if info.contains(JsonKey.IsFriend) == true {
+        let friendInfo = FriendInfo()
+        _ = friendInfo.fromJson(info: info)
+        humanInfo = friendInfo
+      } else {
+        Log.w(tag: Contact.TAG, msg: "InfoEvent: Failed to parse human data.");
+      }
+      
+      humanInfo = HumanInfo()
+      super.init(type: type, humanCode: humanCode, channelType: channelType, data: data)
+    }
+
+    public override func toString() -> String {
+      return  "StatusEvent"
+            + "[type=\(type)"
+            + ",humanCode=\(humanCode)"
+            + ",channelType=\(channelType)"
+            + ",humanInfo=\(humanInfo.toString())"
+            + "]"
+    }
+    
+    public private(set) var humanInfo: HumanInfo
+  }
+
+  init() {
+    super.init(className: String(describing: ContactListener.self))
+  }
 
   /* @CrossPlatformInterface */
   @objc internal func onAcquire(_ reqType: Int, _ pubKey: String?, _ data: Data?) -> Data? {
@@ -91,38 +105,39 @@ import CrossPL
 
   /* @CrossPlatformInterface */
   @objc internal func onEvent(_ eventType: Int, _ humanCode: String, _ channelType: Int, _ data: Data) {
-//
-//    EventArgs args = null;
-//
-//    EventArgs.Type type = EventArgs.Type.valueOf(eventType);
-//    switch (type) {
-//    case StatusChanged:
-//      args = new StatusEvent(eventType, humanCode, channelType, data);
-//      break;
-//    case FriendRequest:
-//      args = new RequestEvent(eventType, humanCode, channelType, data);
-//      break;
-//    case HumanInfoChanged:
-//      args = new InfoEvent(eventType, humanCode, channelType, data);
-//      break;
-//    default:
-//      throw new RuntimeException("Unimplemented type: " + type);
-//    }
-//
-//    Log.i(Contact.TAG, "ContactListener.onEvent() args=" + args);
-//    onEvent(args);
-//    return;
+
+    var args: EventArgs
+
+    let type = EventArgs.Kind(rawValue: eventType)
+    switch (type) {
+    case .StatusChanged:
+      args = StatusEvent(type: eventType, humanCode: humanCode, channelType: channelType, data: data)
+      break;
+    case .FriendRequest:
+      args = RequestEvent(type: eventType, humanCode: humanCode, channelType: channelType, data: data)
+      break;
+    case .HumanInfoChanged:
+      args = InfoEvent(type: eventType, humanCode: humanCode, channelType: channelType, data: data)
+      break;
+    default:
+      fatalError("Unimplemented type: \(type)");
+    }
+
+    Log.i(tag: Contact.TAG, msg: "ContactListener.onEvent() args=\(args.toString())");
+    onEvent(event: args);
+    return;
   }
 
   /* @CrossPlatformInterface */
-  @objc internal func onReceivedMessage(_ humanCode: String, _ channelType: Int32,
-                                       _ type: Int32, _ data: Data,
+  @objc internal func onReceivedMessage(_ humanCode: String, _ channelType: Int,
+                                       _ type: Int, _ data: Data,
                                        _ cryptoAlgorithm: String, _ timestamp: Int64) {
-//    Contact.Message message = new Contact.Message(ContactMessage.Type.valueOf(type),
-//                                                  data, cryptoAlgorithm);
-//    message.timestamp = timestamp;
-//
-//    onReceivedMessage(humanCode, channelType, message);
+    let message = Contact.Message(type: ContactMessage.Kind(rawValue: type)!,
+                                  data: data,
+                                  cryptoAlgorithm: cryptoAlgorithm)
+    message.timestamp = timestamp
+
+    onReceivedMessage(humanCode: humanCode, channelType: channelType, message: message);
     return;
   }
   
