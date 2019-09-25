@@ -298,7 +298,7 @@ int ChannelImplCarrier::removeFriend(const std::string& friendCode)
 int ChannelImplCarrier::sendMessage(const std::string& friendCode,
                                     std::vector<uint8_t> msgContent)
 {
-    int pkgCount = msgContent.size() / MaxPkgSize + 1;
+    uint64_t pkgCount = msgContent.size() / MaxPkgSize + 1;
     Log::D(Log::TAG, "ChannelImplCarrier::sendMessage() size=%d count=%d", msgContent.size(), pkgCount);
     if(pkgCount > 255) {
         return ErrCode::ChannelDataTooLarge;

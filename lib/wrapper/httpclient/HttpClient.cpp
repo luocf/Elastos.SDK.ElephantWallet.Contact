@@ -171,7 +171,7 @@ int HttpClient::syncPost(const std::string& body)
 {
 	int ret = 0;
 
-	ret = syncPost(reinterpret_cast<const int8_t*>(body.data()), body.size());
+	ret = syncPost(reinterpret_cast<const int8_t*>(body.data()), (int)body.size());
 
 	return ret;
 }
@@ -196,7 +196,7 @@ int HttpClient::getResponseHeaders(HeaderMap& headers) const
 
 	headers = mRespHeaders;
 
-	return mRespHeaders.size();
+	return (int)mRespHeaders.size();
 }
 
 int HttpClient::getResponseHeader(const std::string& name, HeaderValue& value) const
@@ -211,9 +211,9 @@ int HttpClient::getResponseHeader(const std::string& name, HeaderValue& value) c
 	}
 
 	value = found->second;
-	int size = found->second.size();
+	auto size = found->second.size();
 
-	return size;
+	return (int)size;
 }
 
 int HttpClient::getResponseBody(std::shared_ptr<int8_t>& body)
@@ -224,13 +224,13 @@ int HttpClient::getResponseBody(std::shared_ptr<int8_t>& body)
 	}
 
 	mRespBody.seekg(0, mRespBody.end);
-	int size = mRespBody.tellg();
+	auto size = mRespBody.tellg();
 	mRespBody.seekg(0, mRespBody.beg);
 
 	body = std::shared_ptr<int8_t>(new int8_t[size], std::default_delete<int8_t[]>());
 	mRespBody.read(reinterpret_cast<char*>(body.get()), size);
 
-	return size;
+	return (int)size;
 }
 
 int HttpClient::getResponseBody(std::string& body)
@@ -243,10 +243,10 @@ int HttpClient::getResponseBody(std::string& body)
 	body = mRespBody.str();
 
 	mRespBody.seekg(0, mRespBody.end);
-	int size = mRespBody.tellg();
+	auto size = mRespBody.tellg();
 	mRespBody.seekg(0, mRespBody.beg);
 
-	return size;
+	return (int)size;
 }
 
 /* =========================================== */

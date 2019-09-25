@@ -179,7 +179,7 @@ int SecurityManager::loadCryptoFile(const std::string& filePath, std::vector<uin
     cryptoFile.open(filePath, std::ios::in | std::ios::binary);
 
     cryptoFile.seekg (0, cryptoFile.end);
-    int dataLen = cryptoFile.tellg();
+    auto dataLen = cryptoFile.tellg();
     cryptoFile.seekg (0, cryptoFile.beg);
     if(dataLen < 0) {
         cryptoFile.close();

@@ -18,8 +18,8 @@ public class AcquireArgs {
   public func toString() -> String {
     return  "AcquireArgs"
           + "[type=\(type)"
-          + ",publicKey=\(publicKey)"
-          + ",data=\(data)"
+          + ",publicKey=\(String(describing: publicKey))"
+          + ",data=\(String(describing: data))"
           + "]"
   }
 

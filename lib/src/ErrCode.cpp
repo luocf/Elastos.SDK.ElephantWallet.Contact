@@ -78,7 +78,7 @@ std::string ErrCode::ToString(int errCode)
         errMsg = stdErrCode.message();
     }
 
-    return std::move(errMsg);
+  return errMsg;
 }
 
 /***********************************************/

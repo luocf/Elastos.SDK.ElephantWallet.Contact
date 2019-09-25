@@ -483,7 +483,7 @@ int DidChnClient::checkDidProps(std::shared_ptr<HttpClient>& httpClient, const b
         std::string key = it.key;
 
         std::vector<std::string> didProps;
-        int64_t ret = downloadDidPropsByAgent(httpClient, did, key, it.withHistory, didProps);
+        int ret = downloadDidPropsByAgent(httpClient, did, key, it.withHistory, didProps);
         if(stopFlag == true) {
             Log::V(Log::TAG, "DidChnClient::checkDidProps() Stop to check %s: %s", did.c_str(), key.c_str());
             return ErrCode::BlkChnMonStoppedError;
@@ -495,15 +495,14 @@ int DidChnClient::checkDidProps(std::shared_ptr<HttpClient>& httpClient, const b
             continue;
         }
 
-        ret  = checkDidProps(did, key, didProps);
-        if(ret == ErrCode::BlkChnOldUpdateTimeError) { // not changed
+        int64_t lastUpdateTime  = checkDidProps(did, key, didProps);
+        if(lastUpdateTime == ErrCode::BlkChnOldUpdateTimeError) { // not changed
             continue;
         }
-        if(ret < 0) {
-            callback->onError(did, key, ret);
+        if(lastUpdateTime < 0) {
+            callback->onError(did, key, (int)lastUpdateTime);
             continue;
         }
-        int64_t lastUpdateTime = ret;
 
         ret = callback->onChanged(did, key, didProps);
         if(ret < 0) {

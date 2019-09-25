@@ -139,7 +139,7 @@ class ViewController: UIViewController {
     UserDefaults.standard.set(mSavedMnemonic, forKey: ViewController.SavedMnemonicKey)
     
     if mContact == nil { // noneed to restart
-      return "Success to save mnemonic: \(mSavedMnemonic)"
+      return "Success to save mnemonic: \(String(describing: mSavedMnemonic))"
     }
 
     let dialog = UIAlertController(title: nil, message: nil, preferredStyle: .alert)
@@ -160,7 +160,7 @@ class ViewController: UIViewController {
     Contact.Factory.SetDeviceId(devId: getDeviceId())
 
     let cacheDir = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first
-    var ret = Contact.Factory.SetLocalDataDir(dir: cacheDir!.path);
+    let ret = Contact.Factory.SetLocalDataDir(dir: cacheDir!.path);
     if ret < 0 {
       return "Failed to call Contact.Factory.SetLocalDataDir() ret=\(ret)"
     }
@@ -177,14 +177,15 @@ class ViewController: UIViewController {
     mContactListener = {
       class Impl: Contact.Listener {
         init(_ vc: ViewController) {
-           viewCtrl = vc
+          viewCtrl = vc
+          super.init()
         }
         
         override func onAcquire(request: AcquireArgs) -> Data? {
           let ret = viewCtrl.processAcquire(request: request);
           
           var msg = "onAcquire(): req=\(request.toString())\n";
-          msg += "onAcquire(): resp=\(ret)\n";
+          msg += "onAcquire(): resp=\(String(describing: ret))\n";
           viewCtrl.showEvent(msg);
           
           return ret;
@@ -203,7 +204,7 @@ class ViewController: UIViewController {
         
         override func onError(errCode: Int32, errStr: String, ext: String?) {
           var msg = "\(errCode): \(errStr)"
-          msg += "\n\(ext)";
+          msg += "\n\(String(describing: ext))";
           viewCtrl.showError(msg);
         }
         
@@ -246,14 +247,14 @@ class ViewController: UIViewController {
       return "\(ViewController.ErrorPrefix)Contact is null.";
     }
   
-//  //        mThread = new Thread(() -> {
-//  int ret = mContact.start();
-//  //        });
-//  //        mThread.start();
-//  if(ret < 0) {
-//  return "Failed to start contact instance. ret=" + ret;
-//  }
-//
+  //        mThread = new Thread(() -> {
+  let ret = mContact!.start();
+  //        });
+  //        mThread.start();
+  if ret < 0 {
+    return "Failed to start contact instance. ret=\(ret)"
+  }
+
     return "Success to start contact instance.";
   }
 
@@ -280,8 +281,6 @@ class ViewController: UIViewController {
       case .SignData:
         response = signData(data: request.data);
         break;
-      default:
-        fatalError("Unprocessed request: " + request.toString());
     }
   
     return response;
@@ -292,21 +291,18 @@ class ViewController: UIViewController {
       case .StatusChanged:
         break
       case .FriendRequest:
-        let requestEvent = event as Contact.Listener.RequestEvent
-        Helper.showFriendRequest(this, requestEvent.humanCode, requestEvent.summary, v -> {
-          mContact.acceptFriend(requestEvent.humanCode);
-  });
-  break;
-  case HumanInfoChanged:
-  Contact.Listener.InfoEvent infoEvent = (Contact.Listener.InfoEvent) event;
-  String msg = event.humanCode + " info changed: " + infoEvent.toString();
-  showEvent(msg);
-  break;
-  default:
-  Log.w(TAG, "Unprocessed event: " + event);
+//        let requestEvent = event as Contact.Listener.RequestEvent
+//        Helper.showFriendRequest(this, requestEvent.humanCode, requestEvent.summary, v -> {
+//          mContact.acceptFriend(requestEvent.humanCode);
+//        });
+        break;
+    case .HumanInfoChanged:
+      let infoEvent = event as! Contact.Listener.InfoEvent
+      let msg = event.humanCode + " info changed: " + infoEvent.toString()
+      showEvent(msg);
+      break;
+    }
   }
-  }
-
   
   private func getPublicKey() -> String {
     var seed = Data()
@@ -330,7 +326,7 @@ class ViewController: UIViewController {
   
   private func getAgentAuthHeader() -> Data {
     let appid = "org.elastos.debug.didplugin"
-    let appkey = "b2gvzUM79yLhCbbGNWCuhSsGdqYhA7sS"
+    //let appkey = "b2gvzUM79yLhCbbGNWCuhSsGdqYhA7sS"
     let timestamp = Int64(Date().timeIntervalSince1970 * 1000)
     let auth = Utils.getMd5(str: "appkey\(timestamp)")
     let headerValue = "id=\(appid);time=\(timestamp);auth=\(auth)"

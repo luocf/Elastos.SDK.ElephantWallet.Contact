@@ -207,7 +207,7 @@ int DidChnDataListener::processFriendKeyChanged(std::shared_ptr<HumanInfo> human
         Json jsonInfo = Json::parse(it);
         std::string friendCode = jsonInfo[JsonKey::FriendCode];
         HumanInfo::Status status = jsonInfo[JsonKey::Status];
-        int64_t updateTime = jsonInfo[JsonKey::UpdateTime];
+        //int64_t updateTime = jsonInfo[JsonKey::UpdateTime];
 
         if(status == HumanInfo::Status::Removed) {
             continue;

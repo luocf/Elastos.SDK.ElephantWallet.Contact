@@ -89,7 +89,7 @@ import CrossPL
     public private(set) var humanInfo: HumanInfo
   }
 
-  init() {
+  public init() {
     super.init(className: String(describing: ContactListener.self))
   }
 
@@ -120,7 +120,7 @@ import CrossPL
       args = InfoEvent(type: eventType, humanCode: humanCode, channelType: channelType, data: data)
       break;
     default:
-      fatalError("Unimplemented type: \(type)");
+      fatalError("Unimplemented type: \(String(describing: type))");
     }
 
     Log.i(tag: Contact.TAG, msg: "ContactListener.onEvent() args=\(args.toString())");

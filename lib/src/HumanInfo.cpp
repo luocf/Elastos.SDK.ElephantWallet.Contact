@@ -205,7 +205,7 @@ int HumanInfo::addCarrierInfo(const HumanInfo::CarrierInfo& info, const HumanInf
 
     mBoundCarrierArray.push_back(correctedInfo); // if not exists, add new one
     mBoundCarrierStatus.push_back(status);
-    return mBoundCarrierArray.size();
+    return (int)mBoundCarrierArray.size();
 }
 
 int HumanInfo::delCarrierInfo(const std::string& carrierCode)
@@ -272,7 +272,7 @@ int HumanInfo::getCarrierInfoByDevId(const std::string& devId, CarrierInfo& info
 int HumanInfo::getAllCarrierInfo(std::vector<HumanInfo::CarrierInfo>& infoArray) const
 {
     infoArray = mBoundCarrierArray;
-    return mBoundCarrierArray.size();
+    return (int)mBoundCarrierArray.size();
 }
 
 int HumanInfo::setCarrierStatus(const std::string& usrId, const Status status)
@@ -577,10 +577,10 @@ int HumanInfo::deserializeDetails(const std::string& value)
         return ErrCode::IgnoreMergeOldInfo;
     }
 
-    for(const auto [key, value]: commonInfoMap) {
+    for(const auto& [key, value]: commonInfoMap) {
         mCommonInfoMap[key] = value;
     }
-    for(const auto [key, value]: walletAddressMap) {
+    for(const auto& [key, value]: walletAddressMap) {
         mWalletAddressMap[key] = value;
     }
     mUpdateTime = updateTime;

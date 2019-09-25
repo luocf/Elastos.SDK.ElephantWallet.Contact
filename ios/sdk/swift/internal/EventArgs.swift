@@ -21,7 +21,7 @@ public class EventArgs {
           + "[type=\(type)"
           + ",humanCode=\(humanCode)"
           + ",channelType=\(channelType)"
-          + ",data=\(data)"
+          + ",data=\(String(describing: data))"
           + "]"
   }
   

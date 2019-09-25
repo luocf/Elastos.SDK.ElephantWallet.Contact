@@ -580,7 +580,7 @@ int FriendManager::addFriendByCarrier(const std::string& carrierAddress, const s
         friendInfo = std::make_shared<FriendInfo>(weak_from_this());
         mFriendList.push_back(friendInfo);
         FriendInfo::CarrierInfo carrierInfo;
-        carrierInfo.mUsrAddr = carrierAddress,
+        carrierInfo.mUsrAddr = carrierAddress;
         ret = friendInfo->addCarrierInfo(carrierInfo, FriendInfo::Status::WaitForAccept);
         CHECK_ERROR(ret)
     }
@@ -717,7 +717,7 @@ int FriendManager::mergeFriendInfoFromJsonArray(const std::string& jsonArray)
         Json jsonInfo = Json::parse(it);
         std::string friendCode = jsonInfo["FriendCode"];
         HumanInfo::Status status = jsonInfo["Status"];
-        int64_t updateTime = jsonInfo["UpdateTime"];
+        //int64_t updateTime = jsonInfo["UpdateTime"];
 
         if(status == HumanInfo::Status::Removed) {
             continue;
