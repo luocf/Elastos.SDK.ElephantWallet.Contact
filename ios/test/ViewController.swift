@@ -231,9 +231,17 @@ class ViewController: UIViewController {
           viewCtrl.showEvent(msg);
         }
         
-//        override func onReceivedMessage(humanCode: String, channelType: Int, message: Contact.Message) {
-//          fatalError("\(#function) not implementation.")
-//        }
+        override func onReceivedMessage(humanCode: String, channelType: Int, message: Contact.Message) {
+          var data: Any? = message.data
+          if message.type == Contact.Message.Kind.MsgText {
+            data = String(data: message.data, encoding: .utf8)
+          }
+          
+          var msg = "onRcvdMsg(): data=\(String(describing: data))\n"
+          msg += "onRcvdMsg(): type=\(message.type)\n";
+          msg += "onRcvdMsg(): crypto=" + message.cryptoAlgorithm + "\n";
+          viewCtrl.showEvent(msg);
+        }
         
         override func onError(errCode: Int32, errStr: String, ext: String?) {
           var msg = "\(errCode): \(errStr)"
@@ -246,30 +254,6 @@ class ViewController: UIViewController {
       
       return Impl(self)
     }()
-    
-
-
-//
-//  @Override
-//  public void onReceivedMessage(String humanCode, int channelType, Contact.Message message) {
-//  Object data = message.data;
-//  if(message.type == Contact.Message.Type.MsgText) {
-//  data = new String(message.data);
-//  }
-//
-//  String msg = "onRcvdMsg(): data=" + data + "\n";
-//  msg += "onRcvdMsg(): type=" + message.type + "\n";
-//  msg += "onRcvdMsg(): crypto=" + message.cryptoAlgorithm + "\n";
-//  showEvent(msg);
-//  }
-//
-//  @Override
-//  public void onError(int errCode, String errStr, String ext) {
-//  String msg = errCode + ": " + errStr;
-//  msg += "\n" + ext;
-//  showError(msg);
-//  }
-//  };
     mContact!.setupListener(listener: mContactListener);
   
     return "Success to create a contact instance.";

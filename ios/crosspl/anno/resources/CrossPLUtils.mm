@@ -154,11 +154,14 @@ std::shared_ptr<std::span<uint8_t>> CrossPLUtils::SafeCastByteArray(NSData* ocda
         EnsureRunOnThread(threadId);
         const uint8_t* arrayPtr = reinterpret_cast<const uint8_t*>([ocdata bytes]);
         NSUInteger arrayLen = [ocdata length];
-        auto retPtr = new std::span<uint8_t>(const_cast<uint8_t*>(arrayPtr), arrayLen);
+        auto ptr = new uint8_t[arrayLen];
+        std::memcpy(ptr, arrayPtr, arrayLen);
+        auto retPtr = new std::span<uint8_t>(const_cast<uint8_t*>(ptr), arrayLen);
         return retPtr;
     };
     auto deleter = [=](std::span<uint8_t>* ptr) -> void {
         EnsureRunOnThread(threadId);
+        delete[] ptr->data();
         delete ptr;
     };
 
@@ -408,7 +411,8 @@ int CrossPLUtils::SafeCopyByteBufferToSwift(NSData** occopyTo, const std::vector
   
 int64_t CrossPLUtils::AddGlobalObject(NSObject* ocobj)
 {
-    return 0;
+    int64_t handle = reinterpret_cast<int64_t>(ocobj);
+    return handle;
 }
   
 int64_t CrossPLUtils::DelGlobalObject(NSObject* ocobj)

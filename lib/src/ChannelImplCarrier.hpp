@@ -65,7 +65,8 @@ protected:
     static void OnCarrierFriendConnection(ElaCarrier *carrier,const char *friendid,
                                           ElaConnectionStatus status, void *context);
     static void OnCarrierFriendMessage(ElaCarrier *carrier, const char *from,
-                                       const void *msg, size_t len, void *context);
+                                                const void *msg, size_t len,
+                                                bool offline, void *context);
 
     static constexpr int32_t MaxPkgSize = 1000;
     static constexpr uint8_t PkgMagic[] = { 0xA5, 0xA5, 0x5A, 0x5A, 0x00/*index*/, 0x00/*count*/ };

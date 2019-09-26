@@ -9,9 +9,8 @@ message(STATUS "curl library path: ${pkg-curl_STATIC_LDFLAGS}")
 set(pkg-Elastos.NET.Carrier_STATIC_LDFLAGS
     elacarrier
     elasession
+    cjson
     flatccrt
-    hive-api
-    hive-api++
     pjmedia
     pjnath
     pjlib-util

@@ -48,8 +48,8 @@ public:
     constexpr static const int MergeInfoFailed = -13;
     constexpr static const int IgnoreMergeOldInfo = -14;
     constexpr static const int EmptyInfoError = -15;
-	constexpr static const int InvalidFriendCode = -16;
-	constexpr static const int RepeatOperationError = -17;
+    constexpr static const int InvalidFriendCode = -16;
+    constexpr static const int RepeatOperationError = -17;
 
     constexpr static const int InvalidLocalDataDir = -50;
     constexpr static const int NoSecurityListener = -51;
@@ -58,7 +58,7 @@ public:
 
     constexpr static const int ChannelFailedPresetAll = -200;
     constexpr static const int ChannelFailedOpenAll = -201;
-	constexpr static const int ChannelFailedCloseAll = -202;
+    constexpr static const int ChannelFailedCloseAll = -202;
     constexpr static const int ChannelFailedMultiOpen = -203;
     constexpr static const int ChannelFailedCarrier = -204;
     constexpr static const int ChannelFailedFriendExists = -205;
@@ -74,9 +74,9 @@ public:
     constexpr static const int BlkChnGetPropError = -301;
     constexpr static const int BlkChnEmptyPropError = -302;
     constexpr static const int BlkChnBadTxIdError = -303;
-	constexpr static const int BlkChnBadUpdateTimeError = -304;
-	constexpr static const int BlkChnOldUpdateTimeError = -305;
-	constexpr static const int BlkChnMonStoppedError = -306;
+    constexpr static const int BlkChnBadUpdateTimeError = -304;
+    constexpr static const int BlkChnOldUpdateTimeError = -305;
+    constexpr static const int BlkChnMonStoppedError = -306;
 
     constexpr static const int HttpClientError = -500;
 

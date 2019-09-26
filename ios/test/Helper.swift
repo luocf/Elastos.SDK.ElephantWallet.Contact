@@ -17,26 +17,8 @@ public class Helper {
     }))
     dialog.addAction(UIAlertAction(title: "Cancel", style: .cancel))
     
-
-    
-    
-//        try {
-//            EditText root = new EditText(context);
-//            root.setLines(8);
-//            builder.setView(root);
-//
-//            builder.setPositiveButton("Import", (dialog, which) -> {
-//                listener.onResult(root.getText().toString());
-//            });
-//            builder.setNegativeButton("Cancel", (dialog, which) -> {
-//                dismissDialog();
-//            });
-//        } catch (Exception e) {
-//            builder.setMessage("Failed to show address." + e);
-//        }
-
       showDialog(view, dialog);
-    }
+  }
 
 //    public static void showAddress(Context context, HashMap<String, String> humanCode, String presentDevId, String ext,
 //                                   OnListener listener) {

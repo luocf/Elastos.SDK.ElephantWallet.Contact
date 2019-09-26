@@ -120,7 +120,7 @@ int ChannelImplCarrier::preset(const std::string& profile)
     //carrierOpts.hive_bootstraps_size = hiveNodeSize;
     //carrierOpts.hive_bootstraps = hiveNodeArray;
 
-    ela_log_init(static_cast<ElaLogLevel>(config->mCarrierConfig->mLogLevel), nullptr, nullptr);
+    carrierOpts.log_level = static_cast<ElaLogLevel>(config->mCarrierConfig->mLogLevel);
 
     auto creater = [&]() -> ElaCarrier* {
         auto ptr = ela_new(&carrierOpts, &carrierCallbacks, this);
@@ -314,7 +314,8 @@ int ChannelImplCarrier::sendMessage(const std::string& friendCode,
         auto dataEnd = (MaxPkgSize < dataRemains ? dataBegin + MaxPkgSize : dataBegin + dataRemains);
         data.insert(data.end(), dataBegin, dataEnd);
 
-        int ret = ela_send_friend_message(mCarrier.get(), friendCode.c_str(), data.data(), data.size());
+        bool offlineMsg;
+        int ret = ela_send_friend_message(mCarrier.get(), friendCode.c_str(), data.data(), data.size(), &offlineMsg);
         if(ret != 0) {
             int err = ela_get_error();
             char strerr_buf[512] = {0};
@@ -385,7 +386,8 @@ void ChannelImplCarrier::OnCarrierFriendConnection(ElaCarrier *carrier,const cha
 }
 
 void ChannelImplCarrier::OnCarrierFriendMessage(ElaCarrier *carrier, const char *from,
-                                                const void *msg, size_t len, void *context)
+                                                const void *msg, size_t len,
+                                                bool offline, void *context)
 {
     Log::D(Log::TAG, "ChannelImplCarrier::OnCarrierFriendMessage from: %s len=%d", from, len);
 

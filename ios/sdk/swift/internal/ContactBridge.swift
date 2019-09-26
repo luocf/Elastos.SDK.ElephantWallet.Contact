@@ -20,7 +20,7 @@ open class ContactBridge: CrossBase {
     }
     mListener = listener;
 
-    mListener?.bind();
+    mListener!.bind();
     setListener(listener: mListener);
   }
 //
