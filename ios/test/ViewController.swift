@@ -77,7 +77,9 @@ class ViewController: UIViewController {
       message += testStartContact();
       break
     case ButtonTag.stop_and_del_contact.rawValue:
-      print("\(sender.tag)")
+      message = testStopContact();
+      message += testDelContact();
+
       break
     case ButtonTag.recreate_contact.rawValue:
       print("\(sender.tag)")
@@ -261,20 +263,40 @@ class ViewController: UIViewController {
 
   private func testStartContact() -> String {
     if mContact == nil {
-      return "\(ViewController.ErrorPrefix)Contact is null.";
+      return ViewController.ErrorPrefix + "Contact is null."
     }
   
-  //        mThread = new Thread(() -> {
-  let ret = mContact!.start();
-  //        });
-  //        mThread.start();
-  if ret < 0 {
-    return "Failed to start contact instance. ret=\(ret)"
-  }
+    let ret = mContact!.start();
+    if ret < 0 {
+      return "Failed to start contact instance. ret=\(ret)"
+    }
 
     return "Success to start contact instance.";
   }
 
+  private func testStopContact() -> String {
+    if mContact == nil {
+      return ViewController.ErrorPrefix + "Contact is null."
+    }
+
+    let ret = mContact!.stop()
+    if ret < 0 {
+      return "Failed to stop contact instance. ret=\(ret)"
+    }
+
+    return "Success to stop contact instance.";
+  }
+
+  private func testDelContact() -> String {
+      if mContact == nil {
+        return ViewController.ErrorPrefix + "Contact is null."
+      }
+
+      mContact = nil
+      return "Success to delete a contact instance.";
+  }
+
+  
   private func processAcquire(request: AcquireArgs) -> Data? {
     var response: Data?;
   
