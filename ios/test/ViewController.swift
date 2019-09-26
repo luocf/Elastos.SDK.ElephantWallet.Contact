@@ -15,6 +15,18 @@ class ViewController: UIViewController {
   override func viewDidLoad() {
     super.viewDidLoad()
     // Do any additional setup after loading the view.
+    
+    let devId = getDeviceId()
+    Log.i(tag: ViewController.TAG, msg: "Device ID:" + devId)
+    
+    mSavedMnemonic = UserDefaults.standard.string(forKey: ViewController.SavedMnemonicKey)
+    if mSavedMnemonic == nil {
+      mSavedMnemonic = ElastosKeypair.GenerateMnemonic(language: ViewController.KeypairLanguage,
+                                                       words: ViewController.KeypairWords)
+      _ = newAndSaveMnemonic(mSavedMnemonic)
+    }
+
+    showMessage("Mnemonic:\(mSavedMnemonic ?? "nil")\n")
   }
 
   @IBAction func onOptionsMenuTapped(_ sender: Any) {
@@ -58,7 +70,7 @@ class ViewController: UIViewController {
       message = newAndSaveMnemonic(nil);
       break
     case ButtonTag.import_mnemonic.rawValue:
-      message = "\(ViewController.ErrorPrefix) not implementation"
+      message = importMnemonic()
       break
     case ButtonTag.new_and_start_contact.rawValue:
       message = testNewContact();
@@ -133,7 +145,8 @@ class ViewController: UIViewController {
   private func newAndSaveMnemonic(_ newMnemonic: String?) -> String {
     mSavedMnemonic = newMnemonic;
     if mSavedMnemonic == nil {
-      mSavedMnemonic = ElastosKeypair.GenerateMnemonic(language: "english", words: "")
+      mSavedMnemonic = ElastosKeypair.GenerateMnemonic(language: ViewController.KeypairLanguage,
+                                                       words: ViewController.KeypairWords)
     }
   
     UserDefaults.standard.set(mSavedMnemonic, forKey: ViewController.SavedMnemonicKey)
@@ -154,6 +167,26 @@ class ViewController: UIViewController {
     return ("Cancel to save mnemonic: \(newMnemonic ?? "nil")\n");
   }
 
+  private func importMnemonic() -> String {
+    Helper.showImportMnemonic(view: self, listener: { result in
+        if self.isEnglishWords(result) == false {
+          self.showMessage(ViewController.ErrorPrefix + "Only english mnemonic is supported.");
+          return;
+        }
+        let privKey = self.getPrivateKey()
+        if privKey.isEmpty {
+          self.showMessage(ViewController.ErrorPrefix + "Bad mnemonic.")
+          return;
+        }
+
+        let message = self.newAndSaveMnemonic(result);
+        self.showMessage(message);
+    });
+
+    return "Success to show import mnemonic dialog.";
+  }
+
+  
   private func testNewContact() -> String {
     Contact.Factory.SetLogLevel(level: 7)
 
@@ -391,7 +424,16 @@ class ViewController: UIViewController {
     }
   }
   
-  @IBOutlet weak var optionsMenu: UIStackView!
+  private func isEnglishWords(_ words: String?) -> Bool {
+    guard (words?.count ?? -1) > 0 else {
+      return false
+    }
+    
+    let isEnglish = (words!.range(of: "[^a-zA-Z ]", options: .regularExpression) == nil)
+    return isEnglish;
+  }
+  
+  @IBOutlet weak var optionsMenu: UIScrollView!
   @IBOutlet weak var errLog: UITextView!
   @IBOutlet weak var msgLog: UITextView!
   @IBOutlet weak var eventLog: UITextView!
@@ -400,6 +442,8 @@ class ViewController: UIViewController {
   private var mContact: Contact?
   private var mContactListener: Contact.Listener?
   
+  private static let KeypairLanguage = "english"
+  private static let KeypairWords = ""
   private static let SavedMnemonicKey = "mnemonic"
   private static let ErrorPrefix = "Error: "
   private static let TAG = "ContactTest"

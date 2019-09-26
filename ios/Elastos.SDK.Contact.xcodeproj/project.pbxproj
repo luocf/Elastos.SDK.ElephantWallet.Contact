@@ -122,6 +122,7 @@
 		DE76DD6A23289D640041A703 /* CrossPLUtilsGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE76DD6923289D640041A703 /* CrossPLUtilsGenerator.swift */; };
 		DE76DD7A2328A26B0041A703 /* experimental-span.hpp in Headers */ = {isa = PBXBuildFile; fileRef = DE76DD732328A26B0041A703 /* experimental-span.hpp */; settings = {ATTRIBUTES = (Private, ); }; };
 		DE978FD9233BA1C000F5B5F9 /* FriendInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE978FD8233BA1C000F5B5F9 /* FriendInfo.swift */; };
+		DE978FDB233BB47B00F5B5F9 /* Helper.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE978FDA233BB47B00F5B5F9 /* Helper.swift */; };
 		DECA49C6232CA40D00C98A0D /* CrossPLUtils.mm in Sources */ = {isa = PBXBuildFile; fileRef = DECA49C4232CA40D00C98A0D /* CrossPLUtils.mm */; };
 		DECA49C7232CA40D00C98A0D /* CrossPLUtils.h in Headers */ = {isa = PBXBuildFile; fileRef = DECA49C5232CA40D00C98A0D /* CrossPLUtils.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		DEDA63672338A38E0024EA12 /* ContactBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEDA63662338A38E0024EA12 /* ContactBridge.swift */; };
@@ -294,6 +295,7 @@
 		DE76DD6923289D640041A703 /* CrossPLUtilsGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CrossPLUtilsGenerator.swift; sourceTree = "<group>"; };
 		DE76DD732328A26B0041A703 /* experimental-span.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = "experimental-span.hpp"; sourceTree = "<group>"; };
 		DE978FD8233BA1C000F5B5F9 /* FriendInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendInfo.swift; sourceTree = "<group>"; };
+		DE978FDA233BB47B00F5B5F9 /* Helper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Helper.swift; sourceTree = "<group>"; };
 		DECA49C4232CA40D00C98A0D /* CrossPLUtils.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = CrossPLUtils.mm; sourceTree = "<group>"; };
 		DECA49C5232CA40D00C98A0D /* CrossPLUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CrossPLUtils.h; sourceTree = "<group>"; };
 		DED5255D218DF4C800619F59 /* CrossPL.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CrossPL.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -578,6 +580,7 @@
 			children = (
 				DE27584D23345AD4001B635B /* AppDelegate.swift */,
 				DE27584F23345AD4001B635B /* ViewController.swift */,
+				DE978FDA233BB47B00F5B5F9 /* Helper.swift */,
 				DE27585123345AD4001B635B /* Main.storyboard */,
 				DE27585423345AD6001B635B /* Assets.xcassets */,
 				DE27585623345AD6001B635B /* LaunchScreen.storyboard */,
@@ -1035,6 +1038,7 @@
 			files = (
 				DE27585023345AD4001B635B /* ViewController.swift in Sources */,
 				DE27584E23345AD4001B635B /* AppDelegate.swift in Sources */,
+				DE978FDB233BB47B00F5B5F9 /* Helper.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
