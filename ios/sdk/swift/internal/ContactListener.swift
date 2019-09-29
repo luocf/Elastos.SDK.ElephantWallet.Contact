@@ -15,12 +15,8 @@ import CrossPL
     fatalError("\(#function) not implementation.")
   }
   
-
-//  public class EventArgs extends org.elastos.sdk.elephantwallet.contact.internal.EventArgs {
-//    public EventArgs(int type, String humanCode, int channelType, byte[] data) {
-//      super(type, humanCode, channelType, data);
-//    }
-//  }
+  public class EventArgs: ContactSDK.EventArgs {
+  }
 
   public class StatusEvent: EventArgs {
     public override init(type: Int, humanCode: String, channelType: Int, data: Data?) {

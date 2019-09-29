@@ -5,23 +5,33 @@ public class Helper {
 
   public static func showImportMnemonic(view: UIViewController, listener: @escaping OnListener) {
     let dialog = UIAlertController(title: nil, message: nil, preferredStyle: .alert)
-    
     dialog.title = "Import Mnemonic"
-   
-    let customView = UITextView()
-    setDialogContent(dialog, 200, customView)
     
-//    dialog.message = "New mnemonic can only be valid after restart,\ndo you want restart app?"
+    let rootView = UITextView()
+    setDialogContent(dialog, 200, rootView)
+
     dialog.addAction(UIAlertAction(title: "Import", style: .default, handler: { _ in
-      listener(customView.text)
+      listener(rootView.text)
     }))
     dialog.addAction(UIAlertAction(title: "Cancel", style: .cancel))
     
-      showDialog(view, dialog);
+    showDialog(view, dialog);
   }
 
-//    public static void showAddress(Context context, HashMap<String, String> humanCode, String presentDevId, String ext,
-//                                   OnListener listener) {
+  public static func showAddress(view: UIViewController,
+                                 listener: @escaping OnListener,
+                                 humanCode: [String: String?], presentDevId: String, ext: String?) {
+    let dialog = UIAlertController(title: nil, message: nil, preferredStyle: .alert)
+    dialog.title = "My Address"
+    
+    let rootView = makeAddressView(view: view, listener: listener,
+                                   humanCode: humanCode, presentDevId: presentDevId, ext: ext)
+    setDialogContent(dialog, 200, rootView)
+
+    dialog.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+    
+    showDialog(view, dialog);
+    
 //        AlertDialog.Builder builder = new AlertDialog.Builder(context);
 //        builder.setTitle("My Address");
 //        try {
@@ -38,7 +48,7 @@ public class Helper {
 //        });
 //
 //        showDialog(builder);
-//    }
+    }
 //
 //    public static void showSetDetails(Context context, List<String> checkList, String separator, OnListener listener) {
 //        AlertDialog.Builder builder = new AlertDialog.Builder(context);
@@ -201,11 +211,12 @@ public class Helper {
 //        }
 //    }
 //
-//    private static View makeAddressView(Context context, HashMap<String, String> humanCode, String presentDevId, String ext,
-//                                        OnListener listener) {
-//        TextView txtDevId = new TextView(context);
-//        ImageView image = new ImageView(context);
-//        TextView txtCode = new TextView(context);
+    private static func makeAddressView(view: UIViewController,
+                                        listener: @escaping OnListener,
+                                        humanCode: [String: String?], presentDevId: String?, ext: String?) -> UIView {
+        let txtDevId = UITextField()
+        let imgQRCode = UIImageView()
+        let txtCode =  UITextField()
 //        RadioGroup radioGrp = new RadioGroup(context);
 //        Button btn = new Button(context);
 //
@@ -235,14 +246,14 @@ public class Helper {
 //            }
 //        }
 //
-//        LinearLayout root = new LinearLayout(context);
+        let rootView = UITableView()
 //        root.setOrientation(LinearLayout.VERTICAL);
-//        if(presentDevId != null) {
-//            root.addView(txtDevId);
-//            txtDevId.setText("Present DevId: " + presentDevId);
-//        }
-//        root.addView(image);
-//        root.addView(txtCode);
+        if(presentDevId != nil) {
+          rootView.addSubview(txtDevId)
+          txtDevId.text = "Present DevId: " + (presentDevId ?? "nil")
+        }
+        rootView.addSubview(imgQRCode)
+        rootView.addSubview(txtCode);
 //        root.addView(radioGrp);
 //        root.addView(btn);
 //
@@ -254,9 +265,9 @@ public class Helper {
 //            listener.onResult(null);
 //        });
 //
-//        return root;
-//    }
-//
+        return rootView
+    }
+
 //    private static View makeSetDetailView(Context context, RadioGroup radioGrp, List<String> checkList, EditText editView) {
 //        TextView txtView = new TextView(context);
 //

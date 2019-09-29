@@ -38,7 +38,8 @@ void CrossPLUtils::DetachCurrentThread()
 //    jint jret = sJVM->GetEnv((void **) &jenv, JNI_VERSION_1_6);
 //    if (jret != JNI_OK) {
         std::thread::id threadId = std::this_thread::get_id();
-        __android_log_print(ANDROID_LOG_WARN, "crosspl", "============= DetachCurrentThread tid=%d", threadId);
+    //    __android_log_print(ANDROID_LOG_WARN, "crosspl", "============= DetachCurrentThread tid=%d", threadId);
+        __android_log_print(ANDROID_LOG_WARN, "crosspl", "============= DetachCurrentThread");
         sJVM->DetachCurrentThread();
 //    }
 }

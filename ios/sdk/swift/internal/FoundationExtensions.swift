@@ -92,7 +92,7 @@ extension Data {
 }
 
 extension Encodable {
-    func toString() -> String {
+    public func toString() -> String {
         do {
           let className = String(describing: type(of: self))
           let jsonEncoder = JSONEncoder()

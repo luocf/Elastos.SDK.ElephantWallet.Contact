@@ -116,6 +116,35 @@
                                             <action selector="onOptionsItemSelected:" destination="BYZ-38-t0r" eventType="touchUpInside" id="6Qr-Ah-BwP"/>
                                         </connections>
                                     </button>
+                                    <button opaque="NO" tag="106" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="DVE-A1-us8">
+                                        <rect key="frame" x="9.3333333333333321" y="230" width="208" height="30"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                        <state key="normal" title="   |- Recreate Contact"/>
+                                        <connections>
+                                            <action selector="onOptionsItemSelected:" destination="BYZ-38-t0r" eventType="touchUpInside" id="WZa-yb-lpy"/>
+                                        </connections>
+                                    </button>
+                                    <button opaque="NO" tag="107" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Uiz-wf-rSy">
+                                        <rect key="frame" x="9.3333333333333321" y="255" width="208" height="30"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                        <state key="normal" title="   `- Restart Contact"/>
+                                        <connections>
+                                            <action selector="onOptionsItemSelected:" destination="BYZ-38-t0r" eventType="touchUpInside" id="Nvu-3g-JBW"/>
+                                        </connections>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="xuq-Oy-W4T">
+                                        <rect key="frame" x="9.3333333333333321" y="280" width="208" height="30"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                        <state key="normal" title="User"/>
+                                    </button>
+                                    <button opaque="NO" tag="108" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="DbA-ot-1KR">
+                                        <rect key="frame" x="9.3333333333333321" y="305" width="208" height="30"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                        <state key="normal" title="   |- Get User Info"/>
+                                        <connections>
+                                            <action selector="onOptionsItemSelected:" destination="BYZ-38-t0r" eventType="touchUpInside" id="mih-mz-xNS"/>
+                                        </connections>
+                                    </button>
                                 </subviews>
                                 <color key="backgroundColor" cocoaTouchSystemColor="groupTableViewBackgroundColor"/>
                                 <viewLayoutGuide key="safeArea" id="l3z-ob-ToF"/>

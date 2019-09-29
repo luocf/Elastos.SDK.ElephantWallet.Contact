@@ -15,7 +15,15 @@ class CrossTmplUtils {
     }
   }
 
-  static func WriteContent(file: URL, content: String) {
+  static func WriteContent(file: URL, content: String, forceWrite: Bool = false) {
+    if forceWrite == false {
+      let tmplContent = try? String(contentsOf: file, encoding: .utf8)
+      if tmplContent != nil
+      && tmplContent! == content {
+        print("CrossTmplUtils.WriteContent() Ignore to write to url: \(file.path)")
+      }
+    }
+    
     do {
       try content.write(to: file, atomically: false, encoding: .utf8)
     } catch {

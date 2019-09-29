@@ -1,12 +1,13 @@
 import Foundation
 
 class CrossClassInfo {
-  static func Parse(sourceFile: String, className: String,
+  static func Parse(sourcePath: String, className: String,
                     sourceLines: [String], classIndex: Int,
                     productName: String, bundleId: String) -> CrossClassInfo {
     CrossClassInfo.ProductName = productName
     
     let classInfo = CrossClassInfo()
+    classInfo.sourcePath = sourcePath
     classInfo.cppInfo.className = className
     classInfo.swiftInfo.className = className
     classInfo.swiftInfo.classPath = bundleId + "." + className
@@ -38,7 +39,7 @@ class CrossClassInfo {
 //    print("nativeMethodList=\(nativeMethodList)")
 //    print("platformMethodList=\(platformMethodList)")
     
-    let ast = printAst(filePath: sourceFile)
+    let ast = printAst(filePath: sourcePath)
     let classLines = ast.components(separatedBy: .newlines)
     var classLayer = -1
     layer = 0
@@ -69,9 +70,11 @@ class CrossClassInfo {
        
         if isCrossInterface == true {
           let methodInfo = CrossMethodInfo.Parse(sourceContent: line, methodName: methodName, isNative: isNative)
-          print("  \(methodInfo.toString())")
+          print("  \(methodInfo?.toString() ?? "xxxxxxxxxxxxx: Failed to parse \(line)")")
           
-          classInfo.methodInfoList.append(methodInfo)
+          if methodInfo != nil {
+            classInfo.methodInfoList.append(methodInfo!)
+          }
         }
       }
     }
@@ -181,7 +184,7 @@ class CrossClassInfo {
     return content
   }
 
-  
+  var sourcePath: String? = nil
   var cppInfo = CppInfo()
   var swiftInfo = SwiftInfo()
   private var methodInfoList = [CrossMethodInfo]()

@@ -5,9 +5,9 @@
 //  Copyright © 2016 mengxk. All rights reserved.
 //
 
-#include "PlatformIos.hpp"
-
 #if defined(__APPLE__) && (defined(TARGET_OS_IPHONE) || defined(TARGET_IPHONE_SIMULATOR))
+
+#include "PlatformIos.hpp"
 
 #include <execinfo.h>
 #include <sstream>

@@ -22,7 +22,7 @@ class CrossClassAnnoProcessor {
           let className = classDefine.replace(".*class (\\w*).*") { "\($0[1])" }
           print("Found \(Annotation.CrossClass): \(className)")
           
-          let classInfo = CrossClassInfo.Parse(sourceFile: swiftSrc, className: className,
+          let classInfo = CrossClassInfo.Parse(sourcePath: swiftSrc, className: className,
                                                sourceLines: contentLines, classIndex: classIndex,
                                                productName: productName, bundleId: bundleId)
           classInfoList.append(classInfo)

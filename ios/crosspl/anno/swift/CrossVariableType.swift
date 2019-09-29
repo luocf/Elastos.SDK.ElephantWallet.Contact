@@ -50,7 +50,7 @@ class CrossVariableType {
     varType.type = supportedTypeDeclared[trimContent]
     if varType.type == nil {
       print("CrossVariableType.Parse() Unsupported variable type: \(trimContent)")
-      exit(1)
+//      exit(1)
     }
     
 //    print("=================CrossVariableType.Parse() trimContent=\(varType.toString())")

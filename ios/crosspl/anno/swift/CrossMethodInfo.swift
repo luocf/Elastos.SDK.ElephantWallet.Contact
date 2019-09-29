@@ -1,7 +1,7 @@
 import Foundation
 
 class CrossMethodInfo {
-  static func Parse(sourceContent: String, methodName: String, isNative: Bool) -> CrossMethodInfo {
+  static func Parse(sourceContent: String, methodName: String, isNative: Bool) -> CrossMethodInfo? {
     let methodInfo = CrossMethodInfo()
 //    print("CrossMethodInfo.Parse() ============== 0")
     methodInfo.methodName = methodName
@@ -14,6 +14,9 @@ class CrossMethodInfo {
       }
       let typeLines = line.components(separatedBy: ":")
       let type = CrossVariableType.Parse(sourceContent: typeLines[1])
+      if type.type == nil {
+        return nil
+      }
       
       methodInfo.paramsType.append(type)
     }

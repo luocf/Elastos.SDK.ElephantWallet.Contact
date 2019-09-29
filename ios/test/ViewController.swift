@@ -67,28 +67,31 @@ class ViewController: UIViewController {
       clearEvent()
       break
     case ButtonTag.new_mnemonic.rawValue:
-      message = newAndSaveMnemonic(nil);
+      message = newAndSaveMnemonic(nil)
       break
     case ButtonTag.import_mnemonic.rawValue:
       message = importMnemonic()
       break
     case ButtonTag.new_and_start_contact.rawValue:
-      message = testNewContact();
-      message += testStartContact();
+      message = testNewContact()
+      message += testStartContact()
       break
     case ButtonTag.stop_and_del_contact.rawValue:
-      message = testStopContact();
-      message += testDelContact();
-
+      message = testStopContact()
+      message += testDelContact()
       break
     case ButtonTag.recreate_contact.rawValue:
-      print("\(sender.tag)")
+      message = testStopContact()
+      message += testDelContact()
+      message += testNewContact()
+      message += testStartContact()
       break
     case ButtonTag.restart_contact.rawValue:
-      print("\(sender.tag)")
+      message = testStopContact()
+      message += testStartContact()
       break
     case ButtonTag.get_user_info.rawValue:
-      print("\(sender.tag)")
+      message = showGetUserInfo()
       break
     case ButtonTag.set_user_identifycode.rawValue:
       print("\(sender.tag)")
@@ -125,7 +128,7 @@ class ViewController: UIViewController {
       fatalError("Button [\(sender.currentTitle!)(\(sender.tag))] not decleared.")
     }
     
-    showMessage(message);
+    showMessage(message)
   }
 
   private func getStarted() {
@@ -136,16 +139,18 @@ class ViewController: UIViewController {
     help += "Step4: After online, [Add friend] can add friend\n"
     help += "Step5: After friend online, [Send Message] can send message\n"
     
-    clearEvent();
-    showEvent(help);
+    clearEvent()
+    showEvent(help)
   }
   
   private func clearEvent() {
-    eventLog.text = ""
+    DispatchQueue.main.async { [weak self] in
+      self?.eventLog.text = ""
+    }
   }
   
   private func newAndSaveMnemonic(_ newMnemonic: String?) -> String {
-    mSavedMnemonic = newMnemonic;
+    mSavedMnemonic = newMnemonic
     if mSavedMnemonic == nil {
       mSavedMnemonic = ElastosKeypair.GenerateMnemonic(language: ViewController.KeypairLanguage,
                                                        words: ViewController.KeypairWords)
@@ -160,32 +165,32 @@ class ViewController: UIViewController {
     let dialog = UIAlertController(title: nil, message: nil, preferredStyle: .alert)
     dialog.message = "New mnemonic can only be valid after restart,\ndo you want restart app?"
     dialog.addAction(UIAlertAction(title: "OK", style: .default, handler: { _ in
-      exit(0);
+      exit(0)
     }))
     dialog.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
     
     self.present(dialog, animated: false, completion: nil)
 
-    return ("Cancel to save mnemonic: \(newMnemonic ?? "nil")\n");
+    return ("Cancel to save mnemonic: \(newMnemonic ?? "nil")\n")
   }
 
   private func importMnemonic() -> String {
     Helper.showImportMnemonic(view: self, listener: { result in
         if self.isEnglishWords(result) == false {
-          self.showMessage(ViewController.ErrorPrefix + "Only english mnemonic is supported.");
-          return;
+          self.showMessage(ViewController.ErrorPrefix + "Only english mnemonic is supported.")
+          return
         }
         let privKey = self.getPrivateKey()
         if privKey.isEmpty {
           self.showMessage(ViewController.ErrorPrefix + "Bad mnemonic.")
-          return;
+          return
         }
 
-        let message = self.newAndSaveMnemonic(result);
-        self.showMessage(message);
-    });
+        let message = self.newAndSaveMnemonic(result)
+        self.showMessage(message)
+    })
 
-    return "Success to show import mnemonic dialog.";
+    return "Success to show import mnemonic dialog."
   }
 
   
@@ -195,12 +200,12 @@ class ViewController: UIViewController {
     Contact.Factory.SetDeviceId(devId: getDeviceId())
 
     let cacheDir = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first
-    let ret = Contact.Factory.SetLocalDataDir(dir: cacheDir!.path);
+    let ret = Contact.Factory.SetLocalDataDir(dir: cacheDir!.path)
     if ret < 0 {
       return "Failed to call Contact.Factory.SetLocalDataDir() ret=\(ret)"
     }
 
-    mContact = Contact.Factory.Create();
+    mContact = Contact.Factory.Create()
     if mContact == nil {
       return "Failed to call Contact.Factory.Create()"
     }
@@ -217,20 +222,20 @@ class ViewController: UIViewController {
         }
         
         override func onAcquire(request: AcquireArgs) -> Data? {
-          let ret = viewCtrl.processAcquire(request: request);
+          let ret = viewCtrl.processAcquire(request: request)
           
-          var msg = "onAcquire(): req=\(request.toString())\n";
-          msg += "onAcquire(): resp=\(String(describing: ret))\n";
-          viewCtrl.showEvent(msg);
+          var msg = "onAcquire(): req=\(request.toString())\n"
+          msg += "onAcquire(): resp=\(String(describing: ret))\n"
+          viewCtrl.showEvent(msg)
           
-          return ret;
+          return ret
         }
         
         override func onEvent(event: EventArgs) {
-          viewCtrl.processEvent(event: event);
+          viewCtrl.processEvent(event: event)
           
-          let msg = "onEvent(): ev=\(event.toString())\n";
-          viewCtrl.showEvent(msg);
+          let msg = "onEvent(): ev=\(event.toString())\n"
+          viewCtrl.showEvent(msg)
         }
         
         override func onReceivedMessage(humanCode: String, channelType: Int, message: Contact.Message) {
@@ -240,15 +245,15 @@ class ViewController: UIViewController {
           }
           
           var msg = "onRcvdMsg(): data=\(String(describing: data))\n"
-          msg += "onRcvdMsg(): type=\(message.type)\n";
-          msg += "onRcvdMsg(): crypto=" + message.cryptoAlgorithm + "\n";
-          viewCtrl.showEvent(msg);
+          msg += "onRcvdMsg(): type=\(message.type)\n"
+          msg += "onRcvdMsg(): crypto=" + message.cryptoAlgorithm + "\n"
+          viewCtrl.showEvent(msg)
         }
         
         override func onError(errCode: Int32, errStr: String, ext: String?) {
           var msg = "\(errCode): \(errStr)"
-          msg += "\n\(String(describing: ext))";
-          viewCtrl.showError(msg);
+          msg += "\n\(String(describing: ext))"
+          viewCtrl.showError(msg)
         }
         
         private let viewCtrl: ViewController
@@ -256,9 +261,9 @@ class ViewController: UIViewController {
       
       return Impl(self)
     }()
-    mContact!.setupListener(listener: mContactListener);
+    mContact!.setListener(listener: mContactListener)
   
-    return "Success to create a contact instance.";
+    return "Success to create a contact instance."
   }
 
   private func testStartContact() -> String {
@@ -266,12 +271,12 @@ class ViewController: UIViewController {
       return ViewController.ErrorPrefix + "Contact is null."
     }
   
-    let ret = mContact!.start();
+    let ret = mContact!.start()
     if ret < 0 {
       return "Failed to start contact instance. ret=\(ret)"
     }
 
-    return "Success to start contact instance.";
+    return "Success to start contact instance."
   }
 
   private func testStopContact() -> String {
@@ -284,7 +289,7 @@ class ViewController: UIViewController {
       return "Failed to stop contact instance. ret=\(ret)"
     }
 
-    return "Success to stop contact instance.";
+    return "Success to stop contact instance."
   }
 
   private func testDelContact() -> String {
@@ -293,36 +298,60 @@ class ViewController: UIViewController {
       }
 
       mContact = nil
-      return "Success to delete a contact instance.";
+      return "Success to delete a contact instance."
   }
 
+  private func showGetUserInfo() -> String {
+      if mContact == nil {
+        return ViewController.ErrorPrefix + "Contact is null."
+      }
+
+      let info = mContact!.getUserInfo();
+      if info == nil {
+        return ViewController.ErrorPrefix + "Failed to get user info."
+      }
+
+      let humanCode = [
+        "Did": info!.did,
+        "Ela": info!.elaAddress,
+        "Carrier": info!.getCurrDevCarrierAddr()
+      ]
+      let ext = info!.getCurrDevCarrierId()
+    Helper.showAddress(view: self,
+                       listener: { _ in
+      //          Helper.showDetails(MainActivity.this, info.toJson());
+                       },
+                       humanCode: humanCode, presentDevId: getDeviceId(), ext: ext);
+
+      return info!.toString()
+  }
   
   private func processAcquire(request: AcquireArgs) -> Data? {
-    var response: Data?;
+    var response: Data?
   
     switch (request.type) {
       case .PublicKey:
         response = getPublicKey().data(using: .utf8)
-        break;
+        break
       case .EncryptData:
         response = request.data // plaintext
-        break;
+        break
       case .DecryptData:
         response = request.data // plaintext
-        break;
+        break
       case .DidPropAppId:
         let appId = "DC92DEC59082610D1D4698F42965381EBBC4EF7DBDA08E4B3894D530608A64AAA65BB82A170FBE16F04B2AF7B25D88350F86F58A7C1F55CC29993B4C4C29E405"
         response = appId.data(using: .utf8)
-        break;
+        break
       case .DidAgentAuthHeader:
-        response = getAgentAuthHeader();
-        break;
+        response = getAgentAuthHeader()
+        break
       case .SignData:
-        response = signData(data: request.data);
-        break;
+        response = signData(data: request.data)
+        break
     }
   
-    return response;
+    return response
   }
 
   private func processEvent(event: EventArgs) {
@@ -332,14 +361,14 @@ class ViewController: UIViewController {
       case .FriendRequest:
 //        let requestEvent = event as Contact.Listener.RequestEvent
 //        Helper.showFriendRequest(this, requestEvent.humanCode, requestEvent.summary, v -> {
-//          mContact.acceptFriend(requestEvent.humanCode);
-//        });
-        break;
+//          mContact.acceptFriend(requestEvent.humanCode)
+//        })
+        break
     case .HumanInfoChanged:
       let infoEvent = event as! Contact.Listener.InfoEvent
       let msg = event.humanCode + " info changed: " + infoEvent.toString()
-      showEvent(msg);
-      break;
+      showEvent(msg)
+      break
     }
   }
   
@@ -368,7 +397,7 @@ class ViewController: UIViewController {
     //let appkey = "b2gvzUM79yLhCbbGNWCuhSsGdqYhA7sS"
     let timestamp = Int64(Date().timeIntervalSince1970 * 1000)
     let auth = Utils.getMd5(str: "appkey\(timestamp)")
-    let headerValue = "id=\(appid);time=\(timestamp);auth=\(auth)"
+    let headerValue = "id=\(appid)time=\(timestamp)auth=\(auth)"
     Log.i(tag: ViewController.TAG, msg: "getAgentAuthHeader() headerValue=" + headerValue)
   
     return headerValue.data(using: .utf8)!
@@ -381,13 +410,13 @@ class ViewController: UIViewController {
     
     let privKey = getPrivateKey()
 
-    var signedData = Data();
+    var signedData = Data()
     let signedSize = ElastosKeypair.Sign(privateKey: privKey, data: data!, len: data!.count, signedData: &signedData)
     if signedSize <= 0 {
-      return nil;
+      return nil
     }
   
-    return signedData;
+    return signedData
   }
   
   private func getDeviceId() -> String {
@@ -398,23 +427,30 @@ class ViewController: UIViewController {
   
   private func showMessage(_ msg: String) {
     Log.i(tag: ViewController.TAG, msg: "\(msg)")
-    msgLog.text = msg
+    
+    DispatchQueue.main.async { [weak self] in
+      self?.msgLog.text = msg
+    }
     
     if msg.hasPrefix(ViewController.ErrorPrefix) {
-      showToast(msg);
+      showToast(msg)
     }
   }
   
   private func showEvent(_ newMsg: String) {
     print("\(newMsg)")
-    eventLog.text += "\n"
-    eventLog.text += newMsg
+    DispatchQueue.main.async { [weak self] in
+      self?.eventLog.text += "\n"
+      self?.eventLog.text += newMsg
+    }
   }
   
   private func showError(_ newErr: String) {
-    Log.e(tag: ViewController.TAG, msg: newErr);
+    Log.e(tag: ViewController.TAG, msg: newErr)
 
-    errLog.text = newErr
+    DispatchQueue.main.async { [weak self] in
+      self?.errLog.text = newErr
+    }
   }
 
   private func showToast(_ message : String) {
@@ -423,7 +459,9 @@ class ViewController: UIViewController {
     alert.view.alpha = 0.6
     alert.view.layer.cornerRadius = 15
     
-    self.present(alert, animated: false)
+    DispatchQueue.main.async { [weak self] in
+      self?.present(alert, animated: false)
+    }
     
     DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 1) {
       alert.dismiss(animated: true)
@@ -436,7 +474,7 @@ class ViewController: UIViewController {
     }
     
     let isEnglish = (words!.range(of: "[^a-zA-Z ]", options: .regularExpression) == nil)
-    return isEnglish;
+    return isEnglish
   }
   
   @IBOutlet weak var optionsMenu: UIScrollView!

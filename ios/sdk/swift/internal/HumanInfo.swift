@@ -71,7 +71,7 @@ public class HumanInfo: Codable {
   }
   
   private(set) var boundCarrierArray: [CarrierInfo]? = nil
-  private var commonInfoMap: [Int: String]? = nil
+  public var commonInfoMap: [Int: String]? = nil
   private var walletAddressMap: [String: String]? = nil
   public private(set) var  status: ContactStatus = .Invalid
   public private(set) var humanCode: String? = nil

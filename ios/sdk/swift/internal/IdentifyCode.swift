@@ -1,7 +1,7 @@
 
 
 public class IdentifyCode: Codable {
-  enum Kind: Int {
+  public enum Kind: Int {
        case PhoneNumber = 1
        case EmailAddress = 2
        case WechatId = 3

@@ -14,7 +14,7 @@
 #include "ErrCode.hpp"
 #include "Log.hpp"
 
-#include "CrossPLUtils.hpp"
+//#include "CrossPLUtils.hpp"
 
 namespace elastos {
 
@@ -28,7 +28,7 @@ std::string PlatformAndroid::mCurrentDevId;
 /***********************************************/
 void PlatformAndroid::DetachCurrentThread()
 {
-    crosspl::CrossPLUtils::DetachCurrentThread();
+    //crosspl::CrossPLUtils::DetachCurrentThread();
 }
 
 std::string PlatformAndroid::GetBacktrace()
