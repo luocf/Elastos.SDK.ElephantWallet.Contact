@@ -5,7 +5,9 @@
 //  Copyright © 2016 mengxk. All rights reserved.
 //
 
-#if defined(__APPLE__) && (defined(TARGET_OS_IPHONE) || defined(TARGET_IPHONE_SIMULATOR))
+#if defined(__APPLE__)
+#include "TargetConditionals.h"
+#if defined(TARGET_OS_IOS)
 
 #include "PlatformIos.hpp"
 
@@ -90,4 +92,5 @@ void PlatformIos::SetCurrentDevId(const std::string& devId)
 
 } // namespace elastos
 
-#endif /* defined(__APPLE__) && (defined(TARGET_OS_IPHONE) || defined(TARGET_IPHONE_SIMULATOR)) */
+#endif // defined(__APPLE__)
+#endif // defined(TARGET_OS_IOS)

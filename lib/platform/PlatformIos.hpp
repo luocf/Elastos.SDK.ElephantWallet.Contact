@@ -11,8 +11,9 @@
 #ifndef _ELASTOS_PLATFORM_IOS_HPP_
 #define _ELASTOS_PLATFORM_IOS_HPP_
 
+#if defined(__APPLE__)
 #include "TargetConditionals.h"
-#if defined(__APPLE__) && (defined(TARGET_OS_IPHONE) || defined(TARGET_IPHONE_SIMULATOR))
+#if defined(TARGET_OS_IOS)
 
 #include <string>
 
@@ -47,6 +48,7 @@ private:
 
 } // namespace elastos
 
-#endif /* defined(__APPLE__) && (defined(TARGET_OS_IPHONE) || defined(TARGET_IPHONE_SIMULATOR)) */
+#endif // defined(__APPLE__)
+#endif // defined(TARGET_OS_IOS)
 
 #endif /* _ELASTOS_PLATFORM_IOS_HPP_ */
