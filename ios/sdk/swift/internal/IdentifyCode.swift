@@ -7,7 +7,7 @@ public class IdentifyCode: Codable {
        case WechatId = 3
   }
   
-  var idCodeMap: [Int: String]?
+  var idCodeMap: IntStrDictionary?
   public private(set) var updateTime: Int64 = 0
 
   public private(set) var phoneNumber: String? = nil

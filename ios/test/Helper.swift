@@ -26,7 +26,7 @@ public class Helper {
     
     let rootView = makeAddressView(view: view, listener: listener,
                                    humanCode: humanCode, presentDevId: presentDevId, ext: ext)
-    setDialogContent(dialog, 200, rootView)
+    setDialogContent(dialog, -1, rootView)
 
     dialog.addAction(UIAlertAction(title: "Cancel", style: .cancel))
     
@@ -340,7 +340,7 @@ public class Helper {
 //
   private static func setDialogContent(_ dialog: UIAlertController, _ height: CGFloat, _ contentView: UIView) {
     dialog.view.translatesAutoresizingMaskIntoConstraints = false
-    dialog.view.heightAnchor.constraint(equalToConstant: height).isActive = true
+    dialog.view.heightAnchor.constraint(equalToConstant: height >= 0.0 ? height : 10000).isActive = true
 
     dialog.view.addSubview(contentView)
     contentView.translatesAutoresizingMaskIntoConstraints = false

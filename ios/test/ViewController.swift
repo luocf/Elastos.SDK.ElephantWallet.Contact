@@ -317,7 +317,7 @@ class ViewController: UIViewController {
         "Carrier": info!.getCurrDevCarrierAddr()
       ]
       let ext = info!.getCurrDevCarrierId()
-    Helper.showAddress(view: self,
+      Helper.showAddress(view: self,
                        listener: { _ in
       //          Helper.showDetails(MainActivity.this, info.toJson());
                        },

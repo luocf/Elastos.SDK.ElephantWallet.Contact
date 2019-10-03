@@ -40,6 +40,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import com.google.gson.Gson;
+
 public class MainActivity extends Activity {
     public static final String TAG = "ContactTest";
 
