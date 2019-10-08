@@ -306,7 +306,7 @@ class ViewController: UIViewController {
         return ViewController.ErrorPrefix + "Contact is null."
       }
 
-      let info = mContact!.getUserInfo();
+      let info = mContact!.getUserInfo()
       if info == nil {
         return ViewController.ErrorPrefix + "Failed to get user info."
       }
@@ -318,10 +318,10 @@ class ViewController: UIViewController {
       ]
       let ext = info!.getCurrDevCarrierId()
       Helper.showAddress(view: self,
-                       listener: { _ in
-      //          Helper.showDetails(MainActivity.this, info.toJson());
-                       },
-                       humanCode: humanCode, presentDevId: getDeviceId(), ext: ext);
+                         listener: { _ in
+                           Helper.showDetails(view: self, msg: info!.toJson()!)
+                         },
+                         humanCode: humanCode, presentDevId: getDeviceId(), ext: ext)
 
       return info!.toString()
   }

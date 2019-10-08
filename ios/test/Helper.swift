@@ -15,7 +15,7 @@ public class Helper {
     }))
     dialog.addAction(UIAlertAction(title: "Cancel", style: .cancel))
     
-    showDialog(view, dialog);
+    showDialog(view, dialog)
   }
 
   public static func showAddress(view: UIViewController,
@@ -24,7 +24,7 @@ public class Helper {
     let dialog = UIAlertController(title: nil, message: nil, preferredStyle: .alert)
     dialog.title = "My Address"
     
-    let rootView = makeAddressView(view: view, listener: listener,
+    let rootView = makeAddressView(view: view, width: dialog.view.widthAnchor, listener: listener,
                                    humanCode: humanCode, presentDevId: presentDevId, ext: ext)
     setDialogContent(dialog, -1, rootView)
 
@@ -73,18 +73,20 @@ public class Helper {
 //
 //        showDialog(builder);
 //    }
-//
-//    public static void showDetails(Context context, String msg) {
-//        AlertDialog.Builder builder = new AlertDialog.Builder(context);
-//        builder.setTitle("Details");
-//        builder.setMessage(msg);
-//        builder.setNegativeButton("Cancel", (dialog, which) -> {
-//            dialog.dismiss();
-//        });
-//
-//        builder.create().show();
-//    }
-//
+
+  public static func showDetails(view: UIViewController, msg: String) {
+    let dialog = UIAlertController(title: nil, message: nil, preferredStyle: .alert)
+
+    dialog.title = "Details"
+    let rootView = UITextView()
+    rootView.text = msg
+    rootView.isEditable = false
+    setDialogContent(dialog, -1, rootView)
+    dialog.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+      
+    showDialog(view, dialog);
+  }
+
 //    public static void showFriendList(Context context, List<String> friendList, OnListener listener) {
 //        ListView listView = new ListView(context);
 //        ArrayAdapter<String> adapter = new ArrayAdapter<>(context, android.R.layout.simple_list_item_1, friendList);
@@ -211,62 +213,95 @@ public class Helper {
 //        }
 //    }
 //
-    private static func makeAddressView(view: UIViewController,
+  private static func makeAddressView(view: UIViewController, width: NSLayoutDimension,
                                         listener: @escaping OnListener,
                                         humanCode: [String: String?], presentDevId: String?, ext: String?) -> UIView {
-        let txtDevId = UITextField()
-        let imgQRCode = UIImageView()
-        let txtCode =  UITextField()
-//        RadioGroup radioGrp = new RadioGroup(context);
-//        Button btn = new Button(context);
-//
-//        radioGrp.setOnCheckedChangeListener((group, checkedId) -> {
-//            RadioButton checkedView = group.findViewById(checkedId);
-//            int mapIdx = group.indexOfChild(checkedView);
-//            String checkedVal = (String) humanCode.values().toArray()[mapIdx];
-//            String showed = checkedVal;
-//            if(mapIdx == humanCode.size() - 1) {
-//                showed += "\n----------------\n" + ext;
-//            }
-//            Bitmap bitmap = makeQRCode(checkedVal);
-//            image.setImageBitmap(bitmap);
-//            txtCode.setText(showed);
-//        });
-//        for(HashMap.Entry<String, String> entry : humanCode.entrySet()) {
-//            String key = entry.getKey();
-//            String value = entry.getValue();
-//
-//            RadioButton radiobtn = new RadioButton(context);
-//            radiobtn.setText(key + ": " + value.substring(0, 5) + " ... " + value.substring(value.length()-5));
-//            radiobtn.setId(View.generateViewId());
-//
-//            radioGrp.addView(radiobtn);
-//            if(radioGrp.getChildCount() == 1) {
-//                radiobtn.setChecked(true);
-//            }
-//        }
-//
-        let rootView = UITableView()
-//        root.setOrientation(LinearLayout.VERTICAL);
-        if(presentDevId != nil) {
-          rootView.addSubview(txtDevId)
-          txtDevId.text = "Present DevId: " + (presentDevId ?? "nil")
-        }
-        rootView.addSubview(imgQRCode)
-        rootView.addSubview(txtCode);
-//        root.addView(radioGrp);
-//        root.addView(btn);
-//
-//        ViewGroup.MarginLayoutParams txtLayout = (ViewGroup.MarginLayoutParams) txtCode.getLayoutParams();
-//        txtLayout.setMargins(20, 10, 20, 20);
-//
-//        btn.setText("Details");
-//        btn.setOnClickListener((v) -> {
-//            listener.onResult(null);
-//        });
-//
-        return rootView
+    let txtDevId = UITextView()
+    let imgQRCode = UIImageView()
+    var radioGrp = [UIStackView]()
+    let txtCode =  UITextView()
+    let btn =  UIButton()
+
+    txtDevId.isEditable = false
+    txtCode.text = "Present DevId: " + (presentDevId ?? "nil")
+    
+    txtDevId.isEditable = false
+    
+    let radioGrpChecked: UIControl.TargetClosure = { sender in
+      for it in radioGrp {
+        (it.subviews.first as! UISwitch).setOn(false, animated: false)
+      }
+      let radioBtn = sender as! UISwitch
+      radioBtn.setOn(true, animated: false)
+      
+      let mapIdx = radioBtn.tag
+      let checkedVal = Array(humanCode)[mapIdx].value
+      var showed = checkedVal
+      if(mapIdx == humanCode.count - 1) {
+        showed! += "\n----------------\n" + ext!;
+      }
+      
+      let bitmap = makeQRCode(value: checkedVal!)
+      imgQRCode.image = bitmap
+      txtCode.text = showed
     }
+    
+    for it in humanCode {
+      let key = it.key
+      let value = it.value!
+      
+      let radioView = UIStackView()
+     
+      let radioBtn = UISwitch()
+      radioBtn.addTargetClosure(closure: radioGrpChecked)
+      radioBtn.tag = radioGrp.count
+      radioView.addArrangedSubview(radioBtn)
+     
+      let radioLabel = UILabel()
+      radioLabel.text = key + ": " + value[value.startIndex..<value.index(value.startIndex, offsetBy: 5)] + " ... " + value[value.index(value.endIndex, offsetBy: -5)..<value.endIndex]
+      radioView.addArrangedSubview(radioLabel)
+
+      radioGrp.append(radioView)
+      if(radioBtn.tag == 0) {
+        radioBtn.sendActions(for: .touchUpInside)
+      }
+    }
+    
+    btn.setTitle("Details", for: .normal)
+    btn.backgroundColor = .blue
+    btn.addTargetClosure(closure: { sender in
+      listener(nil)
+    })
+    
+    let rootView = UIStackView()
+    rootView.axis = .vertical
+    rootView.addArrangedSubview(txtDevId)
+    rootView.addArrangedSubview(imgQRCode)
+    rootView.addArrangedSubview(txtCode);
+    for it in radioGrp {
+      rootView.addArrangedSubview(it)
+    }
+    rootView.addArrangedSubview(btn)
+
+    txtDevId.translatesAutoresizingMaskIntoConstraints = false
+    txtDevId.heightAnchor.constraint(equalToConstant: 50).isActive = true
+    imgQRCode.translatesAutoresizingMaskIntoConstraints = false
+    imgQRCode.heightAnchor.constraint(equalTo: imgQRCode.widthAnchor).isActive = true
+    txtCode.translatesAutoresizingMaskIntoConstraints = false
+    txtCode.heightAnchor.constraint(equalToConstant: 100).isActive = true
+    for it in radioGrp {
+      it.translatesAutoresizingMaskIntoConstraints = false
+      it.widthAnchor.constraint(equalToConstant: 150).isActive = true
+      for sub in it.subviews {
+        sub.translatesAutoresizingMaskIntoConstraints = false
+        sub.heightAnchor.constraint(equalToConstant: 40).isActive = true
+      }
+    }
+    btn.translatesAutoresizingMaskIntoConstraints = false
+    btn.heightAnchor.constraint(equalToConstant: 50).isActive = true
+
+    return rootView
+  }
 
 //    private static View makeSetDetailView(Context context, RadioGroup radioGrp, List<String> checkList, EditText editView) {
 //        TextView txtView = new TextView(context);
@@ -309,35 +344,18 @@ public class Helper {
 //        return root;
 //    }
 //
-//    private static Bitmap makeQRCode(String value) {
-//        HashMap<EncodeHintType, ErrorCorrectionLevel> hintMap = new HashMap<>();
-//        hintMap.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.L);
-//        BitMatrix matrix = null;
-//        try {
-//            matrix = new MultiFormatWriter().encode(value, BarcodeFormat.QR_CODE, 512, 512, hintMap);
-//        } catch (WriterException e) {
-//            Log.e(TAG, "Failed to MultiFormatWriter().encode()", e);
-//            throw new RuntimeException("Failed to MultiFormatWriter().encode()", e);
-//        }
-//
-//        //converting bitmatrix to bitmap
-//        int width = matrix.getWidth();
-//        int height = matrix.getHeight();
-//        int[] pixels = new int[width * height];
-//        // All are 0, or black, by default
-//        for (int y = 0; y < height; y++) {
-//            int offset = y * width;
-//            for (int x = 0; x < width; x++) {
-//                pixels[offset + x] = matrix.get(x, y) ? Color.BLACK : Color.WHITE;
-//            }
-//        }
-//
-//        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-//        bitmap.setPixels(pixels, 0, width, 0, 0, width, height);
-//
-//        return bitmap;
-//    }
-//
+  private static func makeQRCode(value: String) -> UIImage {
+    let data = value.data(using: String.Encoding.ascii)
+
+    let filter = CIFilter(name: "CIQRCodeGenerator")
+    filter!.setValue(data, forKey: "inputMessage")
+    let transform = CGAffineTransform(scaleX: 3, y: 3)
+
+    let output = (filter!.outputImage?.transformed(by: transform))!
+    let ret = UIImage(ciImage: output)
+    return ret
+  }
+
   private static func setDialogContent(_ dialog: UIAlertController, _ height: CGFloat, _ contentView: UIView) {
     dialog.view.translatesAutoresizingMaskIntoConstraints = false
     dialog.view.heightAnchor.constraint(equalToConstant: height >= 0.0 ? height : 10000).isActive = true
@@ -367,4 +385,39 @@ public class Helper {
   private static var mLastDialog: UIAlertController? = nil
 //    private static OnListener mOnScanListener;
 //    private static final int REQUEST_CODE_QR_SCAN = 101;
+}
+
+extension UIControl {
+  typealias TargetClosure = (UIControl) -> ()
+
+  func addTargetClosure(closure: @escaping TargetClosure) {
+    targetClosure = closure
+    addTarget(self, action: #selector(UIControl.closureAction), for: .touchUpInside)
+  }
+  @objc func closureAction() {
+      guard let targetClosure = targetClosure else { return }
+      targetClosure(self)
+  }
+  
+  private struct AssociatedKeys {
+      static var targetClosure = "targetClosure"
+  }
+  
+  private var targetClosure: TargetClosure? {
+      get {
+          guard let closureWrapper = objc_getAssociatedObject(self, &AssociatedKeys.targetClosure) as? ClosureWrapper else { return nil }
+          return closureWrapper.closure
+      }
+      set(newValue) {
+          guard let newValue = newValue else { return }
+          objc_setAssociatedObject(self, &AssociatedKeys.targetClosure, ClosureWrapper(newValue), objc_AssociationPolicy.OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+      }
+  }
+  
+  class ClosureWrapper: NSObject {
+      let closure: TargetClosure
+      init(_ closure: @escaping TargetClosure) {
+          self.closure = closure
+      }
+  }
 }

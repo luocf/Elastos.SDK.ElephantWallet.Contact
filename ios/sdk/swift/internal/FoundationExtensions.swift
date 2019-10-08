@@ -110,7 +110,6 @@ public struct IntStrDictionary: Collection, Codable {
   private var dictionary: DictionaryType
 
   //Collection: these are the access methods
-  public typealias IndexDistance = DictionaryType.IndexDistance
   public typealias Indices = DictionaryType.Indices
   public typealias Iterator = DictionaryType.Iterator
   public typealias SubSequence = DictionaryType.SubSequence
@@ -152,7 +151,7 @@ public struct IntStrDictionary: Collection, Codable {
   public func encode(to encoder: Encoder) throws {
     var kvMap = [[IntOrStr]]()
     for (k, v) in dictionary {
-      let kv = [k, v] as! [IntOrStr]
+      let kv = [IntOrStr.i(k), IntOrStr.s(v)]
       kvMap.append(kv)
     }
     
