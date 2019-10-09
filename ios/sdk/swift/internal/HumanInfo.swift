@@ -1,6 +1,6 @@
 
 public class HumanInfo: Codable {
-  public enum Item: Int, CodingKey {
+  public enum Item: Int {
     case ChainPubKey = 1
     case Did = 2
     case ElaAddress = 3
@@ -84,21 +84,35 @@ public class HumanInfo: Codable {
     case status
     case humanCode
     case updateTime
+
+    case chainPubKey
+    case did
+    case elaAddress
+    case nickname
+    case avatar
+    case gender
+    case description
     
     var rawValue: String {
       get {
         switch self {
           case .boundCarrierArray: return JsonKey.BoundCarrierArray
-          case .commonInfoMap: return JsonKey.CommonInfoMap
-          case .walletAddressMap: return JsonKey.WalletAddressMap
-          case .status: return JsonKey.Status
-          case .humanCode: return JsonKey.HumanCode
-          case .updateTime: return JsonKey.UpdateTime
+          case .commonInfoMap:     return JsonKey.CommonInfoMap
+          case .walletAddressMap:  return JsonKey.WalletAddressMap
+          case .status:            return JsonKey.Status
+          case .humanCode:         return JsonKey.HumanCode
+          case .updateTime:        return JsonKey.UpdateTime
+          case .chainPubKey:       return "chainPubKey"
+          case .did:               return "did"
+          case .elaAddress:        return "elaAddress"
+          case .nickname:          return "nickname"
+          case .avatar:            return "avatar"
+          case .gender:            return "gender"
+          case .description:       return "description"
         }
       }
     }
   }
-  
   
   public private(set) var chainPubKey: String? = nil
   public private(set) var did: String? = nil

@@ -54,7 +54,9 @@ public class FriendInfo: HumanInfo {
 
     json.alias = self.alias
 
-    let encode = try! JSONEncoder().encode(json)
+    let encoder = JSONEncoder()
+    encoder.outputFormatting = .prettyPrinted
+    let encode = try! encoder.encode(json)
     let val = String(data: encode, encoding: .utf8)!
     return val
   }

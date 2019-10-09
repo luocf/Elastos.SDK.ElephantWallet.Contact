@@ -94,28 +94,28 @@ class ViewController: UIViewController {
       message = showGetUserInfo()
       break
     case ButtonTag.set_user_identifycode.rawValue:
-      print("\(sender.tag)")
+      message = showSetUserIdentifyCode()
       break
     case ButtonTag.set_user_details.rawValue:
-      print("\(sender.tag)")
+      message = showSetUserDetails()
       break
     case ButtonTag.set_wallet_address.rawValue:
-      print("\(sender.tag)")
+      message = showSetWalletAddress()
       break
     case ButtonTag.sync_upload.rawValue:
-      print("\(sender.tag)")
+      message = testSyncUpload()
       break
     case ButtonTag.sync_download.rawValue:
-      print("\(sender.tag)")
+      message = testSyncDownload()
       break
     case ButtonTag.friend_info.rawValue:
-      print("\(sender.tag)")
+      message = listFriendInfo()
       break
     case ButtonTag.add_friend.rawValue:
       print("\(sender.tag)")
       break
     case ButtonTag.del_friend.rawValue:
-      print("\(sender.tag)")
+      message = removeFriend()
       break
     case ButtonTag.send_message.rawValue:
       print("\(sender.tag)")
@@ -302,28 +302,231 @@ class ViewController: UIViewController {
   }
 
   private func showGetUserInfo() -> String {
-      if mContact == nil {
-        return ViewController.ErrorPrefix + "Contact is null."
-      }
+    if mContact == nil {
+      return ViewController.ErrorPrefix + "Contact is null."
+    }
+
+    let info = mContact!.getUserInfo()
+    if info == nil {
+      return ViewController.ErrorPrefix + "Failed to get user info."
+    }
+
+    let humanCode: Helper.OrderedDictionary = [
+        ("Did", info!.did),
+        ("Ela", info!.elaAddress),
+        ("Carrier", info!.getCurrDevCarrierAddr())
+    ]
+    let ext = info!.getCurrDevCarrierId()
+    Helper.showAddress(view: self,
+                       listener: { _ in
+                         Helper.showDetails(view: self, msg: info!.toJson()!)
+                       },
+                       humanCode: humanCode, presentDevId: getDeviceId(), ext: ext)
+
+    return info!.toString()
+  }
+  
+  private func showSetUserIdentifyCode() -> String {
+    if mContact == nil {
+      return ViewController.ErrorPrefix + "Contact is null."
+    }
+
+    let checkList = [
+        "\(Contact.UserInfo.Kind.PhoneNumber)",
+        "\(Contact.UserInfo.Kind.EmailAddress)",
+        "\(Contact.UserInfo.Kind.WechatId)"
+    ]
+    let separator = ":-:-:"
+
+    Helper.showSetDetails(view: self,
+                          checkList: checkList, separator: separator,
+                          listener: { result in
+        let details = [
+          "\(Contact.UserInfo.Kind.PhoneNumber)": Contact.UserInfo.Kind.PhoneNumber,
+          "\(Contact.UserInfo.Kind.EmailAddress)": Contact.UserInfo.Kind.EmailAddress,
+          "\(Contact.UserInfo.Kind.WechatId)": Contact.UserInfo.Kind.WechatId
+        ]
+
+        let keyValue = result!.components(separatedBy: separator)
+        let type = details[keyValue[0]]!
+        let value = keyValue[1]
+
+        let ret = self.mContact!.setIdentifyCode(type: type, value: value)
+        if(ret < 0) {
+          self.showMessage(ViewController.ErrorPrefix + "Failed to set \(result!). ret=\(ret)")
+        }
+    })
+
+    let info = mContact!.getUserInfo()
+    if info == nil {
+      return ViewController.ErrorPrefix + "Failed to get user info."
+    }
+
+    return info.toString()
+  }
+
+  private func showSetUserDetails() -> String {
+    if mContact == nil {
+      return ViewController.ErrorPrefix + "Contact is null."
+    }
+
+    let checkList = [
+      "\(Contact.UserInfo.Item.Nickname)",
+      "\(Contact.UserInfo.Item.Avatar)",
+      "\(Contact.UserInfo.Item.Gender)",
+      "\(Contact.UserInfo.Item.Description)"
+    ]
+    let separator = ":-:-:"
+    
+    
+    Helper.showSetDetails(view: self,
+                          checkList: checkList, separator: separator,
+                          listener: { result in
+          let details = [
+                  "\(Contact.UserInfo.Item.Nickname)": Contact.UserInfo.Item.Nickname,
+                  "\(Contact.UserInfo.Item.Avatar)": Contact.UserInfo.Item.Avatar,
+                  "\(Contact.UserInfo.Item.Gender)": Contact.UserInfo.Item.Gender,
+                  "\(Contact.UserInfo.Item.Description)": Contact.UserInfo.Item.Description
+          ]
+                              
+          let keyValue = result!.components(separatedBy: separator)
+          let item = details[keyValue[0]]!
+          let value = keyValue[1]
+
+          let ret = self.mContact!.setUserInfo(item: item, value: value)
+          if(ret < 0) {
+            self.showMessage(ViewController.ErrorPrefix + "Failed to set \(result!). ret=\(ret)")
+          }
+      })
 
       let info = mContact!.getUserInfo()
       if info == nil {
         return ViewController.ErrorPrefix + "Failed to get user info."
       }
 
-      let humanCode = [
-        "Did": info!.did,
-        "Ela": info!.elaAddress,
-        "Carrier": info!.getCurrDevCarrierAddr()
-      ]
-      let ext = info!.getCurrDevCarrierId()
-      Helper.showAddress(view: self,
-                         listener: { _ in
-                           Helper.showDetails(view: self, msg: info!.toJson()!)
-                         },
-                         humanCode: humanCode, presentDevId: getDeviceId(), ext: ext)
+      return info.toString()
+  }
 
-      return info!.toString()
+  private func showSetWalletAddress() -> String {
+    if mContact == nil {
+      return ViewController.ErrorPrefix + "Contact is null."
+    }
+
+    let checkList = [
+            "ELA",
+            "BTC",
+            "ETH"
+    ]
+    let separator = ":-:-:"
+
+    Helper.showSetDetails(view: self,
+                          checkList: checkList, separator: separator,
+                          listener: { result in
+    
+          let keyValue = result!.components(separatedBy: separator)
+          let name = keyValue[0]
+          let value = keyValue[1]
+                            
+          let ret = self.mContact!.setWalletAddress(name: name, value: value)
+          if(ret < 0) {
+            self.showMessage(ViewController.ErrorPrefix + "Failed to set \(result!). ret=\(ret)")
+          }
+      })
+
+      let info = mContact!.getUserInfo()
+      if info == nil {
+        return ViewController.ErrorPrefix + "Failed to get user info."
+      }
+
+      return info.toString()
+  }
+
+  private func testSyncUpload() -> String {
+    if mContact == nil {
+      return ViewController.ErrorPrefix + "Contact is null."
+    }
+
+    let ret = mContact!.syncInfoUploadToDidChain()
+    if(ret < 0) {
+      return ViewController.ErrorPrefix + "Failed to call syncInfoUploadToDidChain() ret=\(ret)"
+    }
+
+    return "Success to syncInfoUploadToDidChain."
+  }
+
+  private func testSyncDownload() -> String {
+    if mContact == nil {
+      return ViewController.ErrorPrefix + "Contact is null."
+    }
+
+    let ret = mContact!.syncInfoDownloadFromDidChain()
+    if(ret < 0) {
+      return ViewController.ErrorPrefix + "Failed to call syncInfoDownloadFromDidChain() ret=\(ret)"
+    }
+
+    return "Success to syncInfoDownloadFromDidChain ."
+  }
+
+  private func listFriendInfo() -> String {
+    if mContact == nil {
+      return ViewController.ErrorPrefix + "Contact is null."
+    }
+
+    let friendList = mContact!.listFriendInfo()
+    if(friendList == nil) {
+      return ViewController.ErrorPrefix + "Failed to list friend info."
+    }
+    let friendCodeList = mContact!.listFriendCode()
+
+    Helper.showFriendList(view: self, friendList: friendCodeList, listener:  { friendCode in
+      var friendInfo: Contact.FriendInfo?
+      for info in friendList! {
+        if(info.humanCode == friendCode) {
+            friendInfo = info
+            break
+        }
+      }
+      Helper.showDetails(view: self, msg: friendInfo!.toJson()!)
+    })
+    return "Success to list friend info."
+  }
+
+  private func removeFriend() -> String {
+    if mContact == nil {
+      return ViewController.ErrorPrefix + "Contact is null."
+    }
+    let info = mContact!.getUserInfo()
+    if info == nil {
+      return ViewController.ErrorPrefix + "Failed to get user info."
+    }
+
+    if (info!.status != ContactStatus.Online) {
+      return ViewController.ErrorPrefix + "Contact is not online."
+    }
+
+    let separator = " "
+    var friendCodeList = [String]()
+    let friendList = mContact!.listFriendInfo()
+    for friendInfo in friendList! {
+        friendCodeList.append(friendInfo.humanCode! + separator + "[\(friendInfo.status)]")
+    }
+    
+    Helper.showFriendList(view: self, friendList: friendCodeList, listener:  { result in
+      let friendCode = result!.components(separatedBy: separator)[0]
+      let dialog = UIAlertController(title: nil, message: nil, preferredStyle: .alert)
+      dialog.message = "Are you sure to remove friend: " + friendCode
+      dialog.addAction(UIAlertAction(title: "Accept", style: .default, handler: { _ in
+        let ret = self.mContact!.removeFriend(friendCode: friendCode)
+        if(ret < 0) {
+          self.showMessage(ViewController.ErrorPrefix + "Failed to delete friend. ret=\(ret)")
+          return;
+        }
+      }))
+      dialog.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+      Helper.showDialog(self, dialog)
+    })
+    
+    return "Success to send message.";
   }
   
   private func processAcquire(request: AcquireArgs) -> Data? {
@@ -359,10 +562,15 @@ class ViewController: UIViewController {
       case .StatusChanged:
         break
       case .FriendRequest:
-//        let requestEvent = event as Contact.Listener.RequestEvent
-//        Helper.showFriendRequest(this, requestEvent.humanCode, requestEvent.summary, v -> {
-//          mContact.acceptFriend(requestEvent.humanCode)
-//        })
+        let requestEvent = event as! Contact.Listener.RequestEvent
+        Helper.showFriendRequest(view: self,
+                                 humanCode: requestEvent.humanCode, summary: requestEvent.summary,
+                                 listener: { _ in
+          let ret = self.mContact!.acceptFriend(friendCode: requestEvent.humanCode)
+          if(ret < 0) {
+            self.showMessage(ViewController.ErrorPrefix + "Failed to acceptFriend \(requestEvent.humanCode). ret=\(ret)")
+          }
+        })
         break
     case .HumanInfoChanged:
       let infoEvent = event as! Contact.Listener.InfoEvent

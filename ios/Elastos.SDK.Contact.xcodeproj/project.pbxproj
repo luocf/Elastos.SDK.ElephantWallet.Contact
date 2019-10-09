@@ -93,6 +93,7 @@
 		DE35737F231F630600496E41 /* CrossBase.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE35737E231F630600496E41 /* CrossBase.swift */; };
 		DE357383231F642D00496E41 /* CrossBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DE357381231F642D00496E41 /* CrossBase.cpp */; };
 		DE357384231F642D00496E41 /* CrossBase.hpp in Headers */ = {isa = PBXBuildFile; fileRef = DE357382231F642D00496E41 /* CrossBase.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		DE371F3D234C72D000011A70 /* RadioGroupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE371F3C234C72D000011A70 /* RadioGroupView.swift */; };
 		DE3C538E2339AAE70053196E /* CrossBase.proxy.h in Headers */ = {isa = PBXBuildFile; fileRef = DE3C538D2339AAE70053196E /* CrossBase.proxy.h */; };
 		DE3C53952339ABC20053196E /* ContactBridge.proxy.h in Headers */ = {isa = PBXBuildFile; fileRef = DE3C538F2339ABC10053196E /* ContactBridge.proxy.h */; };
 		DE3C53962339ABC20053196E /* ContactBridge.proxy.mm in Sources */ = {isa = PBXBuildFile; fileRef = DE3C53902339ABC10053196E /* ContactBridge.proxy.mm */; };
@@ -269,6 +270,7 @@
 		DE35737E231F630600496E41 /* CrossBase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CrossBase.swift; sourceTree = "<group>"; };
 		DE357381231F642D00496E41 /* CrossBase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CrossBase.cpp; sourceTree = "<group>"; };
 		DE357382231F642D00496E41 /* CrossBase.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = CrossBase.hpp; sourceTree = "<group>"; };
+		DE371F3C234C72D000011A70 /* RadioGroupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RadioGroupView.swift; sourceTree = "<group>"; };
 		DE3C538D2339AAE70053196E /* CrossBase.proxy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CrossBase.proxy.h; sourceTree = "<group>"; };
 		DE3C538F2339ABC10053196E /* ContactBridge.proxy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ContactBridge.proxy.h; sourceTree = "<group>"; };
 		DE3C53902339ABC10053196E /* ContactBridge.proxy.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ContactBridge.proxy.mm; sourceTree = "<group>"; };
@@ -581,6 +583,7 @@
 				DE27584D23345AD4001B635B /* AppDelegate.swift */,
 				DE27584F23345AD4001B635B /* ViewController.swift */,
 				DE978FDA233BB47B00F5B5F9 /* Helper.swift */,
+				DE371F3C234C72D000011A70 /* RadioGroupView.swift */,
 				DE27585123345AD4001B635B /* Main.storyboard */,
 				DE27585423345AD6001B635B /* Assets.xcassets */,
 				DE27585623345AD6001B635B /* LaunchScreen.storyboard */,
@@ -1038,6 +1041,7 @@
 			files = (
 				DE27585023345AD4001B635B /* ViewController.swift in Sources */,
 				DE27584E23345AD4001B635B /* AppDelegate.swift in Sources */,
+				DE371F3D234C72D000011A70 /* RadioGroupView.swift in Sources */,
 				DE978FDB233BB47B00F5B5F9 /* Helper.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

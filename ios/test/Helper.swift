@@ -2,6 +2,7 @@ import UIKit
 
 public class Helper {
   public typealias OnListener = (_ result: String?) -> Void
+  public typealias OrderedDictionary =  [(key: String, value: String?)]
 
   public static func showImportMnemonic(view: UIViewController, listener: @escaping OnListener) {
     let dialog = UIAlertController(title: nil, message: nil, preferredStyle: .alert)
@@ -20,7 +21,7 @@ public class Helper {
 
   public static func showAddress(view: UIViewController,
                                  listener: @escaping OnListener,
-                                 humanCode: [String: String?], presentDevId: String, ext: String?) {
+                                 humanCode: OrderedDictionary, presentDevId: String, ext: String?) {
     let dialog = UIAlertController(title: nil, message: nil, preferredStyle: .alert)
     dialog.title = "My Address"
     
@@ -50,29 +51,30 @@ public class Helper {
 //        showDialog(builder);
     }
 //
-//    public static void showSetDetails(Context context, List<String> checkList, String separator, OnListener listener) {
-//        AlertDialog.Builder builder = new AlertDialog.Builder(context);
-//        builder.setTitle("Set Details");
-//
-//        RadioGroup radioGrp = new RadioGroup(context);
-//        EditText editView = new EditText(context);
-//        View root = makeSetDetailView(context, radioGrp, checkList, editView);
-//        builder.setView(root);
-//
-//        builder.setPositiveButton("OK", (dialog, which) -> {
-//            int checkedId = radioGrp.getCheckedRadioButtonId();
-//            RadioButton checkedBtn = radioGrp.findViewById(checkedId);
-//            String key = checkedBtn.getText().toString();
-//            String value = editView.getText().toString();
-//
-//            listener.onResult(key + separator + value);
-//        });
-//        builder.setNegativeButton("Cancel", (dialog, which) -> {
-//            dismissDialog();
-//        });
-//
-//        showDialog(builder);
-//    }
+    public static func showSetDetails(view: UIViewController,
+                                      checkList: [String], separator: String,
+                                      listener: @escaping OnListener) {
+      let dialog = UIAlertController(title: nil, message: nil, preferredStyle: .alert)
+      dialog.title = "Set Details"
+      
+      
+      let radioGrp = RadioGroupView()
+      let editView =  UITextView()
+      
+      radioGrp.addRadioButtons(titles: checkList, selected: 0)
+      let rootView = makeSetDetailView(view: view, radioGrp: radioGrp, editView: editView);
+      setDialogContent(dialog, 300, rootView)
+    
+      dialog.addAction(UIAlertAction(title: "OK", style: .default, handler: { _ in
+        let key = radioGrp.selectedTitle!
+        let value = editView.text
+      
+        listener(key + separator + (value ?? ""))
+      }))
+      dialog.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+
+      showDialog(view, dialog);
+    }
 
   public static func showDetails(view: UIViewController, msg: String) {
     let dialog = UIAlertController(title: nil, message: nil, preferredStyle: .alert)
@@ -87,24 +89,60 @@ public class Helper {
     showDialog(view, dialog);
   }
 
-//    public static void showFriendList(Context context, List<String> friendList, OnListener listener) {
-//        ListView listView = new ListView(context);
-//        ArrayAdapter<String> adapter = new ArrayAdapter<>(context, android.R.layout.simple_list_item_1, friendList);
-//        listView.setAdapter(adapter);
-//        listView.setOnItemClickListener((parent, view, position, id) -> {
-//            listener.onResult(((TextView)view).getText().toString());
-//        });
-//
-//        AlertDialog.Builder builder = new AlertDialog.Builder(context);
-//        builder.setTitle("Friend List");
-//        builder.setView(listView);
-//        builder.setNegativeButton("Cancel", (dialog, which) -> {
-//            dismissDialog();
-//        });
-//
-//        showDialog(builder);
-//    }
-//
+  public static func showFriendList(view: UIViewController, friendList: [String],
+                                    listener: @escaping OnListener) {
+    let dialog = UIAlertController(title: nil, message: nil, preferredStyle: .alert)
+    dialog.title = "Friend List"
+
+    let impl: NSObject = {
+      class Impl : NSObject, UITableViewDataSource, UITableViewDelegate {
+        init(_ friendList: [String], _ listener: @escaping OnListener) {
+          self.friendList = friendList
+          self.listener = listener
+        }
+        
+        func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+          return friendList.count
+        }
+        
+        func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+          let cell = tableView.dequeueReusableCell(withIdentifier: "UITableViewCell", for: indexPath)
+          let friendCode = friendList[indexPath.item]
+          let valPrefix = friendCode[..<friendCode.index(friendCode.startIndex, offsetBy: 5)]
+          let valSuffix = friendCode[friendCode.index(friendCode.endIndex, offsetBy: -10)...]
+          let label = "" + valPrefix + " ... " + valSuffix
+          cell.textLabel?.text = label
+          
+          return cell
+        }
+        
+        func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+          let friendCode = friendList[indexPath.item]
+          listener(friendCode)
+        }
+        
+        private let friendList: [String]
+        private let listener: OnListener
+      }
+      
+      return Impl(friendList, listener)
+    }()
+    _ = Unmanaged.passRetained(impl)
+
+    let listView = UITableView()
+    listView.register(UITableViewCell.self, forCellReuseIdentifier: "UITableViewCell")
+    listView.delegate = (impl as! UITableViewDelegate)
+    listView.dataSource = (impl as! UITableViewDataSource)
+
+    setDialogContent(dialog, 500, listView)
+    
+    dialog.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: { _ in
+      _ = Unmanaged.passRetained(impl).autorelease()
+    }))
+
+    showDialog(view, dialog)
+  }
+
 //    public static void showAddFriend(Context context, String friendCode, OnListener listener) {
 //        EditText edit = new EditText(context);
 //        View root = makeEditView(context, friendCode, edit);
@@ -121,24 +159,31 @@ public class Helper {
 //
 //        showDialog(builder);
 //    }
-//
-//    public static void showFriendRequest(Context context, String humanCode, String summary, OnListener listener) {
-//        AlertDialog.Builder builder = new AlertDialog.Builder(context);
-//        builder.setTitle("Friend Request");
-//        String msg = new String();
-//        msg += "FriendCode:\n  " + humanCode + "\n\n";
-//        msg += "Summary:\n  " + summary;
-//        builder.setMessage(msg);
-//        builder.setPositiveButton("Accept", (dialog, which) -> {
-//            listener.onResult(null);
-//        });
-//        builder.setNegativeButton("Cancel", (dialog, which) -> {
-//            dismissDialog();
-//        });
-//
-//        showDialog(builder);
-//    }
-//
+
+  public static func showFriendRequest(view: UIViewController,
+                                       humanCode: String, summary: String,
+                                       listener: @escaping OnListener) {
+    DispatchQueue.main.async {
+      let dialog = UIAlertController(title: nil, message: nil, preferredStyle: .alert)
+      dialog.title = "Friend Request"
+
+      var msg = "FriendCode:\n  " + humanCode + "\n\n"
+      msg += "Summary:\n  " + summary
+      
+      let rootView = UITextView()
+      rootView.text = msg
+      rootView.isEditable = false
+      setDialogContent(dialog, 500, rootView)
+      
+      dialog.addAction(UIAlertAction(title: "Accept", style: .default, handler: { _ in
+        listener(nil)
+      }))
+      dialog.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+
+      showDialog(view, dialog)
+    }
+  }
+
 //    public static void showSendMessage(Context context, String friendCode, OnListener listener) {
 //        EditText edit = new EditText(context);
 //        View root = makeEditView(context, friendCode, edit);
@@ -214,61 +259,42 @@ public class Helper {
 //    }
 //
   private static func makeAddressView(view: UIViewController, width: NSLayoutDimension,
-                                        listener: @escaping OnListener,
-                                        humanCode: [String: String?], presentDevId: String?, ext: String?) -> UIView {
+                                      listener: @escaping OnListener,
+                                      humanCode: OrderedDictionary, presentDevId: String?, ext: String?) -> UIView {
     let txtDevId = UITextView()
     let imgQRCode = UIImageView()
-    var radioGrp = [UIStackView]()
+    let radioGrp = RadioGroupView()
     let txtCode =  UITextView()
     let btn =  UIButton()
 
     txtDevId.isEditable = false
-    txtCode.text = "Present DevId: " + (presentDevId ?? "nil")
+    txtDevId.text = "Present DevId: " + (presentDevId ?? "nil")
+    txtCode.isEditable = false
     
-    txtDevId.isEditable = false
-    
-    let radioGrpChecked: UIControl.TargetClosure = { sender in
-      for it in radioGrp {
-        (it.subviews.first as! UISwitch).setOn(false, animated: false)
-      }
-      let radioBtn = sender as! UISwitch
-      radioBtn.setOn(true, animated: false)
-      
-      let mapIdx = radioBtn.tag
-      let checkedVal = Array(humanCode)[mapIdx].value
+    radioGrp.axis = .vertical
+    radioGrp.setOnClickedClosure(closure: { (index, button) in
+      let checkedVal = Array(humanCode)[index].value
       var showed = checkedVal
-      if(mapIdx == humanCode.count - 1) {
+      if(index == humanCode.count - 1) {
         showed! += "\n----------------\n" + ext!;
       }
       
       let bitmap = makeQRCode(value: checkedVal!)
       imgQRCode.image = bitmap
       txtCode.text = showed
-    }
-    
-    for it in humanCode {
-      let key = it.key
-      let value = it.value!
+    })
+    for idx in humanCode.indices {
+      let key = humanCode[idx].key
+      let value = humanCode[idx].value!
+      let valPrefix = value[..<value.index(value.startIndex, offsetBy: 5)]
+      let valSuffix = value[value.index(value.endIndex, offsetBy: -5)...]
+      let label = key + ": " + valPrefix + " ... " + valSuffix
       
-      let radioView = UIStackView()
-     
-      let radioBtn = UISwitch()
-      radioBtn.addTargetClosure(closure: radioGrpChecked)
-      radioBtn.tag = radioGrp.count
-      radioView.addArrangedSubview(radioBtn)
-     
-      let radioLabel = UILabel()
-      radioLabel.text = key + ": " + value[value.startIndex..<value.index(value.startIndex, offsetBy: 5)] + " ... " + value[value.index(value.endIndex, offsetBy: -5)..<value.endIndex]
-      radioView.addArrangedSubview(radioLabel)
-
-      radioGrp.append(radioView)
-      if(radioBtn.tag == 0) {
-        radioBtn.sendActions(for: .touchUpInside)
-      }
+      radioGrp.addRadioButton(title: label, selected: idx == humanCode.startIndex)
     }
     
     btn.setTitle("Details", for: .normal)
-    btn.backgroundColor = .blue
+    btn.setTitleColor(.blue, for: .normal)
     btn.addTargetClosure(closure: { sender in
       listener(nil)
     })
@@ -278,9 +304,7 @@ public class Helper {
     rootView.addArrangedSubview(txtDevId)
     rootView.addArrangedSubview(imgQRCode)
     rootView.addArrangedSubview(txtCode);
-    for it in radioGrp {
-      rootView.addArrangedSubview(it)
-    }
+    rootView.addArrangedSubview(radioGrp)
     rootView.addArrangedSubview(btn)
 
     txtDevId.translatesAutoresizingMaskIntoConstraints = false
@@ -289,43 +313,33 @@ public class Helper {
     imgQRCode.heightAnchor.constraint(equalTo: imgQRCode.widthAnchor).isActive = true
     txtCode.translatesAutoresizingMaskIntoConstraints = false
     txtCode.heightAnchor.constraint(equalToConstant: 100).isActive = true
-    for it in radioGrp {
-      it.translatesAutoresizingMaskIntoConstraints = false
-      it.widthAnchor.constraint(equalToConstant: 150).isActive = true
-      for sub in it.subviews {
-        sub.translatesAutoresizingMaskIntoConstraints = false
-        sub.heightAnchor.constraint(equalToConstant: 40).isActive = true
-      }
-    }
+    radioGrp.translatesAutoresizingMaskIntoConstraints = false
+    radioGrp.widthAnchor.constraint(equalToConstant: 150).isActive = true
     btn.translatesAutoresizingMaskIntoConstraints = false
     btn.heightAnchor.constraint(equalToConstant: 50).isActive = true
 
     return rootView
   }
 
-//    private static View makeSetDetailView(Context context, RadioGroup radioGrp, List<String> checkList, EditText editView) {
-//        TextView txtView = new TextView(context);
-//
-//        LinearLayout root = new LinearLayout(context);
-//        root.setOrientation(LinearLayout.VERTICAL);
-//        root.addView(radioGrp);
-//        root.addView(txtView);
-//        root.addView(editView);
-//
-//        for(String it: checkList) {
-//            RadioButton radiobtn = new RadioButton(context);
-//            radiobtn.setText(it);
-//            radioGrp.addView(radiobtn);
-//            if(radioGrp.getChildCount() == 1) {
-//                radiobtn.setChecked(true);
-//            }
-//        }
-//
-//        txtView.setText("Value: ");
-//        editView.setText("TestUser");
-//
-//        return root;
-//    }
+  private static func makeSetDetailView(view: UIViewController,
+                                        radioGrp: RadioGroupView,
+                                        editView: UITextView) -> UIView {
+    let txtView = UITextField()
+
+    let rootView = UIStackView()
+    rootView.axis = .vertical
+    
+    rootView.addArrangedSubview(radioGrp)
+    rootView.addArrangedSubview(txtView)
+    rootView.addArrangedSubview(editView)
+
+    radioGrp.axis = .vertical
+   
+    txtView.text = "Value:"
+    editView.text = "TestUser"
+
+    return rootView
+  }
 //
 //    private static View makeEditView(Context context, String friendCode, EditText edit) {
 //        TextView txtCode = new TextView(context);
@@ -368,56 +382,27 @@ public class Helper {
     contentView.bottomAnchor.constraint(equalTo: dialog.view.bottomAnchor, constant: -45).isActive = true
   }
   
-  private static func showDialog(_ view: UIViewController, _ dialog: UIAlertController) {
+  public static func showDialog(_ view: UIViewController, _ dialog: UIAlertController) {
     dismissDialog()
 
-    mLastDialog = dialog
-    view.present(mLastDialog!, animated: false)
+//    DispatchQueue.main.async {
+      mLastDialog = dialog
+      view.present(mLastDialog!, animated: false)
+//    }
   }
 
   private static func dismissDialog() {
     guard mLastDialog != nil else { return }
 
-    mLastDialog!.dismiss(animated: false)
-    mLastDialog = nil
+//    DispatchQueue.main.async {
+      mLastDialog!.dismiss(animated: false)
+      mLastDialog = nil
+//    }
   }
 
   private static var mLastDialog: UIAlertController? = nil
+  private static var mTableViewDelegate: NSObject? = nil
 //    private static OnListener mOnScanListener;
 //    private static final int REQUEST_CODE_QR_SCAN = 101;
 }
 
-extension UIControl {
-  typealias TargetClosure = (UIControl) -> ()
-
-  func addTargetClosure(closure: @escaping TargetClosure) {
-    targetClosure = closure
-    addTarget(self, action: #selector(UIControl.closureAction), for: .touchUpInside)
-  }
-  @objc func closureAction() {
-      guard let targetClosure = targetClosure else { return }
-      targetClosure(self)
-  }
-  
-  private struct AssociatedKeys {
-      static var targetClosure = "targetClosure"
-  }
-  
-  private var targetClosure: TargetClosure? {
-      get {
-          guard let closureWrapper = objc_getAssociatedObject(self, &AssociatedKeys.targetClosure) as? ClosureWrapper else { return nil }
-          return closureWrapper.closure
-      }
-      set(newValue) {
-          guard let newValue = newValue else { return }
-          objc_setAssociatedObject(self, &AssociatedKeys.targetClosure, ClosureWrapper(newValue), objc_AssociationPolicy.OBJC_ASSOCIATION_RETAIN_NONATOMIC)
-      }
-  }
-  
-  class ClosureWrapper: NSObject {
-      let closure: TargetClosure
-      init(_ closure: @escaping TargetClosure) {
-          self.closure = closure
-      }
-  }
-}

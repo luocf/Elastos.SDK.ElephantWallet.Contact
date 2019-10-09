@@ -99,7 +99,7 @@ class CrossMethodInfo {
       arguments += "int64_t nativeHandle, "
     }
 
-    for idx in 0..<paramsType.count {
+    for idx in paramsType.indices {
       let type = paramsType[idx].toObjcString()
       arguments += "\(type) ocvar\(idx), "
     }
@@ -143,7 +143,7 @@ class CrossMethodInfo {
   private func makeNativeFunctionBody(cppClassName: String) -> String {
     var prefixContent = ""
     var suffixContent = ""
-    for idx in 0..<paramsType.count {
+    for idx in paramsType.indices {
       let type = self.paramsType[idx]
       let isPrimitiveType = type.isPrimitiveType()
       if isPrimitiveType == true {
@@ -177,7 +177,7 @@ class CrossMethodInfo {
     }
   
     var argusContent = ""
-    for idx in 0..<paramsType.count {
+    for idx in paramsType.indices {
       let type = paramsType[idx]
       let isPrimitiveType = type.isPrimitiveType()
       if isPrimitiveType == true {
@@ -226,7 +226,7 @@ class CrossMethodInfo {
     var suffixContent = ""
   
     prefixContent += "\(CrossTmplUtils.TabSpace)auto ocobj = crosspl::CrossPLUtils::SafeCastCrossObjectToSwift<\(cppClassName)>(platformHandle);\n"
-    for idx in 0..<paramsType.count {
+    for idx in paramsType.indices {
       let type = paramsType[idx]
       let isPrimitiveType = type.isPrimitiveType()
       if isPrimitiveType == true {
@@ -248,7 +248,7 @@ class CrossMethodInfo {
 //    prefixContent += "\(CrossTmplUtils.TabSpace)auto jclazz = crosspl::CrossPLUtils::FindJavaClass(jenv.get(), \"$javaClassPath\");\n"
 //
 //    var jniSigContent = "("
-//    for idx in 0..<paramsType.count {
+//    for idx in paramsType.indices {
 //      let type = paramsType[idx]
 //      jniSigContent += "${type.toJniSigChar()}"
 //    }
@@ -276,7 +276,7 @@ class CrossMethodInfo {
 //    funcContent += "Method"
   
     var argusContent = ""
-    for idx in 0..<paramsType.count {
+    for idx in paramsType.indices {
       let type = paramsType[idx]
       let isPrimitiveType = type.isPrimitiveType()
       if isPrimitiveType == true {

@@ -2,7 +2,7 @@ import CrossPL
 
 /* @CrossClass */
 open class ContactBridge: CrossBase {
-  public static let TAG = "elastos";
+  public static let TAG = "elastos"
   
   init() {
     super.init(className: String(describing: ContactBridge.self))
@@ -55,50 +55,51 @@ open class ContactBridge: CrossBase {
 
     return userInfo;
   }
-//
-//  public List<Contact.FriendInfo> listFriendInfo() {
-//    assert(mListener != null);
-//
-//    StringBuffer json = new StringBuffer();
-//    int ret = getFriendList(json);
-//    if(ret < 0) {
-//      Log.w(TAG, "Failed to list friend info. ret=" + ret);
-//      return null;
-//    }
-//
+
+  public func listFriendInfo() -> [Contact.FriendInfo]? {
+    assert(mListener != nil)
+
+    var json = String()
+    let ret = getFriendList(info: &json);
+    if(ret < 0) {
+      Log.w(tag: ContactBridge.TAG, msg: "Failed to list friend info. ret=\(ret)")
+      return nil
+    }
+
 //    TypeToken<List<Contact.FriendInfo.FriendJson>> friendInfoListType = new TypeToken<List<Contact.FriendInfo.FriendJson>>(){};
-//    List<Contact.FriendInfo.FriendJson> listJson = new Gson().fromJson(json.toString(), friendInfoListType.getType());
-//
-//    List<Contact.FriendInfo> list = new ArrayList<>();
-//    for(Contact.FriendInfo.FriendJson it: listJson) {
-//      Contact.FriendInfo friendInfo = new Contact.FriendInfo();
-//      ret  = friendInfo.fromJson(it);
-//      if(ret < 0) {
-//        Log.w(TAG, "Failed to deserialize friend info. ret=" + ret);
-//        return null;
-//      }
-//
-//      list.add(friendInfo);
-//    }
-//
-//    return list;
-//  }
-//
-//  public List<String> listFriendCode() {
-//    List<String> friendCodeList = new ArrayList<String>();
-//
-//    List<Contact.FriendInfo> friendList = listFriendInfo();
-//    if(friendList == null) {
-//      return friendCodeList;
-//    }
-//
-//    for(Contact.FriendInfo it: friendList) {
-//      friendCodeList.add(it.humanCode);
-//    }
-//
-//    return friendCodeList;
-//  }
-//
+//    let listJson = new Gson().fromJson(json.toString(), friendInfoListType.getType());
+    let listJson = try! JSONDecoder().decode([Contact.FriendInfo.FriendJson].self, from: json.data(using: .utf8)!)
+
+    var list = [Contact.FriendInfo]()
+    for it in listJson {
+      let friendInfo = Contact.FriendInfo()
+      let ret = friendInfo.fromJson(info: it)
+      if(ret < 0) {
+        Log.w(tag: ContactBridge.TAG, msg: "Failed to deserialize friend info. ret=\(ret)")
+        return nil
+      }
+
+      list.append(friendInfo)
+    }
+
+    return list
+  }
+
+  public func listFriendCode() -> [String] {
+    var friendCodeList = [String]()
+
+    let friendList = listFriendInfo()
+    if(friendList == nil) {
+      return friendCodeList
+    }
+
+    for it in friendList! {
+      friendCodeList.append(it.humanCode!)
+    }
+
+    return friendCodeList
+  }
+
 //  public ContactStatus getStatus(String humanCode) {
 //    int ret = getHumanStatus(humanCode);
 //    if(ret < 0) {

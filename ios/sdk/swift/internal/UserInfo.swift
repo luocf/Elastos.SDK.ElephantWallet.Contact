@@ -1,7 +1,6 @@
 
 public class UserInfo: HumanInfo {
-//  enum Kind: IdentifyCode.Kind {
-//  }
+  public typealias Kind = IdentifyCode.Kind
   
   public class UserJson: HumanInfo.HumanJson {
     var identifyCode: IdentifyCode? = nil
