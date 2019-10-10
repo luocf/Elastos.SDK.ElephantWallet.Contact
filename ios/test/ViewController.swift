@@ -112,7 +112,7 @@ class ViewController: UIViewController {
       message = listFriendInfo()
       break
     case ButtonTag.add_friend.rawValue:
-      print("\(sender.tag)")
+      message = scanUserInfo()
       break
     case ButtonTag.del_friend.rawValue:
       message = removeFriend()
@@ -491,6 +491,25 @@ class ViewController: UIViewController {
     return "Success to list friend info."
   }
 
+  private func scanUserInfo() -> String {
+      if mContact == nil {
+        return ViewController.ErrorPrefix + "Contact is null."
+      }
+
+      Helper.scanAddress(view: self, listener: { result in
+        self.showMessage(result!)
+
+        Helper.showAddFriend(view: self, friendCode: result!, listener: { summary in
+          let ret = self.mContact!.addFriend(friendCode: result!, summary: summary!)
+            if(ret < 0) {
+              self.showMessage(ViewController.ErrorPrefix + "Failed to add friend. ret=\(ret)")
+            }
+          })
+      })
+
+      return ""
+  }
+  
   private func removeFriend() -> String {
     if mContact == nil {
       return ViewController.ErrorPrefix + "Contact is null."

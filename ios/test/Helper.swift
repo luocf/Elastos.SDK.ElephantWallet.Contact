@@ -143,22 +143,22 @@ public class Helper {
     showDialog(view, dialog, release: impl)
   }
 
-//    public static void showAddFriend(Context context, String friendCode, OnListener listener) {
-//        EditText edit = new EditText(context);
-//        View root = makeEditView(context, friendCode, edit);
-//
-//        AlertDialog.Builder builder = new AlertDialog.Builder(context);
-//        builder.setTitle("Find Address");
-//        builder.setView(root);
-//        builder.setNegativeButton("Cancel", (dialog, which) -> {
-//            dismissDialog();
-//        });
-//        builder.setPositiveButton("Add Friend", (dialog, which) -> {
-//            listener.onResult(edit.getText().toString());
-//        });
-//
-//        showDialog(builder);
-//    }
+  public static func showAddFriend(view: UIViewController, friendCode: String,
+                                   listener: @escaping OnListener) {
+    let dialog = UIAlertController(title: nil, message: nil, preferredStyle: .alert)
+    dialog.title = "Found Address"
+
+    let edit = UITextView()
+    let rootView = makeEditView(view, friendCode, edit)
+    setDialogContent(dialog, 500, rootView)
+      
+    dialog.addAction(UIAlertAction(title: "Send", style: .default, handler: { _ in
+      listener(edit.text)
+    }))
+    dialog.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+
+    showDialog(view, dialog)
+  }
 
   public static func showFriendRequest(view: UIViewController,
                                        humanCode: String, summary: String,
@@ -185,7 +185,8 @@ public class Helper {
   }
 
   public static func showSendMessage(view: UIViewController,
-                                     friendCode: String, listener: @escaping OnListener) {
+                                     friendCode: String,
+                                     listener: @escaping OnListener) {
     let dialog = UIAlertController(title: nil, message: nil, preferredStyle: .alert)
     dialog.title = "Send Message"
 
@@ -201,7 +202,7 @@ public class Helper {
     showDialog(view, dialog)
   }
 
-//    public static void scanAddress(MainActivity activity, OnListener listener) {
+    public static func scanAddress(view: UIViewController, listener: @escaping OnListener) {
 //        mOnScanListener = listener;
 //
 //        int hasCameraPermission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.CAMERA);
@@ -213,8 +214,8 @@ public class Helper {
 //                    new String[]{Manifest.permission.CAMERA},
 //                    1);
 //        }
-//    }
-//
+    }
+
 //    public static void onRequestPermissionsResult(MainActivity activity, int requestCode, String[] permissions, int[] grantResults) {
 //        if (requestCode != 1) {
 //            return;
