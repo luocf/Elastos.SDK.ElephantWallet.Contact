@@ -27,15 +27,6 @@ open class Contact: ContactBridge {
   public class Message: ContactMessage {
   } // class Message
 
-//  public abstract static class Debug extends ContactDebug {
-//  } // class Listener
+  public class Debug: ContactDebug {
+  } // class Listener
 }
-
-//extension Dictionary {
-//    public init(keyValuePairs: [(Int, Value)]) {
-//        self.init()
-//        for pair in keyValuePairs {
-//            self[pair.0] = pair.1
-//        }
-//    }
-//}

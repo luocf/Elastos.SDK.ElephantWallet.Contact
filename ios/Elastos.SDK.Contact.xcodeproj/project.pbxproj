@@ -118,6 +118,9 @@
 		DE5961A7232F231200BDB4EE /* CrossBase.proxy.mm in Sources */ = {isa = PBXBuildFile; fileRef = DE5961A6232F231200BDB4EE /* CrossBase.proxy.mm */; };
 		DE5EA245234EEC630055F587 /* CrossPLFactory.ContactSDK.h in Headers */ = {isa = PBXBuildFile; fileRef = DE5EA243234EEC630055F587 /* CrossPLFactory.ContactSDK.h */; };
 		DE5EA246234EEC630055F587 /* CrossPLFactory.ContactSDK.mm in Sources */ = {isa = PBXBuildFile; fileRef = DE5EA244234EEC630055F587 /* CrossPLFactory.ContactSDK.mm */; };
+		DE5EA248234EF7B10055F587 /* ContactDebug.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE5EA247234EF7B10055F587 /* ContactDebug.swift */; };
+		DE5EA24B234EF9980055F587 /* ContactDebug.proxy.h in Headers */ = {isa = PBXBuildFile; fileRef = DE5EA249234EF9970055F587 /* ContactDebug.proxy.h */; };
+		DE5EA24C234EF9980055F587 /* ContactDebug.proxy.mm in Sources */ = {isa = PBXBuildFile; fileRef = DE5EA24A234EF9980055F587 /* ContactDebug.proxy.mm */; };
 		DE76DD5623262AF70041A703 /* CrossTmplUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE76DD5523262AF70041A703 /* CrossTmplUtils.swift */; };
 		DE76DD5823287EF40041A703 /* CrossPLFactoryGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE76DD5723287EF40041A703 /* CrossPLFactoryGenerator.swift */; };
 		DE76DD6A23289D640041A703 /* CrossPLUtilsGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE76DD6923289D640041A703 /* CrossPLUtilsGenerator.swift */; };
@@ -292,6 +295,9 @@
 		DE5961A6232F231200BDB4EE /* CrossBase.proxy.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = CrossBase.proxy.mm; sourceTree = "<group>"; };
 		DE5EA243234EEC630055F587 /* CrossPLFactory.ContactSDK.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CrossPLFactory.ContactSDK.h; sourceTree = "<group>"; };
 		DE5EA244234EEC630055F587 /* CrossPLFactory.ContactSDK.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = CrossPLFactory.ContactSDK.mm; sourceTree = "<group>"; };
+		DE5EA247234EF7B10055F587 /* ContactDebug.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactDebug.swift; sourceTree = "<group>"; };
+		DE5EA249234EF9970055F587 /* ContactDebug.proxy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ContactDebug.proxy.h; sourceTree = "<group>"; };
+		DE5EA24A234EF9980055F587 /* ContactDebug.proxy.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ContactDebug.proxy.mm; sourceTree = "<group>"; };
 		DE76DD5523262AF70041A703 /* CrossTmplUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CrossTmplUtils.swift; sourceTree = "<group>"; };
 		DE76DD5723287EF40041A703 /* CrossPLFactoryGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CrossPLFactoryGenerator.swift; sourceTree = "<group>"; };
 		DE76DD6923289D640041A703 /* CrossPLUtilsGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CrossPLUtilsGenerator.swift; sourceTree = "<group>"; };
@@ -355,9 +361,9 @@
 		DE1F52672322072B00A70F78 /* generator */ = {
 			isa = PBXGroup;
 			children = (
-				DE1F52682322076C00A70F78 /* CrossProxyGenerator.swift */,
 				DE76DD5723287EF40041A703 /* CrossPLFactoryGenerator.swift */,
 				DE76DD6923289D640041A703 /* CrossPLUtilsGenerator.swift */,
+				DE1F52682322076C00A70F78 /* CrossProxyGenerator.swift */,
 			);
 			path = generator;
 			sourceTree = "<group>";
@@ -377,17 +383,17 @@
 		DE2757702333486B001B635B /* cpp */ = {
 			isa = PBXGroup;
 			children = (
+				DE2757722333486B001B635B /* base */,
 				DEDA638D2338AFF10024EA12 /* ContactBridge.cpp */,
 				DEDA638A2338AFF10024EA12 /* ContactBridge.hpp */,
 				DEDA638C2338AFF10024EA12 /* ContactDebug.cpp */,
 				DEDA638F2338AFF10024EA12 /* ContactDebug.hpp */,
+				DE27584423345A20001B635B /* ContactFactory.cpp */,
+				DE27584323345A20001B635B /* ContactFactory.hpp */,
 				DEDA638B2338AFF10024EA12 /* ContactListener.cpp */,
 				DEDA63892338AFF00024EA12 /* ContactListener.hpp */,
 				DEDA63902338AFF10024EA12 /* ContactMessage.cpp */,
 				DEDA638E2338AFF10024EA12 /* ContactMessage.hpp */,
-				DE27584423345A20001B635B /* ContactFactory.cpp */,
-				DE27584323345A20001B635B /* ContactFactory.hpp */,
-				DE2757722333486B001B635B /* base */,
 			);
 			path = cpp;
 			sourceTree = "<group>";
@@ -531,19 +537,20 @@
 				DE3C53B5233A0FBD0053196E /* AcquireArgs.swift */,
 				DEDA63662338A38E0024EA12 /* ContactBridge.swift */,
 				DE3C53BB233AFDDB0053196E /* ContactChannel.swift */,
+				DE5EA247234EF7B10055F587 /* ContactDebug.swift */,
 				DE27582723335014001B635B /* ContactFactory.swift */,
 				DEDA63992338CB540024EA12 /* ContactListener.swift */,
-				DE978FD8233BA1C000F5B5F9 /* FriendInfo.swift */,
 				DE3C53BD233AFF070053196E /* ContactMessage.swift */,
 				DE3C53C3233B16B90053196E /* ContactStatus.swift */,
 				DE3C53B9233AFCB50053196E /* EventArgs.swift */,
 				DE3C53C5233B18DF0053196E /* FoundationExtensions.swift */,
+				DE978FD8233BA1C000F5B5F9 /* FriendInfo.swift */,
 				DE3C53C9233B1A220053196E /* HumanInfo.swift */,
+				DEEFCF1F233B68CC008E240B /* IdentifyCode.swift */,
 				DE3C53C7233B19AF0053196E /* JsonKey.swift */,
 				DE3C53AF2339C5900053196E /* Log.swift */,
-				DE3C53B7233A189A0053196E /* Utils.swift */,
 				DEEFCF1D233B68A3008E240B /* UserInfo.swift */,
-				DEEFCF1F233B68CC008E240B /* IdentifyCode.swift */,
+				DE3C53B7233A189A0053196E /* Utils.swift */,
 			);
 			path = internal;
 			sourceTree = "<group>";
@@ -553,8 +560,8 @@
 			children = (
 				DE5EA243234EEC630055F587 /* CrossPLFactory.ContactSDK.h */,
 				DE5EA244234EEC630055F587 /* CrossPLFactory.ContactSDK.mm */,
-				DE27582F23335177001B635B /* CrossPLUtils.mm */,
 				DE27583123335177001B635B /* CrossPLUtils.h */,
+				DE27582F23335177001B635B /* CrossPLUtils.mm */,
 				DE27583223335177001B635B /* experimental-span.hpp */,
 				DE27582C23335177001B635B /* proxy */,
 			);
@@ -565,14 +572,16 @@
 		DE27582C23335177001B635B /* proxy */ = {
 			isa = PBXGroup;
 			children = (
-				DE3C53BF233B02650053196E /* ContactMessage.proxy.h */,
-				DE3C53C0233B02650053196E /* ContactMessage.proxy.mm */,
 				DE3C538F2339ABC10053196E /* ContactBridge.proxy.h */,
 				DE3C53902339ABC10053196E /* ContactBridge.proxy.mm */,
+				DE5EA249234EF9970055F587 /* ContactDebug.proxy.h */,
+				DE5EA24A234EF9980055F587 /* ContactDebug.proxy.mm */,
 				DE3C53942339ABC20053196E /* ContactFactory.proxy.h */,
 				DE3C53912339ABC10053196E /* ContactFactory.proxy.mm */,
 				DE3C53922339ABC10053196E /* ContactListener.proxy.h */,
 				DE3C53932339ABC10053196E /* ContactListener.proxy.mm */,
+				DE3C53BF233B02650053196E /* ContactMessage.proxy.h */,
+				DE3C53C0233B02650053196E /* ContactMessage.proxy.mm */,
 			);
 			path = proxy;
 			sourceTree = "<group>";
@@ -606,14 +615,14 @@
 			isa = PBXGroup;
 			children = (
 				DE1F52672322072B00A70F78 /* generator */,
-				DE283ECE231FBD1800D9740C /* main.swift */,
-				DE1F52532320D5EA00A70F78 /* CrossClassInfo.swift */,
-				DE76DD5523262AF70041A703 /* CrossTmplUtils.swift */,
-				DE1F52612320F9FC00A70F78 /* CrossMethodInfo.swift */,
-				DE1F52652321E43E00A70F78 /* CrossVariableType.swift */,
-				DE1F52552320D64B00A70F78 /* CrossClassAnnoProcessor.swift */,
 				DE1F526323214A9400A70F78 /* Annotation.swift */,
+				DE1F52552320D64B00A70F78 /* CrossClassAnnoProcessor.swift */,
+				DE1F52532320D5EA00A70F78 /* CrossClassInfo.swift */,
+				DE1F52612320F9FC00A70F78 /* CrossMethodInfo.swift */,
+				DE76DD5523262AF70041A703 /* CrossTmplUtils.swift */,
+				DE1F52652321E43E00A70F78 /* CrossVariableType.swift */,
 				DE1F525F2320F5F200A70F78 /* FoundationExtensions.swift */,
+				DE283ECE231FBD1800D9740C /* main.swift */,
 			);
 			path = swift;
 			sourceTree = "<group>";
@@ -707,8 +716,8 @@
 		DED5255F218DF4C800619F59 /* lib */ = {
 			isa = PBXGroup;
 			children = (
-				DE76DD6B2328A26B0041A703 /* crosspl */,
 				DE357380231F642D00496E41 /* cpp */,
+				DE76DD6B2328A26B0041A703 /* crosspl */,
 				DE76DD59232889A60041A703 /* swift */,
 				DEDB2484218DF5F200F07F42 /* CrossPL-Bridging-Header.h */,
 				DED52561218DF4C800619F59 /* Info.plist */,
@@ -752,6 +761,7 @@
 				DE2757E82333486B001B635B /* UserInfo.hpp in Headers */,
 				DEDA63962338AFF10024EA12 /* ContactMessage.hpp in Headers */,
 				DE2757E92333486B001B635B /* FriendManager.hpp in Headers */,
+				DE5EA24B234EF9980055F587 /* ContactDebug.proxy.h in Headers */,
 				DE27581E2333486C001B635B /* DidChnDataListener.hpp in Headers */,
 				DE2758002333486B001B635B /* SafePtr.hpp in Headers */,
 				DE2757EA2333486B001B635B /* IdentifyCode.hpp in Headers */,
@@ -988,6 +998,7 @@
 				DE3C53CA233B1A220053196E /* HumanInfo.swift in Sources */,
 				DE27581B2333486C001B635B /* MessageChannelStrategy.cpp in Sources */,
 				DEEFCF1E233B68A3008E240B /* UserInfo.swift in Sources */,
+				DE5EA248234EF7B10055F587 /* ContactDebug.swift in Sources */,
 				DE27581F2333486C001B635B /* Elastos.SDK.Contact.cpp in Sources */,
 				DEEFCF20233B68CC008E240B /* IdentifyCode.swift in Sources */,
 				DE2758142333486B001B635B /* FriendManager.cpp in Sources */,
@@ -1018,6 +1029,7 @@
 				DE27580B2333486B001B635B /* ChannelImplCarrier.cpp in Sources */,
 				DE2758162333486C001B635B /* IdentifyCode.cpp in Sources */,
 				DE3C53B8233A189A0053196E /* Utils.swift in Sources */,
+				DE5EA24C234EF9980055F587 /* ContactDebug.proxy.mm in Sources */,
 				DE2757F52333486B001B635B /* PlatformUnixLike.cpp in Sources */,
 				DE3C53972339ABC20053196E /* ContactFactory.proxy.mm in Sources */,
 				DEDA63982338AFF10024EA12 /* ContactMessage.cpp in Sources */,

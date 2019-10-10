@@ -121,7 +121,7 @@ class ViewController: UIViewController {
       message = sendMessage()
       break
     case ButtonTag.show_cached_didprop.rawValue:
-      print("\(sender.tag)")
+      message = getCachedDidProp()
       break
 
     default:
@@ -565,6 +565,18 @@ class ViewController: UIViewController {
       return "Success to send message.";
   }
 
+  private func getCachedDidProp() -> String {
+    if mContact == nil {
+      return ViewController.ErrorPrefix + "Contact is null."
+    }
+
+    var cachedDidProp = String()
+    Contact.Debug.GetCachedDidProp(value: &cachedDidProp)
+    
+    Helper.showDetails(view: self, msg:  cachedDidProp)
+    
+    return "Success to get cached didprop.";
+  }
   
   
   private func processAcquire(request: AcquireArgs) -> Data? {

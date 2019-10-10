@@ -11,17 +11,17 @@ import CrossPL
 /* @CrossClass */
 public class ContactFactory: CrossBase {
   /* @CrossNativeInterface */
-  @objc public static func SetLogLevel(level: Int32) {
+  public static func SetLogLevel(level: Int32) {
     crosspl_Proxy_ContactFactory_SetLogLevel(level)
   }
   
   /* @CrossNativeInterface */
-  @objc public class func SetDeviceId(devId: String) {
+  public class func SetDeviceId(devId: String) {
     crosspl_Proxy_ContactFactory_SetDeviceId(devId)
   }
   
   /* @CrossNativeInterface */
-  @objc public static func SetLocalDataDir(dir: String) -> Int32 {
+  public static func SetLocalDataDir(dir: String) -> Int32 {
     return crosspl_Proxy_ContactFactory_SetLocalDataDir(dir)
   }
   
