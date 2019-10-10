@@ -1,11 +1,16 @@
 import Foundation
 
 class CrossTmplUtils {
+  static func GetResourceFile(tmplName: String) -> URL {
+    let tmplPath = resourcesDir!.appendingPathComponent(tmplName)
+    return tmplPath
+  }
+  
   static func ReadTmplContent(tmplName: String) -> String {
     var tmplPath: URL
     
     do {
-      tmplPath = resourcesDir!.appendingPathComponent(tmplName)
+      tmplPath = GetResourceFile(tmplName: tmplName)
       
       let tmplContent = try String(contentsOf: tmplPath, encoding: .utf8)
       return tmplContent
@@ -20,7 +25,10 @@ class CrossTmplUtils {
       let tmplContent = try? String(contentsOf: file, encoding: .utf8)
       if tmplContent != nil
       && tmplContent! == content {
+//        print("========== tmplContent:\(tmplContent!)")
+//        print("========== content:\(content)")
         print("CrossTmplUtils.WriteContent() Ignore to write to url: \(file.path)")
+        return
       }
     }
     

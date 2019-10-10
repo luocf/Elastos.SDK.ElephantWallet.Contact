@@ -31,9 +31,11 @@ class CrossClassInfo {
       }
       
       if line.contains(Annotation.CrossNativeInterface) {
-        nativeMethodList.append(sourceLines[idx + 1])
+        let methodLine = getMethodLine(sourceLines: sourceLines, from: idx)
+        nativeMethodList.append(methodLine)
       } else if line.contains(Annotation.CrossPlatformInterface) {
-        platformMethodList.append(sourceLines[idx + 1])
+        let methodLine = getMethodLine(sourceLines: sourceLines, from: idx)
+        platformMethodList.append(methodLine)
       }
     }
 //    print("nativeMethodList=\(nativeMethodList)")
@@ -47,7 +49,8 @@ class CrossClassInfo {
       let line = classLines[idx];
       if line.contains("{") {
         layer += 1
-      } else if line.contains("}") {
+      }
+      if line.contains("}") {
         layer -= 1
       }
       if line.contains(" \(className) ") {
@@ -59,17 +62,26 @@ class CrossClassInfo {
         let methodName = line.replace(".*func (\\w*)\\(.*") { "\($0[1])" }
         var isCrossInterface = false
         var isNative = false
-        if (nativeMethodList.filter() { $0.contains("func \(methodName)(") }.count != 0) {
+        var argTypes: [String]? = nil
+        
+        let nativeMethodLines = nativeMethodList.filter() { $0.contains("func \(methodName)(") }
+        if (nativeMethodLines.count != 0) {
           isCrossInterface = true
           isNative = true
-        } else if (platformMethodList.filter() { $0.contains("func \(methodName)(") }.count != 0)
-        && line.contains(" @objc ") {
+          argTypes = getMethodArgTypes(methodLine: nativeMethodLines.first!)
+        }
+        let platformMethodLines = platformMethodList.filter() { $0.contains("func \(methodName)(") }
+        if (platformMethodLines.count != 0
+        && line.contains(" @objc ")) {
           isCrossInterface = true
           isNative = false
+          argTypes = getMethodArgTypes(methodLine: platformMethodLines.first!)
         }
        
         if isCrossInterface == true {
-          let methodInfo = CrossMethodInfo.Parse(sourceContent: line, methodName: methodName, isNative: isNative)
+          let methodInfo = CrossMethodInfo.Parse(sourceContent: line,
+                                                 methodName: methodName, argTypes: argTypes!,
+                                                 isNative: isNative)
           print("  \(methodInfo?.toString() ?? "xxxxxxxxxxxxx: Failed to parse \(line)")")
           
           if methodInfo != nil {
@@ -80,6 +92,37 @@ class CrossClassInfo {
     }
     
     return classInfo
+  }
+  
+  static func getMethodLine(sourceLines: [String], from: Int) -> String {
+    var methodLine = String()
+    var next = 1
+    repeat {
+      methodLine += sourceLines[from + next]
+      next += 1
+    } while methodLine.contains(")") == false
+    
+    return methodLine
+  }
+  
+  static func getMethodArgTypes(methodLine: String) -> [String] {
+    var argTypes = [String]()
+    
+    let argsLine = methodLine.replace(".*\\((.*)\\).*") { "\($0[1])" }
+    if argsLine.isEmpty == true {
+      return argTypes
+    }
+    
+    let argsList = argsLine.components(separatedBy: ",")
+    for arg in argsList {
+      let split = arg.components(separatedBy: ":")
+      var type = split[1].replacingOccurrences(of: "?", with: "") // remove '?'
+      type = type.trimmingCharacters(in: .whitespacesAndNewlines) // trim
+      
+      argTypes.append(type)
+    }
+    
+    return argTypes
   }
   
   func toString() -> String {

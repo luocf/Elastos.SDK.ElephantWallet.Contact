@@ -6,4 +6,4 @@
 //  Copyright © 2019 Elastos. All rights reserved.
 //
 
-#import "CrossPLFactory.sdk.h"
+#import "CrossPLFactory.ContactSDK.h"

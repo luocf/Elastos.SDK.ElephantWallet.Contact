@@ -15,21 +15,27 @@ open class ContactMessage: CrossBase {
   public var timestamp: Int64
   
   public func syncMessageToNative() -> Int {
-    let ret = syncMessageToNative(type.rawValue, data, cryptoAlgorithm, timestamp);
+    let ret = syncMessageToNative(type: type.rawValue,
+                                  data: data,
+                                  cryptoAlgorithm: cryptoAlgorithm,
+                                  timestamp: timestamp)
     return ret;
   }
   
-  init(type: Kind, data: Data, cryptoAlgorithm: String) {
+  init(type: Kind, data: Data, cryptoAlgorithm: String?) {
     self.type = type
     self.data = data
-    self.cryptoAlgorithm = cryptoAlgorithm
+    self.cryptoAlgorithm = cryptoAlgorithm ?? ""
     self.timestamp = Int64(Date().timeIntervalSince1970 * 1000)
     
     super.init(className: String(describing: ContactMessage.self))
   }
   
   /* @CrossNativeInterface */
-  private func syncMessageToNative(_ type: Int, _ data: Data, _ cryptoAlgorithm: String, _ timestamp: Int64) -> Int {
-    return 0
+  private func syncMessageToNative(type: Int,
+                                   data: Data, cryptoAlgorithm: String,
+                                   timestamp: Int64) -> Int {
+    let ret = crosspl_Proxy_ContactMessage_syncMessageToNative(nativeHandle, Int32(type), data, cryptoAlgorithm, timestamp)
+    return Int(ret)
   }
-} // class Factory
+}

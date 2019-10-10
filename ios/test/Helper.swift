@@ -140,7 +140,7 @@ public class Helper {
       _ = Unmanaged.passRetained(impl).autorelease()
     }))
 
-    showDialog(view, dialog)
+    showDialog(view, dialog, release: impl)
   }
 
 //    public static void showAddFriend(Context context, String friendCode, OnListener listener) {
@@ -184,23 +184,23 @@ public class Helper {
     }
   }
 
-//    public static void showSendMessage(Context context, String friendCode, OnListener listener) {
-//        EditText edit = new EditText(context);
-//        View root = makeEditView(context, friendCode, edit);
-//
-//        AlertDialog.Builder builder = new AlertDialog.Builder(context);
-//        builder.setTitle("Send Message");
-//        builder.setView(root);
-//        builder.setNegativeButton("Cancel", (dialog, which) -> {
-//            dismissDialog();
-//        });
-//        builder.setPositiveButton("Send", (dialog, which) -> {
-//            listener.onResult(edit.getText().toString());
-//        });
-//
-//        showDialog(builder);
-//    }
-//
+  public static func showSendMessage(view: UIViewController,
+                                     friendCode: String, listener: @escaping OnListener) {
+    let dialog = UIAlertController(title: nil, message: nil, preferredStyle: .alert)
+    dialog.title = "Send Message"
+
+    let edit = UITextView()
+    let rootView = makeEditView(view, friendCode, edit)
+    setDialogContent(dialog, 500, rootView)
+      
+    dialog.addAction(UIAlertAction(title: "Send", style: .default, handler: { _ in
+      listener(edit.text)
+    }))
+    dialog.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+
+    showDialog(view, dialog)
+  }
+
 //    public static void scanAddress(MainActivity activity, OnListener listener) {
 //        mOnScanListener = listener;
 //
@@ -340,24 +340,29 @@ public class Helper {
 
     return rootView
   }
-//
-//    private static View makeEditView(Context context, String friendCode, EditText edit) {
-//        TextView txtCode = new TextView(context);
-//        TextView txtMsg = new TextView(context);
-//
-//        LinearLayout root = new LinearLayout(context);
-//        root.setOrientation(LinearLayout.VERTICAL);
-//        root.addView(txtCode);
-//        root.addView(txtMsg);
-//        root.addView(edit);
-//
-//        txtCode.setText("FriendCode: \n  " + friendCode);
-//        txtMsg.setText("Message:");
-//        edit.setText("Hello");
-//
-//        return root;
-//    }
-//
+
+  private static func makeEditView(_ view: UIViewController,
+                                   _ friendCode: String, _ edit: UITextView) -> UIView {
+    let txtCode = UITextView()
+    let txtMsg = UILabel()
+    
+    let root = UIStackView()
+    root.axis = .vertical
+    root.addArrangedSubview(txtCode)
+    root.addArrangedSubview(txtMsg)
+    root.addArrangedSubview(edit)
+
+    txtCode.isEditable = false
+    txtCode.translatesAutoresizingMaskIntoConstraints = false
+    txtCode.heightAnchor.constraint(equalToConstant: 40).isActive = true
+
+    txtCode.text = "FriendCode:\n  " + friendCode
+    txtMsg.text = "Message:"
+    edit.text = "Hello"
+
+    return root;
+  }
+
   private static func makeQRCode(value: String) -> UIImage {
     let data = value.data(using: String.Encoding.ascii)
 
@@ -382,8 +387,8 @@ public class Helper {
     contentView.bottomAnchor.constraint(equalTo: dialog.view.bottomAnchor, constant: -45).isActive = true
   }
   
-  public static func showDialog(_ view: UIViewController, _ dialog: UIAlertController) {
-    dismissDialog()
+  public static func showDialog(_ view: UIViewController, _ dialog: UIAlertController, release: NSObject? = nil) {
+    dismissDialog(release)
 
 //    DispatchQueue.main.async {
       mLastDialog = dialog
@@ -391,12 +396,16 @@ public class Helper {
 //    }
   }
 
-  private static func dismissDialog() {
+  private static func dismissDialog(_ release: NSObject? = nil) {
     guard mLastDialog != nil else { return }
 
 //    DispatchQueue.main.async {
       mLastDialog!.dismiss(animated: false)
       mLastDialog = nil
+    
+    if release != nil {
+      _ = Unmanaged.passRetained(release!).autorelease()
+    }
 //    }
   }
 

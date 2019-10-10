@@ -118,7 +118,7 @@ class ViewController: UIViewController {
       message = removeFriend()
       break
     case ButtonTag.send_message.rawValue:
-      print("\(sender.tag)")
+      message = sendMessage()
       break
     case ButtonTag.show_cached_didprop.rawValue:
       print("\(sender.tag)")
@@ -239,12 +239,12 @@ class ViewController: UIViewController {
         }
         
         override func onReceivedMessage(humanCode: String, channelType: Int, message: Contact.Message) {
-          var data: Any? = message.data
+          var data: Any = message.data
           if message.type == Contact.Message.Kind.MsgText {
-            data = String(data: message.data, encoding: .utf8)
+            data = String(data: message.data, encoding: .utf8)!
           }
           
-          var msg = "onRcvdMsg(): data=\(String(describing: data))\n"
+          var msg = "onRcvdMsg(): data=\(data)\n"
           msg += "onRcvdMsg(): type=\(message.type)\n"
           msg += "onRcvdMsg(): crypto=" + message.cryptoAlgorithm + "\n"
           viewCtrl.showEvent(msg)
@@ -528,6 +528,44 @@ class ViewController: UIViewController {
     
     return "Success to send message.";
   }
+  
+  private func sendMessage() -> String {
+    if mContact == nil {
+      return ViewController.ErrorPrefix + "Contact is null."
+    }
+    let info = mContact!.getUserInfo()
+    if info == nil {
+      return ViewController.ErrorPrefix + "Failed to get user info."
+    }
+
+    if (info!.status != ContactStatus.Online) {
+      return ViewController.ErrorPrefix + "Contact is not online."
+    }
+
+    let friendCodeList = mContact!.listFriendCode()
+    Helper.showFriendList(view: self, friendList: friendCodeList, listener:  { friendCode in
+      Helper.showSendMessage(view: self, friendCode: friendCode!, listener:  { message in
+        let msgInfo = self.mContact!.makeTextMessage(data: message!, cryptoAlgorithm: nil)
+
+        let status = self.mContact!.getStatus(humanCode: friendCode!)
+        if(status != ContactStatus.Online) {
+          self.showMessage(ViewController.ErrorPrefix + "Friend isViewController. not online.")
+          return
+        }
+
+        let ret = self.mContact!.sendMessage(friendCode: friendCode!,
+                                             channelType: ContactChannel.Carrier,
+                                             message: msgInfo)
+        if(ret < 0) {
+          self.showMessage(ViewController.ErrorPrefix + "Failed to send message to " + friendCode!)
+        }
+      })
+    })
+    
+      return "Success to send message.";
+  }
+
+  
   
   private func processAcquire(request: AcquireArgs) -> Data? {
     var response: Data?

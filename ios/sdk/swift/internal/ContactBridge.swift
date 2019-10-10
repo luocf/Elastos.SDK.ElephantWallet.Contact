@@ -100,40 +100,38 @@ open class ContactBridge: CrossBase {
     return friendCodeList
   }
 
-//  public ContactStatus getStatus(String humanCode) {
-//    int ret = getHumanStatus(humanCode);
-//    if(ret < 0) {
-//      return null;
-//    }
-//
-//    return ContactStatus.valueOf(ret);
-//  }
-//
-//  public Contact.Message makeMessage(ContactMessage.Type type, byte[] data, String cryptoAlgorithm) {
-//    Contact.Message msg = new Contact.Message(type, data, cryptoAlgorithm);
-//    return msg;
-//  }
-//
-//  public Contact.Message makeTextMessage(String data, String cryptoAlgorithm) {
-//    Contact.Message msg = new Contact.Message(ContactMessage.Type.MsgText, data.getBytes(), cryptoAlgorithm);
-//    return msg;
-//  }
-//
-//
-//  public int sendMessage(String friendCode, ContactChannel channelType, Contact.Message message) {
-//    if(message == null) {
-//      return -1;
-//    }
-//
-//    int ret = message.syncMessageToNative();
-//    if(ret < 0) {
-//      return ret;
-//    }
-//
-//    ret = sendMessage(friendCode, channelType.id(), message);
-//
-//    return ret;
-//  }
+  public func getStatus(humanCode: String) -> ContactStatus? {
+    let ret = getHumanStatus(humanCode: humanCode)
+    if(ret < 0) {
+      return nil
+    }
+
+    return ContactStatus(rawValue: ret)
+  }
+
+  public func makeMessage(type: ContactMessage.Kind, data: Data, cryptoAlgorithm: String?) -> Contact.Message {
+    let msg = Contact.Message(type: type, data: data, cryptoAlgorithm: cryptoAlgorithm)
+    return msg
+  }
+
+  public func makeTextMessage(data: String, cryptoAlgorithm: String?) -> Contact.Message {
+    let msg = makeMessage(type: ContactMessage.Kind.MsgText,
+                          data: data.data(using: .utf8)!,
+                          cryptoAlgorithm: cryptoAlgorithm)
+    return msg
+  }
+
+
+  public func sendMessage(friendCode: String, channelType: ContactChannel, message: Contact.Message) -> Int {
+    var ret = message.syncMessageToNative()
+    if(ret < 0) {
+      return ret;
+    }
+
+    ret = sendMessage(friendCode: friendCode, channelType: channelType.rawValue, message: message)
+
+    return ret;
+  }
   
   /* @CrossNativeInterface */
   public func start() -> Int {

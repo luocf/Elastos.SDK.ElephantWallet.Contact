@@ -1,7 +1,9 @@
 import Foundation
 
 class CrossMethodInfo {
-  static func Parse(sourceContent: String, methodName: String, isNative: Bool) -> CrossMethodInfo? {
+  static func Parse(sourceContent: String,
+                    methodName: String, argTypes: [String],
+                    isNative: Bool) -> CrossMethodInfo? {
     let methodInfo = CrossMethodInfo()
 //    print("CrossMethodInfo.Parse() ============== 0")
     methodInfo.methodName = methodName
@@ -15,10 +17,22 @@ class CrossMethodInfo {
       let typeLines = line.components(separatedBy: ":")
       let type = CrossVariableType.Parse(sourceContent: typeLines[1])
       if type.type == nil {
+        print("Failed to parse \(methodName): Unknown arg type: \(typeLines[1])")
         return nil
       }
       
       methodInfo.paramsType.append(type)
+    }
+    if argTypes.count != methodInfo.paramsType.count {
+      print("Failed to parse \(methodName): Args count \(methodInfo.paramsType.count) not match to \(argTypes.count).")
+      return nil
+    }
+    for idx in argTypes.indices {
+      let curType = methodInfo.paramsType[idx].toSwiftString()
+      if argTypes[idx] != curType {
+        print("Failed to parse \(methodName): Args[\(idx)] type \(curType) not match to \(argTypes[idx]).")
+        return nil
+      }
     }
     
 //    print("CrossMethodInfo.Parse() ============== 1 -\(sourceContent)-")
