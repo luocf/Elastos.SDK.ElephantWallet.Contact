@@ -150,9 +150,9 @@ public class Helper {
 
     let edit = UITextView()
     let rootView = makeEditView(view, friendCode, edit)
-    setDialogContent(dialog, 500, rootView)
+    setDialogContent(dialog, 300, rootView)
       
-    dialog.addAction(UIAlertAction(title: "Send", style: .default, handler: { _ in
+    dialog.addAction(UIAlertAction(title: "Add", style: .default, handler: { _ in
       listener(edit.text)
     }))
     dialog.addAction(UIAlertAction(title: "Cancel", style: .cancel))
@@ -203,17 +203,52 @@ public class Helper {
   }
 
     public static func scanAddress(view: UIViewController, listener: @escaping OnListener) {
-//        mOnScanListener = listener;
-//
-//        int hasCameraPermission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.CAMERA);
-//        if(hasCameraPermission == PackageManager.PERMISSION_GRANTED) {
-//            Intent intent = new Intent(activity, QrCodeActivity.class);
-//            activity.startActivityForResult(intent, REQUEST_CODE_QR_SCAN);
-//        } else {
-//            ActivityCompat.requestPermissions(activity,
-//                    new String[]{Manifest.permission.CAMERA},
-//                    1);
-//        }
+      let imagePicker = ImagePicker()
+      
+      let impl: NSObject = {
+        class Impl : NSObject, ImagePickerDelegate {
+          init(_ imagePicker: ImagePicker, _ viewCtrl: UIViewController, _ listener: @escaping OnListener) {
+            self.imagePicker = imagePicker
+            self.viewCtrl = viewCtrl
+            self.listener = listener
+          }
+          
+          func imagePickerDelegate(didSelect image: UIImage, delegatedForm: ImagePicker) {
+            let result = Helper.makeQRCodeString(value: image)
+            listener(result)
+            delegatedForm.dismiss()
+            _ = Unmanaged.passRetained(self).autorelease()
+          }
+
+          func imagePickerDelegate(didCancel delegatedForm: ImagePicker) {
+            delegatedForm.dismiss()
+            _ = Unmanaged.passRetained(self).autorelease()
+          }
+
+          func imagePickerDelegate(canUseGallery accessIsAllowed: Bool, delegatedForm: ImagePicker) {
+            if accessIsAllowed {
+              delegatedForm.present(parent: viewCtrl, sourceType: .photoLibrary)
+            }
+          }
+
+          func imagePickerDelegate(canUseCamera accessIsAllowed: Bool, delegatedForm: ImagePicker) {
+              // works only on real device (crash on simulator)
+            if accessIsAllowed {
+              delegatedForm.present(parent: viewCtrl, sourceType: .camera)
+             }
+          }
+
+          private let imagePicker: ImagePicker
+          private let viewCtrl: UIViewController
+          private let listener: OnListener
+         }
+         
+         return Impl(imagePicker, view, listener)
+       }()
+       _ = Unmanaged.passRetained(impl)
+
+      imagePicker.delegate = (impl as? ImagePickerDelegate)
+      imagePicker.photoGalleryAsscessRequest()
     }
 
 //    public static void onRequestPermissionsResult(MainActivity activity, int requestCode, String[] permissions, int[] grantResults) {
@@ -280,7 +315,7 @@ public class Helper {
         showed! += "\n----------------\n" + ext!;
       }
       
-      let bitmap = makeQRCode(value: checkedVal!)
+      let bitmap = makeQRCodeImage(value: checkedVal!)
       imgQRCode.image = bitmap
       txtCode.text = showed
     })
@@ -364,16 +399,37 @@ public class Helper {
     return root;
   }
 
-  private static func makeQRCode(value: String) -> UIImage {
+  private static func makeQRCodeImage(value: String) -> UIImage? {
     let data = value.data(using: String.Encoding.ascii)
 
     let filter = CIFilter(name: "CIQRCodeGenerator")
-    filter!.setValue(data, forKey: "inputMessage")
+    filter?.setValue(data, forKey: "inputMessage")
     let transform = CGAffineTransform(scaleX: 3, y: 3)
 
-    let output = (filter!.outputImage?.transformed(by: transform))!
+    guard let output = (filter!.outputImage?.transformed(by: transform)) else {
+      return nil
+    }
+    
     let ret = UIImage(ciImage: output)
     return ret
+  }
+  
+  private static func makeQRCodeString(value: UIImage) -> String? {
+    guard let image = CIImage(image: value) else {
+        return nil
+    }
+
+    let detector = CIDetector(ofType: CIDetectorTypeQRCode,
+                              context: nil,
+                              options: [CIDetectorAccuracy: CIDetectorAccuracyHigh])
+
+    let features = detector?.features(in: image) ?? []
+
+    let ret = features.compactMap { feature in
+        return (feature as? CIQRCodeFeature)?.messageString
+    }
+    
+    return (ret.count > 0 ? ret[0] : nil)
   }
 
   private static func setDialogContent(_ dialog: UIAlertController, _ height: CGFloat, _ contentView: UIView) {
@@ -391,27 +447,27 @@ public class Helper {
   public static func showDialog(_ view: UIViewController, _ dialog: UIAlertController, release: NSObject? = nil) {
     dismissDialog(release)
 
-//    DispatchQueue.main.async {
+    DispatchQueue.main.async {
       mLastDialog = dialog
       view.present(mLastDialog!, animated: false)
-//    }
+    }
   }
 
   private static func dismissDialog(_ release: NSObject? = nil) {
     guard mLastDialog != nil else { return }
 
-//    DispatchQueue.main.async {
+    DispatchQueue.main.async {
       mLastDialog!.dismiss(animated: false)
       mLastDialog = nil
-    
+    }
+
     if release != nil {
       _ = Unmanaged.passRetained(release!).autorelease()
     }
-//    }
   }
 
   private static var mLastDialog: UIAlertController? = nil
-  private static var mTableViewDelegate: NSObject? = nil
+//  private static var mTableViewDelegate: NSObject? = nil
 //    private static OnListener mOnScanListener;
 //    private static final int REQUEST_CODE_QR_SCAN = 101;
 }

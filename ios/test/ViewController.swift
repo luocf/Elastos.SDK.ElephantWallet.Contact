@@ -497,6 +497,11 @@ class ViewController: UIViewController {
       }
 
       Helper.scanAddress(view: self, listener: { result in
+        guard result != nil else {
+          self.showMessage(ViewController.ErrorPrefix + "Failed to scan QRCode.")
+          return
+        }
+        
         self.showMessage(result!)
 
         Helper.showAddFriend(view: self, friendCode: result!, listener: { summary in

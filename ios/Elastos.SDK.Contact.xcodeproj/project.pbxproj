@@ -116,6 +116,7 @@
 		DE3C53C8233B19AF0053196E /* JsonKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE3C53C7233B19AF0053196E /* JsonKey.swift */; };
 		DE3C53CA233B1A220053196E /* HumanInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE3C53C9233B1A220053196E /* HumanInfo.swift */; };
 		DE5961A7232F231200BDB4EE /* CrossBase.proxy.mm in Sources */ = {isa = PBXBuildFile; fileRef = DE5961A6232F231200BDB4EE /* CrossBase.proxy.mm */; };
+		DE598EDA2350106800ECA160 /* ImagePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE598ED92350106800ECA160 /* ImagePicker.swift */; };
 		DE5EA245234EEC630055F587 /* CrossPLFactory.ContactSDK.h in Headers */ = {isa = PBXBuildFile; fileRef = DE5EA243234EEC630055F587 /* CrossPLFactory.ContactSDK.h */; };
 		DE5EA246234EEC630055F587 /* CrossPLFactory.ContactSDK.mm in Sources */ = {isa = PBXBuildFile; fileRef = DE5EA244234EEC630055F587 /* CrossPLFactory.ContactSDK.mm */; };
 		DE5EA248234EF7B10055F587 /* ContactDebug.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE5EA247234EF7B10055F587 /* ContactDebug.swift */; };
@@ -293,6 +294,7 @@
 		DE3C53C7233B19AF0053196E /* JsonKey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JsonKey.swift; sourceTree = "<group>"; };
 		DE3C53C9233B1A220053196E /* HumanInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HumanInfo.swift; sourceTree = "<group>"; };
 		DE5961A6232F231200BDB4EE /* CrossBase.proxy.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = CrossBase.proxy.mm; sourceTree = "<group>"; };
+		DE598ED92350106800ECA160 /* ImagePicker.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImagePicker.swift; sourceTree = "<group>"; };
 		DE5EA243234EEC630055F587 /* CrossPLFactory.ContactSDK.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CrossPLFactory.ContactSDK.h; sourceTree = "<group>"; };
 		DE5EA244234EEC630055F587 /* CrossPLFactory.ContactSDK.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = CrossPLFactory.ContactSDK.mm; sourceTree = "<group>"; };
 		DE5EA247234EF7B10055F587 /* ContactDebug.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactDebug.swift; sourceTree = "<group>"; };
@@ -589,15 +591,16 @@
 		DE27584C23345AD4001B635B /* test */ = {
 			isa = PBXGroup;
 			children = (
-				DE27584D23345AD4001B635B /* AppDelegate.swift */,
-				DE27584F23345AD4001B635B /* ViewController.swift */,
-				DE978FDA233BB47B00F5B5F9 /* Helper.swift */,
-				DE371F3C234C72D000011A70 /* RadioGroupView.swift */,
-				DE27585123345AD4001B635B /* Main.storyboard */,
-				DE27585423345AD6001B635B /* Assets.xcassets */,
-				DE27585623345AD6001B635B /* LaunchScreen.storyboard */,
-				DE27585923345AD6001B635B /* Info.plist */,
 				DE3C53A72339BF780053196E /* Frameworks */,
+				DE27585423345AD6001B635B /* Assets.xcassets */,
+				DE27584D23345AD4001B635B /* AppDelegate.swift */,
+				DE978FDA233BB47B00F5B5F9 /* Helper.swift */,
+				DE598ED92350106800ECA160 /* ImagePicker.swift */,
+				DE27585623345AD6001B635B /* LaunchScreen.storyboard */,
+				DE27585123345AD4001B635B /* Main.storyboard */,
+				DE371F3C234C72D000011A70 /* RadioGroupView.swift */,
+				DE27584F23345AD4001B635B /* ViewController.swift */,
+				DE27585923345AD6001B635B /* Info.plist */,
 			);
 			path = test;
 			sourceTree = "<group>";
@@ -1054,6 +1057,7 @@
 			files = (
 				DE27585023345AD4001B635B /* ViewController.swift in Sources */,
 				DE27584E23345AD4001B635B /* AppDelegate.swift in Sources */,
+				DE598EDA2350106800ECA160 /* ImagePicker.swift in Sources */,
 				DE371F3D234C72D000011A70 /* RadioGroupView.swift in Sources */,
 				DE978FDB233BB47B00F5B5F9 /* Helper.swift in Sources */,
 			);
