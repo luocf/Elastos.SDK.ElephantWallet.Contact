@@ -220,6 +220,10 @@ public class MainActivity extends Activity {
     }
 
     private String testNewContact() {
+        if(mContact != null) {
+            return ErrorPrefix + "Contact is created.";
+        }
+
         Contact.Factory.SetLogLevel(7);
 
         Contact.Factory.SetDeviceId(getDeviceId());

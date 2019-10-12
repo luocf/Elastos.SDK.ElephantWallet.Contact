@@ -3726,6 +3726,7 @@ GHC_INLINE void last_write_time(const path& p, file_time_type new_time, std::err
 #endif
 #endif
 #else
+    auto d = new_time.time_since_epoch();
     struct ::timespec times[2];
     times[0].tv_sec = 0;
     times[0].tv_nsec = UTIME_OMIT;
