@@ -44,14 +44,6 @@ int ContactFactory::SetLocalDataDir(const std::string& dir)
 /***********************************************/
 /***** class public function implement  ********/
 /***********************************************/
-ContactFactory::ContactFactory()
-{
-    Log::I(Log::TAG, "%s", __PRETTY_FUNCTION__);
-}
-ContactFactory::~ContactFactory()
-{
-    Log::I(Log::TAG, "%s", __PRETTY_FUNCTION__);
-}
 
 /***********************************************/
 /***** class protected function implement  *****/

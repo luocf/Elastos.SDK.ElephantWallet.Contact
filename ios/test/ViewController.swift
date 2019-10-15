@@ -7,7 +7,6 @@
 //
 
 import UIKit
-import ElastosSdkKeypair
 import ContactSDK
 
 class ViewController: UIViewController {
@@ -21,8 +20,12 @@ class ViewController: UIViewController {
     
     mSavedMnemonic = UserDefaults.standard.string(forKey: ViewController.SavedMnemonicKey)
     if mSavedMnemonic == nil {
-      mSavedMnemonic = ElastosKeypair.GenerateMnemonic(language: ViewController.KeypairLanguage,
-                                                       words: ViewController.KeypairWords)
+      let ret = Contact.Debug.Keypair.GenerateMnemonic(language: ViewController.KeypairLanguage,
+                                                       words: ViewController.KeypairWords,
+                                                       mnem:&mSavedMnemonic)
+      if(ret < 0) {
+        showMessage(ViewController.ErrorPrefix + "Failed to call Contact.Debug.Keypair.GenerateMnemonic()")
+      }
       _ = newAndSaveMnemonic(mSavedMnemonic)
     }
 
@@ -152,8 +155,12 @@ class ViewController: UIViewController {
   private func newAndSaveMnemonic(_ newMnemonic: String?) -> String {
     mSavedMnemonic = newMnemonic
     if mSavedMnemonic == nil {
-      mSavedMnemonic = ElastosKeypair.GenerateMnemonic(language: ViewController.KeypairLanguage,
-                                                       words: ViewController.KeypairWords)
+      let ret = Contact.Debug.Keypair.GenerateMnemonic(language: ViewController.KeypairLanguage,
+                                                       words: ViewController.KeypairWords,
+                                                       mnem:&mSavedMnemonic)
+      if(ret < 0) {
+        showMessage(ViewController.ErrorPrefix + "Failed to call Contact.Debug.Keypair.GenerateMnemonic()")
+      }
     }
   
     UserDefaults.standard.set(mSavedMnemonic, forKey: ViewController.SavedMnemonicKey)
@@ -656,22 +663,36 @@ class ViewController: UIViewController {
   
   private func getPublicKey() -> String {
     var seed = Data()
-    let seedLen = ElastosKeypair.GetSeedFromMnemonic(seed: &seed,
-                                                     mnemonic: mSavedMnemonic!,
-                                                     mnemonicPassword: "")
-    let pubKey = ElastosKeypair.GetSinglePublicKey(seed: seed, seedLen: seedLen)
+    var ret = Contact.Debug.Keypair.GetSeedFromMnemonic(mnemonic: mSavedMnemonic!,
+                                                        mnemonicPassword: "",
+                                                        seed: &seed)
+    if(ret < 0) {
+      showMessage(ViewController.ErrorPrefix + "Failed to call Contact.Debug.Keypair.GetSeedFromMnemonic()")
+    }
+    var pubKey = String()
+    ret = Contact.Debug.Keypair.GetSinglePublicKey(seed: seed, pubKey: &pubKey)
+    if(ret < 0) {
+      showMessage(ViewController.ErrorPrefix + "Failed to call Contact.Debug.Keypair.GetSinglePublicKey()")
+    }
 
-    return pubKey!
+    return pubKey
   }
 
   private func getPrivateKey() -> String {
     var seed = Data()
-    let seedLen = ElastosKeypair.GetSeedFromMnemonic(seed: &seed,
-                                                     mnemonic: mSavedMnemonic!,
-                                                     mnemonicPassword: "")
-    let privKey = ElastosKeypair.GetSinglePrivateKey(seed: seed, seedLen: seedLen)
-  
-    return privKey!
+    var ret = Contact.Debug.Keypair.GetSeedFromMnemonic(mnemonic: mSavedMnemonic!,
+                                                        mnemonicPassword: "",
+                                                        seed: &seed)
+    if(ret < 0) {
+      showMessage(ViewController.ErrorPrefix + "Failed to call Contact.Debug.Keypair.GetSeedFromMnemonic()")
+    }
+    var privKey = String()
+    ret = Contact.Debug.Keypair.GetSinglePrivateKey(seed: seed, privKey: &privKey)
+    if(ret < 0) {
+      showMessage(ViewController.ErrorPrefix + "Failed to call Contact.Debug.Keypair.GetSinglePrivateKey()")
+    }
+
+    return privKey
   }
   
   private func getAgentAuthHeader() -> Data {
@@ -693,8 +714,9 @@ class ViewController: UIViewController {
     let privKey = getPrivateKey()
 
     var signedData = Data()
-    let signedSize = ElastosKeypair.Sign(privateKey: privKey, data: data!, len: data!.count, signedData: &signedData)
-    if signedSize <= 0 {
+    let ret = Contact.Debug.Keypair.Sign(privateKey: privKey, data: data!, signedData: &signedData)
+    if(ret < 0) {
+      showMessage(ViewController.ErrorPrefix + "Failed to call Contact.Debug.Keypair.Sign()")
       return nil
     }
   

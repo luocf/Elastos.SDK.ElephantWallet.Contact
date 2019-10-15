@@ -24,8 +24,8 @@ public:
     static int GetCachedDidProp(std::stringstream* value);
 
     /*** class function and variable ***/
-    explicit ContactDebug();
-    virtual ~ContactDebug();
+    explicit ContactDebug() = default;
+    virtual ~ContactDebug() = default;
 
 private:
     /*** type define ***/

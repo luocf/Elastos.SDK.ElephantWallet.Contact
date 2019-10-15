@@ -40,14 +40,6 @@ int ContactDebug::GetCachedDidProp(std::stringstream* value)
 /***********************************************/
 /***** class public function implement  ********/
 /***********************************************/
-ContactDebug::ContactDebug()
-{
-    Log::I(Log::TAG, "%s", __PRETTY_FUNCTION__);
-}
-ContactDebug::~ContactDebug()
-{
-    Log::I(Log::TAG, "%s", __PRETTY_FUNCTION__);
-}
 
 /***********************************************/
 /***** class protected function implement  *****/

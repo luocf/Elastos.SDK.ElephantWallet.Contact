@@ -16,6 +16,9 @@ public class ContactDebug: CrossBase {
     return 0
   }
   
+  public class Keypair: KeypairWrapper {
+  } // class Listener
+  
   init() {
     super.init(className: String(describing: ContactDebug.self))
   }
