@@ -300,14 +300,18 @@ int ChannelImplCarrier::sendMessage(const std::string& friendCode,
 {
     uint64_t pkgCount = msgContent.size() / MaxPkgSize + 1;
     Log::D(Log::TAG, "ChannelImplCarrier::sendMessage() size=%d count=%d", msgContent.size(), pkgCount);
-    if(pkgCount > 255) {
+    if(pkgCount > MaxPkgCount) {
         return ErrCode::ChannelDataTooLarge;
     }
 
-    for(auto pkgIdx = 0; pkgIdx < pkgCount; pkgIdx++) {
+    for(uint64_t pkgIdx = 0; pkgIdx < pkgCount; pkgIdx++) {
         std::vector<uint8_t> data {std::begin(PkgMagic), std::end(PkgMagic)};
-        data[PkgMagicDataIdx] = static_cast<uint8_t>(pkgIdx);
-        data[PkgMagicDataCnt] = static_cast<uint8_t>(pkgCount);
+        uint16_t pkgVal = static_cast<uint16_t>(pkgIdx);
+        data[PkgMagicDataIdx] = (pkgVal >> 8 ) & 0xFF;
+        data[PkgMagicDataIdx + 1] = pkgVal & 0xFF;
+        pkgVal = static_cast<uint16_t>(pkgCount);
+        data[PkgMagicDataCnt] = (pkgVal >> 8 ) & 0xFF;
+        data[PkgMagicDataCnt + 1] = pkgVal & 0xFF;
 
         auto dataBegin = msgContent.begin() + pkgIdx * MaxPkgSize;
         auto dataRemains = msgContent.end() - dataBegin;
@@ -323,6 +327,8 @@ int ChannelImplCarrier::sendMessage(const std::string& friendCode,
             Log::E(Log::TAG, "Failed to send message! ret=%s(0x%x)", strerr_buf, err);
             return ErrCode::ChannelNotSendMessage;
         }
+        Log::D(Log::TAG, "ChannelImplCarrier::sendMessage PkgMagicData Idx/Cnt=%05lld[%02x,%02x]/%05lld[%02x,%02x]",
+                         pkgIdx, data[PkgMagicDataIdx], data[PkgMagicDataIdx + 1], pkgCount, data[PkgMagicDataCnt], data[PkgMagicDataCnt + 1]);
     }
 
     return 0;
@@ -407,20 +413,36 @@ void ChannelImplCarrier::OnCarrierFriendMessage(ElaCarrier *carrier, const char 
             isPkgData = false;
             break;
         }
-    }
-    if(isPkgData == true) {
         dataOffset = PkgMagicSize;
-        dataComplete = (data[PkgMagicDataIdx] == data[PkgMagicDataCnt] - 1 ? true : false);
-        Log::D(Log::TAG, "ChannelImplCarrier::OnCarrierFriendMessage PkgMagicData Idx/Cnt=%d/%d", data[PkgMagicDataIdx], data[PkgMagicDataCnt]);
     }
 
-    auto& dataCache = channel->mRecvDataCache[from];
-    dataCache.insert(dataCache.end(), data + dataOffset, data + len);
+    auto dataSection = std::vector<uint8_t>(data + dataOffset, data + len);
+    if(isPkgData == true) {
+        uint64_t pkgIdx = data[PkgMagicDataIdx];
+        pkgIdx = (pkgIdx << 8) + data[PkgMagicDataIdx + 1];
+        uint64_t pkgCount = data[PkgMagicDataCnt];
+        pkgCount = (pkgCount << 8) + data[PkgMagicDataCnt + 1];
 
-    if(dataComplete == true) {
-        channel->mChannelListener->onReceivedMessage(from, channel->mChannelType, dataCache);
-        dataCache.clear();
+//        dataComplete = (pkgIdx == pkgCount - 1 ? true : false);
+        Log::D(Log::TAG, "ChannelImplCarrier::OnCarrierFriendMessage PkgMagicData Idx/Cnt=%05lld[%02x,%02x]/%05lld[%02x,%02x]",
+               pkgIdx, data[PkgMagicDataIdx], data[PkgMagicDataIdx + 1], pkgCount, data[PkgMagicDataCnt], data[PkgMagicDataCnt + 1]);
+
+        auto& dataCache = channel->mRecvDataCache[from];
+        dataCache[pkgIdx] = std::move(dataSection);
+
+        if(dataCache.size() == pkgCount) {
+            std::vector<uint8_t> dataPkg;
+            for(int idx = 0; idx < dataCache.size(); idx++) {
+                dataPkg.insert(dataPkg.end(), dataCache[idx].begin(), dataCache[idx].end());
+            }
+
+            channel->mChannelListener->onReceivedMessage(from, channel->mChannelType, dataPkg);
+            dataCache.clear();
+        }
+    } else {
+        channel->mChannelListener->onReceivedMessage(from, channel->mChannelType, dataSection);
     }
+
 }
 
 /***********************************************/

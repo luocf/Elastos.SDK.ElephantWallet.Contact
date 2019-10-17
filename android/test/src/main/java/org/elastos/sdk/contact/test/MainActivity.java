@@ -552,10 +552,16 @@ public class MainActivity extends Activity {
             return ErrorPrefix + "Contact is not online.";
         }
 
+
         List<String> friendCodeList = mContact.listFriendCode();
         Helper.showFriendList(this, friendCodeList, (friendCode) -> {
             Helper.showSendMessage(this, friendCode, (message) -> {
-                Contact.Message msgInfo = mContact.makeTextMessage(message, null);
+//                Contact.Message msgInfo = mContact.makeTextMessage(message, null);
+                StringBuffer str = new StringBuffer();
+                for(int idx = 0; idx < 1024 * 50; idx ++) {
+                    str.append("1234567890");
+                }
+                Contact.Message msgInfo = mContact.makeTextMessage(str.toString(), null);
 
                 ContactStatus status = mContact.getStatus(friendCode);
                 if(status != ContactStatus.Online) {

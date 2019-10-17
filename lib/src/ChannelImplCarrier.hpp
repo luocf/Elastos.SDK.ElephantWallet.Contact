@@ -69,11 +69,14 @@ protected:
                                                 bool offline, void *context);
 
     static constexpr int32_t MaxPkgSize = 1000;
-    static constexpr uint8_t PkgMagic[] = { 0xA5, 0xA5, 0x5A, 0x5A, 0x00/*index*/, 0x00/*count*/ };
-    static constexpr int32_t PkgMagicSize = 6;
+    static constexpr uint8_t PkgMagic[] = { 0xA5, 0xA5, 0x5A, 0x5A,
+                                            0x00/*index*/, 0x00/*index*/,
+                                            0x00/*count*/, 0x00/*count*/ };
+    static constexpr int32_t PkgMagicSize = 8;
     static constexpr int32_t PkgMagicHeadSize = 4;
     static constexpr int32_t PkgMagicDataIdx = 4;
-    static constexpr int32_t PkgMagicDataCnt = 5;
+    static constexpr int32_t PkgMagicDataCnt = 6;
+    static constexpr int32_t MaxPkgCount = 65535; // sizeof uint16
 
     /*** class function and variable ***/
     void runCarrier();
@@ -82,7 +85,7 @@ protected:
     std::unique_ptr<ElaCarrier, std::function<void(ElaCarrier*)>> mCarrier;
     std::unique_ptr<ThreadPool> mTaskThread;
     ChannelListener::ChannelStatus mChannelStatus;
-    std::map<std::string, std::vector<uint8_t>> mRecvDataCache;
+    std::map<std::string, std::map<int, std::vector<uint8_t>>> mRecvDataCache;
 
 }; // class ChannelImplCarrier
 
