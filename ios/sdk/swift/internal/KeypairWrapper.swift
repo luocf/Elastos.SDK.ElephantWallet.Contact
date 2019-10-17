@@ -28,7 +28,7 @@ public class KeypairWrapper: CrossBase {
   }
   
   /* @CrossNativeInterface */
-  public static func GenerateMnemonic(language: String, words: String?, mnem: inout String?) -> Int {
+  public static func GenerateMnemonic(language: String, words: String?, mnem: inout String) -> Int {
     var nsMnem = mnem as NSString?
     let ret = crosspl_Proxy_KeypairWrapper_GenerateMnemonic(language, words, &nsMnem)
     if ret < 0 {

@@ -113,6 +113,8 @@
 		DE3C53C6233B18DF0053196E /* FoundationExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE3C53C5233B18DF0053196E /* FoundationExtensions.swift */; };
 		DE3C53C8233B19AF0053196E /* JsonKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE3C53C7233B19AF0053196E /* JsonKey.swift */; };
 		DE3C53CA233B1A220053196E /* HumanInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE3C53C9233B1A220053196E /* HumanInfo.swift */; };
+		DE4EDE562355C4B900FF2CEB /* CrossPL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DED5255D218DF4C800619F59 /* CrossPL.framework */; };
+		DE4EDE572355C4B900FF2CEB /* CrossPL.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = DED5255D218DF4C800619F59 /* CrossPL.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		DE5961A7232F231200BDB4EE /* CrossBase.proxy.mm in Sources */ = {isa = PBXBuildFile; fileRef = DE5961A6232F231200BDB4EE /* CrossBase.proxy.mm */; };
 		DE598EDA2350106800ECA160 /* ImagePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE598ED92350106800ECA160 /* ImagePicker.swift */; };
 		DE5EA245234EEC630055F587 /* CrossPLFactory.ContactSDK.h in Headers */ = {isa = PBXBuildFile; fileRef = DE5EA243234EEC630055F587 /* CrossPLFactory.ContactSDK.h */; };
@@ -155,6 +157,13 @@
 			remoteGlobalIDString = DE27576723334804001B635B;
 			remoteInfo = sdk;
 		};
+		DE4EDE582355C4B900FF2CEB /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = DED52554218DF4C800619F59 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = DED5255C218DF4C800619F59;
+			remoteInfo = lib;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -174,6 +183,7 @@
 			dstSubfolderSpec = 10;
 			files = (
 				DE3C53B22339E5BF0053196E /* ContactSDK.framework in Embed Frameworks */,
+				DE4EDE572355C4B900FF2CEB /* CrossPL.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -346,6 +356,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				DE3C53B12339E5BF0053196E /* ContactSDK.framework in Frameworks */,
+				DE4EDE562355C4B900FF2CEB /* CrossPL.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -836,6 +847,7 @@
 			);
 			dependencies = (
 				DE3C53B42339E5BF0053196E /* PBXTargetDependency */,
+				DE4EDE592355C4B900FF2CEB /* PBXTargetDependency */,
 			);
 			name = test;
 			productName = test;
@@ -1107,6 +1119,11 @@
 			isa = PBXTargetDependency;
 			target = DE27576723334804001B635B /* sdk */;
 			targetProxy = DE3C53B32339E5BF0053196E /* PBXContainerItemProxy */;
+		};
+		DE4EDE592355C4B900FF2CEB /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = DED5255C218DF4C800619F59 /* lib */;
+			targetProxy = DE4EDE582355C4B900FF2CEB /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 

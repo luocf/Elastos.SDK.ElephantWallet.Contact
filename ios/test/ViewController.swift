@@ -20,13 +20,15 @@ class ViewController: UIViewController {
     
     mSavedMnemonic = UserDefaults.standard.string(forKey: ViewController.SavedMnemonicKey)
     if mSavedMnemonic == nil {
+      var mnem = String()
       let ret = Contact.Debug.Keypair.GenerateMnemonic(language: ViewController.KeypairLanguage,
                                                        words: ViewController.KeypairWords,
-                                                       mnem:&mSavedMnemonic)
+                                                       mnem:&mnem)
       if(ret < 0) {
         showMessage(ViewController.ErrorPrefix + "Failed to call Contact.Debug.Keypair.GenerateMnemonic()")
+        return
       }
-      _ = newAndSaveMnemonic(mSavedMnemonic)
+      _ = newAndSaveMnemonic(mnem)
     }
 
     showMessage("Mnemonic:\(mSavedMnemonic ?? "nil")\n")
@@ -70,7 +72,7 @@ class ViewController: UIViewController {
       clearEvent()
       break
     case ButtonTag.new_mnemonic.rawValue:
-      message = newAndSaveMnemonic(nil)
+      message = newAndSaveMnemonic(nil) ?? ""
       break
     case ButtonTag.import_mnemonic.rawValue:
       message = importMnemonic()
@@ -152,15 +154,18 @@ class ViewController: UIViewController {
     }
   }
   
-  private func newAndSaveMnemonic(_ newMnemonic: String?) -> String {
+  private func newAndSaveMnemonic(_ newMnemonic: String?) -> String? {
     mSavedMnemonic = newMnemonic
     if mSavedMnemonic == nil {
+      var mnem = String()
       let ret = Contact.Debug.Keypair.GenerateMnemonic(language: ViewController.KeypairLanguage,
                                                        words: ViewController.KeypairWords,
-                                                       mnem:&mSavedMnemonic)
+                                                       mnem:&mnem)
       if(ret < 0) {
         showMessage(ViewController.ErrorPrefix + "Failed to call Contact.Debug.Keypair.GenerateMnemonic()")
+        return nil
       }
+      mSavedMnemonic = mnem
     }
   
     UserDefaults.standard.set(mSavedMnemonic, forKey: ViewController.SavedMnemonicKey)
@@ -194,7 +199,7 @@ class ViewController: UIViewController {
         }
 
         let message = self.newAndSaveMnemonic(result)
-        self.showMessage(message)
+        self.showMessage(message!)
     })
 
     return "Success to show import mnemonic dialog."
