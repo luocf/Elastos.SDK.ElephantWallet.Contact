@@ -23,7 +23,9 @@ public:
     /*** type define ***/
 
     /*** static function and variable ***/
+    static void SetJavaVM(void* jvm);
     static void DetachCurrentThread();
+    static bool CallOnload(bool(*func)(void*, void*));
 
     static std::string GetBacktrace();
     static int GetCurrentDevId(std::string& devId);
@@ -47,6 +49,7 @@ private:
     virtual ~PlatformAndroid() = delete;
 
     static std::string mCurrentDevId;
+    static void* mJVM;
 
 }; // class PlatformAndroid
 

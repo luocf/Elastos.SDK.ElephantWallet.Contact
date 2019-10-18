@@ -24,6 +24,7 @@ import android.widget.Toast;
 
 import org.elastos.sdk.elephantwallet.contact.Contact;
 import org.elastos.sdk.elephantwallet.contact.internal.ContactChannel;
+import org.elastos.sdk.elephantwallet.contact.internal.ContactMessage;
 import org.elastos.sdk.elephantwallet.contact.internal.ContactStatus;
 import org.elastos.sdk.elephantwallet.contact.internal.EventArgs;
 import org.elastos.sdk.elephantwallet.contact.internal.AcquireArgs;
@@ -263,12 +264,7 @@ public class MainActivity extends Activity {
 
             @Override
             public void onReceivedMessage(String humanCode, int channelType, Contact.Message message) {
-                Object data = message.data;
-                if(message.type == Contact.Message.Type.MsgText) {
-                    data = new String(message.data);
-                }
-
-                String msg = "onRcvdMsg(): data=" + data + "\n";
+                String msg = "onRcvdMsg(): data=" + message.data + "\n";
                 msg += "onRcvdMsg(): type=" + message.type + "\n";
                 msg += "onRcvdMsg(): crypto=" + message.cryptoAlgorithm + "\n";
                 showEvent(msg);
@@ -556,12 +552,12 @@ public class MainActivity extends Activity {
         List<String> friendCodeList = mContact.listFriendCode();
         Helper.showFriendList(this, friendCodeList, (friendCode) -> {
             Helper.showSendMessage(this, friendCode, (message) -> {
-//                Contact.Message msgInfo = mContact.makeTextMessage(message, null);
-                StringBuffer str = new StringBuffer();
-                for(int idx = 0; idx < 1024 * 50; idx ++) {
-                    str.append("1234567890");
-                }
-                Contact.Message msgInfo = mContact.makeTextMessage(str.toString(), null);
+                Contact.Message msgInfo = Contact.MakeTextMessage(message, null);
+//                StringBuffer str = new StringBuffer();
+//                for(int idx = 0; idx < 1024 * 50; idx ++) {
+//                    str.append("1234567890");
+//                }
+//                Contact.Message msgInfo = Contact.MakeTextMessage(str.toString(), null);
 
                 ContactStatus status = mContact.getStatus(friendCode);
                 if(status != ContactStatus.Online) {
@@ -686,7 +682,7 @@ public class MainActivity extends Activity {
         String appid = "org.elastos.debug.didplugin";
         String appkey = "b2gvzUM79yLhCbbGNWCuhSsGdqYhA7sS";
         long timestamp = System.currentTimeMillis();
-        String auth = Utils.getMd5(appkey + timestamp);
+        String auth = Utils.getMd5Sum(appkey + timestamp);
         String headerValue = "id=" + appid + ";time=" + timestamp + ";auth=" + auth;
         Log.i(TAG, "getAgentAuthHeader() headerValue=" + headerValue);
 

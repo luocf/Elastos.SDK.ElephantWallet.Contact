@@ -51,6 +51,10 @@
         "typeinfo": "cpp",
         "atomic": "cpp",
         "cstddef": "cpp",
-        "string": "cpp"
+        "string": "cpp",
+        "list": "cpp",
+        "map": "cpp",
+        "memory_resource": "cpp",
+        "set": "cpp"
     }
 }

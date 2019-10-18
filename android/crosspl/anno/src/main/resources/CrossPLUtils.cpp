@@ -27,9 +27,19 @@ JavaVM* CrossPLUtils::sJVM = nullptr;
 /***********************************************/
 /***** static function implement ***************/
 /***********************************************/
+extern "C" JavaVM* GetJavaVM()
+{
+    return crosspl::CrossPLUtils::GetJavaVM();
+}
+
 void CrossPLUtils::SetJavaVM(JavaVM* jvm)
 {
     sJVM = jvm;
+}
+
+JavaVM* CrossPLUtils::GetJavaVM()
+{
+    return sJVM;
 }
 
 void CrossPLUtils::DetachCurrentThread()

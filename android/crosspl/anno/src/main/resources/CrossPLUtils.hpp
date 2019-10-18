@@ -20,6 +20,7 @@ public:
 
     /*** static function and variable ***/
     static void SetJavaVM(JavaVM* jvm);
+    static JavaVM* GetJavaVM();
     static void DetachCurrentThread();
     static std::shared_ptr<JNIEnv> SafeGetEnv();
     static jclass FindJavaClass(JNIEnv* jenv, const char* className);

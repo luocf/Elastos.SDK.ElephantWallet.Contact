@@ -7,9 +7,11 @@
 
 #include <ChannelImplCarrier.hpp>
 
+#include <ela_session.h>
 #include <cstring>
 #include <Log.hpp>
 #include <SafePtr.hpp>
+#include <Platform.hpp>
 
 namespace elastos {
 
@@ -59,10 +61,12 @@ ChannelImplCarrier::ChannelImplCarrier(uint32_t chType,
     : MessageChannelStrategy(chType, listener)
     , mConfig(config)
     , mCarrier()
+    , mFileTransfer()
     , mTaskThread()
     , mChannelStatus(ChannelListener::ChannelStatus::Pending)
     , mRecvDataCache()
 {
+    PlatformAndroid::CallOnload(ela_session_jni_onload);
 }
 
 ChannelImplCarrier::~ChannelImplCarrier()
@@ -76,70 +80,12 @@ int ChannelImplCarrier::preset(const std::string& profile)
         return ErrCode::ChannelFailedMultiOpen;
     }
 
-    auto config = SAFE_GET_PTR(mConfig);
-
-    ElaOptions carrierOpts;
-    ElaCallbacks carrierCallbacks;
-
-    memset(&carrierOpts, 0, sizeof(carrierOpts));
-    memset(&carrierCallbacks, 0, sizeof(carrierCallbacks));
-    carrierCallbacks.connection_status = OnCarrierConnection;
-    carrierCallbacks.friend_request = OnCarrierFriendRequest;
-    carrierCallbacks.friend_connection = OnCarrierFriendConnection;
-    carrierCallbacks.friend_message = OnCarrierFriendMessage;
-
-    carrierOpts.udp_enabled = config->mCarrierConfig->mEnableUdp;
-    carrierOpts.persistent_location = config->mUserDataDir.c_str();
-//    Log::W(Log::TAG, "========= Recover carrier by secret key: %s", profile.c_str());
-//    if(profile.empty() == false) {
-//        carrierOpts.secret_key = profile.c_str();
-//    }
-
-    // set BootstrapNode
-    size_t carrierNodeSize = config->mCarrierConfig->mBootstrapNodes.size();
-    BootstrapNode carrierNodeArray[carrierNodeSize];
-    memset (carrierNodeArray, 0, sizeof(carrierNodeArray));
-    for(int idx = 0; idx < carrierNodeSize; idx++) {
-        const auto& node = config->mCarrierConfig->mBootstrapNodes[idx];
-        carrierNodeArray[idx].ipv4 = node.mIpv4.c_str();
-        carrierNodeArray[idx].port = node.mPort.c_str();
-        carrierNodeArray[idx].public_key = node.mPublicKey.c_str();
-    }
-    carrierOpts.bootstraps_size = carrierNodeSize;
-    carrierOpts.bootstraps = carrierNodeArray;
-
-    // set HiveBootstrapNode
-    size_t hiveNodeSize = config->mCarrierConfig->mHiveNodes.size();
-    HiveBootstrapNode hiveNodeArray[hiveNodeSize];
-    memset (hiveNodeArray, 0, sizeof(hiveNodeArray));
-    for(int idx = 0; idx < hiveNodeSize; idx++) {
-        const auto& node = config->mCarrierConfig->mHiveNodes[idx];
-        hiveNodeArray[idx].ipv4 = node.mIpv4.c_str();
-        hiveNodeArray[idx].port = node.mPort.c_str();
-    }
-    //carrierOpts.hive_bootstraps_size = hiveNodeSize;
-    //carrierOpts.hive_bootstraps = hiveNodeArray;
-
-    carrierOpts.log_level = static_cast<ElaLogLevel>(config->mCarrierConfig->mLogLevel);
-
-    auto creater = [&]() -> ElaCarrier* {
-        auto ptr = ela_new(&carrierOpts, &carrierCallbacks, this);
-        return ptr;
-    };
-    auto deleter = [=](ElaCarrier* ptr) -> void {
-        if(ptr != nullptr) {
-            ela_session_cleanup(ptr);
-            ela_kill(ptr);
-        }
-    };
-    mCarrier = std::unique_ptr<ElaCarrier, std::function<void(ElaCarrier*)>>(creater(), deleter);
-
-    if (mCarrier == nullptr) {
-        Log::E(Log::TAG, "Failed to new carrier!");
-        return ErrCode::ChannelFailedCarrier;
+    int ret = initCarrier();
+    if(ret < 0) {
+        return ret;
     }
 
-    int ret = ela_set_self_nospam(mCarrier.get(), 0);
+    ret = ela_set_self_nospam(mCarrier.get(), 0);
     if(ret != 0) {
         int err = ela_get_error();
         char strerr_buf[512] = {0};
@@ -334,9 +280,119 @@ int ChannelImplCarrier::sendMessage(const std::string& friendCode,
     return 0;
 }
 
+int ChannelImplCarrier::pullFile(const std::string& friendCode,
+                                 const std::string& fileName)
+{
+
+}
+
 /***********************************************/
 /***** class protected function implement  *****/
 /***********************************************/
+int ChannelImplCarrier::initCarrier()
+{
+    auto config = SAFE_GET_PTR(mConfig);
+
+    ElaOptions carrierOpts;
+    ElaCallbacks carrierCallbacks;
+
+    memset(&carrierOpts, 0, sizeof(carrierOpts));
+    memset(&carrierCallbacks, 0, sizeof(carrierCallbacks));
+    carrierCallbacks.connection_status = OnCarrierConnection;
+    carrierCallbacks.friend_request = OnCarrierFriendRequest;
+    carrierCallbacks.friend_connection = OnCarrierFriendConnection;
+    carrierCallbacks.friend_message = OnCarrierFriendMessage;
+
+    carrierOpts.udp_enabled = config->mCarrierConfig->mEnableUdp;
+    carrierOpts.persistent_location = config->mUserDataDir.c_str();
+//    Log::W(Log::TAG, "========= Recover carrier by secret key: %s", profile.c_str());
+//    if(profile.empty() == false) {
+//        carrierOpts.secret_key = profile.c_str();
+//    }
+
+    // set BootstrapNode
+    size_t carrierNodeSize = config->mCarrierConfig->mBootstrapNodes.size();
+    BootstrapNode carrierNodeArray[carrierNodeSize];
+    memset (carrierNodeArray, 0, sizeof(carrierNodeArray));
+    for(int idx = 0; idx < carrierNodeSize; idx++) {
+        const auto& node = config->mCarrierConfig->mBootstrapNodes[idx];
+        carrierNodeArray[idx].ipv4 = node.mIpv4.c_str();
+        carrierNodeArray[idx].port = node.mPort.c_str();
+        carrierNodeArray[idx].public_key = node.mPublicKey.c_str();
+    }
+    carrierOpts.bootstraps_size = carrierNodeSize;
+    carrierOpts.bootstraps = carrierNodeArray;
+
+    // set HiveBootstrapNode
+    size_t hiveNodeSize = config->mCarrierConfig->mHiveNodes.size();
+    HiveBootstrapNode hiveNodeArray[hiveNodeSize];
+    memset (hiveNodeArray, 0, sizeof(hiveNodeArray));
+    for(int idx = 0; idx < hiveNodeSize; idx++) {
+        const auto& node = config->mCarrierConfig->mHiveNodes[idx];
+        hiveNodeArray[idx].ipv4 = node.mIpv4.c_str();
+        hiveNodeArray[idx].port = node.mPort.c_str();
+    }
+    //carrierOpts.hive_bootstraps_size = hiveNodeSize;
+    //carrierOpts.hive_bootstraps = hiveNodeArray;
+
+    carrierOpts.log_level = static_cast<ElaLogLevel>(config->mCarrierConfig->mLogLevel);
+
+    auto creater = [&]() -> ElaCarrier* {
+        auto ptr = ela_new(&carrierOpts, &carrierCallbacks, this);
+        return ptr;
+    };
+    auto deleter = [=](ElaCarrier* ptr) -> void {
+        if(ptr != nullptr) {
+            ela_filetransfer_cleanup(ptr);
+            ela_session_cleanup(ptr);
+            ela_kill(ptr);
+        }
+    };
+    mCarrier = std::unique_ptr<ElaCarrier, std::function<void(ElaCarrier*)>>(creater(), deleter);
+    if (mCarrier == nullptr) {
+        Log::E(Log::TAG, "Failed to new carrier!");
+        return ErrCode::ChannelFailedCarrier;
+    }
+
+    int ret = ela_filetransfer_init(mCarrier.get(), OnFileTransferConnect, this);
+    if (ret < 0) {
+        Log::E(Log::TAG, "Failed to init filetransfer!");
+        return ErrCode::ChannelFailedCarrier;
+    }
+
+    return 0;
+}
+
+int ChannelImplCarrier::makeFileTransfer(const std::string& friendCode)
+{
+    ElaFileTransferCallbacks ftCallbacks;
+    memset(&ftCallbacks, 0, sizeof(ftCallbacks));
+
+    ftCallbacks.state_changed = OnFileTransferStateChanged;
+    ftCallbacks.file = OnFileTransferFile;
+    ftCallbacks.pull = OnFileTransferPull;
+    ftCallbacks.data = OnFileTransferData;
+    ftCallbacks.cancel = OnFileTransferCancel;
+
+    auto creater = [&]() -> ElaFileTransfer* {
+        auto ptr = ela_filetransfer_new(mCarrier.get(), friendCode.c_str(), nullptr,
+                                        &ftCallbacks, this);
+        return ptr;
+    };
+    auto deleter = [=](ElaFileTransfer* ptr) -> void {
+        if(ptr != nullptr) {
+            ela_filetransfer_close(ptr);
+        }
+    };
+    mFileTransfer = std::unique_ptr<ElaFileTransfer, std::function<void(ElaFileTransfer*)>>(creater(), deleter);
+    if (mFileTransfer == nullptr) {
+        Log::E(Log::TAG, "Failed to make file transfer!");
+        return ErrCode::ChannelFailedCarrier;
+    }
+
+    return 0;
+}
+
 void ChannelImplCarrier::runCarrier()
 {
     int ret = ela_run(mCarrier.get(), 500);
@@ -444,6 +500,44 @@ void ChannelImplCarrier::OnCarrierFriendMessage(ElaCarrier *carrier, const char 
     }
 
 }
+
+void ChannelImplCarrier::OnFileTransferConnect(ElaCarrier *carrier, const char *from,
+                                               const ElaFileTransferInfo *fileinfo,
+                                               void *context)
+{
+    throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
+}
+
+void ChannelImplCarrier::OnFileTransferStateChanged(ElaFileTransfer *filetransfer,
+                                                    FileTransferConnection state, void *context)
+{
+    throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
+}
+
+void ChannelImplCarrier::OnFileTransferFile(ElaFileTransfer *filetransfer, const char *fileid,
+                                            const char *filename, uint64_t size, void *context)
+{
+    throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
+}
+
+void ChannelImplCarrier::OnFileTransferPull(ElaFileTransfer *filetransfer, const char *fileid,
+                                            uint64_t offset, void *context)
+{
+    throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
+}
+
+bool ChannelImplCarrier::OnFileTransferData(ElaFileTransfer *filetransfer, const char *fileid,
+                                            const uint8_t *data, size_t length, void *context)
+{
+    throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
+}
+
+void ChannelImplCarrier::OnFileTransferCancel(ElaFileTransfer *filetransfer, const char *fileid,
+                                              int status, const char *reason, void *context)
+{
+    throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
+}
+
 
 /***********************************************/
 /***** class private function implement  *******/

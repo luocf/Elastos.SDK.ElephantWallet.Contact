@@ -102,6 +102,8 @@ NLOHMANN_JSON_SERIALIZE_ENUM(
         {MessageManager::MessageType::MsgText, "MsgText"},
         {MessageManager::MessageType::MsgAudio, "MsgAudio"},
         {MessageManager::MessageType::MsgTransfer, "MsgTransfer"},
+        {MessageManager::MessageType::MsgImage, "MsgImage"},
+        {MessageManager::MessageType::MsgFile, "MsgFile"},
 
         {MessageManager::MessageType::CtrlSyncDesc, "CtrlSyncDesc"},
     }

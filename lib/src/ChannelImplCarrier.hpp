@@ -13,7 +13,7 @@
 
 #include <Config.hpp>
 #include <ela_carrier.h>
-#include <ela_session.h>
+#include <ela_filetransfer.h>
 #include <MessageChannelStrategy.hpp>
 #include <ThreadPool.hpp>
 
@@ -53,6 +53,9 @@ public:
     virtual int sendMessage(const std::string& friendCode,
                             std::vector<uint8_t> msgContent) override;
 
+    virtual int pullFile(const std::string& friendCode,
+                         const std::string& fileName) override;
+
 protected:
     /*** type define ***/
 
@@ -68,6 +71,20 @@ protected:
                                                 const void *msg, size_t len,
                                                 bool offline, void *context);
 
+    static void OnFileTransferConnect(ElaCarrier *carrier, const char *from,
+                                      const ElaFileTransferInfo *fileinfo,
+                                      void *context);
+    static void OnFileTransferStateChanged(ElaFileTransfer *filetransfer,
+                                           FileTransferConnection state, void *context);
+    static void OnFileTransferFile(ElaFileTransfer *filetransfer, const char *fileid,
+                                   const char *filename, uint64_t size, void *context);
+    static void OnFileTransferPull(ElaFileTransfer *filetransfer, const char *fileid,
+                                   uint64_t offset, void *context);
+    static bool OnFileTransferData(ElaFileTransfer *filetransfer, const char *fileid,
+                                   const uint8_t *data, size_t length, void *context);
+    static void OnFileTransferCancel(ElaFileTransfer *filetransfer, const char *fileid,
+                                     int status, const char *reason, void *context);
+
     static constexpr int32_t MaxPkgSize = 1000;
     static constexpr uint8_t PkgMagic[] = { 0xA5, 0xA5, 0x5A, 0x5A,
                                             0x00/*index*/, 0x00/*index*/,
@@ -79,10 +96,13 @@ protected:
     static constexpr int32_t MaxPkgCount = 65535; // sizeof uint16
 
     /*** class function and variable ***/
+    int initCarrier();
+    int makeFileTransfer(const std::string& friendCode);
     void runCarrier();
 
     std::weak_ptr<Config> mConfig;
     std::unique_ptr<ElaCarrier, std::function<void(ElaCarrier*)>> mCarrier;
+    std::unique_ptr<ElaFileTransfer, std::function<void(ElaFileTransfer*)>> mFileTransfer;
     std::unique_ptr<ThreadPool> mTaskThread;
     ChannelListener::ChannelStatus mChannelStatus;
     std::map<std::string, std::map<int, std::vector<uint8_t>>> mRecvDataCache;

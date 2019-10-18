@@ -10,6 +10,7 @@ import org.elastos.tools.crosspl.CrossBase;
 import org.elastos.tools.crosspl.annotation.CrossClass;
 import org.elastos.tools.crosspl.annotation.CrossInterface;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -122,17 +123,6 @@ public class ContactBridge extends CrossBase {
         return ContactStatus.valueOf(ret);
     }
 
-    public Contact.Message makeMessage(ContactMessage.Type type, byte[] data, String cryptoAlgorithm) {
-        Contact.Message msg = new Contact.Message(type, data, cryptoAlgorithm);
-        return msg;
-    }
-
-    public Contact.Message makeTextMessage(String data, String cryptoAlgorithm) {
-        Contact.Message msg = new Contact.Message(ContactMessage.Type.MsgText, data.getBytes(), cryptoAlgorithm);
-        return msg;
-    }
-
-
     public int sendMessage(String friendCode, ContactChannel channelType, Contact.Message message) {
         if(message == null) {
             return -1;
@@ -146,6 +136,16 @@ public class ContactBridge extends CrossBase {
         ret = sendMessage(friendCode, channelType.id(), message);
 
         return ret;
+    }
+
+    public static Contact.Message MakeTextMessage(String text, String cryptoAlgorithm) {
+        Contact.Message msg = new Contact.Message(text, cryptoAlgorithm);
+        return msg;
+    }
+
+    private static Contact.Message MakeMessage(ContactMessage.Type type, byte[] data, String cryptoAlgorithm) {
+        Contact.Message msg = new Contact.Message(type, data, cryptoAlgorithm);
+        return msg;
     }
 
     @CrossInterface

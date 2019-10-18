@@ -71,6 +71,11 @@ public:
     virtual int sendMessage(const std::string& friendCode,
                             std::vector<uint8_t> msgContent) = 0;
 
+    virtual int pullFile(const std::string& friendCode,
+                         const std::string& fileName) {
+        return ErrCode::UnimplementedError;
+    }
+
 protected:
     /*** type define ***/
 

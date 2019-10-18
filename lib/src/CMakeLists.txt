@@ -8,6 +8,7 @@ message(STATUS "curl library path: ${pkg-curl_STATIC_LDFLAGS}")
 
 set(pkg-Elastos.NET.Carrier_STATIC_LDFLAGS
     elacarrier
+    elafiletrans
     elasession
     cjson
     flatccrt

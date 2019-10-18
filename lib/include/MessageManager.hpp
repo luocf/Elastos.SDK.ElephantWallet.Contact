@@ -38,6 +38,8 @@ public:
         MsgText = 0x00000001,
         MsgAudio = 0x00000002,
         MsgTransfer = 0x00000004,
+        MsgImage = 0x00000008,
+        MsgFile = 0x00000010,
 
         Control = 0x00FF0000,
         CtrlSyncDesc = 0x00010000,

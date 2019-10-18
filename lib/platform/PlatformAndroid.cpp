@@ -14,21 +14,32 @@
 #include "ErrCode.hpp"
 #include "Log.hpp"
 
-//#include "CrossPLUtils.hpp"
+#include <jni.h>
 
 namespace elastos {
 
 /***********************************************/
 /***** static variables initialize *************/
 /***********************************************/
+void* PlatformAndroid::mJVM;
 std::string PlatformAndroid::mCurrentDevId;
 
 /***********************************************/
 /***** static function implement ***************/
 /***********************************************/
+void PlatformAndroid::SetJavaVM(void* jvm)
+{
+    mJVM = jvm;
+}
+
 void PlatformAndroid::DetachCurrentThread()
 {
-    //crosspl::CrossPLUtils::DetachCurrentThread();
+    reinterpret_cast<JavaVM*>(mJVM)->DetachCurrentThread();
+}
+
+bool PlatformAndroid::CallOnload(bool(*func)(void*, void*))
+{
+    return func(mJVM, nullptr);
 }
 
 std::string PlatformAndroid::GetBacktrace()
@@ -105,5 +116,15 @@ _Unwind_Reason_Code PlatformAndroid::UnwindCallback(struct _Unwind_Context* cont
 /***********************************************/
 
 } // namespace elastos
+
+#include <sys/endian.h>
+extern "C" uint64_t htonll(uint64_t x) {
+    return htobe64(x);
+    //return ((1==htonl(1)) ? (x) : (((uint64_t)htonl((x) & 0xFFFFFFFFUL)) << 32) | htonl((uint32_t)((x) >> 32)));
+}
+extern "C" uint64_t ntohll(uint64_t x) {
+    return be64toh(x);
+    //return ((1==ntohl(1)) ? (x) : (((uint64_t)ntohl((x) & 0xFFFFFFFFUL)) << 32) | ntohl((uint32_t)((x) >> 32)));
+}
 
 #endif /* defined(__ANDROID__) */

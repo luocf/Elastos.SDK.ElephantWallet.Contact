@@ -4,6 +4,8 @@ import android.util.Log;
 
 import org.elastos.sdk.elephantwallet.contact.Contact;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.lang.reflect.Field;
 import java.math.BigInteger;
 import java.security.MessageDigest;
@@ -37,7 +39,25 @@ public final class Utils {
         return result.toString();
     }
 
-    public static String getMd5(String str) {
+    public static String getMD5Sum(File file) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            FileInputStream fis = new FileInputStream(file);
+            byte[] buffer = new byte[8192];
+            int num;
+
+            while( (num = fis.read(buffer)) > 0) {
+                md.update(buffer, 0, num);
+            }
+            fis.close();
+            String md5 = new BigInteger(1, md.digest()).toString(16);
+            return fillMD5(md5);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to get md5. file:" + file.getAbsolutePath(), e);
+        }
+    }
+
+    public static String getMd5Sum(String str) {
         try {
             MessageDigest md = MessageDigest.getInstance("MD5");
             md.update(str.getBytes());
