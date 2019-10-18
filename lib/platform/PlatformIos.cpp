@@ -92,5 +92,5 @@ void PlatformIos::SetCurrentDevId(const std::string& devId)
 
 } // namespace elastos
 
-#endif // defined(__APPLE__)
 #endif // defined(TARGET_OS_IOS)
+#endif // defined(__APPLE__)

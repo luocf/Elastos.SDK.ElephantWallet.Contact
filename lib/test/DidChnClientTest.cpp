@@ -70,7 +70,7 @@ void signalHandler(int sig) {
 std::string getPublicKey()
 {
     void* seedData = nullptr;
-    int seedSize = ::getSeedFromMnemonic(&seedData, gCachedMnemonic.c_str(), gKeypairLanguage, gKeypairWords, "");
+    int seedSize = ::getSeedFromMnemonic(&seedData, gCachedMnemonic.c_str(), gKeypairLanguage);
 
     auto pubKey = ::getSinglePublicKey(seedData, seedSize);
     freeBuf(seedData);
@@ -85,7 +85,7 @@ std::string getPublicKey()
 std::string getPrivateKey()
 {
     void* seedData = nullptr;
-    int seedSize = ::getSeedFromMnemonic(&seedData, gCachedMnemonic.c_str(), gKeypairLanguage, gKeypairWords, "");
+    int seedSize = ::getSeedFromMnemonic(&seedData, gCachedMnemonic.c_str(), gKeypairLanguage);
 
     auto privKey = ::getSinglePrivateKey(seedData, seedSize);
     freeBuf(seedData);

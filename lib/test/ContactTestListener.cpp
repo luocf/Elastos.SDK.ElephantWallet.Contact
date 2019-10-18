@@ -62,6 +62,12 @@ void ContactTestListener::onFriendStatusChanged(std::shared_ptr<elastos::FriendI
               << " FriendStatus:" << static_cast<int>(status) << std::endl;
 }
 
+void ContactTestListener::onHumanInfoChanged(std::shared_ptr<elastos::HumanInfo> humanInfo,
+                                             elastos::MessageManager::ChannelType channelType)
+{
+    std::cout << "ContactTestListener ChannelType:" << static_cast<int>(channelType) << std::endl;
+}
+
 /* =========================================== */
 /* === class protected function implement  === */
 /* =========================================== */

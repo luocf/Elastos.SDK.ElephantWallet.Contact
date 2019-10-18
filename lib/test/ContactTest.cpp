@@ -305,7 +305,7 @@ std::string getPublicKey()
     ensureCachedMnemonic();
 
     void* seedData = nullptr;
-    int seedSize = ::getSeedFromMnemonic(&seedData, gCachedMnemonic.c_str(), keypairLanguage, keypairWords, "");
+    int seedSize = ::getSeedFromMnemonic(&seedData, gCachedMnemonic.c_str(), keypairLanguage);
 
     auto pubKey = ::getSinglePublicKey(seedData, seedSize);
     freeBuf(seedData);
@@ -322,7 +322,7 @@ std::string getPrivateKey()
     ensureCachedMnemonic();
 
     void* seedData = nullptr;
-    int seedSize = ::getSeedFromMnemonic(&seedData, gCachedMnemonic.c_str(), keypairLanguage, keypairWords, "");
+    int seedSize = ::getSeedFromMnemonic(&seedData, gCachedMnemonic.c_str(), keypairLanguage);
 
     auto privKey = ::getSinglePrivateKey(seedData, seedSize);
     freeBuf(seedData);

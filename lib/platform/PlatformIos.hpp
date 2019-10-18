@@ -48,7 +48,7 @@ private:
 
 } // namespace elastos
 
-#endif // defined(__APPLE__)
 #endif // defined(TARGET_OS_IOS)
+#endif // defined(__APPLE__)
 
 #endif /* _ELASTOS_PLATFORM_IOS_HPP_ */

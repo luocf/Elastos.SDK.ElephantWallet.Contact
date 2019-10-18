@@ -31,6 +31,9 @@ public:
                                        elastos::MessageManager::ChannelType channelType,
                                        elastos::FriendInfo::Status status) override;
 
+    virtual void onHumanInfoChanged(std::shared_ptr<elastos::HumanInfo> humanInfo,
+                                    elastos::MessageManager::ChannelType channelType) override;
+
 
 protected:
     /*** type define ***/
