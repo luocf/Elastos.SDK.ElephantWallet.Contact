@@ -53,8 +53,8 @@ public:
     virtual int sendMessage(const std::string& friendCode,
                             std::vector<uint8_t> msgContent) override;
 
-    virtual int pullFile(const std::string& friendCode,
-                         const std::string& fileName) override;
+    virtual int pullData(const std::string& friendCode,
+                         const std::string& dataId) override;
 
 protected:
     /*** type define ***/
@@ -97,7 +97,7 @@ protected:
 
     /*** class function and variable ***/
     int initCarrier();
-    int makeFileTransfer(const std::string& friendCode);
+    int makeFileTransfer(const char* friendCode, const ElaFileTransferInfo *fileInfo);
     void runCarrier();
 
     std::weak_ptr<Config> mConfig;

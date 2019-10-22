@@ -1,7 +1,6 @@
 package org.elastos.sdk.elephantwallet.contact.internal;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonElement;
 import com.google.gson.annotations.SerializedName;
 
 import org.elastos.tools.crosspl.CrossBase;
@@ -53,13 +52,16 @@ public class ContactMessage extends CrossBase {
         final public String text;
     }
 
-    public class FileData extends Data {
+    public static class FileData extends Data {
         public FileData(File file) {
+            devId = UserInfo.GetCurrDevId();
             name = file.getName();
             size = file.length();
             md5 = Utils.getMD5Sum(file);
         }
 
+        @SerializedName(JsonKey.DeviceId)
+        final public String devId;
         @SerializedName(JsonKey.Name)
         final public String name;
         @SerializedName(JsonKey.Size)
@@ -81,6 +83,10 @@ public class ContactMessage extends CrossBase {
 
     public ContactMessage(String text, String cryptoAlgorithm) {
         this(Type.MsgText, new TextData(text), cryptoAlgorithm);
+    }
+
+    public ContactMessage(File file, String cryptoAlgorithm) {
+        this(Type.MsgFile, new FileData(file), cryptoAlgorithm);
     }
 
     public ContactMessage(Type type, byte[] data, String cryptoAlgorithm) {

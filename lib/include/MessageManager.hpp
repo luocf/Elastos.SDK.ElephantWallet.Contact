@@ -57,8 +57,25 @@ public:
                              const std::string& cryptoAlgorithm);
         explicit MessageInfo(const MessageInfo& info,
                              bool ignoreContent = true);
-        explicit MessageInfo();
-        virtual ~MessageInfo();
+        explicit MessageInfo() = default;
+        virtual ~MessageInfo() = default;
+
+        friend MessageManager;
+    };
+
+    struct FileInfo {
+    public:
+        std::string mDevId;
+        std::string mName;
+        uint64_t mSize;
+        std::string mMd5;
+    private:
+        explicit FileInfo(const std::string& devId,
+                          const std::string& name,
+                          uint64_t size,
+                          const std::string& md5);
+        explicit FileInfo() = default;
+        virtual ~FileInfo() = default;
 
         friend MessageManager;
     };
@@ -120,6 +137,8 @@ public:
                                                     const std::string& cryptoAlgorithm = "");
     static std::shared_ptr<MessageInfo> MakeTextMessage(const std::string& plainContent,
                                                         const std::string& cryptoAlgorithm = "");
+    static std::shared_ptr<FileInfo> MakeFileInfo(const std::string& mDevId,
+                                                  const std::string& mName, uint64_t mSize, const std::string& mMd5);
 
 
     /*** class function and variable ***/
@@ -147,9 +166,13 @@ public:
 //    virtual int monitorDidChainCarrierID(const std::string& did);
 
     virtual int sendMessage(const std::shared_ptr<HumanInfo> humanInfo,
-                            ChannelType chType,
+                            ChannelType humanChType,
                             const std::shared_ptr<MessageInfo> msgInfo,
                             bool sendToOtherDev = true);
+
+    virtual int pullFile(const std::shared_ptr<HumanInfo> humanInfo,
+                         ChannelType humanChType,
+                         const std::shared_ptr<FileInfo> fileInfo);
 
     virtual int broadcastDesc(ChannelType chType);
 

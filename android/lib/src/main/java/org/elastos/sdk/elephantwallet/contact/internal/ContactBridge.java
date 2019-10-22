@@ -138,15 +138,31 @@ public class ContactBridge extends CrossBase {
         return ret;
     }
 
+    public int pullFile(String friendCode, ContactChannel channelType,
+                        Contact.Message.FileData fileInfo) {
+        if(fileInfo == null) {
+            return -1;
+        }
+
+        int ret = pullFile(friendCode, channelType.id(), fileInfo.toString());
+
+        return ret;
+    }
+
     public static Contact.Message MakeTextMessage(String text, String cryptoAlgorithm) {
         Contact.Message msg = new Contact.Message(text, cryptoAlgorithm);
         return msg;
     }
 
-    private static Contact.Message MakeMessage(ContactMessage.Type type, byte[] data, String cryptoAlgorithm) {
-        Contact.Message msg = new Contact.Message(type, data, cryptoAlgorithm);
+    public static Contact.Message MakeFileMessage(File file, String cryptoAlgorithm) {
+        Contact.Message msg = new Contact.Message(file, cryptoAlgorithm);
         return msg;
     }
+
+//    private static Contact.Message MakeMessage(ContactMessage.Type type, byte[] data, String cryptoAlgorithm) {
+//        Contact.Message msg = new Contact.Message(type, data, cryptoAlgorithm);
+//        return msg;
+//    }
 
     @CrossInterface
     public native int start();
@@ -192,6 +208,9 @@ public class ContactBridge extends CrossBase {
 
     @CrossInterface
     private native int sendMessage(String friendCode, int channelType, CrossBase message);
+
+    @CrossInterface
+    private native int pullFile(String friendCode, int channelType, String fileInfo);
 
     private CrossBase mListener;
 

@@ -8,8 +8,10 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
+import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.view.View;
@@ -174,7 +176,7 @@ public class Helper {
         showDialog(builder);
     }
 
-    public static void showSendMessage(Context context, String friendCode, OnListener listener) {
+    public static void showTextSendMessage(Context context, String friendCode, OnListener listener) {
         EditText edit = new EditText(context);
         View root = makeEditView(context, friendCode, edit);
 
@@ -191,8 +193,25 @@ public class Helper {
         showDialog(builder);
     }
 
+    public static void showFileSendMessage(MainActivity activity, String friendCode, OnListener listener) {
+        TextView fileName = new TextView(activity);
+        View root = makeFileChoiceView(activity, friendCode, fileName);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+        builder.setTitle("Send File");
+        builder.setView(root);
+        builder.setNegativeButton("Cancel", (dialog, which) -> {
+            dismissDialog();
+        });
+        builder.setPositiveButton("Send", (dialog, which) -> {
+            listener.onResult(fileName.getText().toString());
+        });
+
+        showDialog(builder);
+    }
+
     public static void scanAddress(MainActivity activity, OnListener listener) {
-        mOnScanListener = listener;
+        mOnResultListener = listener;
 
         int hasCameraPermission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.CAMERA);
         if(hasCameraPermission == PackageManager.PERMISSION_GRANTED) {
@@ -201,6 +220,21 @@ public class Helper {
         } else {
             ActivityCompat.requestPermissions(activity,
                     new String[]{Manifest.permission.CAMERA},
+                    1);
+        }
+    }
+
+    public static void selectPhoto(MainActivity activity, OnListener listener) {
+        mOnResultListener = listener;
+
+        int hasCameraPermission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.READ_EXTERNAL_STORAGE);
+        if(hasCameraPermission == PackageManager.PERMISSION_GRANTED) {
+            Intent intent = new Intent(Intent.ACTION_PICK, null);
+            intent.setDataAndType(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, "image/*");
+            activity.startActivityForResult(intent, REQUEST_CODE_SEL_PHOTO);
+        } else {
+            ActivityCompat.requestPermissions(activity,
+                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
                     1);
         }
     }
@@ -243,8 +277,14 @@ public class Helper {
             String result = data.getStringExtra("com.blikoon.qrcodescanner.got_qr_scan_relult");
             Log.d(TAG,"Scan result:"+ result);
 
-            mOnScanListener.onResult(result);
-            mOnScanListener = null;
+            mOnResultListener.onResult(result);
+            mOnResultListener = null;
+        } else if(requestCode == REQUEST_CODE_SEL_PHOTO) {
+            Uri uri = data.getData();
+            String result = FileUtils.getFilePathByUri(activity, uri);
+
+            mOnResultListener.onResult(result);
+            mOnResultListener = null;
         }
     }
 
@@ -345,6 +385,34 @@ public class Helper {
         return root;
     }
 
+    private static View makeFileChoiceView(MainActivity activity, String friendCode, TextView txtFileName) {
+        TextView txtCode = new TextView(activity);
+        TextView txtMsg = new TextView(activity);
+
+        Button btnSel = new Button(activity);
+        btnSel.setText("Select");
+        btnSel.setOnClickListener((v) -> {
+            selectPhoto(activity, new OnListener() {
+                @Override
+                public void onResult(String result) {
+                    txtFileName.setText(result);
+                }
+            });
+        });
+
+        LinearLayout root = new LinearLayout(activity);
+        root.setOrientation(LinearLayout.VERTICAL);
+        root.addView(txtCode);
+        root.addView(txtMsg);
+        root.addView(txtFileName);
+        root.addView(btnSel);
+
+        txtCode.setText("FriendCode: \n  " + friendCode);
+        txtMsg.setText("File:");
+
+        return root;
+    }
+
     private static Bitmap makeQRCode(String value) {
         HashMap<EncodeHintType, ErrorCorrectionLevel> hintMap = new HashMap<>();
         hintMap.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.L);
@@ -396,6 +464,7 @@ public class Helper {
     }
 
     private static AlertDialog mLastDialog;
-    private static OnListener mOnScanListener;
+    private static OnListener mOnResultListener;
     private static final int REQUEST_CODE_QR_SCAN = 101;
+    private static final int REQUEST_CODE_SEL_PHOTO = 102;
 }

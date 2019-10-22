@@ -69,6 +69,8 @@ public:
     constexpr static const int ChannelNotOnline = -210;
     constexpr static const int ChannelNotSendMessage = -211;
     constexpr static const int ChannelDataTooLarge = -212;
+	constexpr static const int ChannelFailedFileTrans = -213;
+	constexpr static const int ChannelFileTransBusy = -214;
 
     constexpr static const int BlkChnSetPropError = -300;
     constexpr static const int BlkChnGetPropError = -301;

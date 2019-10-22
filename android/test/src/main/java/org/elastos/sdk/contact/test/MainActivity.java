@@ -32,6 +32,7 @@ import org.elastos.sdk.elephantwallet.contact.internal.Utils;
 import org.elastos.sdk.keypair.ElastosKeypair;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,6 +41,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.google.gson.Gson;
 
@@ -170,8 +172,14 @@ public class MainActivity extends Activity {
             case R.id.del_friend:
                 message = removeFriend();
                 break;
-            case R.id.send_message:
-                message = sendMessage();
+            case R.id.send_text_message:
+                message = sendTextMessage();
+                break;
+            case R.id.send_file_message:
+                message = sendFileMessage();
+                break;
+            case R.id.pull_file:
+                message = pullFile();
                 break;
 
             case R.id.show_cached_didprop:
@@ -268,6 +276,10 @@ public class MainActivity extends Activity {
                 msg += "onRcvdMsg(): type=" + message.type + "\n";
                 msg += "onRcvdMsg(): crypto=" + message.cryptoAlgorithm + "\n";
                 showEvent(msg);
+
+                if(message.type == Contact.Message.Type.MsgFile) {
+                    mContactFileDataMap.put(humanCode, (Contact.Message.FileData)message.data);
+                }
             }
 
             @Override
@@ -535,7 +547,7 @@ public class MainActivity extends Activity {
         return "Success to send message.";
     }
 
-    private String sendMessage() {
+    private String sendTextMessage() {
         if (mContact == null) {
             return ErrorPrefix + "Contact is null.";
         }
@@ -551,7 +563,7 @@ public class MainActivity extends Activity {
 
         List<String> friendCodeList = mContact.listFriendCode();
         Helper.showFriendList(this, friendCodeList, (friendCode) -> {
-            Helper.showSendMessage(this, friendCode, (message) -> {
+            Helper.showTextSendMessage(this, friendCode, (message) -> {
                 Contact.Message msgInfo = Contact.MakeTextMessage(message, null);
 //                StringBuffer str = new StringBuffer();
 //                for(int idx = 0; idx < 1024 * 50; idx ++) {
@@ -572,6 +584,70 @@ public class MainActivity extends Activity {
             });
         });
         return "Success to send message.";
+    }
+
+    private String sendFileMessage() {
+        if (mContact == null) {
+            return ErrorPrefix + "Contact is null.";
+        }
+        Contact.UserInfo info = mContact.getUserInfo();
+        if(info == null) {
+            return ErrorPrefix + "Failed to get user info.";
+        }
+
+        if (info.status != ContactStatus.Online) {
+            return ErrorPrefix + "Contact is not online.";
+        }
+
+
+        List<String> friendCodeList = mContact.listFriendCode();
+        Helper.showFriendList(this, friendCodeList, (friendCode) -> {
+            Helper.showFileSendMessage(this, friendCode, (name) -> {
+                Contact.Message msgInfo = Contact.MakeFileMessage(new File(name), null);
+
+                ContactStatus status = mContact.getStatus(friendCode);
+                if(status != ContactStatus.Online) {
+                    showMessage(ErrorPrefix + "Friend is not online.");
+                    return;
+                }
+
+                int ret = mContact.sendMessage(friendCode, ContactChannel.Carrier, msgInfo);
+                if(ret < 0) {
+                    showMessage(ErrorPrefix + "Failed to send message to " + friendCode);
+                }
+            });
+        });
+        return "Success to send message.";
+    }
+
+    private String pullFile() {
+        if (mContact == null) {
+            return ErrorPrefix + "Contact is null.";
+        }
+        Contact.UserInfo info = mContact.getUserInfo();
+        if(info == null) {
+            return ErrorPrefix + "Failed to get user info.";
+        }
+
+        if (info.status != ContactStatus.Online) {
+            return ErrorPrefix + "Contact is not online.";
+        }
+
+        List<String> friendCodeList = new ArrayList<>(mContactFileDataMap.keySet());
+        Helper.showFriendList(this, friendCodeList, (friendCode) -> {
+            ContactStatus status = mContact.getStatus(friendCode);
+            if(status != ContactStatus.Online) {
+                showMessage(ErrorPrefix + "Friend is not online.");
+                return;
+            }
+
+            Contact.Message.FileData fileData = mContactFileDataMap.get(friendCode);
+            int ret = mContact.pullFile(friendCode, ContactChannel.Carrier, fileData);
+            if(ret < 0) {
+                showMessage(ErrorPrefix + "Failed to pull file from " + friendCode);
+            }
+        });
+        return "Success to pull file.";
     }
 
     private String getCachedDidProp() {
@@ -820,6 +896,7 @@ public class MainActivity extends Activity {
     String mSavedMnemonic;
     Contact mContact;
     Contact.Listener mContactListener;
+    HashMap<String, Contact.Message.FileData> mContactFileDataMap = new HashMap<>();
 
     Thread mThread;
     Toast mToast;

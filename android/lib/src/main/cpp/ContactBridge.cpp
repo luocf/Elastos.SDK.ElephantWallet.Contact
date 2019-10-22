@@ -7,6 +7,7 @@
 
 #include <ContactBridge.hpp>
 #include <SafePtr.hpp>
+#include <base/src/JsonDefine.hpp>
 
 #include "Log.hpp"
 #include "Json.hpp"
@@ -268,6 +269,43 @@ int ContactBridge::sendMessage(const char* friendCode, int chType, CrossBase* me
     CHECK_ERROR(ret);
 
     ret = msgMgr->sendMessage(friendInfo, static_cast<elastos::MessageManager::ChannelType>(chType), msgInfo->mMessageInfo);
+    CHECK_ERROR(ret);
+
+    return ret;
+}
+
+int ContactBridge::pullFile(const char* friendCode, int chType, const char* fileInfo)
+{
+    if(fileInfo == nullptr) {
+        return elastos::ErrCode::InvalidArgument;
+    }
+
+    if(mContactImpl->isStarted() == false) {
+        return elastos::ErrCode::NotReadyError;
+    }
+
+    auto weakFriendMgr = mContactImpl->getFriendManager();
+    auto friendMgr =  SAFE_GET_PTR(weakFriendMgr);                                                                      \
+    auto weakMsgMgr = mContactImpl->getMessageManager();
+    auto msgMgr =  SAFE_GET_PTR(weakMsgMgr);                                                                      \
+
+    std::shared_ptr<elastos::FriendInfo> friendInfo;
+    int ret = friendMgr->tryGetFriendInfo(friendCode, friendInfo);
+    CHECK_ERROR(ret);
+
+    elastos::Json jsonInfo;
+    try {
+        jsonInfo= elastos::Json::parse(fileInfo);
+    } catch(elastos::Json::parse_error) {
+        return elastos::ErrCode::JsonParseException;
+    }
+
+    auto info = elastos::MessageManager::MakeFileInfo(jsonInfo[elastos::JsonKey::DeviceId],
+                                                      jsonInfo[elastos::JsonKey::Name],
+                                                      jsonInfo[elastos::JsonKey::Size],
+                                                      jsonInfo[elastos::JsonKey::Md5]);
+
+    ret = msgMgr->pullFile(friendInfo, static_cast<elastos::MessageManager::ChannelType>(chType), info);
     CHECK_ERROR(ret);
 
     return ret;

@@ -5,6 +5,8 @@ import org.elastos.sdk.elephantwallet.contact.internal.ContactDebug;
 import org.elastos.sdk.elephantwallet.contact.internal.ContactFactory;
 import org.elastos.sdk.elephantwallet.contact.internal.ContactListener;
 
+import java.io.File;
+
 public final class Contact extends ContactBridge {
     public static final String TAG = "elastos";
 
@@ -15,7 +17,7 @@ public final class Contact extends ContactBridge {
 
         public static void SetDeviceId(String devId) {
             ContactFactory.SetDeviceId(devId);
-            UserInfo.setCurrDevId(devId);
+            UserInfo.SetCurrDevId(devId);
         }
 
         private Factory() { }
@@ -33,6 +35,10 @@ public final class Contact extends ContactBridge {
     public static class Message extends org.elastos.sdk.elephantwallet.contact.internal.ContactMessage {
         public Message(String text, String cryptoAlgorithm) {
             super(text, cryptoAlgorithm);
+        }
+
+        public Message(File file, String cryptoAlgorithm) {
+            super(file, cryptoAlgorithm);
         }
 
         public Message(Type type, byte[] data, String cryptoAlgorithm) {

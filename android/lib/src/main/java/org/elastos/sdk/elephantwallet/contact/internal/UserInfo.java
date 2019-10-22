@@ -10,8 +10,12 @@ public class UserInfo extends HumanInfo implements IdentifyCodeInterface {
         IdentifyCode identifyCode;
     }
 
-    public static void setCurrDevId(String devId) {
+    public static void SetCurrDevId(String devId) {
         mCurrDevId = devId;
+    }
+
+    public static String GetCurrDevId() {
+        return mCurrDevId;
     }
 
     public String getCurrDevCarrierAddr() {

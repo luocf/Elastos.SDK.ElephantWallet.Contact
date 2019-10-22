@@ -52,8 +52,12 @@
         android:title="   |- Add Friend" />
     <item android:id="@+id/del_friend"
         android:title="   |- Del Friend" />
-    <item android:id="@+id/send_message"
-        android:title="   `- Send Message" />
+    <item android:id="@+id/send_text_message"
+        android:title="   |- Send Text Message" />
+    <item android:id="@+id/send_file_message"
+        android:title="   |- Send File Message" />
+    <item android:id="@+id/pull_file"
+        android:title="   `- Pull File" />
 
     <item android:enabled="false"
         android:title="Debug" />

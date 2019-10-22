@@ -379,6 +379,25 @@ std::shared_ptr<MessageManager::MessageInfo> MessageManager::MakeTextMessage(con
     return MakeMessage(MessageType::MsgText, plainContentBytes, cryptoAlgorithm);
 }
 
+std::shared_ptr<MessageManager::FileInfo> MessageManager::MakeFileInfo(const std::string& devId,
+                                                                       const std::string& name,
+                                                                       uint64_t size,
+                                                                       const std::string& md5)
+{
+    struct Impl: MessageManager::FileInfo {
+        Impl(const std::string& devId,
+             const std::string& name,
+             uint64_t size,
+             const std::string& md5)
+                : MessageManager::FileInfo(devId, name, size, md5) {
+        }
+    };
+
+    auto fileInfo = std::make_shared<Impl>(devId, name, size, md5);
+
+    return fileInfo;
+}
+
 int MessageManager::sendMessage(const std::shared_ptr<HumanInfo> humanInfo,
                                 ChannelType humanChType,
                                 const std::shared_ptr<MessageInfo> msgInfo,
@@ -469,6 +488,78 @@ int MessageManager::sendMessage(const std::shared_ptr<HumanInfo> humanInfo,
     }
 }
 
+int MessageManager::pullFile(const std::shared_ptr<HumanInfo> humanInfo,
+                             ChannelType humanChType,
+                             const std::shared_ptr<FileInfo> fileInfo)
+{
+    auto it = mMessageChannelMap.find(humanChType);
+    if(it == mMessageChannelMap.end()) {
+        return ErrCode::ChannelNotFound;
+    }
+    auto channel = it->second;
+
+    if(channel->isReady() == false) {
+        return ErrCode::ChannelNotReady;
+    }
+
+//    Json jsonData = Json::object();
+//    jsonData[JsonKey::MessageData] = cryptoMsgInfo;
+////std::vector<uint8_t> data = Json::to_cbor(jsonData);
+//    std::string jsonStr = jsonData.dump();
+//    Log::W(Log::TAG, ">>>>>>>>>>>>> %s", jsonStr.c_str());
+//    std::vector<uint8_t> data(jsonStr.begin(), jsonStr.end());
+//
+    if(humanChType == ChannelType::Carrier) {
+//        std::vector<HumanInfo::CarrierInfo> infoArray;
+//
+//        auto userMgr = SAFE_GET_PTR(mUserManager);
+//        std::shared_ptr<UserInfo> userInfo;
+//        userMgr->getUserInfo(userInfo);
+//
+//        if(sendToOtherDev == true) {
+//            int ret = userInfo->getAllCarrierInfo(infoArray);
+//            if (ret < 0) {
+//                return ErrCode::ChannelNotEstablished;
+//            }
+//        }
+//
+//        std::vector<HumanInfo::CarrierInfo> friendArray;
+//        int ret = humanInfo->getAllCarrierInfo(friendArray);
+//        if(ret < 0) {
+//            return ErrCode::ChannelNotEstablished;
+//        }
+////        for(auto& it: infoArray) {
+////            Log::I(Log::TAG, "+++++++++++ %s", it.mUsrId.c_str());
+////        }
+//        infoArray.insert(infoArray.end(), friendArray.begin(), friendArray.end());
+//        for(auto& it: infoArray) {
+//            Log::I(Log::TAG, "----------- %s", it.mUsrId.c_str());
+//        }
+//
+//        ret = ErrCode::ChannelNotOnline;
+//        for(auto& it: infoArray) {
+//            HumanInfo::Status status1 = HumanInfo::Status::Invalid;
+//            HumanInfo::Status status2 = HumanInfo::Status::Invalid;
+//            userInfo->getCarrierStatus(it.mUsrId, status1);
+//            humanInfo->getCarrierStatus(it.mUsrId, status2);
+//            if(status1 != HumanInfo::Status::Online
+//               && status2 != HumanInfo::Status::Online) {
+//                continue;
+//            }
+//
+//            Log::I(Log::TAG, ">>>>>>>>>>> send message to %s", it.mUsrId.c_str());
+//            ret = channel->sendMessage(it.mUsrId, data);
+//            if(ret < 0) {
+////return;
+//            }
+//        }
+//        return ret;
+    } else {
+        throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
+    }
+}
+
+
 int MessageManager::broadcastDesc(ChannelType chType)
 {
     auto userMgr = SAFE_GET_PTR(mUserManager);
@@ -526,15 +617,14 @@ MessageManager::MessageInfo::MessageInfo(const MessageInfo& info,
     }
 }
 
-MessageManager::MessageInfo::MessageInfo()
-    : mType(MessageType::Empty)
-    , mPlainContent()
-    , mCryptoAlgorithm()
-    , mTimeStamp(0)
-{
-}
-
-MessageManager::MessageInfo::~MessageInfo()
+MessageManager::FileInfo::FileInfo(const std::string& devId,
+                                   const std::string& name,
+                                   uint64_t size,
+                                   const std::string& md5)
+    : mDevId(devId)
+    , mName(name)
+    , mSize(size)
+    , mMd5(md5)
 {
 }
 

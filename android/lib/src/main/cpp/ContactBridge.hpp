@@ -43,6 +43,7 @@ public:
     int getFriendList(std::stringstream* info);
 
     int sendMessage(const char* friendCode, int chType, CrossBase* message);
+    int pullFile(const char* friendCode, int chType, const char* fileInfo);
 
     int syncInfoDownloadFromDidChain();
     int syncInfoUploadToDidChain();

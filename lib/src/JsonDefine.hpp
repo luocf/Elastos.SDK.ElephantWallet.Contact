@@ -52,6 +52,11 @@ struct JsonKey {
     static constexpr const char* CryptoAlgorithm = "CryptoAlgorithm";
     static constexpr const char* TimeStamp       = "TimeStamp";
 
+    static constexpr const char* Text            = "Text";
+    static constexpr const char* Name            = "Name";
+    static constexpr const char* Size            = "Size";
+    static constexpr const char* Md5             = "Md5";
+
     static constexpr const char* DidPropCache       = "DidPropCache";
 };
 
@@ -125,6 +130,9 @@ inline void from_json(const Json& j, std::shared_ptr<MessageManager::MessageInfo
     info->mCryptoAlgorithm = j[JsonKey::CryptoAlgorithm];
     info->mTimeStamp = j[JsonKey::TimeStamp];
 }
+
+
+//    struct DataInfo {
 
 } //namespace elastos
 

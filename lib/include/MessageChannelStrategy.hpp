@@ -48,6 +48,15 @@ public:
                                            uint32_t channelType,
                                            ChannelStatus status) = 0;
 
+//        virtual int onSendData(const std::string& friendCode,
+//                               uint32_t channelType,
+//                               const std::string& dataId,
+//                               std::vector<uint8_t>& data) = 0;
+//
+//        virtual int onReceivedData(const std::string& friendCode,
+//                                   uint32_t channelType,
+//                                   const std::string& dataId,
+//                                   const std::vector<uint8_t>& data) = 0;
     };
 
     /*** static function and variable ***/
@@ -71,8 +80,8 @@ public:
     virtual int sendMessage(const std::string& friendCode,
                             std::vector<uint8_t> msgContent) = 0;
 
-    virtual int pullFile(const std::string& friendCode,
-                         const std::string& fileName) {
+    virtual int pullData(const std::string& friendCode,
+                         const std::string& dataId) {
         return ErrCode::UnimplementedError;
     }
 

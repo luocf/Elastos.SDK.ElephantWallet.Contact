@@ -280,10 +280,19 @@ int ChannelImplCarrier::sendMessage(const std::string& friendCode,
     return 0;
 }
 
-int ChannelImplCarrier::pullFile(const std::string& friendCode,
-                                 const std::string& fileName)
+int ChannelImplCarrier::pullData(const std::string& friendCode,
+                                 const std::string& dataId)
 {
+    int ret = makeFileTransfer(friendCode.c_str(), nullptr);
+    CHECK_ERROR(ret)
 
+    ret = ela_filetransfer_connect(mFileTransfer.get());
+    if (ret < 0) {
+        Log::E(Log::TAG, "Failed to connect filetransfer!");
+        return ErrCode::ChannelFailedCarrier;
+    }
+
+    return 0;
 }
 
 /***********************************************/
@@ -363,8 +372,12 @@ int ChannelImplCarrier::initCarrier()
     return 0;
 }
 
-int ChannelImplCarrier::makeFileTransfer(const std::string& friendCode)
+int ChannelImplCarrier::makeFileTransfer(const char* friendCode, const ElaFileTransferInfo* fileInfo)
 {
+    if(mFileTransfer.get() != nullptr) {
+        return ErrCode::ChannelFileTransBusy;
+    }
+
     ElaFileTransferCallbacks ftCallbacks;
     memset(&ftCallbacks, 0, sizeof(ftCallbacks));
 
@@ -375,7 +388,7 @@ int ChannelImplCarrier::makeFileTransfer(const std::string& friendCode)
     ftCallbacks.cancel = OnFileTransferCancel;
 
     auto creater = [&]() -> ElaFileTransfer* {
-        auto ptr = ela_filetransfer_new(mCarrier.get(), friendCode.c_str(), nullptr,
+        auto ptr = ela_filetransfer_new(mCarrier.get(), friendCode, fileInfo,
                                         &ftCallbacks, this);
         return ptr;
     };
@@ -505,6 +518,17 @@ void ChannelImplCarrier::OnFileTransferConnect(ElaCarrier *carrier, const char *
                                                const ElaFileTransferInfo *fileinfo,
                                                void *context)
 {
+    auto channel = reinterpret_cast<ChannelImplCarrier*>(context);
+
+    int ret = channel->makeFileTransfer(from, fileinfo);
+    CHECK_RETVAL(ret);
+
+    ret = ela_filetransfer_accept_connect(channel->mFileTransfer.get());
+    if (ret < 0) {
+        Log::E(Log::TAG, "Failed to accept filetransfer!");
+        return;
+    }
+
     throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
 }
 
