@@ -32,6 +32,15 @@ MessageChannelStrategy::~MessageChannelStrategy()
 {
 }
 
+//MessageChannelStrategy::FileInfo::FileInfo(const std::string& name,
+//                                           uint64_t size,
+//                                           const std::string& md5)
+//    : mName(name)
+//    , mSize(size)
+//    , mMd5(md5)
+//{
+//}
+
 /***********************************************/
 /***** class protected function implement  *****/
 /***********************************************/

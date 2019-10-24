@@ -205,6 +205,7 @@ public class Helper {
         });
         builder.setPositiveButton("Send", (dialog, which) -> {
             listener.onResult(fileName.getText().toString());
+            dismissDialog();
         });
 
         showDialog(builder);
@@ -452,7 +453,7 @@ public class Helper {
         });
     }
 
-    private static void dismissDialog() {
+    public static void dismissDialog() {
         new Handler(Looper.getMainLooper()).post(() -> {
             if(mLastDialog == null) {
                 return;

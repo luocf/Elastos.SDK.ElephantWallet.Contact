@@ -2,12 +2,13 @@ package org.elastos.sdk.elephantwallet.contact.internal;
 
 import android.util.Log;
 
-import com.google.gson.Gson;
-
 import org.elastos.sdk.elephantwallet.contact.Contact;
 import org.elastos.tools.crosspl.CrossBase;
 import org.elastos.tools.crosspl.annotation.CrossClass;
 import org.elastos.tools.crosspl.annotation.CrossInterface;
+
+import java.nio.ByteBuffer;
+import java.util.concurrent.ConcurrentHashMap;
 
 @CrossClass
 public abstract class ContactListener extends CrossBase {
@@ -17,6 +18,9 @@ public abstract class ContactListener extends CrossBase {
     public abstract byte[] onAcquire(AcquireArgs request);
     public abstract void onEvent(EventArgs event);
     public abstract void onReceivedMessage(String humanCode, int channelType, Contact.Message message);
+
+    public abstract int onReadData(String humanCode, int channelType,
+                                   String dataId, long offset, ByteBuffer data);
 
     public class AcquireArgs extends org.elastos.sdk.elephantwallet.contact.internal.AcquireArgs {
         private AcquireArgs(int type, String pubKey, byte[] data) {
@@ -137,7 +141,21 @@ public abstract class ContactListener extends CrossBase {
         return;
     }
 
-    static {
-        System.loadLibrary("Elastos.SDK.Contact.Jni");
+    @CrossInterface
+    private byte[] onReadData(String humanCode, int channelType,
+                              String dataId, long offset) {
+        ByteBuffer dataBuf = ByteBuffer.allocate(1024);
+        int ret = onReadData(humanCode, channelType,
+                dataId, offset,
+                dataBuf);
+        if(ret < 0) {
+            return null;
+        }
+
+        int size = ret;
+        byte[] data = new byte[size];
+        dataBuf.get(data, 0, size);
+
+        return data;
     }
 }

@@ -43,6 +43,7 @@ public:
 
         Control = 0x00FF0000,
         CtrlSyncDesc = 0x00010000,
+        CtrlPullFile = 0x00020000,
     };
 
     struct MessageInfo {
@@ -106,6 +107,13 @@ public:
         virtual void onHumanInfoChanged(std::shared_ptr<HumanInfo> humanInfo,
                                         ChannelType channelType) = 0;
 
+        virtual int onReadData(std::shared_ptr<HumanInfo> humanInfo,
+                               ChannelType channelType,
+                               const std::string& dataId,
+                               uint64_t offset,
+                               std::vector<uint8_t>& data) = 0;
+
+
     private:
         virtual void onStatusChanged(const std::string& userCode,
                                      uint32_t channelType,
@@ -125,6 +133,12 @@ public:
                                            uint32_t channelType,
                                            ChannelStatus status) override;
 
+        virtual int onReadData(const std::string& friendCode,
+                               uint32_t channelType,
+                               const std::string& dataId,
+                               uint64_t offset,
+                               std::vector<uint8_t>& data) override;
+
         std::weak_ptr<MessageManager> mMessageManager;
         friend class MessageManager;
     };
@@ -137,6 +151,8 @@ public:
                                                     const std::string& cryptoAlgorithm = "");
     static std::shared_ptr<MessageInfo> MakeTextMessage(const std::string& plainContent,
                                                         const std::string& cryptoAlgorithm = "");
+
+    static std::shared_ptr<FileInfo> MakeEmptyFileInfo();
     static std::shared_ptr<FileInfo> MakeFileInfo(const std::string& mDevId,
                                                   const std::string& mName, uint64_t mSize, const std::string& mMd5);
 
@@ -170,9 +186,10 @@ public:
                             const std::shared_ptr<MessageInfo> msgInfo,
                             bool sendToOtherDev = true);
 
-    virtual int pullFile(const std::shared_ptr<HumanInfo> humanInfo,
+    virtual int pullData(const std::shared_ptr<HumanInfo> humanInfo,
                          ChannelType humanChType,
-                         const std::shared_ptr<FileInfo> fileInfo);
+                         const std::string& devId,
+                         const std::string& dataId);
 
     virtual int broadcastDesc(ChannelType chType);
 

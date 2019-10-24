@@ -274,7 +274,8 @@ int ContactBridge::sendMessage(const char* friendCode, int chType, CrossBase* me
     return ret;
 }
 
-int ContactBridge::pullFile(const char* friendCode, int chType, const char* fileInfo)
+int ContactBridge::pullData(const char* friendCode, int chType,
+                            const char* devId, const char* fileInfo)
 {
     if(fileInfo == nullptr) {
         return elastos::ErrCode::InvalidArgument;
@@ -293,19 +294,8 @@ int ContactBridge::pullFile(const char* friendCode, int chType, const char* file
     int ret = friendMgr->tryGetFriendInfo(friendCode, friendInfo);
     CHECK_ERROR(ret);
 
-    elastos::Json jsonInfo;
-    try {
-        jsonInfo= elastos::Json::parse(fileInfo);
-    } catch(elastos::Json::parse_error) {
-        return elastos::ErrCode::JsonParseException;
-    }
-
-    auto info = elastos::MessageManager::MakeFileInfo(jsonInfo[elastos::JsonKey::DeviceId],
-                                                      jsonInfo[elastos::JsonKey::Name],
-                                                      jsonInfo[elastos::JsonKey::Size],
-                                                      jsonInfo[elastos::JsonKey::Md5]);
-
-    ret = msgMgr->pullFile(friendInfo, static_cast<elastos::MessageManager::ChannelType>(chType), info);
+    ret = msgMgr->pullData(friendInfo, static_cast<elastos::MessageManager::ChannelType>(chType),
+                           devId, fileInfo);
     CHECK_ERROR(ret);
 
     return ret;

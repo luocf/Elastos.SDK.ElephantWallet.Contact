@@ -61,10 +61,12 @@ ChannelImplCarrier::ChannelImplCarrier(uint32_t chType,
     : MessageChannelStrategy(chType, listener)
     , mConfig(config)
     , mCarrier()
-    , mFileTransfer()
     , mTaskThread()
     , mChannelStatus(ChannelListener::ChannelStatus::Pending)
     , mRecvDataCache()
+    , mFileTransfer()
+    , mDataSendThread()
+    , mDataId()
 {
     PlatformAndroid::CallOnload(ela_session_jni_onload);
 }
@@ -280,11 +282,13 @@ int ChannelImplCarrier::sendMessage(const std::string& friendCode,
     return 0;
 }
 
-int ChannelImplCarrier::pullData(const std::string& friendCode,
+int ChannelImplCarrier::sendData(const std::string& friendCode,
                                  const std::string& dataId)
 {
-    int ret = makeFileTransfer(friendCode.c_str(), nullptr);
+    int ret = makeCarrierFileTrans(friendCode.c_str());
     CHECK_ERROR(ret)
+
+    mDataId = dataId;
 
     ret = ela_filetransfer_connect(mFileTransfer.get());
     if (ret < 0) {
@@ -363,7 +367,7 @@ int ChannelImplCarrier::initCarrier()
         return ErrCode::ChannelFailedCarrier;
     }
 
-    int ret = ela_filetransfer_init(mCarrier.get(), OnFileTransferConnect, this);
+    int ret = ela_filetransfer_init(mCarrier.get(), DataRecvListener::OnConnect, this);
     if (ret < 0) {
         Log::E(Log::TAG, "Failed to init filetransfer!");
         return ErrCode::ChannelFailedCarrier;
@@ -372,23 +376,21 @@ int ChannelImplCarrier::initCarrier()
     return 0;
 }
 
-int ChannelImplCarrier::makeFileTransfer(const char* friendCode, const ElaFileTransferInfo* fileInfo)
+int ChannelImplCarrier::makeCarrierFileTrans(const char* friendCode)
 {
     if(mFileTransfer.get() != nullptr) {
         return ErrCode::ChannelFileTransBusy;
     }
 
-    ElaFileTransferCallbacks ftCallbacks;
-    memset(&ftCallbacks, 0, sizeof(ftCallbacks));
-
-    ftCallbacks.state_changed = OnFileTransferStateChanged;
-    ftCallbacks.file = OnFileTransferFile;
-    ftCallbacks.pull = OnFileTransferPull;
-    ftCallbacks.data = OnFileTransferData;
-    ftCallbacks.cancel = OnFileTransferCancel;
+    ElaFileTransferCallbacks ftCallbacks = {};
+    ftCallbacks.state_changed = DataTransListener::OnStateChanged;
+    ftCallbacks.cancel        = DataTransListener::OnCancel;
+    ftCallbacks.pull          = DataSendListener::OnPull;
+    ftCallbacks.file          = DataRecvListener::OnFile;
+    ftCallbacks.data          = DataRecvListener::OnData;
 
     auto creater = [&]() -> ElaFileTransfer* {
-        auto ptr = ela_filetransfer_new(mCarrier.get(), friendCode, fileInfo,
+        auto ptr = ela_filetransfer_new(mCarrier.get(), friendCode, nullptr,
                                         &ftCallbacks, this);
         return ptr;
     };
@@ -398,10 +400,16 @@ int ChannelImplCarrier::makeFileTransfer(const char* friendCode, const ElaFileTr
         }
     };
     mFileTransfer = std::unique_ptr<ElaFileTransfer, std::function<void(ElaFileTransfer*)>>(creater(), deleter);
-    if (mFileTransfer == nullptr) {
-        Log::E(Log::TAG, "Failed to make file transfer!");
+    if (mFileTransfer.get() == nullptr) {
+        int err = ela_get_error();
+        char strerr_buf[512] = {0};
+        ela_get_strerror(err, strerr_buf, sizeof(strerr_buf));
+        Log::E(Log::TAG, "Failed to make file transfer! ret=%s(0x%x)", strerr_buf, err);
         return ErrCode::ChannelFailedCarrier;
     }
+
+    mFriendId = friendCode;
+    Log::I(Log::TAG, "Success to make file transfer");
 
     return 0;
 }
@@ -412,6 +420,38 @@ void ChannelImplCarrier::runCarrier()
     if(ret < 0) {
         ela_kill(mCarrier.get());
         Log::E(Log::TAG, "Failed to run carrier!");
+        return;
+    }
+}
+
+void ChannelImplCarrier::runSendData(const std::string fileid, uint64_t offset)
+{
+    std::vector<uint8_t> data;
+    for(;;) {
+        data.clear();
+        int ret = mChannelListener->onReadData(mFriendId, mChannelType,
+                                               mDataId, offset,
+                                               data);
+        if(ret > 0) {
+            ret = ela_filetransfer_send(mFileTransfer.get(), fileid.c_str(), data.data(), data.size());
+            if(ret > 0) {
+                offset += ret;
+                continue;
+            }
+
+            int err = ela_get_error();
+            char strerr_buf[512] = {0};
+            ela_get_strerror(err, strerr_buf, sizeof(strerr_buf));
+            Log::E(Log::TAG, "Failed to send data ret=%s(0x%x)", strerr_buf, err);
+            // close transfer
+        } else if(ret == 0) { // finished
+            ret = ela_filetransfer_send(mFileTransfer.get(), fileid.c_str(), nullptr, 0);
+        } else {
+            ret = ela_filetransfer_cancel(mFileTransfer.get(), fileid.c_str(), -1, "Failed to read data.");
+        }
+
+        mFileTransfer.reset();
+        CHECK_RETVAL(ret);
         return;
     }
 }
@@ -514,13 +554,18 @@ void ChannelImplCarrier::OnCarrierFriendMessage(ElaCarrier *carrier, const char 
 
 }
 
-void ChannelImplCarrier::OnFileTransferConnect(ElaCarrier *carrier, const char *from,
-                                               const ElaFileTransferInfo *fileinfo,
-                                               void *context)
+void ChannelImplCarrier::DataRecvListener::OnConnect(ElaCarrier *carrier,
+                                                     const char *from,
+                                                     const ElaFileTransferInfo *fileinfo,
+                                                     void *context)
 {
+    Log::I(Log::TAG, "%s from=%s fileinfo=%p", __PRETTY_FUNCTION__, from, fileinfo);
+    if(fileinfo != nullptr) {
+        Log::I(Log::TAG, "filename=%s", fileinfo->filename);
+    }
     auto channel = reinterpret_cast<ChannelImplCarrier*>(context);
 
-    int ret = channel->makeFileTransfer(from, fileinfo);
+    int ret = channel->makeCarrierFileTrans(from);
     CHECK_RETVAL(ret);
 
     ret = ela_filetransfer_accept_connect(channel->mFileTransfer.get());
@@ -528,37 +573,91 @@ void ChannelImplCarrier::OnFileTransferConnect(ElaCarrier *carrier, const char *
         Log::E(Log::TAG, "Failed to accept filetransfer!");
         return;
     }
-
-    throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
 }
 
-void ChannelImplCarrier::OnFileTransferStateChanged(ElaFileTransfer *filetransfer,
-                                                    FileTransferConnection state, void *context)
+void ChannelImplCarrier::DataTransListener::OnStateChanged(ElaFileTransfer *filetransfer,
+                                                           FileTransferConnection state,
+                                                           void *context)
 {
-    throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
+    Log::I(Log::TAG, "%s state=%d", __PRETTY_FUNCTION__, state);
+
+    auto channel = reinterpret_cast<ChannelImplCarrier*>(context);
+    switch (state) {
+        case FileTransferConnection_connected:
+            if(channel->mDataId.empty() == false) { // sender
+                ElaFileTransferInfo fileInfo = {};
+
+                strcpy(fileInfo.filename, "carrier bug workaround");
+                fileInfo.size = -1; // not used
+                ela_filetransfer_add(filetransfer, &fileInfo);
+
+                strcpy(fileInfo.filename, channel->mDataId.c_str());
+                fileInfo.size = -1; // not used
+                int ret = ela_filetransfer_add(filetransfer, &fileInfo);
+                Log::I(Log::TAG, "%s add ret=%d", __PRETTY_FUNCTION__, ret);
+                CHECK_RETVAL(ret);
+            }
+            break;
+
+        case FileTransferConnection_closed:
+        case FileTransferConnection_failed:
+            channel->mFileTransfer.reset();
+            break;
+
+        default:
+            break;
+    }
+
+//    throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
 }
 
-void ChannelImplCarrier::OnFileTransferFile(ElaFileTransfer *filetransfer, const char *fileid,
-                                            const char *filename, uint64_t size, void *context)
+void ChannelImplCarrier::DataSendListener::OnPull(ElaFileTransfer *filetransfer,
+                                                  const char *fileid,
+                                                  uint64_t offset,
+                                                  void *context)
 {
-    throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
+    Log::I(Log::TAG, "%s fileid=%s size=%llu", __PRETTY_FUNCTION__, fileid, offset);
+    auto channel = reinterpret_cast<ChannelImplCarrier*>(context);
+
+    if(channel->mDataSendThread == nullptr) {
+        channel->mDataSendThread = std::make_unique<ThreadPool>("carrier-channel-datasend");
+    }
+    channel->mDataSendThread->post(std::bind(&ChannelImplCarrier::runSendData, channel, std::string(fileid), offset));
 }
 
-void ChannelImplCarrier::OnFileTransferPull(ElaFileTransfer *filetransfer, const char *fileid,
-                                            uint64_t offset, void *context)
+void ChannelImplCarrier::DataRecvListener::OnFile(ElaFileTransfer *filetransfer,
+                                                  const char *fileid,
+                                                  const char *filename, uint64_t size,
+                                                  void *context)
 {
-    throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
+    Log::I(Log::TAG, "%s fileid=%s name=%s size=%llu", __PRETTY_FUNCTION__, fileid, filename, size);
+
+    auto channel = reinterpret_cast<ChannelImplCarrier*>(context);
+    channel->mDataId = filename;
+
+    int ret = ela_filetransfer_pull(filetransfer, fileid, 0);
+    CHECK_RETVAL(ret);
+
+//    throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
 }
 
-bool ChannelImplCarrier::OnFileTransferData(ElaFileTransfer *filetransfer, const char *fileid,
-                                            const uint8_t *data, size_t length, void *context)
+bool ChannelImplCarrier::DataRecvListener::OnData(ElaFileTransfer *filetransfer,
+                                                  const char *fileid,
+                                                  const uint8_t *data, size_t length,
+                                                  void *context)
 {
-    throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
+    Log::I(Log::TAG, "%s fileid=%s data=%p size=%d", __PRETTY_FUNCTION__, fileid, data, length);
+//    throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
+
+    return true;
 }
 
-void ChannelImplCarrier::OnFileTransferCancel(ElaFileTransfer *filetransfer, const char *fileid,
-                                              int status, const char *reason, void *context)
+void ChannelImplCarrier::DataTransListener::OnCancel(ElaFileTransfer *filetransfer,
+                                                     const char *fileid,
+                                                     int status, const char *reason,
+                                                     void *context)
 {
+    Log::I(Log::TAG, "%s data=%s status=%d", __PRETTY_FUNCTION__, fileid, status);
     throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
 }
 

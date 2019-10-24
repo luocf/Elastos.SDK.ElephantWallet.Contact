@@ -33,6 +33,10 @@ import org.elastos.sdk.keypair.ElastosKeypair;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -83,6 +87,7 @@ public class MainActivity extends Activity {
         }
 
         showMessage("Mnemonic:\n" + mSavedMnemonic);
+
     }
 
     @Override
@@ -278,7 +283,39 @@ public class MainActivity extends Activity {
                 showEvent(msg);
 
                 if(message.type == Contact.Message.Type.MsgFile) {
-                    mContactFileDataMap.put(humanCode, (Contact.Message.FileData)message.data);
+                    mContactRecvFileMap.put(humanCode, (Contact.Message.FileData)message.data);
+                }
+            }
+
+            public int onReadData(String humanCode, int channelType,
+                                  String dataId, long offset, ByteBuffer data)
+            {
+                String filepath = mContactSendFileMap.get(dataId);
+                if(filepath == null) {
+                    return -1;
+                }
+
+                File file = new File(filepath);
+                if(file.exists() == false) {
+                    return -1;
+                }
+                if(offset >= file.length()) {
+                    return 0;
+                }
+
+                FileInputStream fis = null;
+                try {
+                    fis = new FileInputStream(file);
+                    fis.skip(offset);
+                    int num = fis.read(data.array());
+                    return num;
+                } catch (Exception e) {
+                    return -1;
+                } finally {
+                    try {
+                        if(fis != null) fis.close();
+                    } catch (IOException e) {
+                    }
                 }
             }
 
@@ -306,6 +343,28 @@ public class MainActivity extends Activity {
         if(ret < 0) {
             return "Failed to start contact instance. ret=" + ret;
         }
+
+        String recvKey;
+        String recvDataId;
+        String sendDataId;
+        String sendFilePath;
+        if(mContact.getUserInfo().humanCode.equals("igh7qBS5BYLLG9PqfF6gY1ytjnwvAKRcEx")) {
+            recvKey = "iZJo8cTTffSgC5bzKqjLisgK3yWtJnqkHv";
+            recvDataId = "{\"DevId\":\"fa65acd8af43ae7\",\"Md5\":\"c9192c39e36b4d038b3dcea09dda0d1b\",\"Name\":\"Picture_02_Imagination.jpg\",\"Size\":639234}";
+            sendDataId = "{\"DevId\":\"9fdb3e667aec0e60\",\"Md5\":\"9eb62680f193b692e6a489fe592ca2d4\",\"Name\":\"S90829-140357.jpg\",\"Size\":166047}";
+            sendFilePath = null;
+        } else {
+            recvKey = "igh7qBS5BYLLG9PqfF6gY1ytjnwvAKRcEx";
+            recvDataId = "{\"DevId\":\"9fdb3e667aec0e60\",\"Md5\":\"9eb62680f193b692e6a489fe592ca2d4\",\"Name\":\"S90829-140357.jpg\",\"Size\":166047}";
+            sendDataId = "{\"DevId\":\"fa65acd8af43ae7\",\"Md5\":\"c9192c39e36b4d038b3dcea09dda0d1b\",\"Name\":\"Picture_02_Imagination.jpg\",\"Size\":639234}";
+            sendFilePath = "/system/media/Pre-loaded/Pictures/Picture_02_Imagination.jpg";
+        }
+
+        Contact.Message fileMsg = new Contact.Message(Contact.Message.Type.MsgFile,
+                recvDataId.getBytes(), null);
+        mContactRecvFileMap.put(recvKey, (Contact.Message.FileData)fileMsg.data);
+        mContactSendFileMap.put(sendDataId, sendFilePath);
+
 
         return "Success to start contact instance.";
     }
@@ -602,8 +661,8 @@ public class MainActivity extends Activity {
 
         List<String> friendCodeList = mContact.listFriendCode();
         Helper.showFriendList(this, friendCodeList, (friendCode) -> {
-            Helper.showFileSendMessage(this, friendCode, (name) -> {
-                Contact.Message msgInfo = Contact.MakeFileMessage(new File(name), null);
+            Helper.showFileSendMessage(this, friendCode, (filepath) -> {
+                Contact.Message msgInfo = Contact.MakeFileMessage(new File(filepath), null);
 
                 ContactStatus status = mContact.getStatus(friendCode);
                 if(status != ContactStatus.Online) {
@@ -615,6 +674,8 @@ public class MainActivity extends Activity {
                 if(ret < 0) {
                     showMessage(ErrorPrefix + "Failed to send message to " + friendCode);
                 }
+
+                mContactSendFileMap.put(msgInfo.data.toString(), filepath);
             });
         });
         return "Success to send message.";
@@ -633,7 +694,7 @@ public class MainActivity extends Activity {
             return ErrorPrefix + "Contact is not online.";
         }
 
-        List<String> friendCodeList = new ArrayList<>(mContactFileDataMap.keySet());
+        List<String> friendCodeList = new ArrayList<>(mContactRecvFileMap.keySet());
         Helper.showFriendList(this, friendCodeList, (friendCode) -> {
             ContactStatus status = mContact.getStatus(friendCode);
             if(status != ContactStatus.Online) {
@@ -641,11 +702,13 @@ public class MainActivity extends Activity {
                 return;
             }
 
-            Contact.Message.FileData fileData = mContactFileDataMap.get(friendCode);
+            Contact.Message.FileData fileData = mContactRecvFileMap.get(friendCode);
             int ret = mContact.pullFile(friendCode, ContactChannel.Carrier, fileData);
             if(ret < 0) {
                 showMessage(ErrorPrefix + "Failed to pull file from " + friendCode);
             }
+
+            Helper.dismissDialog();
         });
         return "Success to pull file.";
     }
@@ -896,7 +959,8 @@ public class MainActivity extends Activity {
     String mSavedMnemonic;
     Contact mContact;
     Contact.Listener mContactListener;
-    HashMap<String, Contact.Message.FileData> mContactFileDataMap = new HashMap<>();
+    HashMap<String, Contact.Message.FileData> mContactRecvFileMap = new HashMap<>();
+    HashMap<String, String> mContactSendFileMap = new HashMap<>();
 
     Thread mThread;
     Toast mToast;

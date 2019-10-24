@@ -21,15 +21,20 @@ public final class Contact extends ContactBridge {
         }
 
         private Factory() { }
+
+        static { ensureNativeLibrary(); }
     } // class Factory
 
     public abstract static class Listener extends ContactListener {
+        static { ensureNativeLibrary(); }
     } // class Listener
 
     public static final class UserInfo extends org.elastos.sdk.elephantwallet.contact.internal.UserInfo {
+        static { ensureNativeLibrary(); }
     } // class UserInfo
 
     public static final class FriendInfo extends org.elastos.sdk.elephantwallet.contact.internal.FriendInfo {
+        static { ensureNativeLibrary(); }
     } // class FriendInfo
 
     public static class Message extends org.elastos.sdk.elephantwallet.contact.internal.ContactMessage {
@@ -44,11 +49,21 @@ public final class Contact extends ContactBridge {
         public Message(Type type, byte[] data, String cryptoAlgorithm) {
             super(type, data, cryptoAlgorithm);
         }
+
+        static { ensureNativeLibrary(); }
     } // class Message
 
     public abstract static class Debug extends ContactDebug {
+        static { ensureNativeLibrary(); }
     } // class Listener
 
     private Contact() {
     }
+
+    static { ensureNativeLibrary(); }
+
+    private static void ensureNativeLibrary() {
+        System.loadLibrary("Elastos.SDK.Contact.Jni");
+    }
+
 }

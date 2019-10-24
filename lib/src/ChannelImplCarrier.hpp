@@ -53,11 +53,34 @@ public:
     virtual int sendMessage(const std::string& friendCode,
                             std::vector<uint8_t> msgContent) override;
 
-    virtual int pullData(const std::string& friendCode,
+    virtual int sendData(const std::string& friendCode,
                          const std::string& dataId) override;
 
 protected:
     /*** type define ***/
+    struct DataTransListener {
+        static void OnStateChanged(ElaFileTransfer *filetransfer,
+                                   FileTransferConnection state, void *context);
+        static void OnCancel(ElaFileTransfer *filetransfer, const char *fileid,
+                             int status, const char *reason, void *context);
+
+    };
+
+    struct DataSendListener {
+        static void OnPull(ElaFileTransfer *filetransfer, const char *fileid,
+                           uint64_t offset, void *context);
+
+    };
+
+    struct DataRecvListener {
+        static void OnConnect(ElaCarrier *carrier, const char *from,
+                              const ElaFileTransferInfo *fileinfo,
+                              void *context);
+        static void OnFile(ElaFileTransfer *filetransfer, const char *fileid,
+                           const char *filename, uint64_t size, void *context);
+        static bool OnData(ElaFileTransfer *filetransfer, const char *fileid,
+                           const uint8_t *data, size_t length, void *context);
+    };
 
     /*** static function and variable ***/
     static void OnCarrierConnection(ElaCarrier *carrier,
@@ -71,20 +94,6 @@ protected:
                                                 const void *msg, size_t len,
                                                 bool offline, void *context);
 
-    static void OnFileTransferConnect(ElaCarrier *carrier, const char *from,
-                                      const ElaFileTransferInfo *fileinfo,
-                                      void *context);
-    static void OnFileTransferStateChanged(ElaFileTransfer *filetransfer,
-                                           FileTransferConnection state, void *context);
-    static void OnFileTransferFile(ElaFileTransfer *filetransfer, const char *fileid,
-                                   const char *filename, uint64_t size, void *context);
-    static void OnFileTransferPull(ElaFileTransfer *filetransfer, const char *fileid,
-                                   uint64_t offset, void *context);
-    static bool OnFileTransferData(ElaFileTransfer *filetransfer, const char *fileid,
-                                   const uint8_t *data, size_t length, void *context);
-    static void OnFileTransferCancel(ElaFileTransfer *filetransfer, const char *fileid,
-                                     int status, const char *reason, void *context);
-
     static constexpr int32_t MaxPkgSize = 1000;
     static constexpr uint8_t PkgMagic[] = { 0xA5, 0xA5, 0x5A, 0x5A,
                                             0x00/*index*/, 0x00/*index*/,
@@ -97,15 +106,20 @@ protected:
 
     /*** class function and variable ***/
     int initCarrier();
-    int makeFileTransfer(const char* friendCode, const ElaFileTransferInfo *fileInfo);
+    int makeCarrierFileTrans(const char* friendCode);
     void runCarrier();
+    void runSendData(const std::string fileid, uint64_t offset);
 
     std::weak_ptr<Config> mConfig;
     std::unique_ptr<ElaCarrier, std::function<void(ElaCarrier*)>> mCarrier;
-    std::unique_ptr<ElaFileTransfer, std::function<void(ElaFileTransfer*)>> mFileTransfer;
     std::unique_ptr<ThreadPool> mTaskThread;
     ChannelListener::ChannelStatus mChannelStatus;
     std::map<std::string, std::map<int, std::vector<uint8_t>>> mRecvDataCache;
+
+    std::unique_ptr<ElaFileTransfer, std::function<void(ElaFileTransfer*)>> mFileTransfer;
+    std::string mFriendId;
+    std::string mDataId;
+    std::unique_ptr<ThreadPool> mDataSendThread;
 
 }; // class ChannelImplCarrier
 

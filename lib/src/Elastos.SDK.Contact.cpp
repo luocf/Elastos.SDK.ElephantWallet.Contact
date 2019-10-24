@@ -108,12 +108,12 @@ int Contact::start()
 //    ret = mFriendManager->monitorDidChainData();
 //    CHECK_ERROR(ret)
 
-    auto dcClient = DidChnClient::GetInstance();
-    ret = dcClient->startMonitor();
-    CHECK_ERROR(ret)
+//    auto dcClient = DidChnClient::GetInstance();
+//    ret = dcClient->startMonitor();
+//    CHECK_ERROR(ret)
 
-    ret = monitorDidChainData();
-    CHECK_ERROR(ret)
+//    ret = monitorDidChainData();
+//    CHECK_ERROR(ret)
 
     mStarted = true;
     return 0;

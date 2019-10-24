@@ -34,6 +34,16 @@ std::shared_ptr<MessageManager::MessageInfo> MessageManager::MakeEmptyMessage()
     return msgInfo;
 }
 
+std::shared_ptr<MessageManager::FileInfo> MessageManager::MakeEmptyFileInfo()
+{
+    struct Impl: MessageManager::FileInfo {
+    };
+
+    auto fileInfo = std::make_shared<Impl>();
+
+    return fileInfo;
+}
+
 /***********************************************/
 /***** class public function implement  ********/
 /***********************************************/
@@ -488,9 +498,10 @@ int MessageManager::sendMessage(const std::shared_ptr<HumanInfo> humanInfo,
     }
 }
 
-int MessageManager::pullFile(const std::shared_ptr<HumanInfo> humanInfo,
+int MessageManager::pullData(const std::shared_ptr<HumanInfo> humanInfo,
                              ChannelType humanChType,
-                             const std::shared_ptr<FileInfo> fileInfo)
+                             const std::string& devId,
+                             const std::string& dataId)
 {
     auto it = mMessageChannelMap.find(humanChType);
     if(it == mMessageChannelMap.end()) {
@@ -502,58 +513,24 @@ int MessageManager::pullFile(const std::shared_ptr<HumanInfo> humanInfo,
         return ErrCode::ChannelNotReady;
     }
 
-//    Json jsonData = Json::object();
-//    jsonData[JsonKey::MessageData] = cryptoMsgInfo;
-////std::vector<uint8_t> data = Json::to_cbor(jsonData);
-//    std::string jsonStr = jsonData.dump();
-//    Log::W(Log::TAG, ">>>>>>>>>>>>> %s", jsonStr.c_str());
-//    std::vector<uint8_t> data(jsonStr.begin(), jsonStr.end());
-//
     if(humanChType == ChannelType::Carrier) {
-//        std::vector<HumanInfo::CarrierInfo> infoArray;
-//
-//        auto userMgr = SAFE_GET_PTR(mUserManager);
-//        std::shared_ptr<UserInfo> userInfo;
-//        userMgr->getUserInfo(userInfo);
-//
-//        if(sendToOtherDev == true) {
-//            int ret = userInfo->getAllCarrierInfo(infoArray);
-//            if (ret < 0) {
-//                return ErrCode::ChannelNotEstablished;
-//            }
-//        }
-//
-//        std::vector<HumanInfo::CarrierInfo> friendArray;
-//        int ret = humanInfo->getAllCarrierInfo(friendArray);
-//        if(ret < 0) {
-//            return ErrCode::ChannelNotEstablished;
-//        }
-////        for(auto& it: infoArray) {
-////            Log::I(Log::TAG, "+++++++++++ %s", it.mUsrId.c_str());
-////        }
-//        infoArray.insert(infoArray.end(), friendArray.begin(), friendArray.end());
-//        for(auto& it: infoArray) {
-//            Log::I(Log::TAG, "----------- %s", it.mUsrId.c_str());
-//        }
-//
-//        ret = ErrCode::ChannelNotOnline;
-//        for(auto& it: infoArray) {
-//            HumanInfo::Status status1 = HumanInfo::Status::Invalid;
-//            HumanInfo::Status status2 = HumanInfo::Status::Invalid;
-//            userInfo->getCarrierStatus(it.mUsrId, status1);
-//            humanInfo->getCarrierStatus(it.mUsrId, status2);
-//            if(status1 != HumanInfo::Status::Online
-//               && status2 != HumanInfo::Status::Online) {
-//                continue;
-//            }
-//
-//            Log::I(Log::TAG, ">>>>>>>>>>> send message to %s", it.mUsrId.c_str());
-//            ret = channel->sendMessage(it.mUsrId, data);
-//            if(ret < 0) {
-////return;
-//            }
-//        }
-//        return ret;
+        HumanInfo::CarrierInfo carrierInfo;
+
+        int ret = humanInfo->getCarrierInfoByDevId(devId, carrierInfo);
+        CHECK_ERROR(ret);
+
+        std::vector<uint8_t> dataIdBytes(dataId.begin(), dataId.end());
+        auto msgInfo = MakeMessage(MessageType::CtrlPullFile, dataIdBytes);
+
+        Json jsonData = Json::object();
+        jsonData[JsonKey::MessageData] = msgInfo;
+        std::string jsonStr = jsonData.dump();
+        std::vector<uint8_t> data(jsonStr.begin(), jsonStr.end());
+
+        ret = channel->sendMessage(carrierInfo.mUsrId, data);
+        CHECK_ERROR(ret);
+
+        return 0;
     } else {
         throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
     }
@@ -712,7 +689,7 @@ void MessageManager::MessageListener::onReceivedMessage(const std::string& frien
         std::string humanDesc {msgInfo->mPlainContent.begin(), msgInfo->mPlainContent.end()};
         auto newInfo = HumanInfo();
         ret = newInfo.HumanInfo::deserialize(humanDesc, true);
-        CHECK_AND_NOTIFY_RETVAL(ret)
+        CHECK_AND_NOTIFY_RETVAL(ret);
 
         ret = humanInfo->mergeHumanInfo(newInfo, HumanInfo::Status::Online);
         if(ret == ErrCode::IgnoreMergeOldInfo) {
@@ -754,6 +731,17 @@ void MessageManager::MessageListener::onReceivedMessage(const std::string& frien
                 //return;
             //}
         //}
+    } else if(msgInfo->mType == MessageType::CtrlPullFile) {
+        std::string infoStr {msgInfo->mPlainContent.begin(), msgInfo->mPlainContent.end()};
+//        auto jsonInfo = Json::parse(infoStr);
+//        std::shared_ptr<FileInfo> fileInfo;
+//        from_json(jsonInfo, fileInfo);
+
+        auto it = msgMgr->mMessageChannelMap.find(humanChType);
+        auto channel = it->second;
+
+        ret = channel->sendData(friendCode, infoStr);
+        CHECK_RETVAL(ret);
     } else {
         onReceivedMessage(humanInfo, humanChType, msgInfo);
     }
@@ -930,6 +918,29 @@ void MessageManager::MessageListener::onFriendStatusChanged(const std::string& f
 
     Log::D(Log::TAG, "onFriendStatusChanged() friendCode=%s, status=%d", friendCode.c_str(), humanStatus);
     return;
+}
+
+int MessageManager::MessageListener::onReadData(const std::string& friendCode, uint32_t channelType,
+                                                const std::string& dataId,
+                                                uint64_t offset, std::vector<uint8_t>& data)
+{
+    Log::W(Log::TAG, ">>>>>>>>>>>>> onReadData code:%s, dataId=%s", friendCode.c_str(), dataId.c_str());
+    auto msgMgr = SAFE_GET_PTR(mMessageManager);
+//    auto userMgr = SAFE_GET_PTR(msgMgr->mUserManager);
+    auto friendMgr = SAFE_GET_PTR(msgMgr->mFriendManager);
+
+    std::shared_ptr<FriendInfo> friendInfo;
+    int ret = friendMgr->tryGetFriendInfo(friendCode, friendInfo);
+    CHECK_ERROR(ret);
+
+    ChannelType humanChType = static_cast<ChannelType>(channelType);
+//
+//    std::shared_ptr<FileInfo> fileInfo;
+//    auto jsonInfo = Json::parse(dataId);
+//    from_json(jsonInfo, fileInfo);
+
+    ret = msgMgr->mMessageListener->onReadData(friendInfo, humanChType, dataId, offset, data);
+    return ret;
 }
 
 std::shared_ptr<MessageManager::MessageInfo> MessageManager::MakeMessage(std::shared_ptr<MessageManager::MessageInfo> from,

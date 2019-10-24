@@ -48,16 +48,30 @@ public:
                                            uint32_t channelType,
                                            ChannelStatus status) = 0;
 
-//        virtual int onSendData(const std::string& friendCode,
-//                               uint32_t channelType,
-//                               const std::string& dataId,
-//                               std::vector<uint8_t>& data) = 0;
-//
-//        virtual int onReceivedData(const std::string& friendCode,
+        virtual int onReadData(const std::string& friendCode,
+                               uint32_t channelType,
+                               const std::string& dataId,
+                               uint64_t offset,
+                               std::vector<uint8_t>& data) = 0;
+
+//        virtual int onWriteData(const std::string& friendCode,
 //                                   uint32_t channelType,
 //                                   const std::string& dataId,
 //                                   const std::vector<uint8_t>& data) = 0;
     };
+
+//    struct FileInfo {
+//    public:
+//        std::string mName;
+//        uint64_t mSize;
+//        std::string mMd5;
+//    protected:
+//        explicit FileInfo(const std::string& name,
+//                          uint64_t size,
+//                          const std::string& md5);
+//        explicit FileInfo() = default;
+//        virtual ~FileInfo() = default;
+//    };
 
     /*** static function and variable ***/
 
@@ -80,7 +94,11 @@ public:
     virtual int sendMessage(const std::string& friendCode,
                             std::vector<uint8_t> msgContent) = 0;
 
-    virtual int pullData(const std::string& friendCode,
+//    virtual int sendFile(const std::string& friendCode,
+//                         const std::shared_ptr<FileInfo> fileInfo) {
+//        return ErrCode::UnimplementedError;
+//    }
+    virtual int sendData(const std::string& friendCode,
                          const std::string& dataId) {
         return ErrCode::UnimplementedError;
     }

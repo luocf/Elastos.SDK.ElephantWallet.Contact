@@ -220,7 +220,7 @@ std::shared_ptr<elastos::MessageManager::MessageListener> ContactListener::makeM
         }
 
         virtual void onHumanInfoChanged(std::shared_ptr<elastos::HumanInfo> humanInfo,
-                                           elastos::MessageManager::ChannelType channelType) override {
+                                        elastos::MessageManager::ChannelType channelType) override {
             Log::I(Log::TAG, "%s", __PRETTY_FUNCTION__);
             std::string humanCode;
             int ret = humanInfo->getHumanCode(humanCode);
@@ -234,6 +234,26 @@ std::shared_ptr<elastos::MessageManager::MessageListener> ContactListener::makeM
             std::span<uint8_t> data(reinterpret_cast<uint8_t*>(info.data()), info.size());
             sContactListenerInstance->onEvent(EventType::HumanInfoChanged, humanCode,
                                               static_cast<ContactChannel>(channelType), &data);
+        }
+
+        virtual int onReadData(std::shared_ptr<elastos::HumanInfo> humanInfo, elastos::MessageManager::ChannelType channelType,
+                               const std::string& dataId, uint64_t offset,
+                               std::vector<uint8_t>& data) override {
+            Log::I(Log::TAG, "%s", __PRETTY_FUNCTION__);
+            std::string humanCode;
+            int ret = humanInfo->getHumanCode(humanCode);
+            CHECK_ERROR(ret);
+
+
+            auto readData = sContactListenerInstance->onReadData(humanCode, static_cast<ContactChannel>(channelType),
+                                                                 dataId, offset);
+            if(readData.get() == nullptr) {
+                return elastos::ErrCode::ChannelFailedReadData;
+            }
+
+            data.clear();
+            data.insert(data.begin(), readData->data(), readData->data() + readData->size());
+            return data.size();
         }
     };
 
@@ -275,4 +295,15 @@ void ContactListener::onReceivedMessage(const std::string& humanCode, ContactCha
                                                        msgInfo->mCryptoAlgorithm.c_str(),
                                                        msgInfo->mTimeStamp);
     return;
+}
+
+std::shared_ptr<std::span<uint8_t>> ContactListener::onReadData(const std::string& humanCode, ContactChannel channelType,
+                                                                const std::string& dataId, uint64_t offset)
+{
+    int64_t platformHandle = getPlatformHandle();
+    auto ret = crosspl::proxy::ContactListener::onReadData(platformHandle,
+                                                           humanCode.c_str(), static_cast<int>(channelType),
+                                                           dataId.c_str(), offset);
+
+    return ret;
 }

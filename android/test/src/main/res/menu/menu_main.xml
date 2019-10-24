@@ -11,14 +11,6 @@
         android:title="   `- Clear Event" />
 
     <item android:enabled="false"
-        android:title="Mnemonic" />
-    <item android:id="@+id/new_mnemonic"
-        android:title="   |- New And Save Mnemonic" />
-    <item android:id="@+id/import_mnemonic"
-        android:title="   `- Import Mnemonic" />
-
-
-    <item android:enabled="false"
         android:title="Contact" />
     <item android:id="@+id/new_and_start_contact"
         android:title="   |- New and Start Contact" />
@@ -63,4 +55,13 @@
         android:title="Debug" />
     <item android:id="@+id/show_cached_didprop"
         android:title="   `- Show Cached DidProp" />
+
+    <item android:enabled="false"
+        android:title="Mnemonic" />
+    <item android:id="@+id/new_mnemonic"
+        android:title="   |- New And Save Mnemonic" />
+    <item android:id="@+id/import_mnemonic"
+        android:title="   `- Import Mnemonic" />
+
+
 </menu>

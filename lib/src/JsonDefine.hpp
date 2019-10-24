@@ -111,6 +111,7 @@ NLOHMANN_JSON_SERIALIZE_ENUM(
         {MessageManager::MessageType::MsgFile, "MsgFile"},
 
         {MessageManager::MessageType::CtrlSyncDesc, "CtrlSyncDesc"},
+        {MessageManager::MessageType::CtrlPullFile, "CtrlPullFile"},
     }
 );
 
@@ -129,6 +130,23 @@ inline void from_json(const Json& j, std::shared_ptr<MessageManager::MessageInfo
     info->mPlainContent = j[JsonKey::PlainContent].get<std::vector<uint8_t>>();
     info->mCryptoAlgorithm = j[JsonKey::CryptoAlgorithm];
     info->mTimeStamp = j[JsonKey::TimeStamp];
+}
+
+inline void to_json(Json& j, const std::shared_ptr<MessageManager::FileInfo>& info) {
+    j = Json {
+        {JsonKey::DeviceId, info->mDevId},
+        {JsonKey::Name, info->mName},
+        {JsonKey::Size, info->mSize},
+        {JsonKey::Md5, info->mMd5},
+    };
+}
+
+inline void from_json(const Json& j, std::shared_ptr<MessageManager::FileInfo>& info) {
+    info = MessageManager::MakeEmptyFileInfo();
+    info->mDevId = j[JsonKey::DeviceId];
+    info->mName = j[JsonKey::Name];
+    info->mSize = j[JsonKey::Size];
+    info->mMd5 = j[JsonKey::Md5];
 }
 
 

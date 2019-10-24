@@ -134,6 +134,9 @@ public class ContactBridge extends CrossBase {
         }
 
         ret = sendMessage(friendCode, channelType.id(), message);
+        if(ret < 0) {
+            return ret;
+        }
 
         return ret;
     }
@@ -144,7 +147,7 @@ public class ContactBridge extends CrossBase {
             return -1;
         }
 
-        int ret = pullFile(friendCode, channelType.id(), fileInfo.toString());
+        int ret = pullData(friendCode, channelType.id(), fileInfo.devId, fileInfo.toString());
 
         return ret;
     }
@@ -210,9 +213,9 @@ public class ContactBridge extends CrossBase {
     private native int sendMessage(String friendCode, int channelType, CrossBase message);
 
     @CrossInterface
-    private native int pullFile(String friendCode, int channelType, String fileInfo);
+    private native int pullData(String friendCode, int channelType, String devId, String fileInfo);
 
-    private CrossBase mListener;
+    private ContactListener mListener;
 
     static {
         System.loadLibrary("Elastos.SDK.Contact.Jni");
