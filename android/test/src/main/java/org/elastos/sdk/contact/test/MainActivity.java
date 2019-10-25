@@ -35,7 +35,9 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -276,7 +278,7 @@ public class MainActivity extends Activity {
             }
 
             @Override
-            public void onReceivedMessage(String humanCode, int channelType, Contact.Message message) {
+            public void onReceivedMessage(String humanCode, ContactChannel channelType, Contact.Message message) {
                 String msg = "onRcvdMsg(): data=" + message.data + "\n";
                 msg += "onRcvdMsg(): type=" + message.type + "\n";
                 msg += "onRcvdMsg(): crypto=" + message.cryptoAlgorithm + "\n";
@@ -287,7 +289,8 @@ public class MainActivity extends Activity {
                 }
             }
 
-            public int onReadData(String humanCode, int channelType,
+            @Override
+            public int onReadData(String humanCode, ContactChannel channelType,
                                   String dataId, long offset, ByteBuffer data)
             {
                 String filepath = mContactSendFileMap.get(dataId);
@@ -299,9 +302,18 @@ public class MainActivity extends Activity {
                 if(file.exists() == false) {
                     return -1;
                 }
+                String msg = "onReadData(): dataId=" + dataId + ", offset=" + offset + "\n";
+                if(offset == 0 || offset >= file.length()) {
+                    showEvent(msg);
+                } else {
+                    Log.v(TAG, msg);
+                }
+
+
                 if(offset >= file.length()) {
                     return 0;
                 }
+
 
                 FileInputStream fis = null;
                 try {
@@ -314,6 +326,49 @@ public class MainActivity extends Activity {
                 } finally {
                     try {
                         if(fis != null) fis.close();
+                    } catch (IOException e) {
+                    }
+                }
+            }
+
+            @Override
+            public int onWriteData(String humanCode, ContactChannel channelType,
+                                  String dataId, long offset, byte[] data)
+            {
+                String msg = "onWriteData(): dataId=" + dataId + ", offset=" + offset + "\n";
+                if(offset == 0 || data.length == 0) {
+                    showEvent(msg);
+                } else {
+                    Log.v(TAG, msg);
+                }
+
+                ContactMessage.FileData fileInfo = new Gson().fromJson(dataId, ContactMessage.FileData.class);
+
+                File file = new File(MainActivity.this.getCacheDir(), fileInfo.name);
+                if(data.length == 0) {
+                    String md5 = Utils.getMD5Sum(file);
+                    if(md5.equals(fileInfo.md5))  {
+                        msg = "onWriteData(): Success to pull dataId=" + dataId + "\n";
+                    } else {
+                        msg = "onWriteData(): Failed to pull dataId=" + dataId + "\n";
+                    }
+                    showEvent(msg);
+
+                    return 0;
+                }
+
+                FileOutputStream fos = null;
+                try {
+                    fos = new FileOutputStream(file, offset == 0 ? false:true);
+                    fos.write(data);
+                    fos.flush();
+                    Log.d(TAG, "file size=" + file.length());
+                    return data.length;
+                } catch (Exception e) {
+                    return -1;
+                } finally {
+                    try {
+                        if(fos != null) fos.close();
                     } catch (IOException e) {
                     }
                 }
@@ -351,11 +406,11 @@ public class MainActivity extends Activity {
         if(mContact.getUserInfo().humanCode.equals("igh7qBS5BYLLG9PqfF6gY1ytjnwvAKRcEx")) {
             recvKey = "iZJo8cTTffSgC5bzKqjLisgK3yWtJnqkHv";
             recvDataId = "{\"DevId\":\"fa65acd8af43ae7\",\"Md5\":\"c9192c39e36b4d038b3dcea09dda0d1b\",\"Name\":\"Picture_02_Imagination.jpg\",\"Size\":639234}";
-            sendDataId = "{\"DevId\":\"9fdb3e667aec0e60\",\"Md5\":\"9eb62680f193b692e6a489fe592ca2d4\",\"Name\":\"S90829-140357.jpg\",\"Size\":166047}";
-            sendFilePath = null;
+            sendDataId = "{\"DevId\":\"9fdb3e667aec0e60\",\"Md5\":\"de57b4c20b3d7cffed47ba42d1f0f0ad\",\"Name\":\"P91025-131156.jpg\",\"Size\":3217685}";
+            sendFilePath = "/storage/emulated/0/DCIM/P91025-131156.jpg";
         } else {
             recvKey = "igh7qBS5BYLLG9PqfF6gY1ytjnwvAKRcEx";
-            recvDataId = "{\"DevId\":\"9fdb3e667aec0e60\",\"Md5\":\"9eb62680f193b692e6a489fe592ca2d4\",\"Name\":\"S90829-140357.jpg\",\"Size\":166047}";
+            recvDataId = "{\"DevId\":\"9fdb3e667aec0e60\",\"Md5\":\"de57b4c20b3d7cffed47ba42d1f0f0ad\",\"Name\":\"P91025-131156.jpg\",\"Size\":3217685}";
             sendDataId = "{\"DevId\":\"fa65acd8af43ae7\",\"Md5\":\"c9192c39e36b4d038b3dcea09dda0d1b\",\"Name\":\"Picture_02_Imagination.jpg\",\"Size\":639234}";
             sendFilePath = "/system/media/Pre-loaded/Pictures/Picture_02_Imagination.jpg";
         }
@@ -703,14 +758,14 @@ public class MainActivity extends Activity {
             }
 
             Contact.Message.FileData fileData = mContactRecvFileMap.get(friendCode);
-            int ret = mContact.pullFile(friendCode, ContactChannel.Carrier, fileData);
+            int ret = mContact.pullFileAsync(friendCode, ContactChannel.Carrier, fileData);
             if(ret < 0) {
                 showMessage(ErrorPrefix + "Failed to pull file from " + friendCode);
             }
 
             Helper.dismissDialog();
         });
-        return "Success to pull file.";
+        return "Success to start pull file.";
     }
 
     private String getCachedDidProp() {

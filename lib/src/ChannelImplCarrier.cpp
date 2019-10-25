@@ -65,8 +65,9 @@ ChannelImplCarrier::ChannelImplCarrier(uint32_t chType,
     , mChannelStatus(ChannelListener::ChannelStatus::Pending)
     , mRecvDataCache()
     , mFileTransfer()
-    , mDataSendThread()
     , mDataId()
+    , mDataSendThread()
+    , mDataRecvOffset(0)
 {
     PlatformAndroid::CallOnload(ela_session_jni_onload);
 }
@@ -407,6 +408,7 @@ int ChannelImplCarrier::makeCarrierFileTrans(const char* friendCode)
         Log::E(Log::TAG, "Failed to make file transfer! ret=%s(0x%x)", strerr_buf, err);
         return ErrCode::ChannelFailedCarrier;
     }
+    mDataRecvOffset = 0;
 
     mFriendId = friendCode;
     Log::I(Log::TAG, "Success to make file transfer");
@@ -426,16 +428,18 @@ void ChannelImplCarrier::runCarrier()
 
 void ChannelImplCarrier::runSendData(const std::string fileid, uint64_t offset)
 {
+    mDataRecvOffset = offset;
     std::vector<uint8_t> data;
     for(;;) {
         data.clear();
+        int closeReason;
         int ret = mChannelListener->onReadData(mFriendId, mChannelType,
-                                               mDataId, offset,
+                                               mDataId, mDataRecvOffset,
                                                data);
         if(ret > 0) {
             ret = ela_filetransfer_send(mFileTransfer.get(), fileid.c_str(), data.data(), data.size());
             if(ret > 0) {
-                offset += ret;
+                mDataRecvOffset += ret;
                 continue;
             }
 
@@ -443,15 +447,23 @@ void ChannelImplCarrier::runSendData(const std::string fileid, uint64_t offset)
             char strerr_buf[512] = {0};
             ela_get_strerror(err, strerr_buf, sizeof(strerr_buf));
             Log::E(Log::TAG, "Failed to send data ret=%s(0x%x)", strerr_buf, err);
+            closeReason = err;
             // close transfer
         } else if(ret == 0) { // finished
             ret = ela_filetransfer_send(mFileTransfer.get(), fileid.c_str(), nullptr, 0);
+            if(ret < 0) {
+                int err = ela_get_error();
+                char strerr_buf[512] = {0};
+                ela_get_strerror(err, strerr_buf, sizeof(strerr_buf));
+                Log::E(Log::TAG, "Failed to cancel send data err=%s(0x%x)", strerr_buf, err);
+            }
+            Log::I(Log::TAG, "Finish to send data.");
+            closeReason = 0;
         } else {
-            ret = ela_filetransfer_cancel(mFileTransfer.get(), fileid.c_str(), -1, "Failed to read data.");
+            closeReason = ret;
         }
 
         mFileTransfer.reset();
-        CHECK_RETVAL(ret);
         return;
     }
 }
@@ -601,7 +613,14 @@ void ChannelImplCarrier::DataTransListener::OnStateChanged(ElaFileTransfer *file
 
         case FileTransferConnection_closed:
         case FileTransferConnection_failed:
-            channel->mFileTransfer.reset();
+            Platform::DetachCurrentThread();
+            if(channel->mDataSendThread == nullptr) { // SDK19 bug
+                channel->mDataSendThread = std::make_unique<ThreadPool>("carrier-channel-datasend");
+            }
+            channel->mDataSendThread->post([=]() {
+                channel->mFileTransfer.reset();
+            });
+
             break;
 
         default:
@@ -644,11 +663,25 @@ void ChannelImplCarrier::DataRecvListener::OnFile(ElaFileTransfer *filetransfer,
 bool ChannelImplCarrier::DataRecvListener::OnData(ElaFileTransfer *filetransfer,
                                                   const char *fileid,
                                                   const uint8_t *data, size_t length,
-                                                  void *context)
-{
+                                                  void *context) {
     Log::I(Log::TAG, "%s fileid=%s data=%p size=%d", __PRETTY_FUNCTION__, fileid, data, length);
-//    throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
+    std::vector<uint8_t> dataRecv;
+    if (length > 0) {
+        dataRecv = std::vector<uint8_t>(data, data + length);
+    }
 
+    auto channel = reinterpret_cast<ChannelImplCarrier*>(context);
+
+    int ret = channel->mChannelListener->onWriteData(channel->mFriendId, channel->mChannelType,
+                                                     channel->mDataId, channel->mDataRecvOffset,
+                                                     dataRecv);
+    if(ret < 0) {
+        return false;
+    }
+
+    channel->mDataRecvOffset += length;
+
+    Log::I(Log::TAG, "%s fileid=%s end offset=%llu", __PRETTY_FUNCTION__, fileid, channel->mDataRecvOffset);
     return true;
 }
 

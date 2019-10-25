@@ -54,10 +54,11 @@ public:
                                uint64_t offset,
                                std::vector<uint8_t>& data) = 0;
 
-//        virtual int onWriteData(const std::string& friendCode,
-//                                   uint32_t channelType,
-//                                   const std::string& dataId,
-//                                   const std::vector<uint8_t>& data) = 0;
+        virtual int onWriteData(const std::string& friendCode,
+                                uint32_t channelType,
+                                const std::string& dataId,
+                                uint64_t offset,
+                                const std::vector<uint8_t>& data) = 0;
     };
 
 //    struct FileInfo {

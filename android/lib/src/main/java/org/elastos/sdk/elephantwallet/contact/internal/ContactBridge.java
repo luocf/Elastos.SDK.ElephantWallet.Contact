@@ -11,6 +11,7 @@ import org.elastos.tools.crosspl.annotation.CrossClass;
 import org.elastos.tools.crosspl.annotation.CrossInterface;
 
 import java.io.File;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -141,7 +142,7 @@ public class ContactBridge extends CrossBase {
         return ret;
     }
 
-    public int pullFile(String friendCode, ContactChannel channelType,
+    public int pullFileAsync(String friendCode, ContactChannel channelType,
                         Contact.Message.FileData fileInfo) {
         if(fileInfo == null) {
             return -1;

@@ -255,6 +255,20 @@ std::shared_ptr<elastos::MessageManager::MessageListener> ContactListener::makeM
             data.insert(data.begin(), readData->data(), readData->data() + readData->size());
             return data.size();
         }
+
+        virtual int onWriteData(std::shared_ptr<elastos::HumanInfo> humanInfo, elastos::MessageManager::ChannelType channelType,
+                               const std::string& dataId, uint64_t offset,
+                               const std::vector<uint8_t>& data) override {
+            Log::I(Log::TAG, "%s", __PRETTY_FUNCTION__);
+            std::string humanCode;
+            int ret = humanInfo->getHumanCode(humanCode);
+            CHECK_ERROR(ret);
+
+            std::span<uint8_t> writeData(reinterpret_cast<uint8_t*>(const_cast<uint8_t*>(data.data())), data.size());
+            ret = sContactListenerInstance->onWriteData(humanCode, static_cast<ContactChannel>(channelType),
+                                                                 dataId, offset, &writeData);
+            return ret;
+        }
     };
 
     return std::make_shared<MessageListener>();
@@ -304,6 +318,17 @@ std::shared_ptr<std::span<uint8_t>> ContactListener::onReadData(const std::strin
     auto ret = crosspl::proxy::ContactListener::onReadData(platformHandle,
                                                            humanCode.c_str(), static_cast<int>(channelType),
                                                            dataId.c_str(), offset);
+
+    return ret;
+}
+
+int ContactListener::onWriteData(const std::string& humanCode, ContactChannel channelType,
+                                 const std::string& dataId, uint64_t offset, const std::span<uint8_t>* data)
+{
+    int64_t platformHandle = getPlatformHandle();
+    auto ret = crosspl::proxy::ContactListener::onWriteData(platformHandle,
+                                                           humanCode.c_str(), static_cast<int>(channelType),
+                                                           dataId.c_str(), offset, data);
 
     return ret;
 }

@@ -120,6 +120,7 @@ protected:
     std::string mFriendId;
     std::string mDataId;
     std::unique_ptr<ThreadPool> mDataSendThread;
+    uint64_t mDataRecvOffset;
 
 }; // class ChannelImplCarrier
 

@@ -68,6 +68,8 @@ private:
                            std::shared_ptr<elastos::MessageManager::MessageInfo> msgInfo);
     std::shared_ptr<std::span<uint8_t>> onReadData(const std::string& humanCode, ContactChannel channelType,
                                                    const std::string& dataId, uint64_t offset);
+    int onWriteData(const std::string& humanCode, ContactChannel channelType,
+                    const std::string& dataId, uint64_t offset, const std::span<uint8_t>* data);
 
     std::shared_ptr<elastos::SecurityManager::SecurityListener> mSecurityListener;
     std::shared_ptr<elastos::MessageManager::MessageListener> mMessageListener;

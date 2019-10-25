@@ -17,10 +17,12 @@ public abstract class ContactListener extends CrossBase {
 
     public abstract byte[] onAcquire(AcquireArgs request);
     public abstract void onEvent(EventArgs event);
-    public abstract void onReceivedMessage(String humanCode, int channelType, Contact.Message message);
+    public abstract void onReceivedMessage(String humanCode, ContactChannel channelType, Contact.Message message);
 
-    public abstract int onReadData(String humanCode, int channelType,
+    public abstract int onReadData(String humanCode, ContactChannel channelType,
                                    String dataId, long offset, ByteBuffer data);
+    public abstract int onWriteData(String humanCode, ContactChannel channelType,
+                                    String dataId, long offset, byte[] data);
 
     public class AcquireArgs extends org.elastos.sdk.elephantwallet.contact.internal.AcquireArgs {
         private AcquireArgs(int type, String pubKey, byte[] data) {
@@ -137,15 +139,16 @@ public abstract class ContactListener extends CrossBase {
                                                       data, cryptoAlgorithm);
         message.timestamp = timestamp;
 
-        onReceivedMessage(humanCode, channelType, message);
+        onReceivedMessage(humanCode, ContactChannel.valueOf(channelType), message);
         return;
     }
 
     @CrossInterface
     private byte[] onReadData(String humanCode, int channelType,
                               String dataId, long offset) {
+//        Contact.Debug.DumpLocalRefTables();
         ByteBuffer dataBuf = ByteBuffer.allocate(1024);
-        int ret = onReadData(humanCode, channelType,
+        int ret = onReadData(humanCode, ContactChannel.valueOf(channelType),
                 dataId, offset,
                 dataBuf);
         if(ret < 0) {
@@ -157,5 +160,16 @@ public abstract class ContactListener extends CrossBase {
         dataBuf.get(data, 0, size);
 
         return data;
+    }
+
+    @CrossInterface
+    private int onWriteData(String humanCode, int channelType,
+                            String dataId, long offset, byte[] data) {
+//        Contact.Debug.DumpLocalRefTables();
+        int ret = onWriteData(humanCode, ContactChannel.valueOf(channelType),
+                              dataId, offset,
+                              data);
+
+        return ret;
     }
 }

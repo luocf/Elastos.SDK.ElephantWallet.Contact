@@ -112,6 +112,11 @@ public:
                                const std::string& dataId,
                                uint64_t offset,
                                std::vector<uint8_t>& data) = 0;
+        virtual int onWriteData(std::shared_ptr<HumanInfo> humanInfo,
+                                ChannelType channelType,
+                                const std::string& dataId,
+                                uint64_t offset,
+                                const std::vector<uint8_t>& data) = 0;
 
 
     private:
@@ -138,6 +143,12 @@ public:
                                const std::string& dataId,
                                uint64_t offset,
                                std::vector<uint8_t>& data) override;
+
+        virtual int onWriteData(const std::string& friendCode,
+                                uint32_t channelType,
+                                const std::string& dataId,
+                                uint64_t offset,
+                                const std::vector<uint8_t>& data) override ;
 
         std::weak_ptr<MessageManager> mMessageManager;
         friend class MessageManager;

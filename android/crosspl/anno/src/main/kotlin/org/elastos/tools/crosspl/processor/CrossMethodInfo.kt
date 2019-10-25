@@ -296,9 +296,11 @@ class CrossMethodInfo {
                 }
                 returnType == CrossVariableType.CROSSBASE -> {
                     suffixContent += "${CrossTmplUtils.TabSpace}auto ret = CrossPLUtils::SafeCastCrossObject<${returnType.toCppString()}>(jenv.get(), jret);\n"
+                    suffixContent += "${CrossTmplUtils.TabSpace}jenv->DeleteLocalRef(jret);\n"
                 }
                 else -> {
                     suffixContent += "${CrossTmplUtils.TabSpace}auto ret = CrossPLUtils::SafeCast$returnType(jenv.get(), jret);\n"
+                    suffixContent += "${CrossTmplUtils.TabSpace}jenv->DeleteLocalRef(jret);\n"
                 }
             }
             suffixContent += "${CrossTmplUtils.TabSpace}return ret;"

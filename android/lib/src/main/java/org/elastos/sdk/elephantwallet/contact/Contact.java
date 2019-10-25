@@ -1,6 +1,7 @@
 package org.elastos.sdk.elephantwallet.contact;
 
 import org.elastos.sdk.elephantwallet.contact.internal.ContactBridge;
+import org.elastos.sdk.elephantwallet.contact.internal.ContactChannel;
 import org.elastos.sdk.elephantwallet.contact.internal.ContactDebug;
 import org.elastos.sdk.elephantwallet.contact.internal.ContactFactory;
 import org.elastos.sdk.elephantwallet.contact.internal.ContactListener;
@@ -36,6 +37,10 @@ public final class Contact extends ContactBridge {
     public static final class FriendInfo extends org.elastos.sdk.elephantwallet.contact.internal.FriendInfo {
         static { ensureNativeLibrary(); }
     } // class FriendInfo
+
+//    public abstract static class Channel extends ContactChannel {
+//        static { ensureNativeLibrary(); }
+//    } // class Channel
 
     public static class Message extends org.elastos.sdk.elephantwallet.contact.internal.ContactMessage {
         public Message(String text, String cryptoAlgorithm) {

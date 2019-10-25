@@ -934,12 +934,27 @@ int MessageManager::MessageListener::onReadData(const std::string& friendCode, u
     CHECK_ERROR(ret);
 
     ChannelType humanChType = static_cast<ChannelType>(channelType);
-//
-//    std::shared_ptr<FileInfo> fileInfo;
-//    auto jsonInfo = Json::parse(dataId);
-//    from_json(jsonInfo, fileInfo);
 
     ret = msgMgr->mMessageListener->onReadData(friendInfo, humanChType, dataId, offset, data);
+    return ret;
+}
+
+int MessageManager::MessageListener::onWriteData(const std::string& friendCode, uint32_t channelType,
+                                                 const std::string& dataId,
+                                                 uint64_t offset, const std::vector<uint8_t>& data)
+{
+    Log::W(Log::TAG, ">>>>>>>>>>>>> onWriteData code:%s, dataId=%s", friendCode.c_str(), dataId.c_str());
+    auto msgMgr = SAFE_GET_PTR(mMessageManager);
+//    auto userMgr = SAFE_GET_PTR(msgMgr->mUserManager);
+    auto friendMgr = SAFE_GET_PTR(msgMgr->mFriendManager);
+
+    std::shared_ptr<FriendInfo> friendInfo;
+    int ret = friendMgr->tryGetFriendInfo(friendCode, friendInfo);
+    CHECK_ERROR(ret);
+
+    ChannelType humanChType = static_cast<ChannelType>(channelType);
+
+    ret = msgMgr->mMessageListener->onWriteData(friendInfo, humanChType, dataId, offset, data);
     return ret;
 }
 
