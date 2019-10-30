@@ -2,6 +2,7 @@ package org.elastos.sdk.elephantwallet.contact;
 
 import org.elastos.sdk.elephantwallet.contact.internal.ContactBridge;
 import org.elastos.sdk.elephantwallet.contact.internal.ContactChannel;
+import org.elastos.sdk.elephantwallet.contact.internal.ContactDataListener;
 import org.elastos.sdk.elephantwallet.contact.internal.ContactDebug;
 import org.elastos.sdk.elephantwallet.contact.internal.ContactFactory;
 import org.elastos.sdk.elephantwallet.contact.internal.ContactListener;
@@ -29,6 +30,10 @@ public final class Contact extends ContactBridge {
     public abstract static class Listener extends ContactListener {
         static { ensureNativeLibrary(); }
     } // class Listener
+
+    public abstract static class DataListener extends ContactDataListener {
+        static { ensureNativeLibrary(); }
+    } // class DataListener
 
     public static final class UserInfo extends org.elastos.sdk.elephantwallet.contact.internal.UserInfo {
         static { ensureNativeLibrary(); }

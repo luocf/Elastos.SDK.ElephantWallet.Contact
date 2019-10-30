@@ -47,7 +47,17 @@ public:
         virtual void onFriendStatusChanged(const std::string& friendCode,
                                            uint32_t channelType,
                                            ChannelStatus status) = 0;
+    };
 
+    class ChannelDataListener {
+    public:
+        explicit ChannelDataListener() = default;
+        virtual ~ChannelDataListener() = default;
+
+        virtual void onResult(const std::string& friendCode,
+                              uint32_t channelType,
+                              const std::string& dataId,
+                              int errCode) = 0;
         virtual int onReadData(const std::string& friendCode,
                                uint32_t channelType,
                                const std::string& dataId,
@@ -111,11 +121,13 @@ protected:
 
     /*** class function and variable ***/
     explicit MessageChannelStrategy(uint32_t chType,
-                                    std::shared_ptr<ChannelListener> listener);
+                                    std::shared_ptr<ChannelListener> chListener,
+                                    std::shared_ptr<ChannelDataListener> dataListener);
     virtual ~MessageChannelStrategy();
 
     uint32_t mChannelType;
     std::shared_ptr<ChannelListener> mChannelListener;
+    std::shared_ptr<ChannelDataListener> mChannelDataListener;
 
 }; // class MessageChannelStrategy
 

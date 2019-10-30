@@ -26,7 +26,8 @@ public:
 
     /*** class function and variable ***/
     explicit ChannelImplElaChain(uint32_t chType,
-                                 std::shared_ptr<ChannelListener> listener,
+                                 std::shared_ptr<ChannelListener> chListener,
+                                 std::shared_ptr<ChannelDataListener> dataListener,
                                  std::weak_ptr<Config> config,
                                  std::weak_ptr<SecurityManager> sectyMgr);
     virtual ~ChannelImplElaChain();

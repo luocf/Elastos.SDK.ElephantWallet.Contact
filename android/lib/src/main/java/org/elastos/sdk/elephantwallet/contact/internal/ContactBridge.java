@@ -27,6 +27,9 @@ public class ContactBridge extends CrossBase {
         if(mListener != null) {
             mListener.unbind();
         }
+        if(mDataListener != null) {
+            mDataListener.unbind();
+        }
 
         super.finalize();
     }
@@ -40,6 +43,16 @@ public class ContactBridge extends CrossBase {
 
         mListener.bind();
         setListener(mListener);
+    }
+
+    public synchronized void setDataListener(Contact.DataListener listener) {
+        if(mDataListener != null) {
+            mDataListener.unbind();
+        }
+        mDataListener = listener;
+
+        mDataListener.bind();
+        setDataListener(mDataListener);
     }
 
     public int setUserInfo(UserInfo.Item item, String value) {
@@ -196,6 +209,9 @@ public class ContactBridge extends CrossBase {
     private native void setListener(CrossBase listener);
 
     @CrossInterface
+    private native void setDataListener(CrossBase listener);
+
+    @CrossInterface
     private native int setUserInfo(int item, String value);
 
     @CrossInterface
@@ -217,6 +233,7 @@ public class ContactBridge extends CrossBase {
     private native int pullData(String friendCode, int channelType, String devId, String fileInfo);
 
     private ContactListener mListener;
+    private ContactDataListener mDataListener;
 
     static {
         System.loadLibrary("Elastos.SDK.Contact.Jni");

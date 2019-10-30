@@ -27,6 +27,8 @@
 /***********************************************/
 ContactBridge::ContactBridge()
         : mContactImpl()
+        , mListener(nullptr)
+        , mDataListener(nullptr)
 {
     Log::I(Log::TAG, "%s", __PRETTY_FUNCTION__);
 
@@ -53,6 +55,22 @@ void ContactBridge::setListener(CrossBase* listener)
     auto sectyListener = mListener->getSecurityListener();
     auto msgListener = mListener->getMessageListener();
     mContactImpl->setListener(sectyListener, nullptr, nullptr, msgListener);
+
+    return;
+}
+
+void ContactBridge::setDataListener(CrossBase* listener)
+{
+    Log::I(Log::TAG, "%s", __PRETTY_FUNCTION__);
+
+    mDataListener = dynamic_cast<ContactDataListener*>(listener);
+//    mDataListener->onCallback(0, nullptr);
+
+    auto msgDataListener = mDataListener->getDataListener();
+
+    auto weakMsgMgr = mContactImpl->getMessageManager();
+    auto msgMgr =  SAFE_GET_PTR_NO_RETVAL(weakMsgMgr);                                                                      \
+    msgMgr->setDataListener(msgDataListener);
 
     return;
 }

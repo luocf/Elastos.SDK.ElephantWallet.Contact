@@ -290,6 +290,24 @@ public class MainActivity extends Activity {
             }
 
             @Override
+            public void onError(int errCode, String errStr, String ext) {
+                String msg = errCode + ": " + errStr;
+                msg += "\n" + ext;
+                showError(msg);
+            }
+        };
+        mContact.setListener(mContactListener);
+
+        mContactDataListener = new Contact.DataListener() {
+            @Override
+            public void onResult(String humanCode, ContactChannel channelType,
+                                 String dataId, int errCode)
+            {
+                String msg = "onResult(): dataId=" + dataId + ", errCode=" + errCode + "\n";
+                showError(msg);
+            }
+
+            @Override
             public int onReadData(String humanCode, ContactChannel channelType,
                                   String dataId, long offset, ByteBuffer data)
             {
@@ -333,7 +351,7 @@ public class MainActivity extends Activity {
 
             @Override
             public int onWriteData(String humanCode, ContactChannel channelType,
-                                  String dataId, long offset, byte[] data)
+                                   String dataId, long offset, byte[] data)
             {
                 String msg = "onWriteData(): dataId=" + dataId + ", offset=" + offset + "\n";
                 if(offset == 0 || data.length == 0) {
@@ -373,15 +391,8 @@ public class MainActivity extends Activity {
                     }
                 }
             }
-
-            @Override
-            public void onError(int errCode, String errStr, String ext) {
-                String msg = errCode + ": " + errStr;
-                msg += "\n" + ext;
-                showError(msg);
-            }
         };
-        mContact.setListener(mContactListener);
+        mContact.setDataListener(mContactDataListener);
 
         return "Success to create a contact instance.";
     }
@@ -1014,6 +1025,7 @@ public class MainActivity extends Activity {
     String mSavedMnemonic;
     Contact mContact;
     Contact.Listener mContactListener;
+    Contact.DataListener mContactDataListener;
     HashMap<String, Contact.Message.FileData> mContactRecvFileMap = new HashMap<>();
     HashMap<String, String> mContactSendFileMap = new HashMap<>();
 

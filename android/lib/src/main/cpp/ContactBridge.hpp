@@ -14,6 +14,7 @@
 #include <sstream>
 
 #include <ContactListener.hpp>
+#include <ContactDataListener.hpp>
 #include <CrossBase.hpp>
 #include <Elastos.SDK.Contact.hpp>
 
@@ -28,6 +29,7 @@ public:
     virtual ~ContactBridge();
 
     void setListener(CrossBase* listener);
+    void setDataListener(CrossBase* listener);
     int start();
     int stop();
 
@@ -58,6 +60,7 @@ private:
     /*** class function and variable ***/
     std::shared_ptr<elastos::Contact> mContactImpl;
     ContactListener* mListener;
+    ContactDataListener* mDataListener;
 
 }; // class Contact
 

@@ -107,18 +107,6 @@ public:
         virtual void onHumanInfoChanged(std::shared_ptr<HumanInfo> humanInfo,
                                         ChannelType channelType) = 0;
 
-        virtual int onReadData(std::shared_ptr<HumanInfo> humanInfo,
-                               ChannelType channelType,
-                               const std::string& dataId,
-                               uint64_t offset,
-                               std::vector<uint8_t>& data) = 0;
-        virtual int onWriteData(std::shared_ptr<HumanInfo> humanInfo,
-                                ChannelType channelType,
-                                const std::string& dataId,
-                                uint64_t offset,
-                                const std::vector<uint8_t>& data) = 0;
-
-
     private:
         virtual void onStatusChanged(const std::string& userCode,
                                      uint32_t channelType,
@@ -137,6 +125,37 @@ public:
         virtual void onFriendStatusChanged(const std::string& friendCode,
                                            uint32_t channelType,
                                            ChannelStatus status) override;
+
+        std::weak_ptr<MessageManager> mMessageManager;
+        friend class MessageManager;
+    };
+
+    class DataListener : public MessageChannelStrategy::ChannelDataListener {
+    public:
+        explicit DataListener() = default;
+        virtual ~DataListener() = default;
+
+        virtual void onResult(std::shared_ptr<HumanInfo> humanInfo,
+                              ChannelType channelType,
+                              const std::string& dataId,
+                              int errCode) = 0;
+        virtual int onReadData(std::shared_ptr<HumanInfo> humanInfo,
+                               ChannelType channelType,
+                               const std::string& dataId,
+                               uint64_t offset,
+                               std::vector<uint8_t>& data) = 0;
+        virtual int onWriteData(std::shared_ptr<HumanInfo> humanInfo,
+                                ChannelType channelType,
+                                const std::string& dataId,
+                                uint64_t offset,
+                                const std::vector<uint8_t>& data) = 0;
+
+
+    private:
+        virtual void onResult(const std::string& friendCode,
+                              uint32_t channelType,
+                              const std::string& dataId,
+                              int errCode) override;
 
         virtual int onReadData(const std::string& friendCode,
                                uint32_t channelType,
@@ -175,6 +194,7 @@ public:
     virtual ~MessageManager();
 
     virtual void setMessageListener(std::shared_ptr<MessageListener> listener);
+    virtual void setDataListener(std::shared_ptr<DataListener> listener);
 
     virtual int presetChannels(std::weak_ptr<Config> config);
     virtual int openChannels();
@@ -219,6 +239,7 @@ private:
     std::weak_ptr<UserManager> mUserManager;
     std::weak_ptr<FriendManager> mFriendManager;
     std::shared_ptr<MessageListener> mMessageListener;
+    std::shared_ptr<DataListener> mDataListener;
 
     std::map<ChannelType, std::shared_ptr<MessageChannelStrategy>> mMessageChannelMap;
 

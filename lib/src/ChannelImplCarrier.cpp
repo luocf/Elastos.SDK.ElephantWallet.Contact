@@ -56,9 +56,10 @@ int ChannelImplCarrier::GetCarrierUsrIdByAddress(const std::string& address, std
 /***** class public function implement  ********/
 /***********************************************/
 ChannelImplCarrier::ChannelImplCarrier(uint32_t chType,
-                                       std::shared_ptr<ChannelListener> listener,
+                                       std::shared_ptr<ChannelListener> chListener,
+                                       std::shared_ptr<ChannelDataListener> dataListener,
                                        std::weak_ptr<Config> config)
-    : MessageChannelStrategy(chType, listener)
+    : MessageChannelStrategy(chType, chListener, dataListener)
     , mConfig(config)
     , mCarrier()
     , mTaskThread()
@@ -69,7 +70,9 @@ ChannelImplCarrier::ChannelImplCarrier(uint32_t chType,
     , mDataSendThread()
     , mDataRecvOffset(0)
 {
-    PlatformAndroid::CallOnload(ela_session_jni_onload);
+#if defined(__ANDROID__)
+    Platform::CallOnload(ela_session_jni_onload);
+#endif // defined(__ANDROID__)
 }
 
 ChannelImplCarrier::~ChannelImplCarrier()
@@ -433,7 +436,7 @@ void ChannelImplCarrier::runSendData(const std::string fileid, uint64_t offset)
     for(;;) {
         data.clear();
         int closeReason;
-        int ret = mChannelListener->onReadData(mFriendId, mChannelType,
+        int ret = mChannelDataListener->onReadData(mFriendId, mChannelType,
                                                mDataId, mDataRecvOffset,
                                                data);
         if(ret > 0) {
@@ -672,7 +675,7 @@ bool ChannelImplCarrier::DataRecvListener::OnData(ElaFileTransfer *filetransfer,
 
     auto channel = reinterpret_cast<ChannelImplCarrier*>(context);
 
-    int ret = channel->mChannelListener->onWriteData(channel->mFriendId, channel->mChannelType,
+    int ret = channel->mChannelDataListener->onWriteData(channel->mFriendId, channel->mChannelType,
                                                      channel->mDataId, channel->mDataRecvOffset,
                                                      dataRecv);
     if(ret < 0) {

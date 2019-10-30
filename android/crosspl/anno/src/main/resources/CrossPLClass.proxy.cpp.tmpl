@@ -20,7 +20,7 @@ int %ClassName%::RegisterNativeMethods(JNIEnv* jenv)
   };
   int methodArraySize = sizeof(methodArray)/sizeof(*methodArray);
 
-  jclass jclazz = jenv->FindClass("%JniJavaClass%");
+  jclass jclazz = CrossPLUtils::FindJavaClass(jenv, "%JniJavaClass%");
   if(jclazz == nullptr) {
     return -1;
   }
@@ -35,7 +35,7 @@ int %ClassName%::RegisterNativeMethods(JNIEnv* jenv)
   int kotlinStaticMethodArraySize = sizeof(kotlinStaticMethodArray)/sizeof(*kotlinStaticMethodArray);
 
   if(kotlinStaticMethodArraySize > 0) {
-    jclazz = jenv->FindClass("%JniJavaClass%$Companion");
+    jclazz = CrossPLUtils::FindJavaClass(jenv, "%JniJavaClass%$Companion");
     if(jclazz == nullptr) {
       return -1;
     }

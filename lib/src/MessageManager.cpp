@@ -68,6 +68,12 @@ void MessageManager::setMessageListener(std::shared_ptr<MessageListener> listene
     mMessageListener->mMessageManager = weak_from_this();
 }
 
+void MessageManager::setDataListener(std::shared_ptr<DataListener> listener)
+{
+    mDataListener = listener;
+    mDataListener->mMessageManager = weak_from_this();
+}
+
 int MessageManager::presetChannels(std::weak_ptr<Config> config)
 {
     bool hasFailed = false;
@@ -85,7 +91,7 @@ int MessageManager::presetChannels(std::weak_ptr<Config> config)
     // }
 
     mMessageChannelMap[ChannelType::Carrier] = std::make_shared<ChannelImplCarrier>(static_cast<uint32_t>(ChannelType::Carrier),
-                                                                                    mMessageListener,
+                                                                                    mMessageListener, mDataListener,
                                                                                     config);
     // TODO mMessageChannelMap[ChannelType::ElaChain] = std::make_shared<ChannelImplElaChain>(config, mSecurityManager);
 
@@ -920,9 +926,29 @@ void MessageManager::MessageListener::onFriendStatusChanged(const std::string& f
     return;
 }
 
-int MessageManager::MessageListener::onReadData(const std::string& friendCode, uint32_t channelType,
-                                                const std::string& dataId,
-                                                uint64_t offset, std::vector<uint8_t>& data)
+void MessageManager::DataListener::onResult(const std::string& friendCode,
+                                           uint32_t channelType,
+                                           const std::string& dataId,
+                                           int errCode)
+{
+    Log::W(Log::TAG, ">>>>>>>>>>>>> onResult code:%s, dataId=%s errcode=%d", friendCode.c_str(), dataId.c_str(), errCode);
+    auto msgMgr = SAFE_GET_PTR_NO_RETVAL(mMessageManager);
+//    auto userMgr = SAFE_GET_PTR(msgMgr->mUserManager);
+    auto friendMgr = SAFE_GET_PTR_NO_RETVAL(msgMgr->mFriendManager);
+
+    std::shared_ptr<FriendInfo> friendInfo;
+    int ret = friendMgr->tryGetFriendInfo(friendCode, friendInfo);
+    CHECK_RETVAL(ret);
+
+    ChannelType humanChType = static_cast<ChannelType>(channelType);
+
+    msgMgr->mDataListener->onResult(friendInfo, humanChType, dataId, errCode);
+}
+
+
+int MessageManager::DataListener::onReadData(const std::string& friendCode, uint32_t channelType,
+                                             const std::string& dataId,
+                                             uint64_t offset, std::vector<uint8_t>& data)
 {
     Log::W(Log::TAG, ">>>>>>>>>>>>> onReadData code:%s, dataId=%s", friendCode.c_str(), dataId.c_str());
     auto msgMgr = SAFE_GET_PTR(mMessageManager);
@@ -935,13 +961,13 @@ int MessageManager::MessageListener::onReadData(const std::string& friendCode, u
 
     ChannelType humanChType = static_cast<ChannelType>(channelType);
 
-    ret = msgMgr->mMessageListener->onReadData(friendInfo, humanChType, dataId, offset, data);
+    ret = msgMgr->mDataListener->onReadData(friendInfo, humanChType, dataId, offset, data);
     return ret;
 }
 
-int MessageManager::MessageListener::onWriteData(const std::string& friendCode, uint32_t channelType,
-                                                 const std::string& dataId,
-                                                 uint64_t offset, const std::vector<uint8_t>& data)
+int MessageManager::DataListener::onWriteData(const std::string& friendCode, uint32_t channelType,
+                                              const std::string& dataId,
+                                              uint64_t offset, const std::vector<uint8_t>& data)
 {
     Log::W(Log::TAG, ">>>>>>>>>>>>> onWriteData code:%s, dataId=%s", friendCode.c_str(), dataId.c_str());
     auto msgMgr = SAFE_GET_PTR(mMessageManager);
@@ -954,7 +980,7 @@ int MessageManager::MessageListener::onWriteData(const std::string& friendCode, 
 
     ChannelType humanChType = static_cast<ChannelType>(channelType);
 
-    ret = msgMgr->mMessageListener->onWriteData(friendInfo, humanChType, dataId, offset, data);
+    ret = msgMgr->mDataListener->onWriteData(friendInfo, humanChType, dataId, offset, data);
     return ret;
 }
 
