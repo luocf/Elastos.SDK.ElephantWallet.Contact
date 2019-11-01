@@ -16,11 +16,12 @@
 #include <ela_filetransfer.h>
 #include <MessageChannelStrategy.hpp>
 #include <ThreadPool.hpp>
+#include "ChannelImplCarrierDataTrans.hpp"
 
 namespace elastos {
 
 class ChannelImplCarrier : public MessageChannelStrategy,
-                                  std::enable_shared_from_this<ChannelImplCarrier> {
+                           std::enable_shared_from_this<ChannelImplCarrier> {
 public:
     /*** type define ***/
 
@@ -62,36 +63,6 @@ public:
 
 protected:
     /*** type define ***/
-    enum DataTransType {
-        Invalid,
-        Sender,
-        Receiver
-    };
-
-    struct DataTransListener {
-        static void OnStateChanged(ElaFileTransfer *filetransfer,
-                                   FileTransferConnection state, void *context);
-        static void OnCancel(ElaFileTransfer *filetransfer, const char *fileid,
-                             int status, const char *reason, void *context);
-
-    };
-
-    struct DataSendListener {
-        static void OnPull(ElaFileTransfer *filetransfer, const char *fileid,
-                           uint64_t offset, void *context);
-
-    };
-
-    struct DataRecvListener {
-        static void OnConnect(ElaCarrier *carrier, const char *from,
-                              const ElaFileTransferInfo *fileinfo,
-                              void *context);
-        static void OnFile(ElaFileTransfer *filetransfer, const char *fileid,
-                           const char *filename, uint64_t size, void *context);
-        static bool OnData(ElaFileTransfer *filetransfer, const char *fileid,
-                           const uint8_t *data, size_t length, void *context);
-    };
-
     /*** static function and variable ***/
     static void OnCarrierConnection(ElaCarrier *carrier,
                                     ElaConnectionStatus status, void *context);
@@ -103,6 +74,11 @@ protected:
     static void OnCarrierFriendMessage(ElaCarrier *carrier, const char *from,
                                                 const void *msg, size_t len,
                                                 bool offline, void *context);
+
+    static void OnCarrierFileTransConnect(ElaCarrier *carrier, const char *from,
+                                          const ElaFileTransferInfo *fileinfo,
+                                          void *context);
+
 
     static constexpr int32_t MaxPkgSize = 1000;
     static constexpr uint8_t PkgMagic[] = { 0xA5, 0xA5, 0x5A, 0x5A,
@@ -116,26 +92,14 @@ protected:
 
     /*** class function and variable ***/
     int initCarrier();
-    int makeCarrierFileTrans(const char* friendCode, bool sendOrRecv);
     void runCarrier();
-    void runSendData(const std::string fileid, uint64_t offset);
-    void setDataTransStatus(ChannelDataListener::Status status);
 
     std::weak_ptr<Config> mConfig;
-    std::unique_ptr<ElaCarrier, std::function<void(ElaCarrier*)>> mCarrier;
+    std::shared_ptr<ElaCarrier> mCarrier;
     std::unique_ptr<ThreadPool> mTaskThread;
     ChannelListener::ChannelStatus mChannelStatus;
     std::map<std::string, std::map<int, std::vector<uint8_t>>> mRecvDataCache;
-
-    std::shared_ptr<std::recursive_mutex> mDataTransMutex;
-    std::unique_ptr<ThreadPool> mDataTransThread;
-    std::unique_ptr<ElaFileTransfer, std::function<void(ElaFileTransfer*)>> mCarrierFileTrans;
-    DataTransType mDataTransType;
-    ChannelDataListener::Status mDataTransStatus;
-    std::string mFriendId;
-    std::string mDataId;
-    uint64_t mDataRecvOffset;
-
+    std::unique_ptr<ChannelImplCarrierDataTrans> mCarrierFileTrans;
 }; // class ChannelImplCarrier
 
 } // namespace elastos
