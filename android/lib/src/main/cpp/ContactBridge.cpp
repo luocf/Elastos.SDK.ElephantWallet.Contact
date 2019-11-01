@@ -293,9 +293,9 @@ int ContactBridge::sendMessage(const char* friendCode, int chType, CrossBase* me
 }
 
 int ContactBridge::pullData(const char* friendCode, int chType,
-                            const char* devId, const char* fileInfo)
+                            const char* devId, const char* dataId)
 {
-    if(fileInfo == nullptr) {
+    if(dataId == nullptr) {
         return elastos::ErrCode::InvalidArgument;
     }
 
@@ -313,7 +313,34 @@ int ContactBridge::pullData(const char* friendCode, int chType,
     CHECK_ERROR(ret);
 
     ret = msgMgr->pullData(friendInfo, static_cast<elastos::MessageManager::ChannelType>(chType),
-                           devId, fileInfo);
+                           devId, dataId);
+    CHECK_ERROR(ret);
+
+    return ret;
+}
+
+int ContactBridge::cancelPullData(const char* friendCode, int chType,
+                                  const char* devId, const char* dataId)
+{
+    if(dataId == nullptr) {
+        return elastos::ErrCode::InvalidArgument;
+    }
+
+    if(mContactImpl->isStarted() == false) {
+        return elastos::ErrCode::NotReadyError;
+    }
+
+    auto weakFriendMgr = mContactImpl->getFriendManager();
+    auto friendMgr =  SAFE_GET_PTR(weakFriendMgr);                                                                      \
+    auto weakMsgMgr = mContactImpl->getMessageManager();
+    auto msgMgr =  SAFE_GET_PTR(weakMsgMgr);                                                                      \
+
+    std::shared_ptr<elastos::FriendInfo> friendInfo;
+    int ret = friendMgr->tryGetFriendInfo(friendCode, friendInfo);
+    CHECK_ERROR(ret);
+
+    ret = msgMgr->cancelPullData(friendInfo, static_cast<elastos::MessageManager::ChannelType>(chType),
+                                 devId, dataId);
     CHECK_ERROR(ret);
 
     return ret;

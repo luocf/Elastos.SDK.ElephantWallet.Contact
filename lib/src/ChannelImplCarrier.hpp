@@ -57,8 +57,17 @@ public:
     virtual int sendData(const std::string& friendCode,
                          const std::string& dataId) override;
 
+    virtual int cancelSendData(const std::string& friendCode,
+                               const std::string& dataId) override;
+
 protected:
     /*** type define ***/
+    enum DataTransType {
+        Invalid,
+        Sender,
+        Receiver
+    };
+
     struct DataTransListener {
         static void OnStateChanged(ElaFileTransfer *filetransfer,
                                    FileTransferConnection state, void *context);
@@ -107,9 +116,10 @@ protected:
 
     /*** class function and variable ***/
     int initCarrier();
-    int makeCarrierFileTrans(const char* friendCode);
+    int makeCarrierFileTrans(const char* friendCode, bool sendOrRecv);
     void runCarrier();
     void runSendData(const std::string fileid, uint64_t offset);
+    void setDataTransStatus(ChannelDataListener::Status status);
 
     std::weak_ptr<Config> mConfig;
     std::unique_ptr<ElaCarrier, std::function<void(ElaCarrier*)>> mCarrier;
@@ -117,10 +127,13 @@ protected:
     ChannelListener::ChannelStatus mChannelStatus;
     std::map<std::string, std::map<int, std::vector<uint8_t>>> mRecvDataCache;
 
-    std::unique_ptr<ElaFileTransfer, std::function<void(ElaFileTransfer*)>> mFileTransfer;
+    std::shared_ptr<std::recursive_mutex> mDataTransMutex;
+    std::unique_ptr<ThreadPool> mDataTransThread;
+    std::unique_ptr<ElaFileTransfer, std::function<void(ElaFileTransfer*)>> mCarrierFileTrans;
+    DataTransType mDataTransType;
+    ChannelDataListener::Status mDataTransStatus;
     std::string mFriendId;
     std::string mDataId;
-    std::unique_ptr<ThreadPool> mDataSendThread;
     uint64_t mDataRecvOffset;
 
 }; // class ChannelImplCarrier

@@ -542,6 +542,36 @@ int MessageManager::pullData(const std::shared_ptr<HumanInfo> humanInfo,
     }
 }
 
+int MessageManager::cancelPullData(const std::shared_ptr<HumanInfo> humanInfo,
+                                   ChannelType humanChType,
+                                   const std::string& devId,
+                                   const std::string& dataId)
+{
+    auto it = mMessageChannelMap.find(humanChType);
+    if(it == mMessageChannelMap.end()) {
+        return ErrCode::ChannelNotFound;
+    }
+    auto channel = it->second;
+
+    if(channel->isReady() == false) {
+        return ErrCode::ChannelNotReady;
+    }
+
+    if(humanChType == ChannelType::Carrier) {
+        HumanInfo::CarrierInfo carrierInfo;
+
+        int ret = humanInfo->getCarrierInfoByDevId(devId, carrierInfo);
+        CHECK_ERROR(ret);
+
+        ret = channel->cancelSendData(carrierInfo.mUsrId, dataId);
+        CHECK_ERROR(ret);
+
+        return 0;
+    } else {
+        throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
+    }
+}
+
 
 int MessageManager::broadcastDesc(ChannelType chType)
 {
@@ -926,12 +956,12 @@ void MessageManager::MessageListener::onFriendStatusChanged(const std::string& f
     return;
 }
 
-void MessageManager::DataListener::onResult(const std::string& friendCode,
+void MessageManager::DataListener::onNotify(const std::string& friendCode,
                                            uint32_t channelType,
                                            const std::string& dataId,
-                                           int errCode)
+                                           Status status)
 {
-    Log::W(Log::TAG, ">>>>>>>>>>>>> onResult code:%s, dataId=%s errcode=%d", friendCode.c_str(), dataId.c_str(), errCode);
+    Log::W(Log::TAG, ">>>>>>>>>>>>> onNotify code:%s, dataId=%s status=%d", friendCode.c_str(), dataId.c_str(), status);
     auto msgMgr = SAFE_GET_PTR_NO_RETVAL(mMessageManager);
 //    auto userMgr = SAFE_GET_PTR(msgMgr->mUserManager);
     auto friendMgr = SAFE_GET_PTR_NO_RETVAL(msgMgr->mFriendManager);
@@ -942,7 +972,7 @@ void MessageManager::DataListener::onResult(const std::string& friendCode,
 
     ChannelType humanChType = static_cast<ChannelType>(channelType);
 
-    msgMgr->mDataListener->onResult(friendInfo, humanChType, dataId, errCode);
+    msgMgr->mDataListener->onNotify(friendInfo, humanChType, dataId, static_cast<int>(status));
 }
 
 

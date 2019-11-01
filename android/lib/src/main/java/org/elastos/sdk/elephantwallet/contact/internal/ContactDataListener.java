@@ -11,8 +11,34 @@ import java.nio.ByteBuffer;
 
 @CrossClass
 public abstract class ContactDataListener extends CrossBase {
-    public abstract void onResult(String humanCode, ContactChannel channelType,
-                                   String dataId, int errCode);
+    public enum Status {
+        Unknown      (1000),
+        Initialized  (1001),
+        Destroyed    (1002),
+        Connecting   (1003),
+        Connected    (1004),
+        Transmitting (1005),
+        Closed       (1006),
+        Failed       (1007);
+
+        public static Status valueOf(int id) {
+            Status[] values = Status.values();
+            for(int idx = 0; idx < values.length; idx++) {
+                if(values[idx].id == id) {
+                    return values[idx];
+                }
+            }
+            return null;
+        }
+
+        private Status(int id){
+            this.id = id;
+        }
+        private int id;
+    }
+
+    public abstract void onNotify(String humanCode, ContactChannel channelType,
+                                   String dataId, Status status);
     public abstract int onReadData(String humanCode, ContactChannel channelType,
                                    String dataId, long offset, ByteBuffer data);
     public abstract int onWriteData(String humanCode, ContactChannel channelType,
@@ -23,10 +49,10 @@ public abstract class ContactDataListener extends CrossBase {
     }
 
     @CrossInterface
-    private void onResult(String humanCode, int channelType,
-                              String dataId, int errCode) {
-        onResult(humanCode, ContactChannel.valueOf(channelType),
-                dataId, errCode);
+    private void onNotify(String humanCode, int channelType,
+                              String dataId, int status) {
+        onNotify(humanCode, ContactChannel.valueOf(channelType),
+                dataId, Status.valueOf(status));
     }
 
     @CrossInterface

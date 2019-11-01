@@ -135,10 +135,10 @@ public:
         explicit DataListener() = default;
         virtual ~DataListener() = default;
 
-        virtual void onResult(std::shared_ptr<HumanInfo> humanInfo,
+        virtual void onNotify(std::shared_ptr<HumanInfo> humanInfo,
                               ChannelType channelType,
                               const std::string& dataId,
-                              int errCode) = 0;
+                              int status) = 0;
         virtual int onReadData(std::shared_ptr<HumanInfo> humanInfo,
                                ChannelType channelType,
                                const std::string& dataId,
@@ -152,10 +152,10 @@ public:
 
 
     private:
-        virtual void onResult(const std::string& friendCode,
+        virtual void onNotify(const std::string& friendCode,
                               uint32_t channelType,
                               const std::string& dataId,
-                              int errCode) override;
+                              Status status) override;
 
         virtual int onReadData(const std::string& friendCode,
                                uint32_t channelType,
@@ -221,6 +221,10 @@ public:
                          ChannelType humanChType,
                          const std::string& devId,
                          const std::string& dataId);
+    virtual int cancelPullData(const std::shared_ptr<HumanInfo> humanInfo,
+                               ChannelType humanChType,
+                               const std::string& devId,
+                               const std::string& dataId);
 
     virtual int broadcastDesc(ChannelType chType);
 

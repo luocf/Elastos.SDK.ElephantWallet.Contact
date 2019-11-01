@@ -166,6 +166,17 @@ public class ContactBridge extends CrossBase {
         return ret;
     }
 
+    public int cancelPullFile(String friendCode, ContactChannel channelType,
+                              Contact.Message.FileData fileInfo) {
+        if(fileInfo == null) {
+            return -1;
+        }
+
+        int ret = cancelPullData(friendCode, channelType.id(), fileInfo.devId, fileInfo.toString());
+
+        return ret;
+    }
+
     public static Contact.Message MakeTextMessage(String text, String cryptoAlgorithm) {
         Contact.Message msg = new Contact.Message(text, cryptoAlgorithm);
         return msg;
@@ -230,7 +241,10 @@ public class ContactBridge extends CrossBase {
     private native int sendMessage(String friendCode, int channelType, CrossBase message);
 
     @CrossInterface
-    private native int pullData(String friendCode, int channelType, String devId, String fileInfo);
+    private native int pullData(String friendCode, int channelType, String devId, String dataId);
+
+    @CrossInterface
+    private native int cancelPullData(String friendCode, int channelType, String devId, String dataId);
 
     private ContactListener mListener;
     private ContactDataListener mDataListener;

@@ -12,6 +12,7 @@
 #include <Log.hpp>
 #include <SafePtr.hpp>
 #include <Platform.hpp>
+//#include <jni.h>
 
 namespace elastos {
 
@@ -65,9 +66,12 @@ ChannelImplCarrier::ChannelImplCarrier(uint32_t chType,
     , mTaskThread()
     , mChannelStatus(ChannelListener::ChannelStatus::Pending)
     , mRecvDataCache()
-    , mFileTransfer()
+    , mDataTransMutex()
+    , mDataTransThread()
+    , mCarrierFileTrans()
+    , mDataTransType(Invalid)
+    , mDataTransStatus(ChannelDataListener::Status::Unknown)
     , mDataId()
-    , mDataSendThread()
     , mDataRecvOffset(0)
 {
 #if defined(__ANDROID__)
@@ -289,16 +293,32 @@ int ChannelImplCarrier::sendMessage(const std::string& friendCode,
 int ChannelImplCarrier::sendData(const std::string& friendCode,
                                  const std::string& dataId)
 {
-    int ret = makeCarrierFileTrans(friendCode.c_str());
-    CHECK_ERROR(ret)
+    if(dataId.empty() == true
+    || dataId.length() > ELA_MAX_FILE_NAME_LEN) {
+        return ErrCode::ChannelInvalidDataId;
+    }
 
     mDataId = dataId;
 
-    ret = ela_filetransfer_connect(mFileTransfer.get());
+    int ret = makeCarrierFileTrans(friendCode.c_str(), true);
+    CHECK_ERROR(ret);
+
+    std::unique_lock<std::recursive_mutex> lock(*mDataTransMutex);
+    ret = ela_filetransfer_connect(mCarrierFileTrans.get());
     if (ret < 0) {
         Log::E(Log::TAG, "Failed to connect filetransfer!");
         return ErrCode::ChannelFailedCarrier;
     }
+
+    return 0;
+}
+
+int ChannelImplCarrier::cancelSendData(const std::string& friendCode,
+                                       const std::string& dataId)
+{
+    Log::I(Log::TAG, "%s friendCode=%s dataId=%s", __PRETTY_FUNCTION__, friendCode.c_str(), dataId.c_str());
+//    std::unique_lock<std::recursive_mutex> lock(*mDataTransMutex);
+    mCarrierFileTrans.reset();
 
     return 0;
 }
@@ -380,37 +400,55 @@ int ChannelImplCarrier::initCarrier()
     return 0;
 }
 
-int ChannelImplCarrier::makeCarrierFileTrans(const char* friendCode)
+int ChannelImplCarrier::makeCarrierFileTrans(const char* friendCode, bool sendOrRecv)
 {
-    if(mFileTransfer.get() != nullptr) {
+    if(mDataTransMutex.get() == nullptr) {
+        mDataTransMutex = std::make_shared<std::recursive_mutex>();
+    }
+
+    std::unique_lock<std::recursive_mutex> lock(*mDataTransMutex);
+    if(mDataTransThread.get() == nullptr) {
+        mDataTransThread = std::make_unique<ThreadPool>("carrier-channel-datatrans");
+    }
+
+    if(mCarrierFileTrans.get() != nullptr) {
         return ErrCode::ChannelFileTransBusy;
     }
 
     ElaFileTransferCallbacks ftCallbacks = {};
     ftCallbacks.state_changed = DataTransListener::OnStateChanged;
-    ftCallbacks.cancel        = DataTransListener::OnCancel;
+//    ftCallbacks.cancel        = DataTransListener::OnCancel;
     ftCallbacks.pull          = DataSendListener::OnPull;
     ftCallbacks.file          = DataRecvListener::OnFile;
     ftCallbacks.data          = DataRecvListener::OnData;
 
     auto creater = [&]() -> ElaFileTransfer* {
+        Log::I(Log::TAG, "%s ela_filetransfer_new()", __PRETTY_FUNCTION__);
+//        std::unique_lock<std::recursive_mutex> lock(*mDataTransMutex);
         auto ptr = ela_filetransfer_new(mCarrier.get(), friendCode, nullptr,
                                         &ftCallbacks, this);
+        setDataTransStatus(ChannelDataListener::Status::Initialized);
         return ptr;
     };
     auto deleter = [=](ElaFileTransfer* ptr) -> void {
-        if(ptr != nullptr) {
-            ela_filetransfer_close(ptr);
+        if(ptr == nullptr) {
+            return;
         }
+
+        Log::I(Log::TAG, "%s ela_filetransfer_close()", __PRETTY_FUNCTION__);
+//            std::unique_lock<std::recursive_mutex> lock(*mDataTransMutex);
+        ela_filetransfer_close(ptr);
+        setDataTransStatus(ChannelDataListener::Status::Destroyed);
     };
-    mFileTransfer = std::unique_ptr<ElaFileTransfer, std::function<void(ElaFileTransfer*)>>(creater(), deleter);
-    if (mFileTransfer.get() == nullptr) {
+    mCarrierFileTrans = std::unique_ptr<ElaFileTransfer, std::function<void(ElaFileTransfer*)>>(creater(), deleter);
+    if (mCarrierFileTrans.get() == nullptr) {
         int err = ela_get_error();
         char strerr_buf[512] = {0};
         ela_get_strerror(err, strerr_buf, sizeof(strerr_buf));
         Log::E(Log::TAG, "Failed to make file transfer! ret=%s(0x%x)", strerr_buf, err);
         return ErrCode::ChannelFailedCarrier;
     }
+    mDataTransType = (sendOrRecv ? Sender : Receiver);
     mDataRecvOffset = 0;
 
     mFriendId = friendCode;
@@ -433,14 +471,23 @@ void ChannelImplCarrier::runSendData(const std::string fileid, uint64_t offset)
 {
     mDataRecvOffset = offset;
     std::vector<uint8_t> data;
+    int closeReason;
+
+    setDataTransStatus(ChannelDataListener::Status::Transmitting);
     for(;;) {
+        std::unique_lock<std::recursive_mutex> lock(*mDataTransMutex);
+        Log::I(Log::TAG, "%s %d", __PRETTY_FUNCTION__, __LINE__);
+        if(mCarrierFileTrans.get() == nullptr) { // data transfer closed.
+            Log::W(Log::TAG, "Failed to send data. user closed.");
+            break;
+        }
+
         data.clear();
-        int closeReason;
         int ret = mChannelDataListener->onReadData(mFriendId, mChannelType,
                                                mDataId, mDataRecvOffset,
                                                data);
         if(ret > 0) {
-            ret = ela_filetransfer_send(mFileTransfer.get(), fileid.c_str(), data.data(), data.size());
+            ret = ela_filetransfer_send(mCarrierFileTrans.get(), fileid.c_str(), data.data(), data.size());
             if(ret > 0) {
                 mDataRecvOffset += ret;
                 continue;
@@ -453,7 +500,7 @@ void ChannelImplCarrier::runSendData(const std::string fileid, uint64_t offset)
             closeReason = err;
             // close transfer
         } else if(ret == 0) { // finished
-            ret = ela_filetransfer_send(mFileTransfer.get(), fileid.c_str(), nullptr, 0);
+            ret = ela_filetransfer_send(mCarrierFileTrans.get(), fileid.c_str(), nullptr, 0);
             if(ret < 0) {
                 int err = ela_get_error();
                 char strerr_buf[512] = {0};
@@ -466,9 +513,22 @@ void ChannelImplCarrier::runSendData(const std::string fileid, uint64_t offset)
             closeReason = ret;
         }
 
-        mFileTransfer.reset();
-        return;
+        break;
     }
+
+    Log::I(Log::TAG, "%s end.", __PRETTY_FUNCTION__);
+
+    std::unique_lock<std::recursive_mutex> lock(*mDataTransMutex);
+//    mCarrierFileTrans.reset();
+}
+
+void ChannelImplCarrier::setDataTransStatus(ChannelDataListener::Status status)
+{
+    if(mDataTransStatus != status) {
+        mChannelDataListener->onNotify(mFriendId, mChannelType, mDataId, status);
+    }
+
+    mDataTransStatus = status;
 }
 
 void ChannelImplCarrier::OnCarrierConnection(ElaCarrier *carrier,
@@ -580,10 +640,11 @@ void ChannelImplCarrier::DataRecvListener::OnConnect(ElaCarrier *carrier,
     }
     auto channel = reinterpret_cast<ChannelImplCarrier*>(context);
 
-    int ret = channel->makeCarrierFileTrans(from);
+    int ret = channel->makeCarrierFileTrans(from, false);
     CHECK_RETVAL(ret);
 
-    ret = ela_filetransfer_accept_connect(channel->mFileTransfer.get());
+    std::unique_lock<std::recursive_mutex> lock(*channel->mDataTransMutex);
+    ret = ela_filetransfer_accept_connect(channel->mCarrierFileTrans.get());
     if (ret < 0) {
         Log::E(Log::TAG, "Failed to accept filetransfer!");
         return;
@@ -595,14 +656,21 @@ void ChannelImplCarrier::DataTransListener::OnStateChanged(ElaFileTransfer *file
                                                            void *context)
 {
     Log::I(Log::TAG, "%s state=%d", __PRETTY_FUNCTION__, state);
-
     auto channel = reinterpret_cast<ChannelImplCarrier*>(context);
+    std::unique_lock<std::recursive_mutex> lock(*channel->mDataTransMutex);
+
+    ChannelDataListener::Status dataStatus = ChannelDataListener::Status::Unknown;
+
     switch (state) {
+        case FileTransferConnection_connecting:
+            dataStatus = ChannelDataListener::Status::Connecting;
+            break;
         case FileTransferConnection_connected:
-            if(channel->mDataId.empty() == false) { // sender
+            dataStatus = ChannelDataListener::Status::Connected;
+            if(channel->mDataTransType == Sender) { // sender
                 ElaFileTransferInfo fileInfo = {};
 
-                strcpy(fileInfo.filename, "carrier bug workaround");
+                strncpy(fileInfo.filename, "carrier bug workaround", ELA_MAX_FILE_NAME_LEN);
                 fileInfo.size = -1; // not used
                 ela_filetransfer_add(filetransfer, &fileInfo);
 
@@ -613,24 +681,24 @@ void ChannelImplCarrier::DataTransListener::OnStateChanged(ElaFileTransfer *file
                 CHECK_RETVAL(ret);
             }
             break;
-
         case FileTransferConnection_closed:
-        case FileTransferConnection_failed:
-            Platform::DetachCurrentThread();
-            if(channel->mDataSendThread == nullptr) { // SDK19 bug
-                channel->mDataSendThread = std::make_unique<ThreadPool>("carrier-channel-datasend");
-            }
-            channel->mDataSendThread->post([=]() {
-                channel->mFileTransfer.reset();
+            dataStatus = ChannelDataListener::Status::Closed;
+            channel->mDataTransThread->post([=]() {
+                channel->mCarrierFileTrans.reset();
             });
-
             break;
-
+        case FileTransferConnection_failed:
+            dataStatus = ChannelDataListener::Status::Failed;
+            channel->mDataTransThread->post([=]() {
+                channel->mCarrierFileTrans.reset();
+            });
+            break;
         default:
             break;
     }
 
-//    throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
+    channel->setDataTransStatus(dataStatus);
+
 }
 
 void ChannelImplCarrier::DataSendListener::OnPull(ElaFileTransfer *filetransfer,
@@ -640,11 +708,12 @@ void ChannelImplCarrier::DataSendListener::OnPull(ElaFileTransfer *filetransfer,
 {
     Log::I(Log::TAG, "%s fileid=%s size=%llu", __PRETTY_FUNCTION__, fileid, offset);
     auto channel = reinterpret_cast<ChannelImplCarrier*>(context);
+    std::unique_lock<std::recursive_mutex> lock(*channel->mDataTransMutex);
 
-    if(channel->mDataSendThread == nullptr) {
-        channel->mDataSendThread = std::make_unique<ThreadPool>("carrier-channel-datasend");
+    if(channel->mDataTransThread == nullptr) {
+        channel->mDataTransThread = std::make_unique<ThreadPool>("carrier-channel-datasend");
     }
-    channel->mDataSendThread->post(std::bind(&ChannelImplCarrier::runSendData, channel, std::string(fileid), offset));
+    channel->mDataTransThread->post(std::bind(&ChannelImplCarrier::runSendData, channel, std::string(fileid), offset));
 }
 
 void ChannelImplCarrier::DataRecvListener::OnFile(ElaFileTransfer *filetransfer,
@@ -653,8 +722,9 @@ void ChannelImplCarrier::DataRecvListener::OnFile(ElaFileTransfer *filetransfer,
                                                   void *context)
 {
     Log::I(Log::TAG, "%s fileid=%s name=%s size=%llu", __PRETTY_FUNCTION__, fileid, filename, size);
-
     auto channel = reinterpret_cast<ChannelImplCarrier*>(context);
+    std::unique_lock<std::recursive_mutex> lock(*channel->mDataTransMutex);
+
     channel->mDataId = filename;
 
     int ret = ela_filetransfer_pull(filetransfer, fileid, 0);
@@ -668,12 +738,15 @@ bool ChannelImplCarrier::DataRecvListener::OnData(ElaFileTransfer *filetransfer,
                                                   const uint8_t *data, size_t length,
                                                   void *context) {
     Log::I(Log::TAG, "%s fileid=%s data=%p size=%d", __PRETTY_FUNCTION__, fileid, data, length);
+    auto channel = reinterpret_cast<ChannelImplCarrier*>(context);
+    std::unique_lock<std::recursive_mutex> lock(*channel->mDataTransMutex);
+
+    channel->setDataTransStatus(ChannelDataListener::Status::Transmitting);
+
     std::vector<uint8_t> dataRecv;
     if (length > 0) {
         dataRecv = std::vector<uint8_t>(data, data + length);
     }
-
-    auto channel = reinterpret_cast<ChannelImplCarrier*>(context);
 
     int ret = channel->mChannelDataListener->onWriteData(channel->mFriendId, channel->mChannelType,
                                                      channel->mDataId, channel->mDataRecvOffset,
@@ -685,6 +758,11 @@ bool ChannelImplCarrier::DataRecvListener::OnData(ElaFileTransfer *filetransfer,
     channel->mDataRecvOffset += length;
 
     Log::I(Log::TAG, "%s fileid=%s end offset=%llu", __PRETTY_FUNCTION__, fileid, channel->mDataRecvOffset);
+
+    if(length == 0) {
+        channel->mCarrierFileTrans.reset();
+    }
+
     return true;
 }
 
@@ -694,6 +772,9 @@ void ChannelImplCarrier::DataTransListener::OnCancel(ElaFileTransfer *filetransf
                                                      void *context)
 {
     Log::I(Log::TAG, "%s data=%s status=%d", __PRETTY_FUNCTION__, fileid, status);
+    auto channel = reinterpret_cast<ChannelImplCarrier*>(context);
+    std::unique_lock<std::recursive_mutex> lock(*channel->mDataTransMutex);
+
     throw std::runtime_error(std::string(__PRETTY_FUNCTION__) + " Unimplemented!!!");
 }
 

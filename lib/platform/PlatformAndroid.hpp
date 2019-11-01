@@ -24,7 +24,7 @@ public:
 
     /*** static function and variable ***/
     static void SetJavaVM(void* jvm);
-    static void DetachCurrentThread();
+//    static void DetachCurrentThread();
     static bool CallOnload(bool(*func)(void*, void*));
 
     static std::string GetBacktrace();

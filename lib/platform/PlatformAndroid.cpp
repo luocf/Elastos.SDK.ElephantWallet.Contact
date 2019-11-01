@@ -32,10 +32,10 @@ void PlatformAndroid::SetJavaVM(void* jvm)
     mJVM = jvm;
 }
 
-void PlatformAndroid::DetachCurrentThread()
-{
-    reinterpret_cast<JavaVM*>(mJVM)->DetachCurrentThread();
-}
+//void PlatformAndroid::DetachCurrentThread()
+//{
+//    reinterpret_cast<JavaVM*>(mJVM)->DetachCurrentThread();
+//}
 
 bool PlatformAndroid::CallOnload(bool(*func)(void*, void*))
 {

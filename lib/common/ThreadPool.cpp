@@ -146,7 +146,7 @@ void ThreadPool::processTaskQueue(void)
 		}
 	} while (!mQuit);
 
-	Platform::DetachCurrentThread();
+//	Platform::DetachCurrentThread();
 	Log::D(Log::TAG, "%s name:%s exit.", __PRETTY_FUNCTION__, mThreadName.c_str());
 }
 

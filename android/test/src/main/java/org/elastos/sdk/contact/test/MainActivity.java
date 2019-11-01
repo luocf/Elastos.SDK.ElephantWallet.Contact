@@ -188,6 +188,9 @@ public class MainActivity extends Activity {
             case R.id.pull_file:
                 message = pullFile();
                 break;
+            case R.id.cancel_pull_file:
+                message = cancelPullFile();
+                break;
 
             case R.id.show_cached_didprop:
                 message = getCachedDidProp();
@@ -300,11 +303,11 @@ public class MainActivity extends Activity {
 
         mContactDataListener = new Contact.DataListener() {
             @Override
-            public void onResult(String humanCode, ContactChannel channelType,
-                                 String dataId, int errCode)
+            public void onNotify(String humanCode, ContactChannel channelType,
+                                 String dataId, Status status)
             {
-                String msg = "onResult(): dataId=" + dataId + ", errCode=" + errCode + "\n";
-                showError(msg);
+                String msg = "onNotify(): dataId=" + dataId + ", status=" + status + "\n";
+                showEvent(msg);
             }
 
             @Override
@@ -772,6 +775,38 @@ public class MainActivity extends Activity {
             int ret = mContact.pullFileAsync(friendCode, ContactChannel.Carrier, fileData);
             if(ret < 0) {
                 showMessage(ErrorPrefix + "Failed to pull file from " + friendCode);
+            }
+
+            Helper.dismissDialog();
+        });
+        return "Success to start pull file.";
+    }
+
+    private String cancelPullFile() {
+        if (mContact == null) {
+            return ErrorPrefix + "Contact is null.";
+        }
+        Contact.UserInfo info = mContact.getUserInfo();
+        if(info == null) {
+            return ErrorPrefix + "Failed to get user info.";
+        }
+
+        if (info.status != ContactStatus.Online) {
+            return ErrorPrefix + "Contact is not online.";
+        }
+
+        List<String> friendCodeList = new ArrayList<>(mContactRecvFileMap.keySet());
+        Helper.showFriendList(this, friendCodeList, (friendCode) -> {
+            ContactStatus status = mContact.getStatus(friendCode);
+            if(status != ContactStatus.Online) {
+                showMessage(ErrorPrefix + "Friend is not online.");
+                return;
+            }
+
+            Contact.Message.FileData fileData = mContactRecvFileMap.get(friendCode);
+            int ret = mContact.cancelPullFile(friendCode, ContactChannel.Carrier, fileData);
+            if(ret < 0) {
+                showMessage(ErrorPrefix + "Failed to cancel pull file from " + friendCode);
             }
 
             Helper.dismissDialog();

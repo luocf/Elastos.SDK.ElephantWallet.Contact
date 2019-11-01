@@ -51,13 +51,23 @@ public:
 
     class ChannelDataListener {
     public:
+        enum class Status : uint32_t {
+            Unknown      = 1000,
+            Initialized  = 1001,
+            Destroyed    = 1002,
+            Connecting   = 1003,
+            Connected    = 1004,
+            Transmitting = 1005,
+            Closed       = 1006,
+            Failed       = 1007,
+        };
         explicit ChannelDataListener() = default;
         virtual ~ChannelDataListener() = default;
 
-        virtual void onResult(const std::string& friendCode,
+        virtual void onNotify(const std::string& friendCode,
                               uint32_t channelType,
                               const std::string& dataId,
-                              int errCode) = 0;
+                              Status status) = 0;
         virtual int onReadData(const std::string& friendCode,
                                uint32_t channelType,
                                const std::string& dataId,
@@ -111,6 +121,10 @@ public:
 //    }
     virtual int sendData(const std::string& friendCode,
                          const std::string& dataId) {
+        return ErrCode::UnimplementedError;
+    }
+    virtual int cancelSendData(const std::string& friendCode,
+                               const std::string& dataId) {
         return ErrCode::UnimplementedError;
     }
 

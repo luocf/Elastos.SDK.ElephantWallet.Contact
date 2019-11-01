@@ -13,9 +13,19 @@ public:
     /*** static function and variable ***/
 
     /*** class function and variable ***/
-    span(ElementType* d, size_t s)
+    span(ElementType* d, size_t s, bool copy = false)
             : d(d)
-            , s(s) {
+            , s(s)
+            , c(copy) {
+        if(c == true) {
+            this->d = new ElementType[s];
+            memcpy(this->d, d, s);
+        }
+    }
+    virtual ~span() {
+        if(c == true) {
+            delete[] d;
+        }
     }
 
     ElementType* data() const {
@@ -34,6 +44,7 @@ private:
     /*** class function and variable ***/
     ElementType* d;
     size_t s;
+    bool c;
 
 }; // class CrossPLUtils
 }  // namespace std

@@ -67,20 +67,21 @@ std::shared_ptr<JNIEnv> CrossPLUtils::SafeGetEnv()
             if (jret != JNI_OK) {
                 throw std::runtime_error("CrossPL: Failed to get jni env, AttachCurrentThread return error");
             }
+//            __android_log_print(ANDROID_LOG_DEBUG, "crosspl", "CrossPLUtils::SafeGetEnv() AttachCurrentThread tid=%d", threadId);
             needDetach = true;
         }
         return jenv;
-    };
+    }();
 
     auto deleter = [=](JNIEnv* jenv) -> void {
         EnsureRunOnThread(threadId);
         if (needDetach == true) {
             sJVM->DetachCurrentThread();
-            //__android_log_print(ANDROID_LOG_WARN, "crosspl", "============= DetachCurrentThread");
+//            __android_log_print(ANDROID_LOG_DEBUG, "crosspl", "CrossPLUtils::SafeGetEnv() DetachCurrentThread tid=%d", threadId);
         }
     };
 
-    ret = std::shared_ptr<JNIEnv>(creater(), deleter);
+    ret = std::shared_ptr<JNIEnv>(creater, deleter);
 
     return ret;
 }
@@ -175,20 +176,19 @@ std::shared_ptr<std::span<uint8_t>> CrossPLUtils::SafeCastByteArray(JNIEnv* jenv
         return ret; // nullptr
     }
 
-    auto jenvLocal = SafeGetEnv();
-    jbyteArray jdataRef = (jbyteArray)jenv->NewLocalRef(jdata);
     auto creater = [=]() -> std::span<uint8_t>* {
         EnsureRunOnThread(threadId);
-        jbyte* arrayPtr = jenvLocal->GetByteArrayElements(jdataRef, nullptr);
-        jsize arrayLen = jenvLocal->GetArrayLength(jdataRef);
-        auto retPtr = new std::span<uint8_t>(reinterpret_cast<uint8_t*>(arrayPtr), arrayLen);
+        jbyte* arrayPtr = jenv->GetByteArrayElements(jdata, nullptr);
+        jsize arrayLen = jenv->GetArrayLength(jdata);
+
+        auto ptr = new std::span<uint8_t>(reinterpret_cast<uint8_t*>(arrayPtr), arrayLen, true);
+        jenv->ReleaseByteArrayElements(jdata, arrayPtr, JNI_ABORT);
+
 //        __android_log_print(ANDROID_LOG_WARN, "crosspl", "%s %p", __PRETTY_FUNCTION__, retPtr->data());
-        return retPtr;
+        return ptr;
     };
     auto deleter = [=](std::span<uint8_t>* ptr) -> void {
         EnsureRunOnThread(threadId);
-        jenvLocal->ReleaseByteArrayElements(jdataRef, reinterpret_cast<jbyte*>(ptr->data()), JNI_ABORT);
-        jenvLocal->DeleteLocalRef(jdataRef);
 //        __android_log_print(ANDROID_LOG_WARN, "crosspl", "%s %p", __PRETTY_FUNCTION__, ptr->data());
         delete ptr;
     };

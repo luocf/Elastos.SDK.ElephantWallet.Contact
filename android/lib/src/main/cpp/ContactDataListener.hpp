@@ -38,8 +38,8 @@ private:
     /*** class function and variable ***/
     std::shared_ptr<elastos::MessageManager::DataListener> makeDataListener();
 
-    void onResult(const std::string& humanCode, ContactListener::ContactChannel channelType,
-                  const std::string& dataId, int errCode);
+    void onNotify(const std::string& humanCode, ContactListener::ContactChannel channelType,
+                  const std::string& dataId, int status);
     std::shared_ptr<std::span<uint8_t>> onReadData(const std::string& humanCode, ContactListener::ContactChannel channelType,
                                                    const std::string& dataId, uint64_t offset);
     int onWriteData(const std::string& humanCode, ContactListener::ContactChannel channelType,

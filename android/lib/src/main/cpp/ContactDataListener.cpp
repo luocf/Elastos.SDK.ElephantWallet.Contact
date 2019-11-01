@@ -59,18 +59,18 @@ std::shared_ptr<elastos::MessageManager::DataListener> ContactDataListener::make
         explicit DataListener() = default;
         virtual ~DataListener() = default;
 
-        virtual void onResult(std::shared_ptr<elastos::HumanInfo> humanInfo,
+        virtual void onNotify(std::shared_ptr<elastos::HumanInfo> humanInfo,
                               elastos::MessageManager::ChannelType channelType,
                               const std::string& dataId,
-                              int errCode) override {
+                              int notify) override {
             Log::I(Log::TAG, "%s", __PRETTY_FUNCTION__);
             std::string humanCode;
             int ret = humanInfo->getHumanCode(humanCode);
             CHECK_RETVAL(ret);
 
-            sContactDataListenerInstance->onResult(humanCode,
+            sContactDataListenerInstance->onNotify(humanCode,
                                                    static_cast<ContactListener::ContactChannel>(channelType),
-                                                   dataId, errCode);
+                                                   dataId, notify);
         }
 
         virtual int onReadData(std::shared_ptr<elastos::HumanInfo> humanInfo,
@@ -115,15 +115,15 @@ std::shared_ptr<elastos::MessageManager::DataListener> ContactDataListener::make
     return std::make_shared<DataListener>();
 }
 
-void ContactDataListener::onResult(const std::string& humanCode,
+void ContactDataListener::onNotify(const std::string& humanCode,
                                    ContactListener::ContactChannel channelType,
                                    const std::string& dataId,
-                                   int errCode)
+                                   int status)
 {
     int64_t platformHandle = getPlatformHandle();
-    crosspl::proxy::ContactDataListener::onResult(platformHandle,
+    crosspl::proxy::ContactDataListener::onNotify(platformHandle,
                                                   humanCode.c_str(), static_cast<int>(channelType),
-                                                  dataId.c_str(), errCode);
+                                                  dataId.c_str(), status);
 }
 
 std::shared_ptr<std::span<uint8_t>> ContactDataListener::onReadData(const std::string& humanCode,
