@@ -9,6 +9,7 @@
 
 #include <ChannelImplCarrier.hpp>
 #include <ChannelImplElaChain.hpp>
+#include <EnumMask.hpp>
 #include <JsonDefine.hpp>
 #include <Log.hpp>
 #include <Random.hpp>
@@ -526,7 +527,7 @@ int MessageManager::pullData(const std::shared_ptr<HumanInfo> humanInfo,
         CHECK_ERROR(ret);
 
         std::vector<uint8_t> dataIdBytes(dataId.begin(), dataId.end());
-        auto msgInfo = MakeMessage(MessageType::CtrlPullFile, dataIdBytes);
+        auto msgInfo = MakeMessage(MessageType::CtrlPullData, dataIdBytes);
 
         Json jsonData = Json::object();
         jsonData[JsonKey::MessageData] = msgInfo;
@@ -719,65 +720,9 @@ void MessageManager::MessageListener::onReceivedMessage(const std::string& frien
         return;
     }
 
-    //if(msgInfo->mType == MessageType::CtrlSyncDesc
-    //|| msgInfo->mType == MessageType::AckSyncDesc) {
-    if(msgInfo->mType == MessageType::CtrlSyncDesc) {
-        std::string humanDesc {msgInfo->mPlainContent.begin(), msgInfo->mPlainContent.end()};
-        auto newInfo = HumanInfo();
-        ret = newInfo.HumanInfo::deserialize(humanDesc, true);
+    if((msgInfo->mType & MessageType::Control) == msgInfo->mType) { // ctrl msg
+        ret = msgMgr->processCtrlMessage(humanInfo, humanChType, friendCode, msgInfo);
         CHECK_AND_NOTIFY_RETVAL(ret);
-
-        ret = humanInfo->mergeHumanInfo(newInfo, HumanInfo::Status::Online);
-        if(ret == ErrCode::IgnoreMergeOldInfo) {
-            Log::W(Log::TAG, "Ignore to merge friend desc.");
-            return;
-        }
-        CHECK_AND_NOTIFY_RETVAL(ret)
-
-        onHumanInfoChanged(humanInfo, humanChType);
-
-        if(friendMgr->contains(humanInfo)) {
-            std::vector<HumanInfo::CarrierInfo> infoArray;
-            int ret = humanInfo->getAllCarrierInfo(infoArray);
-            if(ret > 0) {
-                for(auto& it: infoArray) {
-                    ret = msgMgr->requestFriend(it.mUsrAddr, humanChType, "", true);
-                    if(ret == ErrCode::ChannelFailedFriendExists) {
-                        continue;
-                    }
-                    CHECK_AND_NOTIFY_RETVAL(ret)
-                }
-            }
-        }
-
-
-        //if(msgInfo->mType == MessageType::CtrlSyncDesc) {
-            //// send latest user desc.
-            //std::string humanDesc;
-            //ret = userInfo->HumanInfo::serialize(humanDesc, true);
-            //if(ret < 0) {
-                //Log::E(Log::TAG, "Failed to serialize user human info.");
-                //return;
-            //}
-            //std::vector<uint8_t> humanDescBytes(humanDesc.begin(), humanDesc.end());
-            //auto msgInfo = msgMgr->MakeMessage(MessageType::AckSyncDesc, humanDescBytes);
-            //ret = msgMgr->sendMessage(humanInfo, humanChType, msgInfo);
-            //if(ret < 0) {
-                //Log::E(Log::TAG, "Failed to send sync desc message.");
-                //return;
-            //}
-        //}
-    } else if(msgInfo->mType == MessageType::CtrlPullFile) {
-        std::string infoStr {msgInfo->mPlainContent.begin(), msgInfo->mPlainContent.end()};
-//        auto jsonInfo = Json::parse(infoStr);
-//        std::shared_ptr<FileInfo> fileInfo;
-//        from_json(jsonInfo, fileInfo);
-
-        auto it = msgMgr->mMessageChannelMap.find(humanChType);
-        auto channel = it->second;
-
-        ret = channel->sendData(friendCode, infoStr);
-        CHECK_RETVAL(ret);
     } else {
         onReceivedMessage(humanInfo, humanChType, msgInfo);
     }
@@ -1027,6 +972,86 @@ std::shared_ptr<MessageManager::MessageInfo> MessageManager::MakeMessage(std::sh
     auto msgInfo = std::make_shared<Impl>(*from, ignoreContent);
 
     return msgInfo;
+}
+
+int MessageManager::processCtrlMessage(std::shared_ptr<HumanInfo> humanInfo,
+                                       ChannelType channelType,
+                                       const std::string& friendCode,
+                                       const std::shared_ptr<MessageInfo> msgInfo)
+{
+    if(msgInfo->mType == MessageType::CtrlSyncDesc) {
+        std::string humanDesc {msgInfo->mPlainContent.begin(), msgInfo->mPlainContent.end()};
+        auto newInfo = HumanInfo();
+        int ret = newInfo.HumanInfo::deserialize(humanDesc, true);
+        CHECK_ERROR(ret);
+
+        ret = humanInfo->mergeHumanInfo(newInfo, HumanInfo::Status::Online);
+        if(ret == ErrCode::IgnoreMergeOldInfo) {
+            Log::W(Log::TAG, "Ignore to merge friend desc.");
+            return 0;
+        }
+        CHECK_ERROR(ret);
+
+        mMessageListener->onHumanInfoChanged(humanInfo, channelType);
+
+        auto friendMgr = SAFE_GET_PTR(mFriendManager);
+        if(friendMgr->contains(humanInfo)) {
+            std::vector<HumanInfo::CarrierInfo> infoArray;
+            int ret = humanInfo->getAllCarrierInfo(infoArray);
+            if(ret > 0) {
+                for(auto& it: infoArray) {
+                    ret = requestFriend(it.mUsrAddr, channelType, "", true);
+                    if(ret == ErrCode::ChannelFailedFriendExists) {
+                        continue;
+                    }
+                    CHECK_ERROR(ret);
+                }
+            }
+        }
+
+
+        //if(msgInfo->mType == MessageType::CtrlSyncDesc) {
+        //// send latest user desc.
+        //std::string humanDesc;
+        //ret = userInfo->HumanInfo::serialize(humanDesc, true);
+        //if(ret < 0) {
+        //Log::E(Log::TAG, "Failed to serialize user human info.");
+        //return;
+        //}
+        //std::vector<uint8_t> humanDescBytes(humanDesc.begin(), humanDesc.end());
+        //auto msgInfo = msgMgr->MakeMessage(MessageType::AckSyncDesc, humanDescBytes);
+        //ret = msgMgr->sendMessage(humanInfo, humanChType, msgInfo);
+        //if(ret < 0) {
+        //Log::E(Log::TAG, "Failed to send sync desc message.");
+        //return;
+        //}
+        //}
+    } else if(msgInfo->mType == MessageType::CtrlPullData) {
+        std::string infoStr {msgInfo->mPlainContent.begin(), msgInfo->mPlainContent.end()};
+//        auto jsonInfo = Json::parse(infoStr);
+//        std::shared_ptr<FileInfo> fileInfo;
+//        from_json(jsonInfo, fileInfo);
+
+        auto it = mMessageChannelMap.find(channelType);
+        auto channel = it->second;
+
+        int ret = channel->sendData(friendCode, infoStr);
+        std::vector<uint8_t> dataRetBytes({(uint8_t)(ret < 0 ? -1 : 0)});
+        auto msgInfo = MakeMessage(MessageType::CtrlPullDataAck, dataRetBytes);
+        Json jsonData = Json::object();
+        jsonData[JsonKey::MessageData] = msgInfo;
+        std::string jsonStr = jsonData.dump();
+        std::vector<uint8_t> data(jsonStr.begin(), jsonStr.end());
+        std::ignore = channel->sendMessage(friendCode, data); // ignore to check ack
+
+        CHECK_ERROR(ret); // check sendData result
+    } else if(msgInfo->mType == MessageType::CtrlPullDataAck) {
+        int ret = (int8_t)msgInfo->mPlainContent[0];
+        auto status = (ret == 0 ? DataListener::Status::PeerInitialized : DataListener::Status::PeerFailed);
+        mDataListener->onNotify(humanInfo, channelType, "", static_cast<int>(status));
+    }
+
+    return 0;
 }
 
 int MessageManager::sendDescMessage(const std::vector<std::shared_ptr<HumanInfo>>& humanList, ChannelType chType)

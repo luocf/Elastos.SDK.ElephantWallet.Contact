@@ -48,7 +48,7 @@ ChannelImplCarrierDataTrans::~ChannelImplCarrierDataTrans()
     stop();
 }
 
-int ChannelImplCarrierDataTrans:: start(Direction direction,
+int ChannelImplCarrierDataTrans::start(Direction direction,
                                         const std::string& friendCode,
                                         const std::string& dataId)
 {
@@ -57,6 +57,10 @@ int ChannelImplCarrierDataTrans:: start(Direction direction,
     }
 
     std::unique_lock<std::recursive_mutex> lock(mDataTransMutex);
+    if(mCarrierFileTrans != nullptr) {
+        return ErrCode::ChannelFileTransBusy;
+    }
+
     ElaFileTransferCallbacks ftCallbacks = {};
     ftCallbacks.state_changed = DataTransListener::OnStateChanged;
 //    ftCallbacks.cancel        = DataTransListener::OnCancel;
@@ -107,11 +111,10 @@ int ChannelImplCarrierDataTrans::stop()
         mCarrierFileTrans = nullptr;
     }
 
-
+    setDataTransStatus(MessageChannelStrategy::ChannelDataListener::Status::Destroyed);
     mDataRecvOffset = 0;
     mFriendId = "";
     mDataTransDirection = Invalid;
-    setDataTransStatus(MessageChannelStrategy::ChannelDataListener::Status::Destroyed);
 
     return 0;
 }
@@ -171,7 +174,7 @@ void ChannelImplCarrierDataTrans::runDataTransfer(const std::string fileid, uint
     Log::I(Log::TAG, "%s end.", __PRETTY_FUNCTION__);
 
     std::unique_lock<std::recursive_mutex> lock(mDataTransMutex);
-//    thiz->stop();
+    stop();
 }
 
 void ChannelImplCarrierDataTrans::setDataTransStatus(MessageChannelStrategy::ChannelDataListener::Status status)
@@ -214,13 +217,12 @@ void ChannelImplCarrierDataTrans::DataTransListener::OnStateChanged(ElaFileTrans
             }
             break;
         case FileTransferConnection_closed:
-            dataStatus = MessageChannelStrategy::ChannelDataListener::Status::Closed;
-            thiz->mDataTransThread.post([=]() {
-                thiz->stop();
-            });
-            break;
         case FileTransferConnection_failed:
-            dataStatus = MessageChannelStrategy::ChannelDataListener::Status::Failed;
+            if(state == FileTransferConnection_closed) {
+                dataStatus = MessageChannelStrategy::ChannelDataListener::Status::Closed;
+            } else {
+                dataStatus = MessageChannelStrategy::ChannelDataListener::Status::Failed;
+            }
             thiz->mDataTransThread.post([=]() {
                 thiz->stop();
             });

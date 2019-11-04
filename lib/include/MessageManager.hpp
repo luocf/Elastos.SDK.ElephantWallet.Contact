@@ -42,8 +42,9 @@ public:
         MsgFile = 0x00000010,
 
         Control = 0x00FF0000,
-        CtrlSyncDesc = 0x00010000,
-        CtrlPullFile = 0x00020000,
+        CtrlSyncDesc    = 0x00010000,
+        CtrlPullData    = 0x00020000,
+        CtrlPullDataAck = 0x00040000,
     };
 
     struct MessageInfo {
@@ -237,6 +238,10 @@ private:
     /*** class function and variable ***/
     template <class T>
     int getChannel(ChannelType chType, std::weak_ptr<T>& channel);
+    int processCtrlMessage(std::shared_ptr<HumanInfo> humanInfo,
+                           ChannelType channelType,
+                           const std::string& friendCode,
+                           const std::shared_ptr<MessageInfo> msgInfo);
     int sendDescMessage(const std::vector<std::shared_ptr<HumanInfo>>& humanList, ChannelType chType);
 
     std::weak_ptr<SecurityManager> mSecurityManager;

@@ -111,7 +111,8 @@ NLOHMANN_JSON_SERIALIZE_ENUM(
         {MessageManager::MessageType::MsgFile, "MsgFile"},
 
         {MessageManager::MessageType::CtrlSyncDesc, "CtrlSyncDesc"},
-        {MessageManager::MessageType::CtrlPullFile, "CtrlPullFile"},
+        {MessageManager::MessageType::CtrlPullData, "CtrlPullData"},
+        {MessageManager::MessageType::CtrlPullDataAck, "CtrlPullDataAck"},
     }
 );
 

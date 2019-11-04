@@ -12,14 +12,17 @@ import java.nio.ByteBuffer;
 @CrossClass
 public abstract class ContactDataListener extends CrossBase {
     public enum Status {
-        Unknown      (1000),
-        Initialized  (1001),
-        Destroyed    (1002),
-        Connecting   (1003),
-        Connected    (1004),
-        Transmitting (1005),
-        Closed       (1006),
-        Failed       (1007);
+        Unknown             (0x0100),
+        Initialized         (0x0101),
+        Destroyed           (0x0102),
+        Connecting          (0x0104),
+        Connected           (0x0108),
+        Transmitting        (0x0110),
+        Closed              (0x0120),
+        Failed              (0x0140),
+
+        PeerInitialized     (0x1001),
+        PeerFailed          (0x1040);
 
         public static Status valueOf(int id) {
             Status[] values = Status.values();
