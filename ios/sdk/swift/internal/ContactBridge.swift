@@ -23,6 +23,16 @@ open class ContactBridge: CrossBase {
     mListener!.bind();
     setListener(listener: mListener);
   }
+  
+  public func setDataListener(listener: Contact.DataListener?) {
+    if(mDataListener != nil) {
+      mDataListener!.unbind();
+    }
+    mDataListener = listener;
+
+    mDataListener!.bind();
+    setDataListener(listener: mDataListener);
+  }
 
   public func setUserInfo(item: UserInfo.Item, value: String) -> Int {
     let ret = setUserInfo(item: item.rawValue, value: value);
@@ -133,6 +143,30 @@ open class ContactBridge: CrossBase {
     return ret;
   }
   
+  public func pullFileAsync(friendCode: String, channelType: ContactChannel,
+                            fileInfo: Contact.Message.FileData) -> Int {
+    guard fileInfo.devId != nil else {
+      return -1;
+    }
+    
+    let ret = pullData(friendCode: friendCode, channelType: channelType.rawValue,
+                       dev: fileInfo.devId!, dataId: fileInfo.toString())
+
+    return ret;
+  }
+
+  public func cancelPullFile(friendCode: String, channelType: ContactChannel,
+                             fileInfo: Contact.Message.FileData) -> Int {
+    guard fileInfo.devId != nil else {
+      return -1;
+    }
+    
+    let ret = cancelPullData(friendCode: friendCode, channelType: channelType.rawValue,
+                             dev: fileInfo.devId!, dataId: fileInfo.toString())
+
+    return ret;
+  }
+
   /* @CrossNativeInterface */
   public func start() -> Int {
     let ret = crosspl_Proxy_ContactBridge_start(nativeHandle)
@@ -187,6 +221,11 @@ open class ContactBridge: CrossBase {
   }
   
   /* @CrossNativeInterface */
+  private func setDataListener(listener: CrossBase?) {
+    crosspl_Proxy_ContactBridge_setDataListener(nativeHandle, listener)
+  }
+  
+  /* @CrossNativeInterface */
   private func setUserInfo(item: Int, value: String) -> Int {
     let ret = crosspl_Proxy_ContactBridge_setUserInfo(nativeHandle, Int32(item), value)
     return Int(ret)
@@ -235,5 +274,20 @@ open class ContactBridge: CrossBase {
     return Int(ret)
   }
   
+  /* @CrossNativeInterface */
+  private func pullData(friendCode: String, channelType: Int, dev: String, dataId: String) -> Int {
+    let ret = crosspl_Proxy_ContactBridge_pullData(nativeHandle, friendCode, Int32(channelType),
+                                                   dev, dataId)
+    return Int(ret)
+  }
+  
+  /* @CrossNativeInterface */
+  private func cancelPullData(friendCode: String, channelType: Int, dev: String, dataId: String) -> Int {
+    let ret = crosspl_Proxy_ContactBridge_cancelPullData(nativeHandle, friendCode, Int32(channelType),
+                                                         dev, dataId)
+    return Int(ret)
+  }
+  
   private var mListener: CrossBase?
+  private var mDataListener: CrossBase?
 }

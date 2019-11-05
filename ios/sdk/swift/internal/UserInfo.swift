@@ -22,6 +22,10 @@ public class UserInfo: HumanInfo {
     mCurrDevId = devId
   }
 
+  public class func GetCurrDevId() -> String? {
+    return mCurrDevId
+  }
+  
   public func getCurrDevCarrierAddr() -> String? {
     if UserInfo.mCurrDevId == nil
     || boundCarrierArray == nil {

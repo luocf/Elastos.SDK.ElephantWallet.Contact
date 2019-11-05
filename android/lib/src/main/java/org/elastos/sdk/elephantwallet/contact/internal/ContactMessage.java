@@ -35,7 +35,7 @@ public class ContactMessage extends CrossBase {
         private int id;
     }
 
-    public static class Data {
+    public static class MsgData {
         @Override
         public String toString() {
             String str = new Gson().toJson(this);
@@ -43,7 +43,7 @@ public class ContactMessage extends CrossBase {
         }
     }
 
-    public static class TextData extends Data {
+    public static class TextData extends MsgData {
         public TextData(String text) {
             this.text = text;
         }
@@ -52,7 +52,7 @@ public class ContactMessage extends CrossBase {
         final public String text;
     }
 
-    public static class FileData extends Data {
+    public static class FileData extends MsgData {
         public FileData(File file) {
             devId = UserInfo.GetCurrDevId();
             name = file.getName();
@@ -71,7 +71,7 @@ public class ContactMessage extends CrossBase {
     }
 
     public final Type type;
-    public Data data;
+    public MsgData data;
     public final String cryptoAlgorithm;
     public long timestamp;
 
@@ -90,13 +90,13 @@ public class ContactMessage extends CrossBase {
     }
 
     public ContactMessage(Type type, byte[] data, String cryptoAlgorithm) {
-        this(type, (Data) null, cryptoAlgorithm);
+        this(type, (MsgData) null, cryptoAlgorithm);
         if(data != null) {
             this.data = new Gson().fromJson(new String(data), GetDataClass(type));
         }
     }
 
-    private ContactMessage(Type type, Data data, String cryptoAlgorithm) {
+    private ContactMessage(Type type, MsgData data, String cryptoAlgorithm) {
         super(ContactMessage.class.getName(), 0);
 
         this.type = type;
@@ -105,7 +105,7 @@ public class ContactMessage extends CrossBase {
         this.timestamp = System.currentTimeMillis();
     }
 
-    static private Class<? extends Data> GetDataClass(Type type) {
+    static private Class<? extends MsgData> GetDataClass(Type type) {
         switch (type) {
         case MsgText:
             return TextData.class;

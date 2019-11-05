@@ -42,6 +42,11 @@ public class JsonKey {
   static let CryptoAlgorithm = "CryptoAlgorithm"
   static let TimeStamp       = "TimeStamp"
   
+  static let Text            = "Text";
+  static let Name            = "Name";
+  static let Size            = "Size";
+  static let Md5             = "Md5";
+  
   static let DidPropCache       = "DidPropCache"
 }
 
