@@ -251,7 +251,7 @@ int ContactBridge::getFriendList(std::stringstream* info)
     }
 
     auto weakFriendMgr = mContactImpl->getFriendManager();
-    auto friendMgr =  SAFE_GET_PTR(weakFriendMgr);                                                                      \
+    auto friendMgr = SAFE_GET_PTR(weakFriendMgr);                                                                      \
 
     std::vector<std::shared_ptr<elastos::FriendInfo>> friendList;
     int ret = friendMgr->getFriendInfoList(friendList);

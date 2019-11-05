@@ -35,12 +35,12 @@ class CrossPLUtilsGenerator {
   private static func GenerateFile(_ from: String, _ to: URL) -> Bool {
     print("Generate: \(to.path)")
 
-    let tmplFile = CrossTmplUtils.GetResourceFile(tmplName: from)
-    let sourceNotChanged = FileManager.default.contentsEqual(atPath: tmplFile.path, andPath: to.path)
-    if sourceNotChanged == true {
-      print("Ignore Generate: \(to)")
-      return true
-    }
+//    let tmplFile = CrossTmplUtils.GetResourceFile(tmplName: from)
+//    let sourceNotChanged = FileManager.default.contentsEqual(atPath: tmplFile.path, andPath: to.path)
+//    if sourceNotChanged == true {
+//      print("Ignore Generate: \(to)")
+//      return true
+//    }
     
     let content = CrossTmplUtils.ReadTmplContent(tmplName: from)
     CrossTmplUtils.WriteContent(file: to, content: content)

@@ -8,6 +8,7 @@
 #include <ContactBridge.hpp>
 #include <SafePtr.hpp>
 
+#include "JsonDefine.hpp"
 #include "Log.hpp"
 #include "Json.hpp"
 #include "ContactMessage.hpp"
@@ -30,6 +31,8 @@ namespace native {
 /***********************************************/
 ContactBridge::ContactBridge()
         : mContactImpl()
+        , mListener(nullptr)
+        , mDataListener(nullptr)
 {
     Log::I(Log::TAG, "%s", __PRETTY_FUNCTION__);
 
@@ -56,6 +59,22 @@ void ContactBridge::setListener(CrossBase* listener)
     auto sectyListener = mListener->getSecurityListener();
     auto msgListener = mListener->getMessageListener();
     mContactImpl->setListener(sectyListener, nullptr, nullptr, msgListener);
+
+    return;
+}
+
+void ContactBridge::setDataListener(CrossBase* listener)
+{
+    Log::I(Log::TAG, "%s", __PRETTY_FUNCTION__);
+
+    mDataListener = dynamic_cast<ContactDataListener*>(listener);
+//    mDataListener->onCallback(0, nullptr);
+
+    auto msgDataListener = mDataListener->getDataListener();
+
+    auto weakMsgMgr = mContactImpl->getMessageManager();
+    auto msgMgr =  SAFE_GET_PTR_NO_RETVAL(weakMsgMgr);                                                                      \
+    msgMgr->setDataListener(msgDataListener);
 
     return;
 }
@@ -232,7 +251,7 @@ int ContactBridge::getFriendList(std::stringstream* info)
     }
 
     auto weakFriendMgr = mContactImpl->getFriendManager();
-    auto friendMgr =  SAFE_GET_PTR(weakFriendMgr);
+    auto friendMgr = SAFE_GET_PTR(weakFriendMgr);                                                                      \
 
     std::vector<std::shared_ptr<elastos::FriendInfo>> friendList;
     int ret = friendMgr->getFriendInfoList(friendList);
@@ -272,6 +291,73 @@ int ContactBridge::sendMessage(const char* friendCode, int chType, CrossBase* me
     CHECK_ERROR(ret);
 
     ret = msgMgr->sendMessage(friendInfo, static_cast<elastos::MessageManager::ChannelType>(chType), msgInfo->mMessageInfo);
+    CHECK_ERROR(ret);
+
+    return ret;
+}
+
+int ContactBridge::pullData(const char* humanCode, int chType,
+                            const char* devId, const char* dataId)
+{
+    if(dataId == nullptr) {
+        return elastos::ErrCode::InvalidArgument;
+    }
+
+    if(mContactImpl->isStarted() == false) {
+        return elastos::ErrCode::NotReadyError;
+    }
+
+    auto weakUserMgr = mContactImpl->getUserManager();
+    auto userMgr =  SAFE_GET_PTR(weakUserMgr);                                                                      \
+    auto weakFriendMgr = mContactImpl->getFriendManager();
+    auto friendMgr =  SAFE_GET_PTR(weakFriendMgr);                                                                      \
+    auto weakMsgMgr = mContactImpl->getMessageManager();
+    auto msgMgr =  SAFE_GET_PTR(weakMsgMgr);                                                                      \
+
+    std::shared_ptr<elastos::HumanInfo> humanInfo;
+    if(userMgr->contains(humanCode) == true) {
+        std::shared_ptr<elastos::UserInfo> userInfo;
+        int ret = userMgr->getUserInfo(userInfo);
+        CHECK_ERROR(ret);
+        humanInfo = userInfo;
+    } else if (friendMgr->contains(humanCode) == true) {
+        std::shared_ptr<elastos::FriendInfo> friendInfo;
+        int ret = friendMgr->tryGetFriendInfo(humanCode, friendInfo);
+        CHECK_ERROR(ret);
+        humanInfo = friendInfo;
+    } else {
+        return elastos::ErrCode::NotFoundError;
+    }
+
+    int ret = msgMgr->pullData(humanInfo, static_cast<elastos::MessageManager::ChannelType>(chType),
+                               devId, dataId);
+    CHECK_ERROR(ret);
+
+    return ret;
+}
+
+int ContactBridge::cancelPullData(const char* humanCode, int chType,
+                                  const char* devId, const char* dataId)
+{
+    if(dataId == nullptr) {
+        return elastos::ErrCode::InvalidArgument;
+    }
+
+    if(mContactImpl->isStarted() == false) {
+        return elastos::ErrCode::NotReadyError;
+    }
+
+    auto weakFriendMgr = mContactImpl->getFriendManager();
+    auto friendMgr =  SAFE_GET_PTR(weakFriendMgr);                                                                      \
+    auto weakMsgMgr = mContactImpl->getMessageManager();
+    auto msgMgr =  SAFE_GET_PTR(weakMsgMgr);                                                                      \
+
+    std::shared_ptr<elastos::FriendInfo> friendInfo;
+    int ret = friendMgr->tryGetFriendInfo(humanCode, friendInfo);
+    CHECK_ERROR(ret);
+
+    ret = msgMgr->cancelPullData(friendInfo, static_cast<elastos::MessageManager::ChannelType>(chType),
+                                 devId, dataId);
     CHECK_ERROR(ret);
 
     return ret;

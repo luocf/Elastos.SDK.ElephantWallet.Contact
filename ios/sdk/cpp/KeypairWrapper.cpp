@@ -88,7 +88,7 @@ int KeypairWrapper::Sign(const char* privateKey, const std::span<uint8_t>* data,
   signedData->clear();
 
   void* keypairSignedData = nullptr;
-  int keypairSignedSize = ::sign(privateKey, data->data(), data->size(), &keypairSignedData);
+  int keypairSignedSize = ::sign(privateKey, data->data(), (int)data->size(), &keypairSignedData);
   if(keypairSignedData == nullptr || keypairSignedSize <= 0) {
     return -1;
   }

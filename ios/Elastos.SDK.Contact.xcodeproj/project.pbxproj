@@ -131,6 +131,14 @@
 		DE76DD5823287EF40041A703 /* CrossPLFactoryGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE76DD5723287EF40041A703 /* CrossPLFactoryGenerator.swift */; };
 		DE76DD6A23289D640041A703 /* CrossPLUtilsGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE76DD6923289D640041A703 /* CrossPLUtilsGenerator.swift */; };
 		DE76DD7A2328A26B0041A703 /* experimental-span.hpp in Headers */ = {isa = PBXBuildFile; fileRef = DE76DD732328A26B0041A703 /* experimental-span.hpp */; settings = {ATTRIBUTES = (Private, ); }; };
+		DE8A33EF23712BB6008F5FA5 /* ContactDataListener.hpp in Headers */ = {isa = PBXBuildFile; fileRef = DE8A33ED23712BB6008F5FA5 /* ContactDataListener.hpp */; };
+		DE8A33F023712BB6008F5FA5 /* ContactDataListener.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DE8A33EE23712BB6008F5FA5 /* ContactDataListener.cpp */; };
+		DE8A33F223712C77008F5FA5 /* ContactDataListener.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE8A33F123712C77008F5FA5 /* ContactDataListener.swift */; };
+		DE8A33F523713374008F5FA5 /* ContactDataListener.proxy.mm in Sources */ = {isa = PBXBuildFile; fileRef = DE8A33F323713374008F5FA5 /* ContactDataListener.proxy.mm */; };
+		DE8A33F623713374008F5FA5 /* ContactDataListener.proxy.h in Headers */ = {isa = PBXBuildFile; fileRef = DE8A33F423713374008F5FA5 /* ContactDataListener.proxy.h */; };
+		DE8A33F823713570008F5FA5 /* EnumMask.hpp in Headers */ = {isa = PBXBuildFile; fileRef = DE8A33F723713570008F5FA5 /* EnumMask.hpp */; };
+		DE8A33FB23713AF6008F5FA5 /* ChannelImplCarrierDataTrans.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DE8A33F923713AF6008F5FA5 /* ChannelImplCarrierDataTrans.cpp */; };
+		DE8A33FC23713AF6008F5FA5 /* ChannelImplCarrierDataTrans.hpp in Headers */ = {isa = PBXBuildFile; fileRef = DE8A33FA23713AF6008F5FA5 /* ChannelImplCarrierDataTrans.hpp */; };
 		DE978FD9233BA1C000F5B5F9 /* FriendInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE978FD8233BA1C000F5B5F9 /* FriendInfo.swift */; };
 		DE978FDB233BB47B00F5B5F9 /* Helper.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE978FDA233BB47B00F5B5F9 /* Helper.swift */; };
 		DECA49C6232CA40D00C98A0D /* CrossPLUtils.mm in Sources */ = {isa = PBXBuildFile; fileRef = DECA49C4232CA40D00C98A0D /* CrossPLUtils.mm */; };
@@ -321,6 +329,14 @@
 		DE76DD5723287EF40041A703 /* CrossPLFactoryGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CrossPLFactoryGenerator.swift; sourceTree = "<group>"; };
 		DE76DD6923289D640041A703 /* CrossPLUtilsGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CrossPLUtilsGenerator.swift; sourceTree = "<group>"; };
 		DE76DD732328A26B0041A703 /* experimental-span.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = "experimental-span.hpp"; sourceTree = "<group>"; };
+		DE8A33ED23712BB6008F5FA5 /* ContactDataListener.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ContactDataListener.hpp; sourceTree = "<group>"; };
+		DE8A33EE23712BB6008F5FA5 /* ContactDataListener.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ContactDataListener.cpp; sourceTree = "<group>"; };
+		DE8A33F123712C77008F5FA5 /* ContactDataListener.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactDataListener.swift; sourceTree = "<group>"; };
+		DE8A33F323713374008F5FA5 /* ContactDataListener.proxy.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ContactDataListener.proxy.mm; sourceTree = "<group>"; };
+		DE8A33F423713374008F5FA5 /* ContactDataListener.proxy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ContactDataListener.proxy.h; sourceTree = "<group>"; };
+		DE8A33F723713570008F5FA5 /* EnumMask.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = EnumMask.hpp; path = ../../../../../lib/common/EnumMask.hpp; sourceTree = "<group>"; };
+		DE8A33F923713AF6008F5FA5 /* ChannelImplCarrierDataTrans.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChannelImplCarrierDataTrans.cpp; path = ../../../../../lib/src/ChannelImplCarrierDataTrans.cpp; sourceTree = "<group>"; };
+		DE8A33FA23713AF6008F5FA5 /* ChannelImplCarrierDataTrans.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = ChannelImplCarrierDataTrans.hpp; path = ../../../../../lib/src/ChannelImplCarrierDataTrans.hpp; sourceTree = "<group>"; };
 		DE978FD8233BA1C000F5B5F9 /* FriendInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendInfo.swift; sourceTree = "<group>"; };
 		DE978FDA233BB47B00F5B5F9 /* Helper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Helper.swift; sourceTree = "<group>"; };
 		DECA49C4232CA40D00C98A0D /* CrossPLUtils.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = CrossPLUtils.mm; sourceTree = "<group>"; };
@@ -405,6 +421,8 @@
 				DE2757722333486B001B635B /* base */,
 				DEDA638D2338AFF10024EA12 /* ContactBridge.cpp */,
 				DEDA638A2338AFF10024EA12 /* ContactBridge.hpp */,
+				DE8A33EE23712BB6008F5FA5 /* ContactDataListener.cpp */,
+				DE8A33ED23712BB6008F5FA5 /* ContactDataListener.hpp */,
 				DEDA638C2338AFF10024EA12 /* ContactDebug.cpp */,
 				DEDA638F2338AFF10024EA12 /* ContactDebug.hpp */,
 				DE27584423345A20001B635B /* ContactFactory.cpp */,
@@ -443,8 +461,8 @@
 		DE27577E2333486B001B635B /* httpclient */ = {
 			isa = PBXGroup;
 			children = (
-				DE2757832333486B001B635B /* HttpClient.hpp */,
 				DE2757842333486B001B635B /* HttpClient.cpp */,
+				DE2757832333486B001B635B /* HttpClient.hpp */,
 			);
 			path = httpclient;
 			sourceTree = "<group>";
@@ -452,8 +470,8 @@
 		DE2757852333486B001B635B /* json */ = {
 			isa = PBXGroup;
 			children = (
-				DE2757872333486B001B635B /* Json.hpp */,
 				DE2757882333486B001B635B /* Json.cpp */,
+				DE2757872333486B001B635B /* Json.hpp */,
 			);
 			path = json;
 			sourceTree = "<group>";
@@ -461,18 +479,18 @@
 		DE2757892333486B001B635B /* include */ = {
 			isa = PBXGroup;
 			children = (
-				DE27578A2333486B001B635B /* UserManager.hpp */,
-				DE27578B2333486B001B635B /* MessageChannelStrategy.hpp */,
-				DE27578C2333486B001B635B /* SecurityManager.hpp */,
-				DE27578D2333486B001B635B /* Elastos.SDK.Contact.hpp */,
-				DE27578E2333486B001B635B /* HumanInfo.hpp */,
 				DE27578F2333486B001B635B /* Config.hpp */,
-				DE2757902333486B001B635B /* MessageManager.hpp */,
-				DE2757912333486B001B635B /* UserInfo.hpp */,
-				DE2757922333486B001B635B /* FriendManager.hpp */,
-				DE2757932333486B001B635B /* IdentifyCode.hpp */,
-				DE2757942333486B001B635B /* FriendInfo.hpp */,
+				DE27578D2333486B001B635B /* Elastos.SDK.Contact.hpp */,
 				DE2757952333486B001B635B /* ErrCode.hpp */,
+				DE2757942333486B001B635B /* FriendInfo.hpp */,
+				DE2757922333486B001B635B /* FriendManager.hpp */,
+				DE27578E2333486B001B635B /* HumanInfo.hpp */,
+				DE2757932333486B001B635B /* IdentifyCode.hpp */,
+				DE27578B2333486B001B635B /* MessageChannelStrategy.hpp */,
+				DE2757902333486B001B635B /* MessageManager.hpp */,
+				DE27578C2333486B001B635B /* SecurityManager.hpp */,
+				DE2757912333486B001B635B /* UserInfo.hpp */,
+				DE27578A2333486B001B635B /* UserManager.hpp */,
 			);
 			path = include;
 			sourceTree = "<group>";
@@ -480,15 +498,15 @@
 		DE2757962333486B001B635B /* platform */ = {
 			isa = PBXGroup;
 			children = (
-				DE2757972333486B001B635B /* PlatformAndroid.hpp */,
-				DE2757982333486B001B635B /* PlatformUnixLike.hpp */,
-				DE2757992333486B001B635B /* PlatformIos.cpp */,
-				DE27579B2333486B001B635B /* PlatformDarwin.hpp */,
 				DE27579C2333486B001B635B /* Platform.hpp */,
-				DE27579D2333486B001B635B /* PlatformDarwin.cpp */,
 				DE27579E2333486B001B635B /* PlatformAndroid.cpp */,
-				DE27579F2333486B001B635B /* PlatformUnixLike.cpp */,
+				DE2757972333486B001B635B /* PlatformAndroid.hpp */,
+				DE27579D2333486B001B635B /* PlatformDarwin.cpp */,
+				DE27579B2333486B001B635B /* PlatformDarwin.hpp */,
+				DE2757992333486B001B635B /* PlatformIos.cpp */,
 				DE2757A02333486B001B635B /* PlatformIos.hpp */,
+				DE27579F2333486B001B635B /* PlatformUnixLike.cpp */,
+				DE2757982333486B001B635B /* PlatformUnixLike.hpp */,
 			);
 			path = platform;
 			sourceTree = "<group>";
@@ -496,19 +514,20 @@
 		DE2757A22333486B001B635B /* common */ = {
 			isa = PBXGroup;
 			children = (
-				DE2757A32333486B001B635B /* ThreadPool.hpp */,
-				DE2757A42333486B001B635B /* MD5.cpp */,
-				DE2757A52333486B001B635B /* DateTime.hpp */,
-				DE2757A62333486B001B635B /* Log.cpp */,
-				DE2757A82333486B001B635B /* Random.hpp */,
-				DE2757A92333486B001B635B /* ghc-filesystem.hpp */,
-				DE2757AA2333486B001B635B /* taskthread.hpp.bak */,
-				DE2757AB2333486B001B635B /* SafePtr.hpp */,
-				DE2757AC2333486B001B635B /* ThreadPool.cpp */,
-				DE2757AD2333486B001B635B /* MD5.hpp */,
-				DE2757AE2333486B001B635B /* Log.hpp */,
-				DE2757AF2333486B001B635B /* CompatibleFileSystem.hpp */,
 				DE2757B02333486B001B635B /* Base64.hpp */,
+				DE2757AF2333486B001B635B /* CompatibleFileSystem.hpp */,
+				DE2757A52333486B001B635B /* DateTime.hpp */,
+				DE8A33F723713570008F5FA5 /* EnumMask.hpp */,
+				DE2757A92333486B001B635B /* ghc-filesystem.hpp */,
+				DE2757A62333486B001B635B /* Log.cpp */,
+				DE2757AE2333486B001B635B /* Log.hpp */,
+				DE2757A42333486B001B635B /* MD5.cpp */,
+				DE2757AD2333486B001B635B /* MD5.hpp */,
+				DE2757A82333486B001B635B /* Random.hpp */,
+				DE2757AB2333486B001B635B /* SafePtr.hpp */,
+				DE2757AA2333486B001B635B /* taskthread.hpp.bak */,
+				DE2757AC2333486B001B635B /* ThreadPool.cpp */,
+				DE2757A32333486B001B635B /* ThreadPool.hpp */,
 			);
 			path = common;
 			sourceTree = "<group>";
@@ -516,29 +535,31 @@
 		DE2757B62333486B001B635B /* src */ = {
 			isa = PBXGroup;
 			children = (
-				DE2757B72333486B001B635B /* FriendInfo.cpp */,
-				DE2757B82333486B001B635B /* ChannelImplCarrier.cpp */,
-				DE2757B92333486B001B635B /* ErrCode.cpp */,
-				DE2757BB2333486B001B635B /* DidChnDataListener.cpp */,
-				DE2757BC2333486B001B635B /* BlkChnClient.hpp.bak */,
-				DE2757BD2333486B001B635B /* DidChnClient.hpp */,
-				DE2757BE2333486B001B635B /* MessageManager.cpp */,
-				DE2757BF2333486B001B635B /* UserInfo.cpp */,
-				DE2757C02333486B001B635B /* JsonDefine.hpp */,
-				DE2757C12333486B001B635B /* FriendManager.cpp */,
-				DE2757C22333486B001B635B /* ChannelImplElaChain.cpp */,
-				DE2757C32333486B001B635B /* IdentifyCode.cpp */,
-				DE2757C42333486B001B635B /* Config.cpp */,
-				DE2757C52333486B001B635B /* ChannelImplElaChain.hpp */,
 				DE2757C62333486B001B635B /* BlkChnClient.cpp.bak */,
-				DE2757C72333486B001B635B /* UserManager.cpp */,
-				DE2757C82333486B001B635B /* MessageChannelStrategy.cpp */,
+				DE2757BC2333486B001B635B /* BlkChnClient.hpp.bak */,
+				DE2757B82333486B001B635B /* ChannelImplCarrier.cpp */,
 				DE2757C92333486B001B635B /* ChannelImplCarrier.hpp */,
-				DE2757CA2333486B001B635B /* SecurityManager.cpp */,
+				DE8A33F923713AF6008F5FA5 /* ChannelImplCarrierDataTrans.cpp */,
+				DE8A33FA23713AF6008F5FA5 /* ChannelImplCarrierDataTrans.hpp */,
+				DE2757C22333486B001B635B /* ChannelImplElaChain.cpp */,
+				DE2757C52333486B001B635B /* ChannelImplElaChain.hpp */,
+				DE2757C42333486B001B635B /* Config.cpp */,
+				DE2757CE2333486B001B635B /* DidChnClient.cpp */,
+				DE2757BD2333486B001B635B /* DidChnClient.hpp */,
+				DE2757BB2333486B001B635B /* DidChnDataListener.cpp */,
 				DE2757CB2333486B001B635B /* DidChnDataListener.hpp */,
 				DE2757CC2333486B001B635B /* Elastos.SDK.Contact.cpp */,
+				DE2757B92333486B001B635B /* ErrCode.cpp */,
+				DE2757B72333486B001B635B /* FriendInfo.cpp */,
+				DE2757C12333486B001B635B /* FriendManager.cpp */,
 				DE2757CD2333486B001B635B /* HumanInfo.cpp */,
-				DE2757CE2333486B001B635B /* DidChnClient.cpp */,
+				DE2757C32333486B001B635B /* IdentifyCode.cpp */,
+				DE2757C02333486B001B635B /* JsonDefine.hpp */,
+				DE2757C82333486B001B635B /* MessageChannelStrategy.cpp */,
+				DE2757BE2333486B001B635B /* MessageManager.cpp */,
+				DE2757CA2333486B001B635B /* SecurityManager.cpp */,
+				DE2757BF2333486B001B635B /* UserInfo.cpp */,
+				DE2757C72333486B001B635B /* UserManager.cpp */,
 			);
 			path = src;
 			sourceTree = "<group>";
@@ -558,6 +579,7 @@
 				DE3C53B5233A0FBD0053196E /* AcquireArgs.swift */,
 				DEDA63662338A38E0024EA12 /* ContactBridge.swift */,
 				DE3C53BB233AFDDB0053196E /* ContactChannel.swift */,
+				DE8A33F123712C77008F5FA5 /* ContactDataListener.swift */,
 				DE5EA247234EF7B10055F587 /* ContactDebug.swift */,
 				DE27582723335014001B635B /* ContactFactory.swift */,
 				DEDA63992338CB540024EA12 /* ContactListener.swift */,
@@ -596,6 +618,8 @@
 			children = (
 				DE3C538F2339ABC10053196E /* ContactBridge.proxy.h */,
 				DE3C53902339ABC10053196E /* ContactBridge.proxy.mm */,
+				DE8A33F423713374008F5FA5 /* ContactDataListener.proxy.h */,
+				DE8A33F323713374008F5FA5 /* ContactDataListener.proxy.mm */,
 				DE5EA249234EF9970055F587 /* ContactDebug.proxy.h */,
 				DE5EA24A234EF9980055F587 /* ContactDebug.proxy.mm */,
 				DE3C53942339ABC20053196E /* ContactFactory.proxy.h */,
@@ -764,6 +788,7 @@
 				DE2757EC2333486B001B635B /* ErrCode.hpp in Headers */,
 				DE3C539A2339ABC20053196E /* ContactFactory.proxy.h in Headers */,
 				DE2757E52333486B001B635B /* HumanInfo.hpp in Headers */,
+				DE8A33F823713570008F5FA5 /* EnumMask.hpp in Headers */,
 				DE2757E32333486B001B635B /* SecurityManager.hpp in Headers */,
 				DE2757EB2333486B001B635B /* FriendInfo.hpp in Headers */,
 				DE2757F12333486B001B635B /* PlatformDarwin.hpp in Headers */,
@@ -782,12 +807,14 @@
 				DE2757E92333486B001B635B /* FriendManager.hpp in Headers */,
 				DE5EA24B234EF9980055F587 /* ContactDebug.proxy.h in Headers */,
 				DE27581E2333486C001B635B /* DidChnDataListener.hpp in Headers */,
+				DE8A33FC23713AF6008F5FA5 /* ChannelImplCarrierDataTrans.hpp in Headers */,
 				DE2758002333486B001B635B /* SafePtr.hpp in Headers */,
 				DE2757EA2333486B001B635B /* IdentifyCode.hpp in Headers */,
 				DE2757DC2333486B001B635B /* HttpClient.hpp in Headers */,
 				DE2757F62333486B001B635B /* PlatformIos.hpp in Headers */,
 				DE2758032333486B001B635B /* Log.hpp in Headers */,
 				DE2757FE2333486B001B635B /* ghc-filesystem.hpp in Headers */,
+				DE8A33EF23712BB6008F5FA5 /* ContactDataListener.hpp in Headers */,
 				DE27583823335177001B635B /* CrossPLUtils.h in Headers */,
 				DE2757ED2333486B001B635B /* PlatformAndroid.hpp in Headers */,
 				DE27583D23345842001B635B /* CrossPLFactory.CrossPL.h in Headers */,
@@ -797,6 +824,7 @@
 				DE2757E42333486B001B635B /* Elastos.SDK.Contact.hpp in Headers */,
 				DE3C53982339ABC20053196E /* ContactListener.proxy.h in Headers */,
 				DE2757FA2333486B001B635B /* DateTime.hpp in Headers */,
+				DE8A33F623713374008F5FA5 /* ContactDataListener.proxy.h in Headers */,
 				DE2758042333486B001B635B /* CompatibleFileSystem.hpp in Headers */,
 				DE2758132333486B001B635B /* JsonDefine.hpp in Headers */,
 			);
@@ -1018,6 +1046,7 @@
 				DE27582823335014001B635B /* ContactFactory.swift in Sources */,
 				DE3C53CA233B1A220053196E /* HumanInfo.swift in Sources */,
 				DE27581B2333486C001B635B /* MessageChannelStrategy.cpp in Sources */,
+				DE8A33F223712C77008F5FA5 /* ContactDataListener.swift in Sources */,
 				DEEFCF1E233B68A3008E240B /* UserInfo.swift in Sources */,
 				DE5EA248234EF7B10055F587 /* ContactDebug.swift in Sources */,
 				DE27581F2333486C001B635B /* Elastos.SDK.Contact.cpp in Sources */,
@@ -1027,6 +1056,7 @@
 				DE27584623345A20001B635B /* ContactFactory.cpp in Sources */,
 				DE27580E2333486B001B635B /* DidChnDataListener.cpp in Sources */,
 				DE3C53992339ABC20053196E /* ContactListener.proxy.mm in Sources */,
+				DE8A33FB23713AF6008F5FA5 /* ChannelImplCarrierDataTrans.cpp in Sources */,
 				DE2757F42333486B001B635B /* PlatformAndroid.cpp in Sources */,
 				DE978FD9233BA1C000F5B5F9 /* FriendInfo.swift in Sources */,
 				DEDA63942338AFF10024EA12 /* ContactDebug.cpp in Sources */,
@@ -1045,6 +1075,7 @@
 				DE3C53BA233AFCB50053196E /* EventArgs.swift in Sources */,
 				DE2758172333486C001B635B /* Config.cpp in Sources */,
 				DE3C53B02339C5900053196E /* Log.swift in Sources */,
+				DE8A33F023712BB6008F5FA5 /* ContactDataListener.cpp in Sources */,
 				DE27583623335177001B635B /* CrossPLUtils.mm in Sources */,
 				DE2758122333486B001B635B /* UserInfo.cpp in Sources */,
 				DE2757F32333486B001B635B /* PlatformDarwin.cpp in Sources */,
@@ -1065,6 +1096,7 @@
 				DE27581A2333486C001B635B /* UserManager.cpp in Sources */,
 				DE27581D2333486C001B635B /* SecurityManager.cpp in Sources */,
 				DE3C53B6233A0FBD0053196E /* AcquireArgs.swift in Sources */,
+				DE8A33F523713374008F5FA5 /* ContactDataListener.proxy.mm in Sources */,
 				DE2757F92333486B001B635B /* MD5.cpp in Sources */,
 				DE2758112333486B001B635B /* MessageManager.cpp in Sources */,
 				DE2758202333486C001B635B /* HumanInfo.cpp in Sources */,
@@ -1180,6 +1212,7 @@
 					"-lssl",
 					"-lcjson",
 					"-lelacarrier",
+					"-lelafiletrans",
 					"-lelasession",
 					"-lflatccrt",
 					"-lpjmedia",
@@ -1234,6 +1267,7 @@
 					"-lssl",
 					"-lcjson",
 					"-lelacarrier",
+					"-lelafiletrans",
 					"-lelasession",
 					"-lflatccrt",
 					"-lpjmedia",

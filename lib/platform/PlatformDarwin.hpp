@@ -13,7 +13,7 @@
 
 #if defined(__APPLE__)
 #include "TargetConditionals.h"
-#if defined(TARGET_OS_MAC)
+#if defined(TARGET_OS_OSX)
 
 #include <string>
 
@@ -46,7 +46,7 @@ private:
 
 } // namespace elastos
 
-#endif // defined(TARGET_OS_MAC)
+#endif // defined(TARGET_OS_OSX)
 #endif // defined(__APPLE__)
 
 #endif /* _ELASTOS_PLATFORM_DARWIN_HPP_ */

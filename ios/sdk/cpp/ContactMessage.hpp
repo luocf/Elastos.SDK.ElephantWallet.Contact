@@ -12,7 +12,7 @@
 #define _ELASTOS_SDK_JNI_CONTACT_MESSAGE_HPP_
 
 #include <string>
-#include <CrossBase.hpp>
+#include "CrossBase.hpp"
 #include <MessageManager.hpp>
 #include "experimental-span.hpp"
 

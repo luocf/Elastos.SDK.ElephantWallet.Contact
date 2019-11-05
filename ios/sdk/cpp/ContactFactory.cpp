@@ -7,7 +7,6 @@
 
 #include <ContactFactory.hpp>
 
-#include <CrossPLUtils.hpp>
 #include <Elastos.SDK.Contact.hpp>
 #include <Platform.hpp>
 #include "Log.hpp"
@@ -32,6 +31,11 @@ void ContactFactory::SetLogLevel(int level)
 
 void ContactFactory::SetDeviceId(const std::string& devId)
 {
+#ifdef __ANDROID__
+    auto jvm = crosspl::CrossPLUtils::GetJavaVM();
+    elastos::Platform::SetJavaVM(jvm);
+#endif // __ANDROID__
+
     elastos::Platform::SetCurrentDevId(devId);
 }
 

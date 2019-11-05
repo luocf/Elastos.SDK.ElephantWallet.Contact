@@ -7,7 +7,7 @@
 
 #if defined(__APPLE__)
 #include "TargetConditionals.h"
-#if defined(TARGET_OS_MAC)
+#if defined(TARGET_OS_OSX)
 
 #include "PlatformDarwin.hpp"
 
@@ -54,7 +54,7 @@ int PlatformDarwin::GetCurrentDevId(std::string& devId)
 
     uuid_t uuid = {};
     struct timespec ts = { .tv_sec = 5, .tv_nsec = 0 };
-    ret = gethostuuid(uuid, &ts);
+//    ret = gethostuuid(uuid, &ts);
     if(ret < 0) {
         return ErrCode::DevUUIDError;
     }
@@ -98,5 +98,5 @@ int PlatformDarwin::GetCurrentDevName(std::string& devName)
 
 } // namespace elastos
 
-#endif // defined(TARGET_OS_MAC)
+#endif // defined(TARGET_OS_OSX)
 #endif // defined(__APPLE__)

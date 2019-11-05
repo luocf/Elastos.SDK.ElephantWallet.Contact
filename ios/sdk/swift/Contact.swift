@@ -17,6 +17,9 @@ open class Contact: ContactBridge {
 
   open class Listener: ContactListener {
   } // class Listener
+  
+  open class DataListener: ContactDataListener {
+  } // class Listener
 
   public class UserInfo: ContactSDK.UserInfo {
   } // class UserInfo

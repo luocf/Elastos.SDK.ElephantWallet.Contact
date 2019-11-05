@@ -15,7 +15,7 @@
 #include "TargetConditionals.h"
 #if TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR
 #include "PlatformIos.hpp"
-#elif TARGET_OS_MAC
+#elif TARGET_OS_OSX
 #include "PlatformDarwin.hpp"
 #else
 #error "Unsupport Apple Platform"
@@ -34,7 +34,7 @@ namespace elastos {
 #if defined(__APPLE__)
 #if TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR
 class Platform : public PlatformIos {
-#elif TARGET_OS_MAC
+#elif TARGET_OS_OSX
 class Platform : public PlatformDarwin {
 #endif
 #elif defined(__ANDROID__)

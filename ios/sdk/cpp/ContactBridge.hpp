@@ -13,8 +13,9 @@
 
 #include <sstream>
 
-#include <ContactListener.hpp>
 #include "CrossBase.hpp"
+#include "ContactListener.hpp"
+#include "ContactDataListener.hpp"
 #include <Elastos.SDK.Contact.hpp>
 
 namespace crosspl {
@@ -31,6 +32,7 @@ public:
     virtual ~ContactBridge();
 
     void setListener(CrossBase* listener);
+    void setDataListener(CrossBase* listener);
     int start();
     int stop();
 
@@ -46,6 +48,8 @@ public:
     int getFriendList(std::stringstream* info);
 
     int sendMessage(const char* friendCode, int chType, CrossBase* message);
+    int pullData(const char* humanCode, int chType, const char* devId, const char* dataId);
+    int cancelPullData(const char* humanCode, int chType, const char* devId, const char* dataId);
 
     int syncInfoDownloadFromDidChain();
     int syncInfoUploadToDidChain();
@@ -60,6 +64,7 @@ private:
     /*** class function and variable ***/
     std::shared_ptr<elastos::Contact> mContactImpl;
     ContactListener* mListener;
+    ContactDataListener* mDataListener;
 
 }; // class Contact
 

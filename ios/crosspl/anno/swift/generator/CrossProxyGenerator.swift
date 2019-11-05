@@ -28,11 +28,11 @@ open class CrossProxyGenerator {
   }
 
   private static func GenerateHeader(proxyFile: URL, classInfo: CrossClassInfo) -> Bool {
-    let sourceChanged = checkSourceChanged(proxyFile: proxyFile, classInfo: classInfo)
-    if sourceChanged == false {
-      print("Ignore Generate: \(proxyFile.path)")
-      return true
-    }
+//    let sourceChanged = checkSourceChanged(proxyFile: proxyFile, classInfo: classInfo)
+//    if sourceChanged == false {
+//      print("Ignore Generate: \(proxyFile.path)")
+//      return true
+//    }
     
     print("Generate: \(proxyFile.path)")
     let tmpl = CrossTmplUtils.ReadTmplContent(tmplName: CrossClassProxyHeaderTmpl)
@@ -43,11 +43,11 @@ open class CrossProxyGenerator {
   }
 
   private static func GenerateSource(proxyFile: URL, classInfo: CrossClassInfo) -> Bool {
-    let sourceChanged = checkSourceChanged(proxyFile: proxyFile, classInfo: classInfo)
-    if sourceChanged == false {
-      print("Ignore Generate: \(proxyFile.path)")
-      return true
-    }
+//    let sourceChanged = checkSourceChanged(proxyFile: proxyFile, classInfo: classInfo)
+//    if sourceChanged == false {
+//      print("Ignore Generate: \(proxyFile.path)")
+//      return true
+//    }
     
     print("Generate: \(proxyFile.path)")
     let tmpl = CrossTmplUtils.ReadTmplContent(tmplName: CrossClassProxySourceTmpl)
