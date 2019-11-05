@@ -99,7 +99,7 @@ protected:
     std::unique_ptr<ThreadPool> mTaskThread;
     ChannelListener::ChannelStatus mChannelStatus;
     std::map<std::string, std::map<int, std::vector<uint8_t>>> mRecvDataCache;
-    std::unique_ptr<ChannelImplCarrierDataTrans> mCarrierFileTrans;
+    std::unique_ptr<ChannelImplCarrierDataTrans> mCarrierDataTrans;
 }; // class ChannelImplCarrier
 
 } // namespace elastos

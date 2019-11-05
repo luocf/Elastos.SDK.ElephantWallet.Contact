@@ -691,9 +691,14 @@ void MessageManager::MessageListener::onReceivedMessage(const std::string& frien
 
     std::string jsonStr(msgContent.begin(), msgContent.end());
     Log::W(Log::TAG, "<<<<<<<<<<<<< %s", jsonStr.c_str());
-    auto jsonData = Json::parse(jsonStr);
-    //auto jsonData = Json::from_cbor(msgContent);
-    std::shared_ptr<MessageInfo> cryptoMsgInfo = jsonData[JsonKey::MessageData];
+    std::shared_ptr<MessageInfo> cryptoMsgInfo;
+    if(jsonStr.find(JsonKey::MessageData) != std::string::npos) { // it's contact sdk
+        auto jsonData = Json::parse(jsonStr);
+        //auto jsonData = Json::from_cbor(msgContent);
+        cryptoMsgInfo = jsonData[JsonKey::MessageData];
+    } else { // from other carrier app
+        cryptoMsgInfo = MessageManager::MakeTextMessage(jsonStr);
+    }
 
     auto msgInfo = MessageManager::MakeMessage(cryptoMsgInfo);
     if(cryptoMsgInfo->mCryptoAlgorithm.empty() == true

@@ -65,7 +65,7 @@ ChannelImplCarrier::ChannelImplCarrier(uint32_t chType,
     , mTaskThread()
     , mChannelStatus(ChannelListener::ChannelStatus::Pending)
     , mRecvDataCache()
-    , mCarrierFileTrans()
+    , mCarrierDataTrans()
 {
 #if defined(__ANDROID__)
     Platform::CallOnload(ela_session_jni_onload);
@@ -287,8 +287,8 @@ int ChannelImplCarrier::sendData(const std::string& friendCode,
                                  const std::string& dataId)
 {
     Log::I(Log::TAG, "%s friendCode=%s dataId=%s", __PRETTY_FUNCTION__, friendCode.c_str(), dataId.c_str());
-    mCarrierFileTrans = std::make_unique<ChannelImplCarrierDataTrans>(mChannelType, mCarrier, mChannelDataListener);
-    int ret = mCarrierFileTrans->start(ChannelImplCarrierDataTrans::Direction::Sender, friendCode, dataId);
+    mCarrierDataTrans = std::make_unique<ChannelImplCarrierDataTrans>(mChannelType, mCarrier, mChannelDataListener);
+    int ret = mCarrierDataTrans->start(ChannelImplCarrierDataTrans::Direction::Sender, friendCode, dataId);
     CHECK_ERROR(ret);
 
     return 0;
@@ -298,7 +298,7 @@ int ChannelImplCarrier::cancelSendData(const std::string& friendCode,
                                        const std::string& dataId)
 {
     Log::I(Log::TAG, "%s friendCode=%s dataId=%s", __PRETTY_FUNCTION__, friendCode.c_str(), dataId.c_str());
-    mCarrierFileTrans.reset();
+    mCarrierDataTrans.reset();
     return 0;
 }
 
@@ -405,6 +405,10 @@ void ChannelImplCarrier::OnCarrierConnection(ElaCarrier *carrier,
     if(thiz->mChannelListener.get() != nullptr) {
         thiz->mChannelListener->onStatusChanged(carrierUsrId, thiz->mChannelType, thiz->mChannelStatus);
     }
+
+    if(status == ElaConnectionStatus_Disconnected) {
+        thiz->cancelSendData("", "");
+    }
 }
 
 void ChannelImplCarrier::OnCarrierFriendRequest(ElaCarrier *carrier, const char *friendid,
@@ -430,6 +434,10 @@ void ChannelImplCarrier::OnCarrierFriendConnection(ElaCarrier *carrier,const cha
                         ? ChannelListener::ChannelStatus::Online
                         : ChannelListener::ChannelStatus::Offline);
         thiz->mChannelListener->onFriendStatusChanged(friendid, thiz->mChannelType, chStatus);
+    }
+
+    if(status == ElaConnectionStatus_Disconnected) {
+        thiz->cancelSendData(friendid, "");
     }
 }
 
@@ -498,8 +506,8 @@ void ChannelImplCarrier::OnCarrierFileTransConnect(ElaCarrier *carrier,
     }
     auto thiz = reinterpret_cast<ChannelImplCarrier*>(context);
 
-    thiz->mCarrierFileTrans = std::make_unique<ChannelImplCarrierDataTrans>(thiz->mChannelType, thiz->mCarrier, thiz->mChannelDataListener);
-    int ret = thiz->mCarrierFileTrans->start(ChannelImplCarrierDataTrans::Direction::Receiver, from);
+    thiz->mCarrierDataTrans = std::make_unique<ChannelImplCarrierDataTrans>(thiz->mChannelType, thiz->mCarrier, thiz->mChannelDataListener);
+    int ret = thiz->mCarrierDataTrans->start(ChannelImplCarrierDataTrans::Direction::Receiver, from);
     CHECK_RETVAL(ret);
 }
 
