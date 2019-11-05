@@ -27,7 +27,7 @@ class CrossProxyGenerator {
         }
 
         fun GetHeaderFile(crossProxyDir: File, classInfo: CrossClassInfo): File {
-            return File(crossProxyDir, classInfo.cppInfo.className + ".proxy.hpp")
+            return File(crossProxyDir, classInfo.cppInfo.className + ".proxy.h")
         }
 
         private fun GenerateHeader(proxyFile: File, classInfo: CrossClassInfo): Boolean {
@@ -51,7 +51,7 @@ class CrossProxyGenerator {
         }
 
 
-        private const val CrossClassProxyHeaderTmpl = "/CrossPLClass.proxy.hpp.tmpl"
+        private const val CrossClassProxyHeaderTmpl = "/CrossPLClass.proxy.h.tmpl"
         private const val CrossClassProxySourceTmpl = "/CrossPLClass.proxy.cpp.tmpl"
     }
 }

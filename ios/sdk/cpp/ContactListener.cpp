@@ -224,7 +224,7 @@ std::shared_ptr<elastos::MessageManager::MessageListener> ContactListener::makeM
         }
 
         virtual void onHumanInfoChanged(std::shared_ptr<elastos::HumanInfo> humanInfo,
-                                           elastos::MessageManager::ChannelType channelType) override {
+                                        elastos::MessageManager::ChannelType channelType) override {
             Log::I(Log::TAG, "%s", __PRETTY_FUNCTION__);
             std::string humanCode;
             int ret = humanInfo->getHumanCode(humanCode);
@@ -273,11 +273,11 @@ void ContactListener::onReceivedMessage(const std::string& humanCode, ContactCha
 
     int64_t platformHandle = getPlatformHandle();
     crosspl_Proxy_ContactListener_onReceivedMessage(platformHandle,
-                                                       humanCode.c_str(), static_cast<int>(channelType),
-                                                       static_cast<int>(msgInfo->mType),
-                                                       &data,
-                                                       msgInfo->mCryptoAlgorithm.c_str(),
-                                                       msgInfo->mTimeStamp);
+                                                    humanCode.c_str(), static_cast<int>(channelType),
+                                                    static_cast<int>(msgInfo->mType),
+                                                    &data,
+                                                    msgInfo->mCryptoAlgorithm.c_str(),
+                                                    msgInfo->mTimeStamp);
     return;
 }
 

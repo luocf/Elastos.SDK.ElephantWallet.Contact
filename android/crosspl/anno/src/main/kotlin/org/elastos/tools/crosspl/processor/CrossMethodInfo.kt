@@ -51,10 +51,10 @@ class CrossMethodInfo {
                 " static=${isStatic}, native=${isNative}}"
     }
 
-    fun makeProxyDeclare(): String {
+    fun makeProxyDeclare(cppClassName: String): String {
         return when {
-            isNative -> makeNativeFunctionDeclare(null)
-            else     -> makePlatformFunctionDeclare(null)
+            isNative -> makeNativeFunctionDeclare(cppClassName)
+            else     -> makePlatformFunctionDeclare(cppClassName)
         }
     }
 
@@ -81,10 +81,9 @@ class CrossMethodInfo {
     var isStatic = false
     var isNative = false
 
-    private fun makeNativeFunctionDeclare(cppClassName: String?): String {
-        var className = (if(cppClassName != null) "${cppClassName}::" else "")
+    private fun makeNativeFunctionDeclare(cppClassName: String): String {
         val returnType = returnType.toJniString(false)
-        var content = "$returnType $className$methodName($TmplKeyArguments)"
+        var content = "$returnType crosspl_Proxy_${cppClassName}_$methodName($TmplKeyArguments)"
 
         var arguments = "JNIEnv* jenv"
         arguments += when {
@@ -100,8 +99,7 @@ class CrossMethodInfo {
         return content
     }
 
-    private fun makePlatformFunctionDeclare(cppClassName: String?): String {
-        var className = (if(cppClassName != null) "$cppClassName::" else "")
+    private fun makePlatformFunctionDeclare(cppClassName: String): String {
         var retTypeStr = returnType.toCppString(false).removeSuffix("*")
         retTypeStr =
             when {
@@ -109,7 +107,7 @@ class CrossMethodInfo {
                 ! returnType.isPrimitiveType()            ->  "std::shared_ptr<$retTypeStr>"
                 else -> retTypeStr
             }
-        var content = "$retTypeStr $className$methodName($TmplKeyArguments)"
+        var content = "$retTypeStr crosspl_Proxy_${cppClassName}_$methodName($TmplKeyArguments)"
 
         var arguments = "int64_t platformHandle"
         for(idx in paramsType.indices) {

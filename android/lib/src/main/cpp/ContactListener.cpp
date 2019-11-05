@@ -7,7 +7,8 @@
 
 #include <ContactListener.hpp>
 
-#include <ContactListener.proxy.hpp>
+#define ENABLE_PLATFORM_FUNCTION
+#include "ContactListener.proxy.h"
 #include "Log.hpp"
 
 namespace crosspl {
@@ -47,8 +48,8 @@ ContactListener::~ContactListener()
 void ContactListener::onError(int errCode, const std::string& errStr, const std::string& ext)
 {
     int64_t platformHandle = getPlatformHandle();
-    crosspl::proxy::ContactListener::onError(platformHandle,
-                                             errCode, errStr.c_str(), ext.c_str());
+    crosspl_Proxy_ContactListener_onError(platformHandle,
+                                          errCode, errStr.c_str(), ext.c_str());
     return;
 }
 
@@ -248,8 +249,8 @@ std::shared_ptr<std::span<uint8_t>> ContactListener::onAcquire(AcquireType type,
                                                               const std::span<uint8_t>* data)
 {
     int64_t platformHandle = getPlatformHandle();
-    auto ret = crosspl::proxy::ContactListener::onAcquire(platformHandle,
-                                                          static_cast<int>(type), pubKey, data);
+    auto ret = crosspl_Proxy_ContactListener_onAcquire(platformHandle,
+                                                       static_cast<int>(type), pubKey, data);
 
     return ret;
 }
@@ -260,8 +261,8 @@ void ContactListener::onEvent(EventType type,
                               const std::span<uint8_t>* data)
 {
     int64_t platformHandle = getPlatformHandle();
-    crosspl::proxy::ContactListener::onEvent(platformHandle,
-                                             static_cast<int>(type), humanCode.c_str(), static_cast<int>(channelType), data);
+    crosspl_Proxy_ContactListener_onEvent(platformHandle,
+                                          static_cast<int>(type), humanCode.c_str(), static_cast<int>(channelType), data);
     return;
 }
 
@@ -271,12 +272,12 @@ void ContactListener::onReceivedMessage(const std::string& humanCode, ContactCha
     std::span<uint8_t> data(msgInfo->mPlainContent.data(), msgInfo->mPlainContent.size());
 
     int64_t platformHandle = getPlatformHandle();
-    crosspl::proxy::ContactListener::onReceivedMessage(platformHandle,
-                                                       humanCode.c_str(), static_cast<int>(channelType),
-                                                       static_cast<int>(msgInfo->mType),
-                                                       &data,
-                                                       msgInfo->mCryptoAlgorithm.c_str(),
-                                                       msgInfo->mTimeStamp);
+    crosspl_Proxy_ContactListener_onReceivedMessage(platformHandle,
+                                                    humanCode.c_str(), static_cast<int>(channelType),
+                                                    static_cast<int>(msgInfo->mType),
+                                                    &data,
+                                                    msgInfo->mCryptoAlgorithm.c_str(),
+                                                    msgInfo->mTimeStamp);
     return;
 }
 

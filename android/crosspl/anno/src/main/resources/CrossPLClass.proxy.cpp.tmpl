@@ -1,18 +1,17 @@
-#include "%ClassName%.proxy.hpp"
+#include "%ClassName%.proxy.h"
 
 #include <CrossPLUtils.hpp>
 #include <%ClassName%.hpp>
 
+using crosspl::CrossPLUtils;
+
+%PlatformFunction%
+
+%NativeFunction%
+
+#ifdef __ANDROID__
 namespace crosspl {
 namespace proxy {
-/***********************************************/
-/***** static variables initialize *************/
-/***********************************************/
-
-
-/***********************************************/
-/***** static function implement ***************/
-/***********************************************/
 int %ClassName%::RegisterNativeMethods(JNIEnv* jenv)
 {
   const JNINativeMethod methodArray[] = {
@@ -47,23 +46,6 @@ int %ClassName%::RegisterNativeMethods(JNIEnv* jenv)
 
   return 0;
 }
-
-%PlatformFunction%
-
-%NativeFunction%
-
-/***********************************************/
-/***** class public function implement  ********/
-/***********************************************/
-
-/***********************************************/
-/***** class protected function implement  *****/
-/***********************************************/
-
-
-/***********************************************/
-/***** class private function implement  *******/
-/***********************************************/
-
 } // namespace proxy
 } // namespace crosspl
+#endif // __ANDROID__

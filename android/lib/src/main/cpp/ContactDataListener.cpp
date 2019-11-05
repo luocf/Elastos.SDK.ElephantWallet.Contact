@@ -7,7 +7,8 @@
 
 #include <ContactDataListener.hpp>
 
-#include <ContactDataListener.proxy.hpp>
+#define ENABLE_PLATFORM_FUNCTION
+#include <ContactDataListener.proxy.h>
 #include "Log.hpp"
 
 namespace crosspl {
@@ -124,9 +125,9 @@ void ContactDataListener::onNotify(const std::string& humanCode,
                                    int status)
 {
     int64_t platformHandle = getPlatformHandle();
-    crosspl::proxy::ContactDataListener::onNotify(platformHandle,
-                                                  humanCode.c_str(), static_cast<int>(channelType),
-                                                  dataId.c_str(), status);
+    crosspl_Proxy_ContactDataListener_onNotify(platformHandle,
+                                               humanCode.c_str(), static_cast<int>(channelType),
+                                               dataId.c_str(), status);
 }
 
 std::shared_ptr<std::span<uint8_t>> ContactDataListener::onReadData(const std::string& humanCode,
@@ -135,9 +136,9 @@ std::shared_ptr<std::span<uint8_t>> ContactDataListener::onReadData(const std::s
                                                                     uint64_t offset)
 {
     int64_t platformHandle = getPlatformHandle();
-    auto ret = crosspl::proxy::ContactDataListener::onReadData(platformHandle,
-                                                           humanCode.c_str(), static_cast<int>(channelType),
-                                                           dataId.c_str(), offset);
+    auto ret = crosspl_Proxy_ContactDataListener_onReadData(platformHandle,
+                                                            humanCode.c_str(), static_cast<int>(channelType),
+                                                            dataId.c_str(), offset);
 
     return ret;
 }
@@ -149,9 +150,9 @@ int ContactDataListener::onWriteData(const std::string& humanCode,
                                      const std::span<uint8_t>* data)
 {
     int64_t platformHandle = getPlatformHandle();
-    auto ret = crosspl::proxy::ContactDataListener::onWriteData(platformHandle,
-                                                           humanCode.c_str(), static_cast<int>(channelType),
-                                                           dataId.c_str(), offset, data);
+    auto ret = crosspl_Proxy_ContactDataListener_onWriteData(platformHandle,
+                                                             humanCode.c_str(), static_cast<int>(channelType),
+                                                             dataId.c_str(), offset, data);
 
     return ret;
 }

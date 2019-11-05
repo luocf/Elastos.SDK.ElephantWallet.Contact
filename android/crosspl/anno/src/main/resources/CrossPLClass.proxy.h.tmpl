@@ -1,0 +1,41 @@
+#ifndef _CROSSPL_PROXY_%ClassName%_HPP_
+#define _CROSSPL_PROXY_%ClassName%_HPP_
+
+
+#include <jni.h>
+#include <functional>
+#include <string>
+#include <sstream>
+#include <vector>
+
+#include <experimental-span.hpp>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+%NativeFunction%
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
+
+#ifdef ENABLE_PLATFORM_FUNCTION
+
+%PlatformFunction%
+
+#endif // ENABLE_PLATFORM_FUNCTION
+
+#ifdef __ANDROID__
+namespace crosspl {
+namespace proxy {
+class %ClassName% {
+public:
+  static int RegisterNativeMethods(JNIEnv* jenv);
+}; // class %ClassName%
+} // namespace proxy
+} // namespace crosspl
+#endif // __ANDROID__
+
+
+#endif /* _CROSSPL_PROXY_%ClassName%_HPP_ */

@@ -135,10 +135,10 @@ class CrossClassInfo {
         var nativeFuncList = ""
         var platformFuncList = ""
         methodInfo.forEach {
-            val functionDeclare = it.makeProxyDeclare()
+            val functionDeclare = it.makeProxyDeclare(cppInfo.className)
             when {
-                it.isNative -> nativeFuncList += "${CrossTmplUtils.TabSpace}static $functionDeclare;\n"
-                else        -> platformFuncList += "${CrossTmplUtils.TabSpace}static $functionDeclare;\n"
+                it.isNative -> nativeFuncList += "$functionDeclare;\n"
+                else        -> platformFuncList += "$functionDeclare;\n"
             }
         }
 
@@ -190,7 +190,7 @@ class CrossClassInfo {
         funcType += ")"
         funcType += methodInfo.returnType.toJniSigChar()
 
-        val methodContent = "{\"${methodInfo.methodName}\", \"$funcType\", (void*)${methodInfo.methodName}}"
+        val methodContent = "{\"${methodInfo.methodName}\", \"$funcType\", (void*)crosspl_Proxy_${cppInfo.className}_${methodInfo.methodName}}"
 
         return methodContent
     }
