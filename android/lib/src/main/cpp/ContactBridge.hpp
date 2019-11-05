@@ -18,6 +18,9 @@
 #include <CrossBase.hpp>
 #include <Elastos.SDK.Contact.hpp>
 
+namespace crosspl {
+namespace native {
+
 class ContactBridge {
 public:
     /*** type define ***/
@@ -64,5 +67,8 @@ private:
     ContactDataListener* mDataListener;
 
 }; // class Contact
+
+} //namespace native
+} //namespace crosspl
 
 #endif /* _ELASTOS_SDK_JNI_CONTACT_BRIDGE_HPP_ */

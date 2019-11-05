@@ -14,7 +14,11 @@
 #include <string>
 #include <CrossBase.hpp>
 #include <MessageManager.hpp>
+#include "experimental-span.hpp"
 
+namespace crosspl {
+namespace native {
+    
 class ContactMessage : public CrossBase {
 public:
     /*** type define ***/
@@ -39,6 +43,9 @@ private:
 
     /*** class function and variable ***/
 }; // class Contact
+
+} //namespace native
+} //namespace crosspl
 
 #endif /* _ELASTOS_SDK_JNI_CONTACT_MESSAGE_HPP_ */
 

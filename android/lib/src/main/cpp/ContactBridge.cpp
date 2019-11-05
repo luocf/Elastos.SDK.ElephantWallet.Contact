@@ -13,6 +13,10 @@
 #include "Json.hpp"
 #include "ContactMessage.hpp"
 
+
+namespace crosspl {
+namespace native {
+
 /***********************************************/
 /***** static variables initialize *************/
 /***********************************************/
@@ -406,3 +410,7 @@ int ContactBridge::setWalletAddress(const char* name, const char* value)
 /***********************************************/
 /***** class private function implement  *******/
 /***********************************************/
+
+
+} //namespace native
+} //namespace crosspl

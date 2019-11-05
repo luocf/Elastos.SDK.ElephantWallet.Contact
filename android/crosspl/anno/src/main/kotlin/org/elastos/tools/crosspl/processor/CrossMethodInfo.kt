@@ -139,14 +139,14 @@ class CrossMethodInfo {
                         "unbindPlatformHandle" -> {
                             var ret = ""
                             ret += "${CrossTmplUtils.TabSpace}auto var$idx = 0;\n"
-                            ret += "${CrossTmplUtils.TabSpace}auto crossBase = CrossPLUtils::SafeCastCrossObject<::CrossBase>(jenv, jvar$idx);\n"
-                            ret += "${CrossTmplUtils.TabSpace}jobject jCrossBase = CrossPLUtils::SafeCastCrossObject<::CrossBase>(jenv, crossBase);\n"
+                            ret += "${CrossTmplUtils.TabSpace}auto crossBase = CrossPLUtils::SafeCastCrossObject<crosspl::native::CrossBase>(jenv, jvar$idx);\n"
+                            ret += "${CrossTmplUtils.TabSpace}jobject jCrossBase = CrossPLUtils::SafeCastCrossObject<crosspl::native::CrossBase>(jenv, crossBase);\n"
                             ret += "${CrossTmplUtils.TabSpace}CrossPLUtils::DelGlobalObject(jenv, jCrossBase);\n"
 
                             ret
                         }
 //                        else -> "${CrossTmplUtils.TabSpace}auto var$idx = CrossPLUtils::SafeCastCrossObject<$cppClassName>(jenv, jvar$idx);\n"
-                        else -> "${CrossTmplUtils.TabSpace}auto var$idx = CrossPLUtils::SafeCastCrossObject<::CrossBase>(jenv, jvar$idx);\n"
+                        else -> "${CrossTmplUtils.TabSpace}auto var$idx = CrossPLUtils::SafeCastCrossObject<crosspl::native::CrossBase>(jenv, jvar$idx);\n"
                     }
                 }
                 else                                -> "${CrossTmplUtils.TabSpace}auto var$idx = CrossPLUtils::SafeCast$type(jenv, jvar$idx);\n"
@@ -162,10 +162,10 @@ class CrossMethodInfo {
 
         var funcContent: String
         if(! isStatic) {
-            prefixContent += "${CrossTmplUtils.TabSpace}auto obj = CrossPLUtils::SafeCastCrossObject<::$cppClassName>(jenv, jobj);\n"
+            prefixContent += "${CrossTmplUtils.TabSpace}auto obj = CrossPLUtils::SafeCastCrossObject<crosspl::native::$cppClassName>(jenv, jobj);\n"
             funcContent = "obj->"
         } else {
-            funcContent = "::$cppClassName::"
+            funcContent = "crosspl::native::$cppClassName::"
         }
 
         var argusContent = ""

@@ -13,6 +13,9 @@ void RegCreateJavaObjFunc(int64_t(*func)(const char*,int64_t));
 void RegDestroyJavaObjFunc(int(*func)(const char*,int64_t));
 } // extern "C"
 
+namespace crosspl {
+namespace native {
+
 class CrossBase {
 public:
   /*** type define ***/
@@ -42,5 +45,8 @@ private:
   int64_t mPlatformHandle;
 
 }; // class CrossBase
+
+} //namespace native
+} //namespace crosspl
 
 #endif /* _CROSSPL_CROSSBASE_HPP_ */

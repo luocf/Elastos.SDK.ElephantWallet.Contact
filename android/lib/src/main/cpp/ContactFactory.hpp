@@ -13,6 +13,9 @@
 
 #include <string>
 
+namespace crosspl {
+namespace native {
+
 class ContactFactory {
 public:
     /*** type define ***/
@@ -25,8 +28,8 @@ public:
     static int SetLocalDataDir(const std::string& dir);
 
     /*** class function and variable ***/
-    explicit ContactFactory();
-    virtual ~ContactFactory();
+    explicit ContactFactory() = default;
+    virtual ~ContactFactory() = default;
 
 private:
     /*** type define ***/
@@ -36,5 +39,8 @@ private:
     /*** class function and variable ***/
 }; // class Contact
 
+} //namespace native
+} //namespace crosspl
+  
 #endif /* _ELASTOS_SDK_JNI_CONTACT_FACTORY_HPP_ */
 

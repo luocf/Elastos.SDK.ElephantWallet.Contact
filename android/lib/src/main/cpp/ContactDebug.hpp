@@ -13,6 +13,9 @@
 
 #include <sstream>
 
+namespace crosspl {
+namespace native {
+    
 class ContactDebug {
 public:
     /*** type define ***/
@@ -21,8 +24,8 @@ public:
     static int GetCachedDidProp(std::stringstream* value);
 
     /*** class function and variable ***/
-    explicit ContactDebug();
-    virtual ~ContactDebug();
+    explicit ContactDebug() = default;
+    virtual ~ContactDebug() = default;
 
 private:
     /*** type define ***/
@@ -31,6 +34,9 @@ private:
 
     /*** class function and variable ***/
 }; // class Contact
+
+} //namespace native
+} //namespace crosspl
 
 #endif /* _ELASTOS_SDK_JNI_CONTACT_DEBUG_HPP_ */
 

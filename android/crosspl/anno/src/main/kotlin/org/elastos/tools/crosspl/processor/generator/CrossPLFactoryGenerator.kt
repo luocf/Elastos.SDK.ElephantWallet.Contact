@@ -65,11 +65,11 @@ class CrossPLFactoryGenerator {
             var getJavaClassPathList = ""
             classInfoList.forEach {
                 createCppObjectList += "${CrossTmplUtils.TabSpace}if(std::strcmp(javaClassName, \"${it.javaInfo.className}\") == 0) {\n"
-                createCppObjectList += "${CrossTmplUtils.TabSpace}${CrossTmplUtils.TabSpace}ptr = new ${it.cppInfo.className}();\n"
+                createCppObjectList += "${CrossTmplUtils.TabSpace}${CrossTmplUtils.TabSpace}ptr = new crosspl::native::${it.cppInfo.className}();\n"
                 createCppObjectList += "${CrossTmplUtils.TabSpace}}\n"
 
                 destroyCppObjectList += "${CrossTmplUtils.TabSpace}if(std::strcmp(javaClassName, \"${it.javaInfo.className}\") == 0) {\n"
-                destroyCppObjectList += "${CrossTmplUtils.TabSpace}${CrossTmplUtils.TabSpace}delete reinterpret_cast<${it.cppInfo.className}*>(cppHandle);\n"
+                destroyCppObjectList += "${CrossTmplUtils.TabSpace}${CrossTmplUtils.TabSpace}delete reinterpret_cast<crosspl::native::${it.cppInfo.className}*>(cppHandle);\n"
                 destroyCppObjectList += "${CrossTmplUtils.TabSpace}${CrossTmplUtils.TabSpace}return 0;\n"
                 destroyCppObjectList += "${CrossTmplUtils.TabSpace}}\n"
 

@@ -17,6 +17,9 @@
 #include <Elastos.SDK.Contact.hpp>
 #include <ContactListener.hpp>
 
+namespace crosspl {
+namespace native {
+
 class ContactDataListener : public CrossBase {
 public:
     /*** type define ***/
@@ -47,5 +50,8 @@ private:
 
     std::shared_ptr<elastos::MessageManager::DataListener> mDataListener;
 }; // class Contact
+
+} //namespace native
+} //namespace crosspl
 
 #endif /* _ELASTOS_SDK_JNI_CONTACT_DATA_LISTENER_HPP_ */

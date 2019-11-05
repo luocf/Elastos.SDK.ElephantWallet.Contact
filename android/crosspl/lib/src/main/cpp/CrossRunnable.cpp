@@ -7,6 +7,9 @@
 
 #include "CrossRunnable.hpp"
 
+namespace crosspl {
+namespace native {
+
 /***********************************************/
 /***** static variables initialize *************/
 /***********************************************/
@@ -39,3 +42,7 @@ void CrossRunnable::run()
 /***********************************************/
 /***** class private function implement  *******/
 /***********************************************/
+
+
+} // namespace native
+} // namespace crosspl

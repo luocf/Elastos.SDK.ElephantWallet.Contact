@@ -7,6 +7,7 @@
 
 #include <ContactFactory.hpp>
 
+#include <CrossPLUtils.hpp>
 #include <Elastos.SDK.Contact.hpp>
 #include <Platform.hpp>
 #include "Log.hpp"

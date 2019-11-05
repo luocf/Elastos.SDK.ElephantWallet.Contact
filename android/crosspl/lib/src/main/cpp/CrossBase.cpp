@@ -12,6 +12,7 @@
 #include <list>
 #include <string>
 
+
 /***********************************************/
 /***** static variables initialize *************/
 /***********************************************/
@@ -46,6 +47,9 @@ void RegDestroyJavaObjFunc(int(*func)(const char*,int64_t))
     __android_log_print(ANDROID_LOG_DEBUG, "crosspl", "%s", __PRETTY_FUNCTION__);
     gDestroyJavaObjFuncList.push_back(func);
 }
+
+namespace crosspl {
+namespace native {
 
 int64_t CrossBase::CreateNativeObject(const char* javaClassName)
 {
@@ -164,3 +168,6 @@ int64_t CrossBase::getPlatformHandle() const
 /***********************************************/
 /***** class private function implement  *******/
 /***********************************************/
+
+} //namespace native
+} //namespace crosspl

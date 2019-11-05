@@ -81,7 +81,7 @@ enum class CrossVariableType {
             FUNCTION     to "std::function<void()>",
             STRINGBUFFER to "std::stringstream",
             BYTEBUFFER   to "std::vector<uint8_t>",
-            CROSSBASE    to "::CrossBase"
+            CROSSBASE    to "crosspl::native::CrossBase"
         )
 
         var cppType = toString(primitiveTypeMap, classTypeMap, isConst)

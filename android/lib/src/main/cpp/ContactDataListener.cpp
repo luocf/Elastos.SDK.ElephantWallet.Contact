@@ -10,6 +10,9 @@
 #include <ContactDataListener.proxy.hpp>
 #include "Log.hpp"
 
+namespace crosspl {
+namespace native {
+
 /***********************************************/
 /***** static variables initialize *************/
 /***********************************************/
@@ -152,3 +155,7 @@ int ContactDataListener::onWriteData(const std::string& humanCode,
 
     return ret;
 }
+
+
+} //namespace native
+} //namespace crosspl

@@ -12,6 +12,9 @@
 #include "Log.hpp"
 #include "ContactMessage.hpp"
 
+namespace crosspl {
+namespace native {
+    
 /***********************************************/
 /***** static variables initialize *************/
 /***********************************************/
@@ -55,3 +58,6 @@ int ContactMessage::syncMessageToNative(int type,
 /***********************************************/
 /***** class private function implement  *******/
 /***********************************************/
+
+} //namespace native
+} //namespace crosspl

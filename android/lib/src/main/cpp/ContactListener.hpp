@@ -13,9 +13,13 @@
 
 #include <mutex>
 
-#include <CrossBase.hpp>
+#include "CrossBase.hpp"
 #include <Elastos.SDK.Contact.hpp>
+#include "experimental-span.hpp"
 
+namespace crosspl {
+namespace native {
+    
 class ContactListener : public CrossBase {
 public:
     /*** type define ***/
@@ -70,5 +74,8 @@ private:
     std::shared_ptr<elastos::SecurityManager::SecurityListener> mSecurityListener;
     std::shared_ptr<elastos::MessageManager::MessageListener> mMessageListener;
 }; // class Contact
+
+} //namespace native
+} //namespace crosspl
 
 #endif /* _ELASTOS_SDK_JNI_CONTACT_LISTENER_HPP_ */

@@ -4,7 +4,10 @@
 #include <functional>
 #include "CrossBase.hpp"
 
-class CrossRunnable final: ::CrossBase {
+namespace crosspl {
+namespace native {
+
+class CrossRunnable final: CrossBase {
 public:
   /*** type define ***/
   explicit CrossRunnable(std::function<void()> callback);
@@ -25,5 +28,8 @@ private:
   std::function<void()> mCallback;
 
 }; // class CrossRunnable
+
+} // namespace native
+} // namespace crosspl
 
 #endif /* _CROSSPL_CROSSRUNNABLE_HPP_ */
