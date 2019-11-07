@@ -5,7 +5,7 @@ import UIKit
 protocol ImagePickerDelegate: class {
     func imagePickerDelegate(canUseCamera accessIsAllowed: Bool, delegatedForm: ImagePicker)
     func imagePickerDelegate(canUseGallery accessIsAllowed: Bool, delegatedForm: ImagePicker)
-    func imagePickerDelegate(didSelect image: UIImage, delegatedForm: ImagePicker)
+    func imagePickerDelegate(didSelect image: UIImage, didSelectUrl imageUrl: URL, delegatedForm: ImagePicker)
     func imagePickerDelegate(didCancel delegatedForm: ImagePicker)
 }
 
@@ -80,16 +80,16 @@ extension ImagePicker {
 extension ImagePicker: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
 
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
-        if let image = info[.editedImage] as? UIImage {
-            delegate?.imagePickerDelegate(didSelect: image, delegatedForm: self)
-            return
-        }
-
-        if let image = info[.originalImage] as? UIImage {
-            delegate?.imagePickerDelegate(didSelect: image, delegatedForm: self)
-        } else {
-            print("Other source")
-        }
+      var image = info[.editedImage] as? UIImage
+      if image == nil {
+        image = info[.originalImage] as? UIImage
+      }
+      if image == nil {
+        print("Other source")
+      }
+      let url = info[.imageURL] as! URL
+      
+      delegate?.imagePickerDelegate(didSelect: image!, didSelectUrl: url, delegatedForm: self)
     }
 
     func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {

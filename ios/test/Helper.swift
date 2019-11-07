@@ -2,6 +2,7 @@ import UIKit
 
 public class Helper {
   public typealias OnListener = (_ result: String?) -> Void
+  public typealias OnPhotoSelectListener = (_ image: UIImage, _ url: URL) -> Void
   public typealias OrderedDictionary =  [(key: String, value: String?)]
 
   public static func showImportMnemonic(view: UIViewController, listener: @escaping OnListener) {
@@ -184,11 +185,11 @@ public class Helper {
     }
   }
 
-  public static func showSendMessage(view: UIViewController,
-                                     friendCode: String,
-                                     listener: @escaping OnListener) {
+  public static func showTextSendMessage(view: UIViewController,
+                                         friendCode: String,
+                                         listener: @escaping OnListener) {
     let dialog = UIAlertController(title: nil, message: nil, preferredStyle: .alert)
-    dialog.title = "Send Message"
+    dialog.title = "Send Text Message"
 
     let edit = UITextView()
     let rootView = makeEditView(view, friendCode, edit)
@@ -201,55 +202,31 @@ public class Helper {
 
     showDialog(view, dialog)
   }
+  
+  public static func showFileSendMessage(view: UIViewController,
+                                         friendCode: String,
+                                         listener: @escaping OnListener) {
+    let dialog = UIAlertController(title: nil, message: nil, preferredStyle: .alert)
+    dialog.title = "Send File Message"
 
-    public static func scanAddress(view: UIViewController, listener: @escaping OnListener) {
-      let imagePicker = ImagePicker()
+    let edit = UITextView()
+    let rootView = makeFileChoiceView(view, friendCode, edit)
+    setDialogContent(dialog, 500, rootView)
       
-      let impl: NSObject = {
-        class Impl : NSObject, ImagePickerDelegate {
-          init(_ imagePicker: ImagePicker, _ viewCtrl: UIViewController, _ listener: @escaping OnListener) {
-            self.imagePicker = imagePicker
-            self.viewCtrl = viewCtrl
-            self.listener = listener
-          }
-          
-          func imagePickerDelegate(didSelect image: UIImage, delegatedForm: ImagePicker) {
-            let result = Helper.makeQRCodeString(value: image)
-            listener(result)
-            delegatedForm.dismiss()
-            _ = Unmanaged.passRetained(self).autorelease()
-          }
+    dialog.addAction(UIAlertAction(title: "Send", style: .default, handler: { _ in
+      listener(edit.text)
+    }))
+    dialog.addAction(UIAlertAction(title: "Cancel", style: .cancel))
 
-          func imagePickerDelegate(didCancel delegatedForm: ImagePicker) {
-            delegatedForm.dismiss()
-            _ = Unmanaged.passRetained(self).autorelease()
-          }
+    showDialog(view, dialog)
+  }
 
-          func imagePickerDelegate(canUseGallery accessIsAllowed: Bool, delegatedForm: ImagePicker) {
-            if accessIsAllowed {
-              delegatedForm.present(parent: viewCtrl, sourceType: .photoLibrary)
-            }
-          }
-
-          func imagePickerDelegate(canUseCamera accessIsAllowed: Bool, delegatedForm: ImagePicker) {
-              // works only on real device (crash on simulator)
-            if accessIsAllowed {
-              delegatedForm.present(parent: viewCtrl, sourceType: .camera)
-             }
-          }
-
-          private let imagePicker: ImagePicker
-          private let viewCtrl: UIViewController
-          private let listener: OnListener
-         }
-         
-         return Impl(imagePicker, view, listener)
-       }()
-       _ = Unmanaged.passRetained(impl)
-
-      imagePicker.delegate = (impl as? ImagePickerDelegate)
-      imagePicker.photoGalleryAsscessRequest()
-    }
+  public static func scanAddress(view: UIViewController, listener: @escaping OnListener) {
+    selectPhoto(view: view, listener: { image, _ in
+      let result = Helper.makeQRCodeString(value: image)
+      listener(result)
+    })
+  }
 
 //    public static void onRequestPermissionsResult(MainActivity activity, int requestCode, String[] permissions, int[] grantResults) {
 //        if (requestCode != 1) {
@@ -398,7 +375,94 @@ public class Helper {
 
     return root;
   }
+  
+  private static func makeFileChoiceView(_ view: UIViewController,
+                                         _ friendCode: String, _ txtFileName: UITextView) -> UIView {
+    let txtCode = UITextView()
+    let txtMsg = UILabel()
+    
+    let btnSel =  UIButton()
+    btnSel.setTitle("Select", for: .normal)
+    btnSel.setTitleColor(.blue, for: .normal)
+    btnSel.addTargetClosure(closure: { sender in
+      let dialog = mLastDialog!
+      dismissDialog()
+      selectPhoto(view: view, listener: { _, url in
+        showDialog(view, dialog)
+        txtFileName.text = url.path
+      })
+    })
 
+    let root = UIStackView()
+    root.axis = .vertical
+    root.addArrangedSubview(txtCode)
+    root.addArrangedSubview(txtMsg)
+    root.addArrangedSubview(txtFileName)
+    root.addArrangedSubview(btnSel)
+
+    txtCode.isEditable = false
+    txtCode.translatesAutoresizingMaskIntoConstraints = false
+    txtCode.heightAnchor.constraint(equalToConstant: 40).isActive = true
+
+    txtCode.text = "FriendCode:\n  " + friendCode
+    txtMsg.text = "File:"
+    
+    txtFileName.isEditable = false
+
+    return root;
+  }
+
+  private static func selectPhoto(view: UIViewController, listener: @escaping OnPhotoSelectListener) {
+    let imagePicker = ImagePicker()
+    
+    let impl: NSObject = {
+      class Impl : NSObject, ImagePickerDelegate {
+        init(_ imagePicker: ImagePicker, _ viewCtrl: UIViewController, _ listener: @escaping OnPhotoSelectListener) {
+          self.imagePicker = imagePicker
+          self.viewCtrl = viewCtrl
+          self.listener = listener
+        }
+        
+        func imagePickerDelegate(didSelect image: UIImage, didSelectUrl imageUrl: URL,
+                                 delegatedForm: ImagePicker) {
+          listener(image, imageUrl)
+          delegatedForm.dismiss()
+          _ = Unmanaged.passRetained(self).autorelease()
+        }
+
+        func imagePickerDelegate(didCancel delegatedForm: ImagePicker) {
+          delegatedForm.dismiss()
+          _ = Unmanaged.passRetained(self).autorelease()
+        }
+
+        func imagePickerDelegate(canUseGallery accessIsAllowed: Bool, delegatedForm: ImagePicker) {
+          if accessIsAllowed {
+            delegatedForm.present(parent: viewCtrl, sourceType: .photoLibrary)
+          }
+        }
+
+        func imagePickerDelegate(canUseCamera accessIsAllowed: Bool, delegatedForm: ImagePicker) {
+            // works only on real device (crash on simulator)
+          if accessIsAllowed {
+            delegatedForm.present(parent: viewCtrl, sourceType: .camera)
+           }
+        }
+
+        private let imagePicker: ImagePicker
+        private let viewCtrl: UIViewController
+        private let listener: OnPhotoSelectListener
+       }
+       
+       return Impl(imagePicker, view, listener)
+     }()
+     _ = Unmanaged.passRetained(impl)
+
+    imagePicker.delegate = (impl as? ImagePickerDelegate)
+    imagePicker.photoGalleryAsscessRequest()
+  }
+
+
+  
   private static func makeQRCodeImage(value: String) -> UIImage? {
     let data = value.data(using: String.Encoding.ascii)
 

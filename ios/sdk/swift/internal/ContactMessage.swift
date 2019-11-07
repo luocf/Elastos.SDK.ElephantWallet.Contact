@@ -29,10 +29,12 @@ open class ContactMessage: CrossBase {
     }
     
     required init(from decoder: Decoder) throws {
-      fatalError("init(from:) has not been implemented")
+      let container = try decoder.container(keyedBy: CodingKeys.self)
+      text = try container.decode(String.self, forKey: .text)
+      super.init()
     }
     
-    public private(set) var text: String
+    public private(set) var text: String?
     
     enum CodingKeys : String, CodingKey {
       case text
@@ -56,7 +58,12 @@ open class ContactMessage: CrossBase {
     }
     
     required init(from decoder: Decoder) throws {
-      fatalError("init(from:) has not been implemented")
+      let container = try decoder.container(keyedBy: CodingKeys.self)
+      devId = try container.decode(String.self, forKey: .devId)
+      name = try container.decode(String.self, forKey: .name)
+      size = try container.decode(Int64.self, forKey: .size)
+      md5 = try container.decode(String.self, forKey: .md5)
+      super.init()
     }
     
     public private(set) var devId: String?
@@ -85,7 +92,7 @@ open class ContactMessage: CrossBase {
   
   public let type: Kind
   public private(set) var data: MsgData?
-  public let cryptoAlgorithm: String
+  public let cryptoAlgorithm: String?
   public var timestamp: Int64
   
   public func syncMessageToNative() -> Int {
@@ -109,7 +116,7 @@ open class ContactMessage: CrossBase {
     self.init(type: type, data: nil as MsgData?, cryptoAlgorithm: cryptoAlgorithm)
       if(data != nil) {
         self.data = try! JSONDecoder().decode(ContactMessage.GetDataClass(type: type)!,
-                                               from: data!)
+                                              from: data!)
       }
   }
   
@@ -126,7 +133,7 @@ open class ContactMessage: CrossBase {
   
   /* @CrossNativeInterface */
   private func syncMessageToNative(type: Int,
-                                   data: Data, cryptoAlgorithm: String,
+                                   data: Data, cryptoAlgorithm: String?,
                                    timestamp: Int64) -> Int {
     let ret = crosspl_Proxy_ContactMessage_syncMessageToNative(nativeHandle, Int32(type), data, cryptoAlgorithm, timestamp)
     return Int(ret)

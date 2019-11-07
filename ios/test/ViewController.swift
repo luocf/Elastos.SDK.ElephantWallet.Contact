@@ -265,7 +265,7 @@ class ViewController: UIViewController {
         override func onReceivedMessage(humanCode: String, channelType: Int, message: Contact.Message) {
           var msg = "onRcvdMsg(): data=\(message.data!.toString())\n"
           msg += "onRcvdMsg(): type=\(message.type)\n"
-          msg += "onRcvdMsg(): crypto=" + message.cryptoAlgorithm + "\n"
+          msg += "onRcvdMsg(): crypto=" + (message.cryptoAlgorithm ?? "nil") + "\n"
           viewCtrl.showEvent(msg)
           
           if(message.type == Contact.Message.Kind.MsgFile) {
@@ -303,22 +303,22 @@ class ViewController: UIViewController {
     var recvDataId: String
     var sendDataId: String
     var sendFilePath: String
-    if (mContact!.getUserInfo()?.humanCode == "igh7qBS5BYLLG9PqfF6gY1ytjnwvAKRcEx") {
-        recvKey = "iZJo8cTTffSgC5bzKqjLisgK3yWtJnqkHv";
-        recvDataId = "{\"DevId\":\"fa65acd8af43ae7\",\"Md5\":\"c9192c39e36b4d038b3dcea09dda0d1b\",\"Name\":\"Picture_02_Imagination.jpg\",\"Size\":639234}";
-        sendDataId = "{\"DevId\":\"9fdb3e667aec0e60\",\"Md5\":\"de57b4c20b3d7cffed47ba42d1f0f0ad\",\"Name\":\"P91025-131156.jpg\",\"Size\":3217685}";
-        sendFilePath = "/storage/emulated/0/DCIM/P91025-131156.jpg";
+    if (UserInfo.GetCurrDevId() == "AC200C58-6375-48E8-85D7-E27255D94C41") {
+      recvKey = "iZJo8cTTffSgC5bzKqjLisgK3yWtJnqkHv";
+      recvDataId = "{\"DevId\":\"fa65acd8af43ae7\",\"Md5\":\"c9192c39e36b4d038b3dcea09dda0d1b\",\"Name\":\"Picture_02_Imagination.jpg\",\"Size\":639234}";
+      sendDataId = "{\"DevId\":\"AC200C58-6375-48E8-85D7-E27255D94C41\",\"Md5\":\"\",\"Name\":\"6.jpg\",\"Size\":}";
+      sendFilePath = "/storage/emulated/0/DCIM/P91025-131156.jpg";
     } else {
-        recvKey = "igh7qBS5BYLLG9PqfF6gY1ytjnwvAKRcEx";
-        recvDataId = "{\"DevId\":\"9fdb3e667aec0e60\",\"Md5\":\"de57b4c20b3d7cffed47ba42d1f0f0ad\",\"Name\":\"P91025-131156.jpg\",\"Size\":3217685}";
-        sendDataId = "{\"DevId\":\"fa65acd8af43ae7\",\"Md5\":\"c9192c39e36b4d038b3dcea09dda0d1b\",\"Name\":\"Picture_02_Imagination.jpg\",\"Size\":639234}";
-        sendFilePath = "/system/media/Pre-loaded/Pictures/Picture_02_Imagination.jpg";
+      recvKey = ""
+      recvDataId = ""
+      sendDataId = ""
+      sendFilePath = ""
     }
 
     let fileMsg = Contact.Message(type: Contact.Message.Kind.MsgFile,
                                   data: recvDataId.data(using: String.Encoding.utf8),
                                   cryptoAlgorithm: nil)
-    mContactRecvFileMap[recvKey] = fileMsg.data as! Contact.Message.FileData
+    mContactRecvFileMap[recvKey] = fileMsg.data as? Contact.Message.FileData
     mContactSendFileMap[sendDataId] = sendFilePath
     
     return "Success to start contact instance."
@@ -613,7 +613,7 @@ class ViewController: UIViewController {
 
     let friendCodeList = mContact!.listFriendCode()
     Helper.showFriendList(view: self, friendList: friendCodeList, listener:  { friendCode in
-      Helper.showSendMessage(view: self, friendCode: friendCode!, listener:  { message in
+      Helper.showTextSendMessage(view: self, friendCode: friendCode!, listener:  { message in
         let msgInfo = self.mContact!.makeTextMessage(data: message!, cryptoAlgorithm: nil)
 
         let status = self.mContact!.getStatus(humanCode: friendCode!)
@@ -649,7 +649,7 @@ class ViewController: UIViewController {
 
     let friendCodeList = mContact!.listFriendCode()
     Helper.showFriendList(view: self, friendList: friendCodeList, listener:  { friendCode in
-      Helper.showSendMessage(view: self, friendCode: friendCode!, listener:  { message in
+      Helper.showFileSendMessage(view: self, friendCode: friendCode!, listener:  { message in
         let msgInfo = self.mContact!.makeTextMessage(data: message!, cryptoAlgorithm: nil)
 
         let status = self.mContact!.getStatus(humanCode: friendCode!)
@@ -685,7 +685,7 @@ class ViewController: UIViewController {
 
     let friendCodeList = mContact!.listFriendCode()
     Helper.showFriendList(view: self, friendList: friendCodeList, listener:  { friendCode in
-      Helper.showSendMessage(view: self, friendCode: friendCode!, listener:  { message in
+      Helper.showTextSendMessage(view: self, friendCode: friendCode!, listener:  { message in
         let msgInfo = self.mContact!.makeTextMessage(data: message!, cryptoAlgorithm: nil)
 
         let status = self.mContact!.getStatus(humanCode: friendCode!)
@@ -721,7 +721,7 @@ class ViewController: UIViewController {
 
     let friendCodeList = mContact!.listFriendCode()
     Helper.showFriendList(view: self, friendList: friendCodeList, listener:  { friendCode in
-      Helper.showSendMessage(view: self, friendCode: friendCode!, listener:  { message in
+      Helper.showTextSendMessage(view: self, friendCode: friendCode!, listener:  { message in
         let msgInfo = self.mContact!.makeTextMessage(data: message!, cryptoAlgorithm: nil)
 
         let status = self.mContact!.getStatus(humanCode: friendCode!)
