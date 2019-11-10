@@ -21,20 +21,23 @@ set(pkg-Elastos.NET.Carrier_STATIC_LDFLAGS
     toxcore
     sodium)
 
-file( GLOB Elastos.SDK.Contact-SOURCES "*.cpp" "*/*.cpp")
-file( GLOB Elastos.SDK.Contact-HEADERS "../include/*.hpp" )
+file( GLOB SRC_SOURCES "*.cpp" "*/*.cpp")
+file( GLOB SRC_HEADERS "*.hpp" )
 
-add_library(Elastos.SDK.Contact)
-target_sources(Elastos.SDK.Contact PRIVATE
-    ${Elastos.SDK.Contact-SOURCES})
-target_include_directories(Elastos.SDK.Contact PRIVATE
+if(${CMAKE_VERSION} VERSION_LESS "3.12")
+    add_library(src STATIC ${SRC_SOURCES})
+else()
+    add_library(src OBJECT ${SRC_SOURCES})
+endif()
+target_include_directories(src PRIVATE
     "${pkg-Elastos.SDK.Keypair.C_INCLUDE_DIRS}"
-    "${pkg-curl_INCLUDE_DIRS}"
-    "${CMAKE_CURRENT_SOURCE_DIR}/../include")
-target_link_libraries(Elastos.SDK.Contact PRIVATE
+    "${pkg-curl_INCLUDE_DIRS}")
+target_include_directories(src PUBLIC
+    "${CMAKE_CURRENT_SOURCE_DIR}")
+target_link_libraries(src PRIVATE
     httpclient
     json)
-target_link_libraries(Elastos.SDK.Contact PUBLIC
+target_link_libraries(src PUBLIC
     ${pkg-curl_STATIC_LDFLAGS}
     ${pkg-Elastos.SDK.Keypair.C_STATIC_LDFLAGS}
     ${pkg-Elastos.NET.Carrier_STATIC_LDFLAGS}
@@ -43,17 +46,8 @@ target_link_libraries(Elastos.SDK.Contact PUBLIC
     common
     httpclient
     platform)
-#target_link_libraries(Elastos.SDK.Contact PRIVATE
-    #thirdparty)
-if("${CFG_TARGET_PLATFORM}" STREQUAL "Android")
-    target_link_libraries(Elastos.SDK.Contact PRIVATE log)
-elseif("${CFG_TARGET_PLATFORM}" STREQUAL "iOS")
-    target_link_libraries(Elastos.SDK.Contact PRIVATE "-framework CFNetwork")
-endif()
-
-set_target_properties(Elastos.SDK.Contact PROPERTIES PUBLIC_HEADER "${Elastos.SDK.Contact-HEADERS}")
-install(TARGETS Elastos.SDK.Contact
-        RUNTIME DESTINATION bin
-        LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib
-        PUBLIC_HEADER DESTINATION include/Elastos.SDK.Contact)
+#if("${CFG_TARGET_PLATFORM}" STREQUAL "Android")
+    #target_link_libraries(src PRIVATE log)
+#elseif("${CFG_TARGET_PLATFORM}" STREQUAL "iOS")
+    #target_link_libraries(src PRIVATE "-framework CFNetwork")
+#endif()

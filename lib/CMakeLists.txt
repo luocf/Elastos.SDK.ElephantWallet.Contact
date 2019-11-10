@@ -4,6 +4,7 @@ include(../config/cmake/CMakeLists.txt)
 include_directories("${CMAKE_INSTALL_PREFIX}/include")
 
 project(Elastos.SDK.Contact)
+add_subdirectory(api)
 add_subdirectory(common)
 add_subdirectory(src)
 add_subdirectory(platform)

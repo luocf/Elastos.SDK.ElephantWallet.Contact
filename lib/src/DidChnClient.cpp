@@ -12,7 +12,6 @@
 #include <SafePtr.hpp>
 #include "JsonDefine.hpp"
 #include "DidChnClient.hpp"
-#include "../include/ErrCode.hpp"
 
 
 namespace elastos {
