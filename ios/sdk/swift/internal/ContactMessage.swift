@@ -31,7 +31,13 @@ open class ContactMessage: CrossBase {
     required init(from decoder: Decoder) throws {
       let container = try decoder.container(keyedBy: CodingKeys.self)
       text = try container.decode(String.self, forKey: .text)
-      super.init()
+      try super.init(from: decoder)
+    }
+    
+    override public func encode(to encoder: Encoder) throws {
+      var container = encoder.container(keyedBy: CodingKeys.self)
+      try container.encode(text, forKey: .text)
+      try super.encode(to: encoder)
     }
     
     public private(set) var text: String?
@@ -50,7 +56,7 @@ open class ContactMessage: CrossBase {
 
   public class FileData: MsgData {
     public init(file: URL) {
-      devId = UserInfo.GetCurrDevId()
+      devId = UserInfo.GetCurrDevId()!
       name = file.lastPathComponent
       size = try? FileManager.default.attributesOfItem(atPath: file.path)[FileAttributeKey.size] as? Int64
       md5 = Utils.getMD5Sum(file: file)
@@ -63,10 +69,34 @@ open class ContactMessage: CrossBase {
       name = try container.decode(String.self, forKey: .name)
       size = try container.decode(Int64.self, forKey: .size)
       md5 = try container.decode(String.self, forKey: .md5)
-      super.init()
+      try super.init(from: decoder)
     }
     
-    public private(set) var devId: String?
+    override public func encode(to encoder: Encoder) throws {
+      var container = encoder.container(keyedBy: CodingKeys.self)
+      try container.encode(devId, forKey: .devId)
+      try container.encode(name, forKey: .name)
+      try container.encode(size, forKey: .size)
+      try container.encode(md5, forKey: .md5)
+      try super.encode(to: encoder)
+    }
+    
+    // fix json decode and encode different issue
+    public static func ConvertId(id: String) -> String? {
+      guard let dataId = id.data(using: .utf8) else {
+        print("FileData.ConvertId() 0 Failed to convert \(id)")
+        return nil
+      }
+      
+      guard let fileData = try? JSONDecoder().decode(FileData.self, from: dataId) else {
+        print("FileData.ConvertId() 1 Failed to convert \(id)")
+        return nil
+      }
+      
+      return fileData.toString()
+    }
+    
+    public private(set) var devId: String
     public private(set) var name: String?
     public private(set) var size: Int64?
     public private(set) var md5: String?
@@ -91,19 +121,20 @@ open class ContactMessage: CrossBase {
 
   
   public let type: Kind
-  public private(set) var data: MsgData?
+  public private(set) var data: MsgData
   public let cryptoAlgorithm: String?
   public var timestamp: Int64
   
   public func syncMessageToNative() -> Int {
     let ret = syncMessageToNative(type: type.rawValue,
-                                  data: data!.toData(),
+                                  data: data.toData(),
                                   cryptoAlgorithm: cryptoAlgorithm,
                                   timestamp: timestamp)
     return ret;
   }
-  
-  public init(type: Kind, data: MsgData?, cryptoAlgorithm: String?) {
+
+
+  public init(type: Kind, data: MsgData, cryptoAlgorithm: String?) {
     self.type = type
     self.data = data
     self.cryptoAlgorithm = cryptoAlgorithm ?? ""
@@ -111,13 +142,25 @@ open class ContactMessage: CrossBase {
     
     super.init(className: String(describing: ContactMessage.self))
   }
+
+  public convenience init(text: String, cryptoAlgorithm: String?) {
+    self.init(type: Kind.MsgText,
+              data: TextData(text: text),
+              cryptoAlgorithm: cryptoAlgorithm);
+  }
+
+  public convenience init(file: URL, cryptoAlgorithm: String?) {
+    self.init(type: Kind.MsgFile,
+              data: FileData(file: file),
+              cryptoAlgorithm: cryptoAlgorithm);
+  }
   
-  public convenience init(type: Kind, data: Data?, cryptoAlgorithm: String?) {
-    self.init(type: type, data: nil as MsgData?, cryptoAlgorithm: cryptoAlgorithm)
-      if(data != nil) {
+  public convenience init(type: Kind, data: Data, cryptoAlgorithm: String?) {
+    self.init(type: type, data: MsgData(), cryptoAlgorithm: cryptoAlgorithm)
+//      if(data != nil) {
         self.data = try! JSONDecoder().decode(ContactMessage.GetDataClass(type: type)!,
-                                              from: data!)
-      }
+                                              from: data)
+//      }
   }
   
   static private func GetDataClass(type: Kind) -> MsgData.Type? {

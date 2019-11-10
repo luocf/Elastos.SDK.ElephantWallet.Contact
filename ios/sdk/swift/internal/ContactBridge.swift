@@ -119,18 +119,21 @@ open class ContactBridge: CrossBase {
     return ContactStatus(rawValue: ret)
   }
 
-  public func makeMessage(type: ContactMessage.Kind, data: Data, cryptoAlgorithm: String?) -> Contact.Message {
-    let msg = Contact.Message(type: type, data: data, cryptoAlgorithm: cryptoAlgorithm)
+//  public func makeMessage(type: ContactMessage.Kind, data: Data, cryptoAlgorithm: String?) -> Contact.Message {
+//    let msg = Contact.Message(type: type, data: data, cryptoAlgorithm: cryptoAlgorithm)
+//    return msg
+//  }
+
+  public static func MakeTextMessage(text: String, cryptoAlgorithm: String?) -> Contact.Message {
+    let msg = Contact.Message(text: text, cryptoAlgorithm: cryptoAlgorithm)
     return msg
   }
 
-  public func makeTextMessage(data: String, cryptoAlgorithm: String?) -> Contact.Message {
-    let msg = makeMessage(type: ContactMessage.Kind.MsgText,
-                          data: data.data(using: .utf8)!,
-                          cryptoAlgorithm: cryptoAlgorithm)
+  public static func MakeFileMessage(file: URL, cryptoAlgorithm: String?) -> Contact.Message {
+    let msg = Contact.Message(file: file,
+                              cryptoAlgorithm: cryptoAlgorithm)
     return msg
   }
-
 
   public func sendMessage(friendCode: String, channelType: ContactChannel, message: Contact.Message) -> Int {
     var ret = message.syncMessageToNative()
@@ -150,7 +153,7 @@ open class ContactBridge: CrossBase {
     }
     
     let ret = pullData(friendCode: friendCode, channelType: channelType.rawValue,
-                       dev: fileInfo.devId!, dataId: fileInfo.toString())
+                       dev: fileInfo.devId, dataId: fileInfo.toString())
 
     return ret;
   }
@@ -162,7 +165,7 @@ open class ContactBridge: CrossBase {
     }
     
     let ret = cancelPullData(friendCode: friendCode, channelType: channelType.rawValue,
-                             dev: fileInfo.devId!, dataId: fileInfo.toString())
+                             dev: fileInfo.devId, dataId: fileInfo.toString())
 
     return ret;
   }

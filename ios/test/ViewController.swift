@@ -263,7 +263,7 @@ class ViewController: UIViewController {
         }
         
         override func onReceivedMessage(humanCode: String, channelType: Int, message: Contact.Message) {
-          var msg = "onRcvdMsg(): data=\(message.data!.toString())\n"
+          var msg = "onRcvdMsg(): data=\(message.data.toString())\n"
           msg += "onRcvdMsg(): type=\(message.type)\n"
           msg += "onRcvdMsg(): crypto=" + (message.cryptoAlgorithm ?? "nil") + "\n"
           viewCtrl.showEvent(msg)
@@ -286,6 +286,75 @@ class ViewController: UIViewController {
     }()
     mContact!.setListener(listener: mContactListener)
   
+    mContactDataListener = {
+      class Impl: Contact.DataListener {
+        init(_ vc: ViewController) {
+          viewCtrl = vc
+          super.init()
+        }
+      
+        override func onNotify(humanCode: String, channelType: Int, dataId: String,
+                               status: Status) {
+          let msg = "onNotify(): dataId=\(dataId), status=\(status)\n";
+          viewCtrl.showEvent(msg);
+
+        }
+        override func onReadData(humanCode: String, channelType: Int, dataId: String,
+                                 offset: Int64, data: inout Data?) -> Int {
+
+          guard let filepath = viewCtrl.mContactSendFileMap[dataId] else {
+            let msg = "onReadData(): dataId=\(dataId) File not cached.\n"
+            viewCtrl.showEvent(ViewController.ErrorPrefix + msg)
+            return -1
+          }
+          
+          guard FileManager.default.fileExists(atPath: filepath) else {
+            let msg = "onReadData(): dataId=\(dataId) File not exists.\n"
+            viewCtrl.showEvent(ViewController.ErrorPrefix + msg)
+            return -1
+          }
+          
+          var fileAttr = try! FileManager.default.attributesOfItem(atPath: filepath)
+          let fileSize = Int64(fileAttr[FileAttributeKey.size] as! UInt64)
+
+          let msg = "onReadData(): dataId=\(dataId), offset=\(offset)\n";
+//          if(offset == 0 || offset >= fileSize) {
+              viewCtrl.showEvent(msg);
+//          } else {
+//              print("\(msg)");
+//          }
+          
+          if(offset >= fileSize) { // finished
+            return 0
+          }
+          
+          guard let fileHandle = FileHandle(forReadingAtPath: filepath) else {
+            let msg = "onReadData(): dataId=\(dataId) Failed to open file.\n"
+            viewCtrl.showEvent(ViewController.ErrorPrefix + msg)
+            return -1
+          }
+           
+          var size = data!.count
+          if(offset + Int64(size) > fileSize) {
+            size = Int(fileSize - offset)
+          }
+
+          try? fileHandle.seek(toOffset: UInt64(offset))
+          data = fileHandle.readData(ofLength: size)
+          return size
+        }
+        override func onWriteData(humanCode: String, channelType: Int, dataId: String,
+                                  offset: Int64, data: Data?) -> Int {
+          fatalError("\(#function) not implementation.")
+        }
+        
+        private let viewCtrl: ViewController
+      }
+        
+      return Impl(self)
+    }()
+    mContact!.setDataListener(listener: mContactDataListener)
+    
     return "Success to create a contact instance."
   }
 
@@ -299,27 +368,27 @@ class ViewController: UIViewController {
       return "Failed to start contact instance. ret=\(ret)"
     }
 
-    var recvKey: String
-    var recvDataId: String
-    var sendDataId: String
-    var sendFilePath: String
-    if (UserInfo.GetCurrDevId() == "AC200C58-6375-48E8-85D7-E27255D94C41") {
-      recvKey = "iZJo8cTTffSgC5bzKqjLisgK3yWtJnqkHv";
-      recvDataId = "{\"DevId\":\"fa65acd8af43ae7\",\"Md5\":\"c9192c39e36b4d038b3dcea09dda0d1b\",\"Name\":\"Picture_02_Imagination.jpg\",\"Size\":639234}";
-      sendDataId = "{\"DevId\":\"AC200C58-6375-48E8-85D7-E27255D94C41\",\"Md5\":\"\",\"Name\":\"6.jpg\",\"Size\":}";
-      sendFilePath = "/storage/emulated/0/DCIM/P91025-131156.jpg";
-    } else {
-      recvKey = ""
-      recvDataId = ""
-      sendDataId = ""
-      sendFilePath = ""
-    }
+//    var recvKey: String
+//    var recvDataId: String
+//    var sendDataId: String
+//    var sendFilePath: String
+//    if (UserInfo.GetCurrDevId() == "AC200C58-6375-48E8-85D7-E27255D94C41") {
+//      recvKey = "igh7qBS5BYLLG9PqfF6gY1ytjnwvAKRcEx";
+//      recvDataId = "{\"DevId\":\"9fdb3e667aec0e60\",\"Md5\":\"de57b4c20b3d7cffed47ba42d1f0f0ad\",\"Name\":\"P91025-131156.jpg\",\"Size\":3217685}";
+//     sendDataId = "{\"DevId\":\"AC200C58-6375-48E8-85D7-E27255D94C41\",\"Md5\":\"6345517ead2f2776f680ec598e4df559\",\"Name\":\"3CDA6326-1CDB-47E7-A055-763589AFBFEA.jpeg\",\"Size\":1896240}";
+//      sendFilePath = "/Users/mengxk/Library/Developer/CoreSimulator/Devices/5F2D3CE5-702A-4D73-B1F3-D7648E13768B/data/Containers/Data/Application/9EC7A10E-234E-4E24-A8D7-724DDEBC31AC/tmp/0E89B578-C2A9-4FED-8915-F891913ABDDA.jpeg";
+//    } else {
+//      recvKey = ""
+//      recvDataId = ""
+//      sendDataId = ""
+//      sendFilePath = ""
+//    }
 
-    let fileMsg = Contact.Message(type: Contact.Message.Kind.MsgFile,
-                                  data: recvDataId.data(using: String.Encoding.utf8),
-                                  cryptoAlgorithm: nil)
-    mContactRecvFileMap[recvKey] = fileMsg.data as? Contact.Message.FileData
-    mContactSendFileMap[sendDataId] = sendFilePath
+//    let fileMsg = Contact.Message(type: Contact.Message.Kind.MsgFile,
+//                                  data: recvDataId.data(using: String.Encoding.utf8),
+//                                  cryptoAlgorithm: nil)
+//    mContactRecvFileMap[recvKey] = fileMsg.data as? Contact.Message.FileData
+//    mContactSendFileMap[sendDataId] = sendFilePath
     
     return "Success to start contact instance."
   }
@@ -614,7 +683,7 @@ class ViewController: UIViewController {
     let friendCodeList = mContact!.listFriendCode()
     Helper.showFriendList(view: self, friendList: friendCodeList, listener:  { friendCode in
       Helper.showTextSendMessage(view: self, friendCode: friendCode!, listener:  { message in
-        let msgInfo = self.mContact!.makeTextMessage(data: message!, cryptoAlgorithm: nil)
+        let msgInfo = Contact.MakeTextMessage(text: message!, cryptoAlgorithm: nil)
 
         let status = self.mContact!.getStatus(humanCode: friendCode!)
         if(status != ContactStatus.Online) {
@@ -649,8 +718,13 @@ class ViewController: UIViewController {
 
     let friendCodeList = mContact!.listFriendCode()
     Helper.showFriendList(view: self, friendList: friendCodeList, listener:  { friendCode in
-      Helper.showFileSendMessage(view: self, friendCode: friendCode!, listener:  { message in
-        let msgInfo = self.mContact!.makeTextMessage(data: message!, cryptoAlgorithm: nil)
+      Helper.showFileSendMessage(view: self, friendCode: friendCode!, listener:  { filepath in
+        guard filepath != nil else {
+          self.showMessage(ViewController.ErrorPrefix + "File not selected.")
+          return
+        }
+        
+        let msgInfo = Contact.MakeFileMessage(file: URL(string: filepath!)!, cryptoAlgorithm: nil)
 
         let status = self.mContact!.getStatus(humanCode: friendCode!)
         if(status != ContactStatus.Online) {
@@ -663,7 +737,10 @@ class ViewController: UIViewController {
                                              message: msgInfo)
         if(ret < 0) {
           self.showMessage(ViewController.ErrorPrefix + "Failed to send message to " + friendCode!)
+          return
         }
+        
+        self.mContactSendFileMap[msgInfo.data.toString()] = filepath!
       })
     })
     
@@ -686,7 +763,7 @@ class ViewController: UIViewController {
     let friendCodeList = mContact!.listFriendCode()
     Helper.showFriendList(view: self, friendList: friendCodeList, listener:  { friendCode in
       Helper.showTextSendMessage(view: self, friendCode: friendCode!, listener:  { message in
-        let msgInfo = self.mContact!.makeTextMessage(data: message!, cryptoAlgorithm: nil)
+        let msgInfo = Contact.MakeTextMessage(text: message!, cryptoAlgorithm: nil)
 
         let status = self.mContact!.getStatus(humanCode: friendCode!)
         if(status != ContactStatus.Online) {
@@ -722,7 +799,7 @@ class ViewController: UIViewController {
     let friendCodeList = mContact!.listFriendCode()
     Helper.showFriendList(view: self, friendList: friendCodeList, listener:  { friendCode in
       Helper.showTextSendMessage(view: self, friendCode: friendCode!, listener:  { message in
-        let msgInfo = self.mContact!.makeTextMessage(data: message!, cryptoAlgorithm: nil)
+        let msgInfo = Contact.MakeTextMessage(text: message!, cryptoAlgorithm: nil)
 
         let status = self.mContact!.getStatus(humanCode: friendCode!)
         if(status != ContactStatus.Online) {
@@ -935,6 +1012,7 @@ class ViewController: UIViewController {
   private var mSavedMnemonic: String?
   private var mContact: Contact?
   private var mContactListener: Contact.Listener?
+  private var mContactDataListener: Contact.DataListener?
   
   private var mContactRecvFileMap = [String: Contact.Message.FileData]()
   private var mContactSendFileMap = [String: String]()

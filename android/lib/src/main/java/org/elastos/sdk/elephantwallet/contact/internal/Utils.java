@@ -53,8 +53,10 @@ public final class Utils {
             String md5 = new BigInteger(1, md.digest()).toString(16);
             return fillMD5(md5);
         } catch (Exception e) {
-            throw new RuntimeException("Failed to get md5. file:" + file.getAbsolutePath(), e);
+            Log.e(Contact.TAG, "Failed to get md5. file:" + file.getAbsolutePath(), e);
         }
+
+        return null;
     }
 
     public static String getMd5Sum(String str) {

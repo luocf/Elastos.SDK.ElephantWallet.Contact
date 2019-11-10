@@ -36,27 +36,43 @@ import CrossPL
   /* @CrossPlatformInterface */
   @objc internal func onNotify(_ humanCode: String, _ channelType: Int, _ dataId: String,
                                _ status: Int) {
-    onNotify(humanCode: humanCode, channelType: channelType, dataId: dataId,
+    var id = Contact.Message.FileData.ConvertId(id: dataId)
+    if id == nil {
+      id = dataId
+    }
+    
+    onNotify(humanCode: humanCode, channelType: channelType, dataId: id!,
              status: Status(rawValue: status)!)
   }
   
   /* @CrossPlatformInterface */
   @objc internal func onReadData(_ humanCode: String, _ channelType: Int, _ dataId: String,
                                  _ offset: Int64) -> Data? {
-    var data: Data? = Data()
-    let ret = onReadData(humanCode: humanCode, channelType: channelType, dataId: dataId,
+    var id = Contact.Message.FileData.ConvertId(id: dataId)
+    if id == nil {
+      id = dataId
+    }
+    
+    var data: Data? = Data(count: 1024)
+    let ret = onReadData(humanCode: humanCode, channelType: channelType, dataId: id!,
                          offset: offset, data: &data)
     if(ret < 0) {
         return nil;
     }
     
-    return data
+    let retData = data?.subdata(in: 0..<ret)
+    return retData
   }
 
   /* @CrossPlatformInterface */
   @objc internal func onWriteData(_ humanCode: String, _ channelType: Int, _ dataId: String,
                                   _ offset: Int64, _ data: Data?) -> Int {
-    let ret = onWriteData(humanCode: humanCode, channelType: channelType, dataId: dataId,
+    var id = Contact.Message.FileData.ConvertId(id: dataId)
+    if id == nil {
+      id = dataId
+    }
+    
+    let ret = onWriteData(humanCode: humanCode, channelType: channelType, dataId: id!,
                           offset: offset, data: data)
     return ret
   }

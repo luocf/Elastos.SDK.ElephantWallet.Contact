@@ -368,7 +368,7 @@ public class MainActivity extends Activity {
                 File file = new File(MainActivity.this.getCacheDir(), fileInfo.name);
                 if(data.length == 0) {
                     String md5 = Utils.getMD5Sum(file);
-                    if(md5.equals(fileInfo.md5))  {
+                    if(md5 != null && md5.equals(fileInfo.md5))  {
                         msg = "onWriteData(): Success to pull dataId=" + dataId + "\n";
                     } else {
                         msg = "onWriteData(): Failed to pull dataId=" + dataId + "\n";
@@ -413,27 +413,31 @@ public class MainActivity extends Activity {
             return "Failed to start contact instance. ret=" + ret;
         }
 
-        String recvKey;
-        String recvDataId;
-        String sendDataId;
-        String sendFilePath;
-        if(mContact.getUserInfo().humanCode.equals("igh7qBS5BYLLG9PqfF6gY1ytjnwvAKRcEx")) {
-            recvKey = "iZJo8cTTffSgC5bzKqjLisgK3yWtJnqkHv";
-            recvDataId = "{\"DevId\":\"fa65acd8af43ae7\",\"Md5\":\"c9192c39e36b4d038b3dcea09dda0d1b\",\"Name\":\"Picture_02_Imagination.jpg\",\"Size\":639234}";
-            sendDataId = "{\"DevId\":\"9fdb3e667aec0e60\",\"Md5\":\"de57b4c20b3d7cffed47ba42d1f0f0ad\",\"Name\":\"P91025-131156.jpg\",\"Size\":3217685}";
-            sendFilePath = "/storage/emulated/0/DCIM/P91025-131156.jpg";
-        } else {
-            recvKey = "igh7qBS5BYLLG9PqfF6gY1ytjnwvAKRcEx";
-            recvDataId = "{\"DevId\":\"9fdb3e667aec0e60\",\"Md5\":\"de57b4c20b3d7cffed47ba42d1f0f0ad\",\"Name\":\"P91025-131156.jpg\",\"Size\":3217685}";
-            sendDataId = "{\"DevId\":\"fa65acd8af43ae7\",\"Md5\":\"c9192c39e36b4d038b3dcea09dda0d1b\",\"Name\":\"Picture_02_Imagination.jpg\",\"Size\":639234}";
-            sendFilePath = "/system/media/Pre-loaded/Pictures/Picture_02_Imagination.jpg";
-        }
-
-        Contact.Message fileMsg = new Contact.Message(Contact.Message.Type.MsgFile,
-                recvDataId.getBytes(), null);
-        mContactRecvFileMap.put(recvKey, (Contact.Message.FileData)fileMsg.data);
-        mContactSendFileMap.put(sendDataId, sendFilePath);
-
+//        String recvKey;
+//        String recvDataId;
+//        String sendDataId;
+//        String sendFilePath;
+//        if(mContact.getUserInfo().humanCode.equals("igh7qBS5BYLLG9PqfF6gY1ytjnwvAKRcEx")) {
+//            recvKey = "iZJo8cTTffSgC5bzKqjLisgK3yWtJnqkHv";
+//            recvDataId = "{\"DevId\":\"fa65acd8af43ae7\",\"Md5\":\"c9192c39e36b4d038b3dcea09dda0d1b\",\"Name\":\"Picture_02_Imagination.jpg\",\"Size\":639234}";
+//            sendDataId = "{\"DevId\":\"9fdb3e667aec0e60\",\"Md5\":\"de57b4c20b3d7cffed47ba42d1f0f0ad\",\"Name\":\"P91025-131156.jpg\",\"Size\":3217685}";
+//            sendFilePath = "/storage/emulated/0/DCIM/P91025-131156.jpg";
+//        } else {
+//            recvKey = "igh7qBS5BYLLG9PqfF6gY1ytjnwvAKRcEx";
+//            recvDataId = "{\"DevId\":\"9fdb3e667aec0e60\",\"Md5\":\"de57b4c20b3d7cffed47ba42d1f0f0ad\",\"Name\":\"P91025-131156.jpg\",\"Size\":3217685}";
+//            sendDataId = "{\"DevId\":\"fa65acd8af43ae7\",\"Md5\":\"c9192c39e36b4d038b3dcea09dda0d1b\",\"Name\":\"Picture_02_Imagination.jpg\",\"Size\":639234}";
+//            sendFilePath = "/system/media/Pre-loaded/Pictures/Picture_02_Imagination.jpg";
+//        }
+//
+//        Contact.Message fileMsg = new Contact.Message(Contact.Message.Type.MsgFile,
+//                recvDataId.getBytes(), null);
+//        mContactRecvFileMap.put(recvKey, (Contact.Message.FileData)fileMsg.data);
+//        mContactSendFileMap.put(sendDataId, sendFilePath);
+//
+//        recvKey = "ii9ab8jGVRg5GKfZsGe4NYHupFd2Y7xUif";
+//        recvDataId = "{\"DevId\":\"AC200C58-6375-48E8-85D7-E27255D94C41\",\"Md5\":\"6345517ead2f2776f680ec598e4df559\",\"Name\":\"3CDA6326-1CDB-47E7-A055-763589AFBFEA.jpeg\",\"Size\":1896240}";
+//        fileMsg = new Contact.Message(Contact.Message.Type.MsgFile, recvDataId.getBytes(), null);
+//        mContactRecvFileMap.put(recvKey, (Contact.Message.FileData)fileMsg.data);
 
         return "Success to start contact instance.";
     }
