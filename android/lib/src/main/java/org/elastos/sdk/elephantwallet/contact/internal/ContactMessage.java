@@ -1,8 +1,11 @@
 package org.elastos.sdk.elephantwallet.contact.internal;
 
+import android.util.Log;
+
 import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
 
+import org.elastos.sdk.elephantwallet.contact.Contact;
 import org.elastos.tools.crosspl.CrossBase;
 import org.elastos.tools.crosspl.annotation.CrossClass;
 import org.elastos.tools.crosspl.annotation.CrossInterface;
@@ -58,6 +61,16 @@ public class ContactMessage extends CrossBase {
             name = file.getName();
             size = file.length();
             md5 = Utils.getMD5Sum(file);
+        }
+
+        // fix json decode and encode different issue
+        public static String ConvertId(String id) {
+            FileData fileData = new Gson().fromJson(id, FileData.class);
+            if (fileData == null) {
+                Log.w(Contact.TAG, "FileData.ConvertId() 0 Failed to convert " + id);
+            }
+
+            return fileData.toString();
         }
 
         @SerializedName(JsonKey.DeviceId)

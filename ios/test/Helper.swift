@@ -517,7 +517,7 @@ public class Helper {
     }
   }
 
-  private static func dismissDialog(_ release: NSObject? = nil) {
+  public static func dismissDialog(_ release: NSObject? = nil) {
     guard mLastDialog != nil else { return }
 
     DispatchQueue.main.async {

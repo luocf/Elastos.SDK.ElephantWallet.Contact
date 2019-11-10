@@ -223,8 +223,8 @@ class ViewController: UIViewController {
 
     Contact.Factory.SetDeviceId(devId: getDeviceId())
 
-    let cacheDir = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first
-    let ret = Contact.Factory.SetLocalDataDir(dir: cacheDir!.path)
+    mCacheDir = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first
+    let ret = Contact.Factory.SetLocalDataDir(dir: mCacheDir!.path)
     if ret < 0 {
       return "Failed to call Contact.Factory.SetLocalDataDir() ret=\(ret)"
     }
@@ -299,6 +299,7 @@ class ViewController: UIViewController {
           viewCtrl.showEvent(msg);
 
         }
+        
         override func onReadData(humanCode: String, channelType: Int, dataId: String,
                                  offset: Int64, data: inout Data?) -> Int {
 
@@ -318,11 +319,11 @@ class ViewController: UIViewController {
           let fileSize = Int64(fileAttr[FileAttributeKey.size] as! UInt64)
 
           let msg = "onReadData(): dataId=\(dataId), offset=\(offset)\n";
-//          if(offset == 0 || offset >= fileSize) {
-              viewCtrl.showEvent(msg);
-//          } else {
-//              print("\(msg)");
-//          }
+          if(offset == 0 || offset >= fileSize) {
+            viewCtrl.showEvent(msg);
+          } else {
+            print("\(msg)");
+          }
           
           if(offset >= fileSize) { // finished
             return 0
@@ -341,11 +342,53 @@ class ViewController: UIViewController {
 
           try? fileHandle.seek(toOffset: UInt64(offset))
           data = fileHandle.readData(ofLength: size)
+          fileHandle.closeFile()
+         
           return size
         }
+        
         override func onWriteData(humanCode: String, channelType: Int, dataId: String,
                                   offset: Int64, data: Data?) -> Int {
-          fatalError("\(#function) not implementation.")
+          var msg = "onWriteData(): dataId=\(dataId), offset=\(offset)\n";
+          if(offset == 0 || data!.count == 0) {
+            viewCtrl.showEvent(msg);
+          } else {
+            print("\(msg)");
+          }
+          
+          guard let fileInfo = viewCtrl.mContactRecvFileMap[humanCode] else {
+            let msg = "onWriteData(): dataId=\(dataId) File not cached.\n"
+            viewCtrl.showEvent(ViewController.ErrorPrefix + msg)
+            return -1
+          }
+          
+          let filepath = viewCtrl.mCacheDir!.appendingPathComponent(fileInfo.name!,
+                                                                    isDirectory: false)
+          if (FileManager.default.fileExists(atPath: filepath.path) == false) {
+            viewCtrl.showEvent("Write data to \(filepath.path)")
+            FileManager.default.createFile(atPath: filepath.path, contents: nil, attributes: nil)
+          }
+          guard let fileHandle = FileHandle(forWritingAtPath: filepath.path) else {
+            let msg = "onWriteData(): dataId=\(dataId) Failed to open file.\n"
+            viewCtrl.showEvent(ViewController.ErrorPrefix + msg)
+            return -1
+          }
+          if(data!.count == 0) {
+              let md5 = Utils.getMD5Sum(file: filepath)
+              if(md5 == fileInfo.md5!)  {
+                  msg = "onWriteData(): Success to pull dataId=" + dataId + "\n";
+              } else {
+                  msg = "onWriteData(): Failed to pull dataId=" + dataId + "\n";
+              }
+              viewCtrl.showEvent(msg);
+              return 0;
+          }
+          
+          fileHandle.seekToEndOfFile()
+          fileHandle.write(data!)
+          fileHandle.closeFile()
+          
+          return data!.count
         }
         
         private let viewCtrl: ViewController
@@ -687,7 +730,7 @@ class ViewController: UIViewController {
 
         let status = self.mContact!.getStatus(humanCode: friendCode!)
         if(status != ContactStatus.Online) {
-          self.showMessage(ViewController.ErrorPrefix + "Friend isViewController. not online.")
+          self.showMessage(ViewController.ErrorPrefix + "Friend is not online.")
           return
         }
 
@@ -700,7 +743,7 @@ class ViewController: UIViewController {
       })
     })
     
-      return "Success to send message.";
+      return "Success to send text message.";
   }
   
   private func sendFileMessage() -> String {
@@ -728,7 +771,7 @@ class ViewController: UIViewController {
 
         let status = self.mContact!.getStatus(humanCode: friendCode!)
         if(status != ContactStatus.Online) {
-          self.showMessage(ViewController.ErrorPrefix + "Friend isViewController. not online.")
+          self.showMessage(ViewController.ErrorPrefix + "Friend is not online.")
           return
         }
 
@@ -744,7 +787,7 @@ class ViewController: UIViewController {
       })
     })
     
-      return "Success to send message.";
+      return "Success to send file message.";
   }
 
   private func pullFile() -> String {
@@ -762,25 +805,27 @@ class ViewController: UIViewController {
 
     let friendCodeList = mContact!.listFriendCode()
     Helper.showFriendList(view: self, friendList: friendCodeList, listener:  { friendCode in
-      Helper.showTextSendMessage(view: self, friendCode: friendCode!, listener:  { message in
-        let msgInfo = Contact.MakeTextMessage(text: message!, cryptoAlgorithm: nil)
+      Helper.dismissDialog()
+      
+      let status = self.mContact!.getStatus(humanCode: friendCode!)
+      if(status != ContactStatus.Online) {
+        self.showMessage(ViewController.ErrorPrefix + "Friend is not online.")
+        return
+      }
 
-        let status = self.mContact!.getStatus(humanCode: friendCode!)
-        if(status != ContactStatus.Online) {
-          self.showMessage(ViewController.ErrorPrefix + "Friend isViewController. not online.")
-          return
-        }
-
-        let ret = self.mContact!.sendMessage(friendCode: friendCode!,
+      guard let fileData = self.mContactRecvFileMap[friendCode!] else {
+        self.showMessage(ViewController.ErrorPrefix + "Failed to find pull file from \(friendCode!)")
+        return
+      }
+      let ret = self.mContact!.pullFileAsync(friendCode: friendCode!,
                                              channelType: ContactChannel.Carrier,
-                                             message: msgInfo)
-        if(ret < 0) {
-          self.showMessage(ViewController.ErrorPrefix + "Failed to send message to " + friendCode!)
-        }
-      })
+                                             fileInfo: fileData)
+      if(ret < 0) {
+        self.showMessage(ViewController.ErrorPrefix + "Failed to pull file from  \(friendCode!)")
+      }
     })
     
-      return "Success to send message.";
+      return "Success to start pull file.";
   }
 
   private func cancelPullFile() -> String {
@@ -798,25 +843,27 @@ class ViewController: UIViewController {
 
     let friendCodeList = mContact!.listFriendCode()
     Helper.showFriendList(view: self, friendList: friendCodeList, listener:  { friendCode in
-      Helper.showTextSendMessage(view: self, friendCode: friendCode!, listener:  { message in
-        let msgInfo = Contact.MakeTextMessage(text: message!, cryptoAlgorithm: nil)
+      Helper.dismissDialog()
+      
+      let status = self.mContact!.getStatus(humanCode: friendCode!)
+      if(status != ContactStatus.Online) {
+        self.showMessage(ViewController.ErrorPrefix + "Friend is not online.")
+        return
+      }
 
-        let status = self.mContact!.getStatus(humanCode: friendCode!)
-        if(status != ContactStatus.Online) {
-          self.showMessage(ViewController.ErrorPrefix + "Friend isViewController. not online.")
-          return
-        }
-
-        let ret = self.mContact!.sendMessage(friendCode: friendCode!,
-                                             channelType: ContactChannel.Carrier,
-                                             message: msgInfo)
-        if(ret < 0) {
-          self.showMessage(ViewController.ErrorPrefix + "Failed to send message to " + friendCode!)
-        }
-      })
+      guard let fileData = self.mContactRecvFileMap[friendCode!] else {
+        self.showMessage(ViewController.ErrorPrefix + "Failed to find pull file from \(friendCode!)")
+        return
+      }
+      let ret = self.mContact!.cancelPullFile(friendCode: friendCode!,
+                                              channelType: ContactChannel.Carrier,
+                                              fileInfo: fileData)
+      if(ret < 0) {
+        self.showMessage(ViewController.ErrorPrefix + "Failed to cancel pull file from  \(friendCode!)")
+      }
     })
     
-      return "Success to send message.";
+    return "Success to cancel pull file.";
   }
 
   private func getCachedDidProp() -> String {
@@ -1009,6 +1056,7 @@ class ViewController: UIViewController {
   @IBOutlet weak var msgLog: UITextView!
   @IBOutlet weak var eventLog: UITextView!
   
+  private var mCacheDir: URL?
   private var mSavedMnemonic: String?
   private var mContact: Contact?
   private var mContactListener: Contact.Listener?

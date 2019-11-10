@@ -54,17 +54,27 @@ public abstract class ContactDataListener extends CrossBase {
     @CrossInterface
     private void onNotify(String humanCode, int channelType,
                               String dataId, int status) {
+        String id = Contact.Message.FileData.ConvertId(dataId);
+        if(id == null) {
+            id = dataId;
+        }
+
         onNotify(humanCode, ContactChannel.valueOf(channelType),
-                dataId, Status.valueOf(status));
+                id, Status.valueOf(status));
     }
 
     @CrossInterface
     private byte[] onReadData(String humanCode, int channelType,
                               String dataId, long offset) {
 //        Contact.Debug.DumpLocalRefTables();
+        String id = Contact.Message.FileData.ConvertId(dataId);
+        if(id == null) {
+            id = dataId;
+        }
+
         ByteBuffer dataBuf = ByteBuffer.allocate(1024);
         int ret = onReadData(humanCode, ContactChannel.valueOf(channelType),
-                             dataId, offset,
+                             id, offset,
                              dataBuf);
         if(ret < 0) {
             return null;
@@ -81,8 +91,13 @@ public abstract class ContactDataListener extends CrossBase {
     private int onWriteData(String humanCode, int channelType,
                             String dataId, long offset, byte[] data) {
 //        Contact.Debug.DumpLocalRefTables();
+        String id = Contact.Message.FileData.ConvertId(dataId);
+        if(id == null) {
+            id = dataId;
+        }
+
         int ret = onWriteData(humanCode, ContactChannel.valueOf(channelType),
-                              dataId, offset,
+                              id, offset,
                               data);
 
         return ret;

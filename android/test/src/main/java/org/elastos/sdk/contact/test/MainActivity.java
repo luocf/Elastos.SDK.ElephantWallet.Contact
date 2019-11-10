@@ -769,6 +769,8 @@ public class MainActivity extends Activity {
 
         List<String> friendCodeList = new ArrayList<>(mContactRecvFileMap.keySet());
         Helper.showFriendList(this, friendCodeList, (friendCode) -> {
+            Helper.dismissDialog();
+
             ContactStatus status = mContact.getStatus(friendCode);
             if(status != ContactStatus.Online) {
                 showMessage(ErrorPrefix + "Friend is not online.");
@@ -780,8 +782,6 @@ public class MainActivity extends Activity {
             if(ret < 0) {
                 showMessage(ErrorPrefix + "Failed to pull file from " + friendCode);
             }
-
-            Helper.dismissDialog();
         });
         return "Success to start pull file.";
     }
@@ -815,7 +815,7 @@ public class MainActivity extends Activity {
 
             Helper.dismissDialog();
         });
-        return "Success to start pull file.";
+        return "Success to cancel pull file.";
     }
 
     private String getCachedDidProp() {
