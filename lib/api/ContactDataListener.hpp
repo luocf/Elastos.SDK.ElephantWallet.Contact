@@ -13,7 +13,7 @@
 
 #include <mutex>
 
-#include <CrossBase.hpp>
+#include "CrossBase.hpp"
 #include <Elastos.SDK.Contact.hpp>
 #include <ContactListener.hpp>
 

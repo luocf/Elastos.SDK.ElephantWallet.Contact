@@ -8,7 +8,9 @@
 #include <ContactFactory.hpp>
 
 #ifdef WITH_CROSSPL
-#include <CrossPLUtils.hpp>
+#ifdef __ANDROID__
+#include "CrossPLUtils.hpp"
+#endif // __ANDROID__
 #endif // WITH_CROSSPL
 #include <Elastos.SDK.Contact.hpp>
 #include <Platform.hpp>

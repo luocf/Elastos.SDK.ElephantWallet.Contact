@@ -15,7 +15,7 @@
 
 #include <ContactListener.hpp>
 #include <ContactDataListener.hpp>
-#include <CrossBase.hpp>
+#include "CrossBase.hpp"
 #include <Elastos.SDK.Contact.hpp>
 
 #ifdef WITH_CROSSPL
