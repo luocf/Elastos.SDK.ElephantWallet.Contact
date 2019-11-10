@@ -10,15 +10,12 @@
 
 #include "Log.hpp"
 #include "Json.hpp"
+#include <JsonDefine.hpp>
 #include "ContactMessage.hpp"
 
 #ifdef WITH_CROSSPL
-#include <base/src/JsonDefine.hpp>
-
 namespace crosspl {
 namespace native {
-#else
-#include <JsonDefine.hpp>
 #endif // WITH_CROSSPL
 
 /***********************************************/
