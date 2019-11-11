@@ -2,6 +2,7 @@
 #define _ELASTOS_ERRCODE_HPP_
 
 #include <string>
+#include <functional>
 
 namespace elastos {
 
