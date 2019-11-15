@@ -3,8 +3,8 @@
 #include <iostream>
 #include <iterator>
 #include <sstream>
+#include "ContactTestCmd.hpp"
 
-#include <DidChnClient.hpp>
 
 /* =========================================== */
 /* === static variables initialize =========== */
@@ -23,7 +23,7 @@ const std::vector<ContactTestCmd::CommandInfo> ContactTestCmd::gCommandInfoList{
 /* =========================================== */
 /* === static function implement ============= */
 /* =========================================== */
-int ContactTestCmd::Do(std::shared_ptr<elastos::Contact> contact,
+int ContactTestCmd::Do(std::shared_ptr<elastos::sdk::ElephantContact> contact,
                        const std::string& cmdLine,
                        std::string& errMsg)
 {
@@ -67,7 +67,7 @@ int ContactTestCmd::Do(std::shared_ptr<elastos::Contact> contact,
 /* =========================================== */
 /* === class private function implement  ===== */
 /* =========================================== */
-int ContactTestCmd::Help(std::shared_ptr<elastos::Contact> contact,
+int ContactTestCmd::Help(std::shared_ptr<elastos::sdk::ElephantContact> contact,
                          const std::vector<std::string>& args,
                          std::string& errMsg)
 {
@@ -80,11 +80,12 @@ int ContactTestCmd::Help(std::shared_ptr<elastos::Contact> contact,
     return 0;
 }
 
-int ContactTestCmd::PrintInfo(std::shared_ptr<elastos::Contact> contact,
+int ContactTestCmd::PrintInfo(std::shared_ptr<elastos::sdk::ElephantContact> contact,
                               const std::vector<std::string>& args,
                               std::string& errMsg)
 {
-    std::string value;
+
+   /* std::string value;
 
     auto weakUserMgr = contact->getUserManager();
     auto userMgr = weakUserMgr.lock();
@@ -97,63 +98,34 @@ int ContactTestCmd::PrintInfo(std::shared_ptr<elastos::Contact> contact,
     auto friendMgr = weakFriendMgr.lock();
     friendMgr->serialize(value);
     std::cout << "FriendInfo:" << std::endl;
-    std::cout << value << std::endl;
-
+    std::cout << value << std::endl;*/
 
     return 0;
 }
 
-int ContactTestCmd::PrintCarrier(std::shared_ptr<elastos::Contact> contact,
+int ContactTestCmd::PrintCarrier(std::shared_ptr<elastos::sdk::ElephantContact> contact,
                                  const std::vector<std::string>& args,
                                  std::string& errMsg)
 {
-    std::string value;
+    std::stringstream info;
 
-    std::cout << "==========================" << std::endl;
-    auto weakUserMgr = contact->getUserManager();
-    std::shared_ptr<elastos::UserInfo> userInfo;
-    weakUserMgr.lock()->getUserInfo(userInfo);
-
-    std::vector<elastos::HumanInfo::CarrierInfo> carrierInfoArray;
-    userInfo->getAllCarrierInfo(carrierInfoArray);
-    std::cout << "UserCarrierInfo:" << std::endl;
-    for(auto& it: carrierInfoArray) {
-        std::cout << " addr:" << it.mUsrAddr << ", id:" << it.mUsrId  << std::endl;
-    }
-
-
-    auto weakFriendMgr = contact->getFriendManager();
-    std::vector<std::shared_ptr<elastos::FriendInfo>> friendList;
-    weakFriendMgr.lock()->getFriendInfoList(friendList);
-    for(auto& friendInfo: friendList) {
-        std::cout << "FriendCarrierInfo:" << std::endl;
-        std::vector<elastos::HumanInfo::CarrierInfo> carrierInfoArray;
-        friendInfo->getAllCarrierInfo(carrierInfoArray);
-        for(auto& it: carrierInfoArray) {
-            std::cout << " addr:" << it.mUsrAddr << ", id:" << it.mUsrId  << std::endl;
-        }
-    }
+    contact->getHumanInfo("-user-info-", &info);
+    std::string result;
+    info >> result;
+    std::cout << result << std::endl;
 
     return 0;
 }
 
-int ContactTestCmd::PrintCachedInfo(std::shared_ptr<elastos::Contact> contact,
+int ContactTestCmd::PrintCachedInfo(std::shared_ptr<elastos::sdk::ElephantContact> contact,
                                     const std::vector<std::string>& args,
                                     std::string& errMsg)
 {
-    auto dcClient = elastos::DidChnClient::GetInstance();
-
-    std::string value;
-    dcClient->printCachedDidProp(value);
-
-    std::cout << "==========================" << std::endl;
-    std::cout << value << std::endl;
-    std::cout << std::endl;
 
     return 0;
 }
 
-int ContactTestCmd::UploadInfo(std::shared_ptr<elastos::Contact> contact,
+int ContactTestCmd::UploadInfo(std::shared_ptr<elastos::sdk::ElephantContact> contact,
                                const std::vector<std::string>& args,
                                std::string& errMsg)
 {
@@ -162,11 +134,10 @@ int ContactTestCmd::UploadInfo(std::shared_ptr<elastos::Contact> contact,
       errMsg = "Failed to upload info. ret=" + std::to_string(ret);
       return -1;
     }
-
     return 0;
 }
 
-int ContactTestCmd::AddFriend(std::shared_ptr<elastos::Contact> contact,
+int ContactTestCmd::AddFriend(std::shared_ptr<elastos::sdk::ElephantContact> contact,
                               const std::vector<std::string>& args,
                               std::string& errMsg)
 {
@@ -174,28 +145,18 @@ int ContactTestCmd::AddFriend(std::shared_ptr<elastos::Contact> contact,
         errMsg = "Bad input count: " + std::to_string(args.size());
         return -1;
     }
-
-    auto weakFriendMgr = contact->getFriendManager();
-    auto friendMgr = weakFriendMgr.lock();
-    if(friendMgr.get() == nullptr) {
-        errMsg = "FriendManager has been released.";
-        return -1;
-    }
-
     auto friendId = args.size() > 1 ? args[1] : "";
     auto summary = args.size() > 2 ? args[2] : "";
-
-    int ret = friendMgr->tryAddFriend(friendId, summary);
+    int ret = contact->addFriend(friendId.c_str(), summary.c_str());
     if(ret < 0) {
         errMsg = "Failed to add friend ret=" + std::to_string(ret);
         return ret;
     }
-
     return 0;
 }
 
 
-int ContactTestCmd::SendMessage(std::shared_ptr<elastos::Contact> contact,
+int ContactTestCmd::SendMessage(std::shared_ptr<elastos::sdk::ElephantContact> contact,
                                 const std::vector<std::string>& args,
                                 std::string& errMsg)
 {
@@ -204,6 +165,7 @@ int ContactTestCmd::SendMessage(std::shared_ptr<elastos::Contact> contact,
         return -1;
     }
 
+
     auto friendCode = args.size() > 1 ? args[1] : "";
     auto channelType = args.size() > 2 ? args[2] : "";
     auto msg = args.size() > 3 ? args[3] : "";
@@ -211,36 +173,11 @@ int ContactTestCmd::SendMessage(std::shared_ptr<elastos::Contact> contact,
         errMsg = "Channel Type not exists";
         return -1;
     }
-
-    auto weakFriendMgr = contact->getFriendManager();
-    auto friendMgr = weakFriendMgr.lock();
-    if(friendMgr.get() == nullptr) {
-        errMsg = "FriendManager has been released.";
-        return -1;
-    }
-
-    std::shared_ptr<elastos::FriendInfo> friendInfo;
-    int ret = friendMgr->tryGetFriendInfo(friendCode, friendInfo);
-    if(ret < 0) {
-        errMsg = "Failed to find friend ret=" + std::to_string(ret);
-        return ret;
-    }
-
-    auto weakMsgMgr = contact->getMessageManager();
-    auto msgMgr = weakMsgMgr.lock();
-    if(msgMgr.get() == nullptr) {
-        errMsg = "msgManager has been released.";
-        return -1;
-    }
-
-    int chType = std::stoi(channelType);
-    auto msgInfo = elastos::MessageManager::MakeTextMessage(msg);
-
-    ret = msgMgr->sendMessage(friendInfo, static_cast<elastos::MessageManager::ChannelType>(chType), msgInfo);
-    if(ret < 0) {
-        errMsg = "Failed to send message ret=" + std::to_string(ret);
-        return ret;
-    }
-
+    /*auto msgInfo = elastos::MessageManager::MakeTextMessage(msg);
+    ret = contact->sendMessage(friendCode, channelType, msgInfo);
+   if(ret < 0) {
+       errMsg = "Failed to send message ret=" + std::to_string(ret);
+       return ret;
+   }*/
     return 0;
 }

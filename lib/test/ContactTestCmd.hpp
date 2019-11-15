@@ -1,8 +1,9 @@
 #ifndef _CONTACT_TEST_CMD_HPP_
 #define _CONTACT_TEST_CMD_HPP_
 
-#include <Elastos.SDK.Contact.hpp>
+#include <ElephantContact.hpp>
 #include <functional>
+#include <sstream>
 #include <memory>
 #include <string>
 #include <vector>
@@ -12,7 +13,7 @@ public:
     /*** type define ***/
 
     /*** static function and variable ***/
-    static int Do(std::shared_ptr<elastos::Contact> contact,
+    static int Do(std::shared_ptr<elastos::sdk::ElephantContact> contact,
                   const std::string& cmdLine,
                   std::string& errMsg);
 
@@ -30,30 +31,30 @@ private:
     struct CommandInfo {
         char mCmd;
         std::string mLongCmd;
-        std::function<int(std::shared_ptr<elastos::Contact>, const std::vector<std::string>&, std::string&)> mFunc;
+        std::function<int(std::shared_ptr<elastos::sdk::ElephantContact>, const std::vector<std::string>&, std::string&)> mFunc;
         std::string mUsage;
     };
 
     /*** static function and variable ***/
-    static int Help(std::shared_ptr<elastos::Contact> contact,
+    static int Help(std::shared_ptr<elastos::sdk::ElephantContact> contact,
                     const std::vector<std::string>& args,
                     std::string& errMsg);
-    static int PrintInfo(std::shared_ptr<elastos::Contact> contact,
+    static int PrintInfo(std::shared_ptr<elastos::sdk::ElephantContact> contact,
                          const std::vector<std::string>& args,
                          std::string& errMsg);
-    static int PrintCarrier(std::shared_ptr<elastos::Contact> contact,
+    static int PrintCarrier(std::shared_ptr<elastos::sdk::ElephantContact> contact,
                             const std::vector<std::string>& args,
                             std::string& errMsg);
-    static int PrintCachedInfo(std::shared_ptr<elastos::Contact> contact,
+    static int PrintCachedInfo(std::shared_ptr<elastos::sdk::ElephantContact> contact,
                                const std::vector<std::string> &args,
                                std::string &errMsg);
-    static int UploadInfo(std::shared_ptr<elastos::Contact> contact,
+    static int UploadInfo(std::shared_ptr<elastos::sdk::ElephantContact> contact,
                           const std::vector<std::string>& args,
                           std::string& errMsg);
-    static int AddFriend(std::shared_ptr<elastos::Contact> contact,
+    static int AddFriend(std::shared_ptr<elastos::sdk::ElephantContact> contact,
                          const std::vector<std::string>& args,
                          std::string& errMsg);
-    static int SendMessage(std::shared_ptr<elastos::Contact> contact,
+    static int SendMessage(std::shared_ptr<elastos::sdk::ElephantContact> contact,
                            const std::vector<std::string>& args,
                            std::string& errMsg);
 
